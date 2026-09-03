@@ -315,8 +315,14 @@ const RUECK_PFAD = "/api/google/zurueck";
 
 function rueckAdresse(req) {
   /* Immer localhost, egal von wo aufgerufen — das ist die Adresse,
-     die in der Google-Konsole hinterlegt wird. */
-  const port = process.env.PORT || 3000;
+     die in der Google-Konsole hinterlegt wird.
+
+     Der Port kommt vom Server selbst: war 3000 belegt, hört er
+     woanders, und dann muss auch Google dorthin zurückschicken.
+     Steht in der Konsole noch die alte Adresse, sagt Google das
+     deutlich — besser als eine Anmeldung, die still ins Leere
+     läuft. */
+  const port = global.lifeosPort || process.env.PORT || 3000;
   return "http://localhost:" + port + RUECK_PFAD;
 }
 

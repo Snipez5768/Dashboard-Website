@@ -11,9 +11,18 @@ const path = require("path");
 const net = require("net");
 
 const app = express();
-const PORT = Number(process.env.PORT) || 3000;
-const PORT_HTTPS = Number(process.env.PORT_HTTPS) || 3443;
-const LIVERELOAD_PORT = Number(process.env.LIVERELOAD_PORT) || 35729;
+
+/* Die Wunschports. Ist einer belegt, rückt der Server eine Stelle
+   weiter — deshalb "let": am Ende steht hier der Port, auf dem er
+   wirklich hört. */
+let PORT = Number(process.env.PORT) || 3000;
+let PORT_HTTPS = Number(process.env.PORT_HTTPS) || 3443;
+let LIVERELOAD_PORT = Number(process.env.LIVERELOAD_PORT) || 35729;
+
+/* So viele Stellen weiter wird höchstens gesucht. Mehr als das
+   heißt: da stimmt etwas anderes nicht. */
+const PORT_SPANNE = 12;
+
 const isDev = process.env.NODE_ENV !== "production";
 
 let httpServer = null;
@@ -32,13 +41,72 @@ function portIstFrei(port) {
   });
 }
 
+/* Den ersten freien Port ab "wunsch" suchen. Nur für Dinge, die man
+   nicht selbst zum Hören bringt — für die eigenen Server ist
+   "hoeren" unten der bessere Weg, weil dort zwischen Prüfung und
+   Belegung nichts dazwischenkommen kann. */
+async function freierPort(wunsch, spanne) {
+  for (let i = 0; i <= (spanne || PORT_SPANNE); i++) {
+    if (await portIstFrei(wunsch + i)) return wunsch + i;
+  }
+  return null;
+}
+
+/* Einen Server zum Hören bringen und dabei ausweichen, wenn der Port
+   belegt ist.
+
+   Bewusst über den Fehler statt über eine Vorabprüfung: zwischen
+   "ist frei" und "hört jetzt" liegt ein Moment, in dem sich jemand
+   anderes den Port nehmen kann. Wer den Fehler abfängt, hat dieses
+   Loch nicht. */
+function hoeren(server, wunsch, spanne) {
+  return new Promise((fertig, schiefgehen) => {
+    let versuch = 0;
+
+    const beiFehler = err => {
+      if (err.code === "EADDRINUSE" && versuch < (spanne || PORT_SPANNE)) {
+        versuch++;
+        server.listen(wunsch + versuch);
+        return;
+      }
+      aufraeumen();
+      schiefgehen(err);
+    };
+    const beiErfolg = () => {
+      aufraeumen();
+      fertig(server.address().port);
+    };
+    function aufraeumen() {
+      server.removeListener("error", beiFehler);
+      server.removeListener("listening", beiErfolg);
+    }
+
+    server.on("error", beiFehler);
+    server.on("listening", beiErfolg);
+    server.listen(wunsch);
+  });
+}
+
+/* Was ausgewichen ist, steht am Ende gesammelt im Terminal — eine
+   Zeile mitten im Startgerede übersieht man. */
+const ausgewichen = [];
+function portMerken(name, wunsch, jetzt) {
+  if (wunsch !== jetzt) ausgewichen.push({ name, wunsch, jetzt });
+}
+
 async function start() {
   /* --- Live-Reload nur im Dev-Betrieb --------------------------------
      Früher hat ein belegter Live-Reload-Port den kompletten Server
      abstürzen lassen. Jetzt wird der Port vorher geprüft und der
      Server läuft notfalls einfach ohne Live-Reload weiter. */
   if (isDev) {
-    if (await portIstFrei(LIVERELOAD_PORT)) {
+    /* Live-Reload bringt sich selbst zum Hören — hier hilft nur die
+       Vorabsuche. Findet sie nichts, läuft der Server ohne. */
+    const lrWunsch = LIVERELOAD_PORT;
+    const lrFrei = await freierPort(lrWunsch, 6);
+    if (lrFrei) {
+      LIVERELOAD_PORT = lrFrei;
+      portMerken("Live-Reload", lrWunsch, lrFrei);
       try {
         const livereload = require("livereload");
         const connectLivereload = require("connect-livereload");
@@ -62,14 +130,17 @@ async function start() {
           setTimeout(() => lrServer.refresh("/"), 100);
         });
 
-        app.use(connectLivereload());
+        /* Die Kennung im Browser muss denselben Port kennen —
+           sonst horcht die Seite auf 35729, während der Server
+           längst woanders sitzt. */
+        app.use(connectLivereload({ port: LIVERELOAD_PORT }));
       } catch (err) {
         console.warn(`  [Live-Reload] konnte nicht starten (${err.message}) — läuft ohne weiter.`);
         lrServer = null;
       }
     } else {
       console.warn(
-        `  [Live-Reload] Port ${LIVERELOAD_PORT} ist belegt — die Seite lädt sich nicht\n` +
+        `  [Live-Reload] Ab Port ${lrWunsch} ist nichts frei — die Seite lädt sich nicht\n` +
         `  automatisch neu. Meist läuft noch ein alter Server: dev-server.bat\n` +
         `  einmal neu starten räumt das auf.\n`
       );
@@ -219,16 +290,25 @@ async function start() {
     try {
       httpsServer = require("https")
         .createServer({ key: zertifikat.key, cert: zertifikat.cert }, app);
-      httpsServer.on("error", err => {
+      const httpsWunsch = PORT_HTTPS;
+      try {
+        PORT_HTTPS = await hoeren(httpsServer, httpsWunsch);
+        portMerken("HTTPS", httpsWunsch, PORT_HTTPS);
+        global.lifeosHttps = { an: true, port: PORT_HTTPS, adressen: zertifikat.adressen };
+        /* Ab jetzt darf ein später Fehler den Zustand noch umwerfen,
+           aber nicht mehr den Start. */
+        httpsServer.on("error", err => {
+          const grund = err.code || err.message;
+          console.warn("  [HTTPS] Verbindung verloren:", grund);
+          global.lifeosHttps = { an: false, grund: grund };
+          httpsServer = null;
+        });
+      } catch (err) {
         const grund = err.code || err.message;
-        console.warn("  [HTTPS] Port " + PORT_HTTPS + " nicht verfügbar:", grund);
+        console.warn("  [HTTPS] Ab Port " + httpsWunsch + " ist nichts frei:", grund);
         global.lifeosHttps = { an: false, grund: grund };
         httpsServer = null;
-      });
-      httpsServer.on("listening", () => {
-        global.lifeosHttps = { an: true, port: PORT_HTTPS, adressen: zertifikat.adressen };
-      });
-      httpsServer.listen(PORT_HTTPS);
+      }
     } catch (fehler) {
       console.warn("  [HTTPS] konnte nicht gestartet werden:", fehler.message);
       global.lifeosHttps = { an: false, grund: fehler.message };
@@ -236,11 +316,49 @@ async function start() {
     }
   }
 
-  httpServer = app.listen(PORT);
+  const httpWunsch = PORT;
+  httpServer = require("http").createServer(app);
+  try {
+    PORT = await hoeren(httpServer, httpWunsch);
+    portMerken("Dashboard", httpWunsch, PORT);
+  } catch (err) {
+    console.error(
+      `\n  Ab Port ${httpWunsch} ist ${PORT_SPANNE + 1} Stellen weit nichts frei.\n` +
+      `  Das ist ungewöhnlich — läuft eine Firewall oder ein Programm dazwischen?\n` +
+      `  Mit einem anderen Startpunkt versuchen:  set PORT=4000 && npm run dev\n`
+    );
+    process.exit(1);
+  }
 
-  httpServer.on("listening", () => {
+  /* Andere Stellen müssen den echten Port kennen — vor allem die
+     Rückadresse der Google-Anmeldung. */
+  global.lifeosPort = PORT;
+
+  /* Und das Startskript, damit es den Browser an der richtigen
+     Adresse öffnet statt stur auf 3000. */
+  try {
+    const fsx = require("fs");
+    fsx.mkdirSync(path.join(__dirname, "data"), { recursive: true });
+    fsx.writeFileSync(path.join(__dirname, "data", "port.txt"), String(PORT), "utf8");
+  } catch (fehler) { /* dann öffnet das Skript eben die Vorgabe */ }
+
+  {
     console.log(`\n  LIFE OS Dashboard läuft auf  http://localhost:${PORT}`);
     console.log(`  Live-Reload: ${lrServer ? "aktiv" : "aus"}`);
+
+    /* Ein gewechselter Port erklärt sich nicht von selbst: die alte
+       Adresse im Lesezeichen führt dann ins Leere oder — schlimmer —
+       auf das fremde Programm, das den Port belegt. */
+    if (ausgewichen.length) {
+      console.log("\n  Ausgewichen, weil belegt:");
+      ausgewichen.forEach(a =>
+        console.log(`      ${a.name}: ${a.wunsch} war belegt  ->  jetzt ${a.jetzt}`));
+      if (PORT !== httpWunsch) {
+        console.log("\n  Das Lesezeichen zeigt vermutlich noch auf den alten Port.");
+        console.log("  Für die Google-Anmeldung muss die Rückadresse in der Konsole passen:");
+        console.log(`      http://localhost:${PORT}/api/google/zurueck`);
+      }
+    }
 
     /* Fuers iPad und das Telefon: die Adresse im Heimnetz, nicht
        localhost. Nur private Adressen anzeigen — eine oeffentliche
@@ -274,18 +392,11 @@ async function start() {
     }
 
     console.log(`\n  (Beenden mit Strg+C)\n`);
-  });
+  }
 
+  /* Der Start ist durch — ab hier ist ein Fehler ein Fehler und kein
+     belegter Port mehr. */
   httpServer.on("error", err => {
-    if (err.code === "EADDRINUSE") {
-      console.error(
-        `\n  Port ${PORT} ist bereits belegt.\n` +
-        `  Vermutlich läuft das Dashboard schon in einem anderen Fenster.\n` +
-        `  Entweder dort weiterarbeiten oder dev-server.bat neu starten —\n` +
-        `  das Skript räumt alte Server vorher weg.\n`
-      );
-      process.exit(1);
-    }
     console.error("  Serverfehler:", err);
     process.exit(1);
   });
