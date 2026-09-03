@@ -6134,19 +6134,43 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
      erreichbar, so wie in der Seitenleiste am Rechner. Die aktive
      Seite bleibt am Hintergrund erkennbar. */
   .nav-lang { display: none; }
-  .nav-scroll { gap: 0; padding: 5px 4px; overflow-x: hidden; }
-  .nav-group, .nav-list { flex: 1; }
-  .nav-list > li { flex: 1; min-width: 0; }
+
+  /* Die Leiste bleibt eine Zeile und rollt waagerecht, statt die
+     Symbole zu stauchen oder umzubrechen. Gestaucht werden sie mit
+     jeder neuen Seite kleiner, bis niemand mehr trifft; umgebrochen
+     wird die Leiste doppelt so hoch und frisst den Inhalt. Rollen
+     hält beides fest: volle Größe, feste Höhe. */
+  .nav-scroll {
+    gap: 0;
+    padding: 5px 4px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;              /* die Balken stören hier nur */
+  }
+  .nav-scroll::-webkit-scrollbar { display: none; }
+  .nav-group, .nav-list { flex: 0 0 auto; }
+  .nav-list > li { flex: 0 0 auto; }
   .nav-link, .sidebar.collapsed .nav-link {
-    width: 100%;
+    width: auto;
+    min-width: 46px;
     padding: 7px 0;
     gap: 0;
   }
   /* Der Name steht schon in der Seitenüberschrift */
   .nav-link span, .sidebar.collapsed .nav-link span { display: none; }
   .nav-link svg, .sidebar.collapsed .nav-link svg { width: 21px; height: 21px; }
-  .sidebar-foot { padding: 5px 6px; }
-  .sidebar-foot .nav-link { padding: 7px 8px; }
+
+  /* Notizen und Einstellungen stehen fest am rechten Rand — sie
+     rollen nicht mit, damit sie immer erreichbar sind. Nebeneinander
+     statt untereinander: sonst wird die Leiste zweizeilig. */
+  .sidebar-foot {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 2px;
+    padding: 5px 6px;
+  }
+  .sidebar-foot .nav-link { min-width: 40px; padding: 7px 8px; }
 }
 
 
@@ -7559,3 +7583,917 @@ html.finger .gk-zu-zeile select { font-size: 16px; padding: 9px; }
 }
 .gk-knopf.stark:hover { filter: brightness(1.08); }
 .gk-knopf:disabled { opacity: 0.6; cursor: default; }
+
+
+/* ==========================================================
+   LICHT — WLED
+   Eine Kachel je Lichterkette. Schalter und Helligkeitsregler
+   liegen offen: das sind die beiden Handgriffe, die man im
+   Vorbeigehen macht. Effekt, Palette und Farben stehen darunter
+   und klappen nur auf, wenn man sie wirklich will — sonst wäre die
+   Seite eine Wand aus Reglern.
+
+   Jede Kachel trägt ihre eigene Farbe als --licht und leuchtet
+   damit schwach, solange sie an ist. So sieht man den Zustand des
+   Zimmers, ohne eine Zeile zu lesen.
+   ========================================================== */
+.licht-kopf-knoepfe { display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap; }
+.li-kopfknopf {
+  padding: 7px 15px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: 0.16s ease;
+}
+.li-kopfknopf:hover:not(:disabled) { color: var(--text); background: rgba(255, 255, 255, 0.1); }
+.li-kopfknopf:disabled { opacity: 0.5; cursor: default; }
+
+.licht-gitter {
+  display: grid;
+  /* minmax(0, …): ohne die Null darf eine Spalte nie schmaler
+     werden als ihr breitester Inhalt — zehn Farbtupfer nebeneinander
+     sprengten damit auf dem Telefon die Kachel ueber den Rand. */
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 12px;
+  align-content: start;
+  overflow-y: auto;
+  padding-bottom: 6px;
+}
+
+.li-karte {
+  --licht: #5b8cff;
+  padding: 15px 16px 16px;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+/* Ist das Licht an, trägt die Kachel seine Farbe — schwach, damit
+   zehn Kacheln nebeneinander nicht zum Jahrmarkt werden. */
+.li-karte.an {
+  border-color: color-mix(in srgb, var(--licht) 38%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--licht) 14%, transparent),
+              0 10px 30px color-mix(in srgb, var(--licht) 10%, transparent);
+}
+.li-karte.an::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(120% 80% at 12% 0%,
+              color-mix(in srgb, var(--licht) 13%, transparent), transparent 62%);
+  pointer-events: none;
+}
+.li-karte.aus-dem-netz { opacity: 0.5; }
+
+.li-kopf { display: flex; align-items: center; gap: 12px; position: relative; z-index: 1; }
+.li-name { flex: 1; min-width: 0; }
+.li-name b {
+  display: block;
+  font-size: 14.5px;
+  font-weight: 600;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.li-name span {
+  display: block;
+  margin-top: 2px;
+  font-size: 11.5px;
+  color: var(--text-faint);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.li-punkt { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.li-punkt.weg { background: var(--text-faint); }
+
+/* Der Schalter: Form statt Beschriftung — man erkennt ihn, ohne zu
+   lesen, und er zeigt den Zustand auch aus zwei Metern Abstand. */
+.li-schalter {
+  flex-shrink: 0;
+  width: 46px; height: 27px;
+  padding: 3px;
+  border: 1px solid var(--border-2);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: background 0.22s ease, border-color 0.22s ease;
+}
+.li-schalter .li-knauf {
+  display: block;
+  width: 19px; height: 19px;
+  border-radius: 50%;
+  background: var(--text-faint);
+  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1), background 0.22s ease;
+}
+.li-schalter.an {
+  border-color: color-mix(in srgb, var(--licht) 60%, transparent);
+  background: color-mix(in srgb, var(--licht) 30%, transparent);
+}
+.li-schalter.an .li-knauf {
+  transform: translateX(19px);
+  background: var(--licht);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--licht) 70%, transparent);
+}
+
+.li-mehr {
+  flex-shrink: 0;
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  border: none; border-radius: 9px;
+  background: none;
+  cursor: pointer;
+  transition: background 0.16s ease;
+}
+.li-mehr:hover { background: rgba(255, 255, 255, 0.07); }
+.li-pfeil {
+  width: 7px; height: 7px;
+  border-right: 1.6px solid var(--text-faint);
+  border-bottom: 1.6px solid var(--text-faint);
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform 0.26s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.li-mehr[aria-expanded="true"] .li-pfeil { transform: rotate(225deg) translate(-2px, -2px); }
+
+/* Helligkeit: ein breiter Regler, der die Farbe des Lichts trägt */
+.li-regler { margin-top: 13px; position: relative; z-index: 1; }
+.li-regler input[type="range"],
+.li-feld input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 26px;
+  background: none;
+  cursor: pointer;
+}
+.li-regler input[type="range"]::-webkit-slider-runnable-track,
+.li-feld input[type="range"]::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.09);
+}
+.li-regler input[type="range"]::-moz-range-track,
+.li-feld input[type="range"]::-moz-range-track {
+  height: 8px; border-radius: 999px; background: rgba(255, 255, 255, 0.09);
+}
+.li-regler input[type="range"]::-webkit-slider-thumb,
+.li-feld input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px; height: 18px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: var(--licht, var(--blue));
+  border: 2px solid #0b0f1a;
+  box-shadow: 0 0 10px color-mix(in srgb, var(--licht, var(--blue)) 55%, transparent);
+  cursor: pointer;
+}
+.li-regler input[type="range"]::-moz-range-thumb,
+.li-feld input[type="range"]::-moz-range-thumb {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--licht, var(--blue));
+  border: 2px solid #0b0f1a;
+  cursor: pointer;
+}
+
+/* Der aufgeklappte Teil */
+.li-tiefe {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+  animation: li-auf 0.22s ease;
+}
+@keyframes li-auf { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
+.li-feld { display: flex; flex-direction: column; gap: 5px; }
+.li-feld > span, .li-marke {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--text-faint);
+}
+.li-feld select {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.24);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12.5px;
+  outline: none;
+}
+.li-feld select:focus { border-color: color-mix(in srgb, var(--licht) 55%, transparent); }
+
+.li-farbreihe { display: flex; gap: 8px; margin-top: 5px; }
+.li-farbe { position: relative; cursor: pointer; }
+.li-farbe input[type="color"] {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  opacity: 0; cursor: pointer;
+}
+.li-farbe span {
+  display: block;
+  width: 34px; height: 34px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+.li-farbe.haupt span { width: 44px; }
+
+.li-schnell { display: flex; flex-wrap: wrap; gap: 7px; }
+.li-tupfer {
+  width: 26px; height: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.14s ease, box-shadow 0.14s ease;
+}
+.li-tupfer:hover { transform: scale(1.12); box-shadow: 0 3px 12px rgba(0, 0, 0, 0.4); }
+.li-tupfer:active { transform: scale(0.96); }
+
+.li-zwei { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.li-fuss { font-family: var(--mono); font-size: 10.5px; color: var(--text-faint); }
+
+.li-leer { text-align: center; padding: 34px 20px; grid-column: 1 / -1; }
+
+/* Am Finger: größere Ziele, und die Kacheln füllen die Breite */
+html.finger .li-schalter { width: 52px; height: 31px; }
+html.finger .li-schalter .li-knauf { width: 23px; height: 23px; }
+html.finger .li-schalter.an .li-knauf { transform: translateX(21px); }
+html.finger .li-tupfer { width: 32px; height: 32px; }
+html.finger .li-farbe span { width: 40px; height: 40px; }
+html.finger .li-farbe.haupt span { width: 52px; }
+html.finger .li-feld select { font-size: 16px; }
+
+@media (max-width: 699px) {
+  .licht-gitter { grid-template-columns: minmax(0, 1fr); }
+  .licht-kopf-knoepfe { width: 100%; margin-left: 0; }
+  .li-kopfknopf { flex: 1; }
+}
+
+
+/* ==========================================================
+   LICHT — AN UND AUS AUSEINANDERHALTEN
+   Zehn gleich große Kacheln sagen nichts darüber, was gerade
+   brennt. Deshalb zwei Größen und zwei Plätze: was an ist, steht
+   oben, nimmt zwei Spalten und trägt seine Farbe. Was aus ist,
+   rutscht darunter und schrumpft auf eine Zeile — da gibt es
+   nichts einzustellen außer dem Einschalten.
+
+   Der Unterschied liegt bewusst in Größe und Ort, nicht nur in
+   einer Farbe: das erkennt man aus zwei Metern Entfernung und
+   auch dann, wenn man Farben schlecht unterscheidet.
+   ========================================================== */
+.li-trenner {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 6px 2px 0;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.li-trenner:first-child { margin-top: 0; }
+.li-trenner::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+  order: 2;
+}
+.li-trenner i {
+  order: 3;
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  opacity: 0.8;
+}
+.li-trenner.ist-an { color: var(--green); }
+.li-trenner.ist-an::after { background: color-mix(in srgb, var(--green) 25%, transparent); }
+
+/* ---------- Angeschaltet: groß, farbig, mit Regler ---------- */
+.li-karte.an {
+  grid-column: span 2;
+  padding: 18px 20px 20px;
+}
+.li-karte.an .li-name b { font-size: 17px; }
+.li-karte.an .li-name span { font-size: 12px; color: var(--text-dim); }
+
+/* Der Helligkeitsbalken trägt seinen Wert am Ende — beim Ziehen
+   sieht man sonst nicht, wo man landet. */
+.li-regler { display: flex; align-items: center; gap: 12px; }
+.li-regler input[type="range"] { flex: 1; }
+.li-prozent {
+  flex-shrink: 0;
+  min-width: 44px;
+  text-align: right;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--licht);
+}
+
+/* ---------- Ausgeschaltet: eine ruhige Zeile ---------- */
+.li-karte:not(.an):not(.aus-dem-netz) {
+  padding: 11px 14px;
+  background: rgba(255, 255, 255, 0.018);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+.li-karte:not(.an) .li-name b { font-size: 13.5px; font-weight: 500; color: var(--text-dim); }
+.li-karte:not(.an) .li-name span { font-size: 10.5px; }
+.li-karte:not(.an) .li-kopf { gap: 10px; }
+/* Aufgeklappt darf auch eine ausgeschaltete Kachel Platz nehmen */
+.li-karte:not(.an).offen { grid-column: span 2; padding-bottom: 18px; }
+
+.li-karte.aus-dem-netz { padding: 11px 14px; }
+
+@media (max-width: 1100px) {
+  .li-karte.an, .li-karte:not(.an).offen { grid-column: span 1; }
+}
+@media (max-width: 699px) {
+  .li-karte.an { padding: 15px 16px 17px; }
+}
+
+
+/* ==========================================================
+   AUSWAHLFELDER AM RECHNER
+   Ein <select> sieht in jedem Browser anders aus und in keinem
+   nach dieser Seite: heller Kasten, Systemschrift, ein Pfeil in
+   Windows-Grau. Vor allem sieht man ihm oft gar nicht an, dass er
+   sich öffnen lässt — im dunklen Layout verschwindet er zwischen
+   den Beschriftungen.
+
+   Deshalb hier ein gemeinsames Aussehen für alle: eigener Pfeil,
+   gleiche Rundung und Höhe wie die übrigen Felder, sichtbare
+   Zustände für Zeiger und Tastatur.
+
+   Nur am Rechner. Auf Telefon und iPad öffnet ein <select> das
+   Auswahlrad des Systems — dort ist die native Form die bessere,
+   und ein nachgebauter Pfeil würde nur mit dem System streiten.
+   ========================================================== */
+html:not(.finger) select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+
+  /* Platz rechts für den Pfeil, damit lange Namen nicht darunter
+     laufen */
+  padding: 8px 34px 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background-color: rgba(0, 0, 0, 0.24);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12.5px;
+  line-height: 1.3;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.16s ease, background-color 0.16s ease,
+              box-shadow 0.16s ease;
+
+  /* Der Pfeil steckt im Hintergrund: kein zusätzliches Element,
+     keine Umbauten an jeder Stelle, an der ein Feld steht. */
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%238b93a7' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1.5 1.75 6 6.25l4.5-4.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 11px 8px;
+}
+
+html:not(.finger) select:hover {
+  border-color: var(--border-2);
+  background-color: rgba(0, 0, 0, 0.32);
+}
+html:not(.finger) select:focus-visible,
+html:not(.finger) select:focus {
+  border-color: color-mix(in srgb, var(--blue) 60%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 16%, transparent);
+}
+html:not(.finger) select:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background-image: none;
+}
+
+/* Die aufgeklappte Liste kommt vom Betriebssystem und lässt sich
+   nur begrenzt beeinflussen. Diese beiden Angaben wirken in
+   Chrome und Edge und holen sie wenigstens ins Dunkle. */
+html:not(.finger) select option {
+  background: #131828;
+  color: #e7ebf3;
+  padding: 6px 10px;
+}
+html:not(.finger) select optgroup { background: #0d1120; color: #8b93a7; }
+
+/* ---------- Wo die Felder eine eigene Größe haben ----------
+   Die gemeinsame Grundform bleibt, nur Maß und Schrift passen sich
+   dem Ort an. */
+
+/* Wochenziel in der Habits-Zeile: schmal, einstellig */
+html:not(.finger) .hk-ziel select {
+  padding: 4px 26px 4px 9px;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.04);
+  color: var(--text-dim);
+  font-family: var(--mono);
+  font-size: 11px;
+  background-position: right 8px center;
+  background-size: 9px 6px;
+}
+html:not(.finger) .hk-ziel select:hover { color: var(--text); }
+
+/* Bausteine im Baukasten: dieselbe Klasse tragen dort auch Text- und
+   Zahlenfelder — nur das Auswahlfeld braucht Platz für den Pfeil. */
+html:not(.finger) select.ps-feld {
+  padding: 7px 30px 7px 10px;
+  border-radius: 9px;
+  font-size: 13px;
+  background-position: right 10px center;
+}
+
+/* Licht: Effekt und Palette, in der Farbe des Geräts */
+html:not(.finger) .li-feld select:hover {
+  border-color: color-mix(in srgb, var(--licht) 40%, transparent);
+}
+html:not(.finger) .li-feld select:focus-visible,
+html:not(.finger) .li-feld select:focus {
+  border-color: color-mix(in srgb, var(--licht) 65%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--licht) 15%, transparent);
+}
+
+/* Kalenderzuordnung in den Einstellungen: kompakter */
+html:not(.finger) .gk-zu-zeile select {
+  padding: 7px 28px 7px 9px;
+  border-radius: 8px;
+  font-size: 12px;
+  background-position: right 9px center;
+}
+
+
+/* ==========================================================
+   EIGENES AUSWAHLMENÜ
+   Das echte <select> bleibt im Dokument — es hält den Wert und
+   verschickt sein "change". Sichtbar ist der Knopf davor, und die
+   Liste hängt am Ende der Seite, damit kein overflow sie
+   abschneidet.
+   ========================================================== */
+html:not(.finger) .aw { position: relative; display: block; min-width: 0; }
+/* Das Feld bleibt für Tastatur und Formular erreichbar, ist aber
+   nicht mehr zu sehen. display:none würde es aus dem Tabulator
+   nehmen und manche Browser überspringen dann sein change. */
+html:not(.finger) .aw > select {
+  position: absolute;
+  width: 1px; height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+html:not(.finger) .aw-knopf {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 11px 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.24);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12.5px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+}
+html:not(.finger) .aw-wert {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+html:not(.finger) .aw-pfeil {
+  flex-shrink: 0;
+  width: 7px; height: 7px;
+  border-right: 1.7px solid var(--text-faint);
+  border-bottom: 1.7px solid var(--text-faint);
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform 0.24s cubic-bezier(0.34, 1.4, 0.64, 1), border-color 0.16s ease;
+}
+html:not(.finger) .aw-knopf:hover {
+  border-color: var(--border-2);
+  background: rgba(0, 0, 0, 0.32);
+}
+html:not(.finger) .aw-knopf:hover .aw-pfeil { border-color: var(--text-dim); }
+html:not(.finger) .aw-knopf[aria-expanded="true"] {
+  border-color: color-mix(in srgb, var(--licht, var(--blue)) 60%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--licht, var(--blue)) 14%, transparent);
+}
+html:not(.finger) .aw-knopf[aria-expanded="true"] .aw-pfeil {
+  transform: rotate(225deg) translate(-2px, -2px);
+  border-color: var(--licht, var(--blue));
+}
+html:not(.finger) .aw-knopf:focus-visible {
+  outline: none;
+  border-color: color-mix(in srgb, var(--blue) 60%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 16%, transparent);
+}
+html:not(.finger) .aw-knopf:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ---------- Die Liste ---------- */
+.aw-liste {
+  position: fixed;
+  z-index: 950;
+  max-width: min(360px, calc(100vw - 16px));
+  max-height: min(340px, calc(100vh - 40px));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(16, 21, 36, 0.72);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  box-shadow:
+    0 22px 56px rgba(0, 0, 0, 0.58),
+    0 2px 10px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+
+  opacity: 0;
+  transform: translateY(-7px) scale(0.975);
+  transform-origin: top center;
+  transition: opacity 0.16s ease, transform 0.2s cubic-bezier(0.34, 1.35, 0.64, 1);
+}
+.aw-liste.nach-oben { transform-origin: bottom center; transform: translateY(7px) scale(0.975); }
+.aw-liste.offen { opacity: 1; transform: none; }
+
+.aw-suchzeile {
+  flex-shrink: 0;
+  padding: 9px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+.aw-suche {
+  width: 100%;
+  padding: 8px 11px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12.5px;
+  outline: none;
+}
+.aw-suche:focus { border-color: color-mix(in srgb, var(--blue) 55%, transparent); }
+.aw-suche::placeholder { color: var(--text-faint); }
+
+.aw-rollen {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 6px;
+  scrollbar-width: thin;
+}
+.aw-rollen::-webkit-scrollbar { width: 8px; }
+.aw-rollen::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.aw-eintrag {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 11px;
+  border: none;
+  border-radius: 9px;
+  background: none;
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 12.5px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.aw-eintrag span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.aw-eintrag:hover { background: rgba(255, 255, 255, 0.07); color: var(--text); }
+.aw-eintrag.gewaehlt {
+  background: color-mix(in srgb, var(--blue) 16%, transparent);
+  color: var(--blue-soft);
+  font-weight: 500;
+}
+.aw-haken {
+  flex-shrink: 0;
+  width: 11px; height: 6px;
+  border-left: 1.9px solid currentColor;
+  border-bottom: 1.9px solid currentColor;
+  transform: rotate(-45deg) translate(1px, -2px);
+}
+.aw-nichts {
+  padding: 18px 12px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
+
+/* ==========================================================
+   LICHT — BEWEGUNG
+   Die Kacheln laufen beim ersten Aufbau von unten ein, eine nach
+   der anderen. Der Blick folgt dabei der Reihenfolge, in der sie
+   auch gelesen werden: erst was an ist, dann der Rest.
+   ========================================================== */
+.licht-gitter > .laeuft-ein {
+  animation: licht-rein 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--verzug, 0ms);
+}
+@keyframes licht-rein {
+  from { opacity: 0; transform: translateY(18px) scale(0.985); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Der Schalter: der Knauf läuft mit leichtem Überschwingen hinüber
+   und wird dabei kurz breiter — wie ein Kippschalter, den man
+   wirklich umlegt. Die Farbe folgt etwas langsamer, damit die
+   Bewegung führt und nicht das Aufleuchten. */
+.li-schalter .li-knauf {
+  transition:
+    transform 0.34s cubic-bezier(0.34, 1.56, 0.64, 1),
+    width 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background 0.3s ease 0.04s,
+    box-shadow 0.3s ease 0.04s;
+}
+.li-schalter:active .li-knauf { width: 25px; }
+html.finger .li-schalter:active .li-knauf { width: 30px; }
+.li-schalter { transition: background 0.3s ease, border-color 0.3s ease; }
+
+/* Beim Einschalten leuchtet die Kachel einmal kurz auf */
+.li-karte.an { animation: licht-an 0.55s ease-out; }
+@keyframes licht-an {
+  0%   { box-shadow: 0 0 0 1px color-mix(in srgb, var(--licht) 14%, transparent),
+                     0 10px 30px color-mix(in srgb, var(--licht) 10%, transparent); }
+  35%  { box-shadow: 0 0 0 3px color-mix(in srgb, var(--licht) 26%, transparent),
+                     0 14px 44px color-mix(in srgb, var(--licht) 22%, transparent); }
+  100% { box-shadow: 0 0 0 1px color-mix(in srgb, var(--licht) 14%, transparent),
+                     0 10px 30px color-mix(in srgb, var(--licht) 10%, transparent); }
+}
+
+/* Wer Bewegung abbestellt hat, bekommt sie nicht */
+@media (prefers-reduced-motion: reduce) {
+  .licht-gitter > .laeuft-ein { animation: none; }
+  .li-karte.an { animation: none; }
+  .aw-liste { transition: opacity 0.1s ease; transform: none; }
+  .li-schalter .li-knauf { transition: transform 0.12s linear, background 0.12s linear; }
+}
+
+
+/* ==========================================================
+   REGLER ALS BALKEN
+   Ein Punkt auf einer Schiene sagt wenig. Erst die gefüllte
+   Strecke davor zeigt auf einen Blick, wie hell es ist — und
+   in welcher Farbe das Licht steht.
+
+   Der Füllstand kommt als --fuell aus dem Skript: CSS kann den
+   Wert eines Reglers nicht selbst lesen. Track und Daumen sind
+   Pseudo-Elemente und müssen je Browser einzeln angesprochen
+   werden; die Verläufe sind deshalb doppelt notiert.
+   ========================================================== */
+.li-regler input[type="range"],
+.li-feld input[type="range"] { --fuell: 50%; }
+
+.li-regler input[type="range"]::-webkit-slider-runnable-track,
+.li-feld input[type="range"]::-webkit-slider-runnable-track {
+  height: 9px;
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg,
+      color-mix(in srgb, var(--licht, var(--blue)) 55%, transparent) 0%,
+      var(--licht, var(--blue)) var(--fuell),
+      rgba(255, 255, 255, 0.08) var(--fuell),
+      rgba(255, 255, 255, 0.08) 100%);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+.li-regler input[type="range"]::-moz-range-track,
+.li-feld input[type="range"]::-moz-range-track {
+  height: 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+/* Firefox füllt selbst — dort genügt die Farbe */
+.li-regler input[type="range"]::-moz-range-progress,
+.li-feld input[type="range"]::-moz-range-progress {
+  height: 9px;
+  border-radius: 999px;
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--licht, var(--blue)) 55%, transparent),
+    var(--licht, var(--blue)));
+}
+
+.li-regler input[type="range"]::-webkit-slider-thumb,
+.li-feld input[type="range"]::-webkit-slider-thumb {
+  margin-top: -5px;
+  width: 19px; height: 19px;
+  transition: transform 0.16s cubic-bezier(0.34, 1.5, 0.64, 1),
+              box-shadow 0.16s ease;
+}
+.li-regler input[type="range"]:hover::-webkit-slider-thumb,
+.li-feld input[type="range"]:hover::-webkit-slider-thumb {
+  transform: scale(1.15);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--licht, var(--blue)) 75%, transparent);
+}
+.li-regler input[type="range"]:active::-webkit-slider-thumb,
+.li-feld input[type="range"]:active::-webkit-slider-thumb { transform: scale(1.28); }
+.li-regler input[type="range"]:focus-visible,
+.li-feld input[type="range"]:focus-visible { outline: none; }
+.li-regler input[type="range"]:focus-visible::-webkit-slider-thumb,
+.li-feld input[type="range"]:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--licht, var(--blue)) 28%, transparent);
+}
+
+/* Tempo und Stärke sind schmaler als die Helligkeit */
+.li-feld input[type="range"]::-webkit-slider-runnable-track { height: 7px; }
+.li-feld input[type="range"]::-webkit-slider-thumb {
+  width: 15px; height: 15px; margin-top: -4px;
+}
+
+
+/* ==========================================================
+   EIGENE FARBPALETTEN
+   Drei Farben unter einem Namen. Als Streifen, weil man eine
+   Palette an ihren Farben wiedererkennt und nicht am Wort.
+   ========================================================== */
+.li-paletten { display: flex; flex-direction: column; gap: 6px; }
+.li-palettenreihe { display: flex; flex-wrap: wrap; gap: 7px; }
+
+.li-palette {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px 6px 7px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 11.5px;
+  cursor: pointer;
+  transition: border-color 0.16s ease, background 0.16s ease, transform 0.14s ease;
+}
+.li-palette:hover {
+  border-color: var(--border-2);
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+.li-palette:active { transform: translateY(0) scale(0.97); }
+.li-palette b { font-weight: 500; }
+
+.li-streifen {
+  display: flex;
+  flex-shrink: 0;
+  width: 30px; height: 18px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+.li-streifen i { flex: 1; }
+
+/* Das Kreuz erscheint erst beim Überfahren — sonst sähe jede
+   Palette nach einer Aufforderung zum Löschen aus. */
+.li-palette-weg {
+  width: 15px; height: 15px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 5px;
+  color: var(--text-faint);
+  font-size: 10px;
+  font-style: normal;
+  opacity: 0;
+  transition: opacity 0.14s ease, color 0.14s ease, background 0.14s ease;
+}
+.li-palette:hover .li-palette-weg { opacity: 1; }
+.li-palette-weg:hover { color: var(--red); background: rgba(251, 113, 133, 0.16); }
+html.finger .li-palette-weg { opacity: 1; }
+
+.li-palette.neu { border-style: dashed; color: var(--text-faint); }
+.li-palette.neu:hover {
+  color: var(--licht, var(--blue));
+  border-color: color-mix(in srgb, var(--licht, var(--blue)) 50%, transparent);
+  background: color-mix(in srgb, var(--licht, var(--blue)) 10%, transparent);
+}
+.li-plus { font-size: 15px; line-height: 1; width: 30px; text-align: center; }
+
+
+/* ==========================================================
+   BEWEGUNG, ÜBERARBEITET
+   Beim Umschalten wandert eine Kachel zwischen den Abschnitten.
+   Die Strecke fährt sie jetzt sichtbar ab (siehe positionenGleiten
+   im Skript) — hier steht, was die Kachel dabei sonst noch tut.
+   ========================================================== */
+.li-karte {
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    background 0.3s ease,
+    padding 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Der aufgeklappte Teil fährt heraus statt einzublenden */
+.li-tiefe {
+  animation: li-tiefe-auf 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes li-tiefe-auf {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: none; }
+}
+/* Die Zeilen darin folgen kurz versetzt — das führt den Blick
+   nach unten, statt alles auf einmal aufblitzen zu lassen. */
+.li-tiefe > * {
+  animation: li-zeile-auf 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.li-tiefe > *:nth-child(1) { animation-delay: 0.03s; }
+.li-tiefe > *:nth-child(2) { animation-delay: 0.06s; }
+.li-tiefe > *:nth-child(3) { animation-delay: 0.09s; }
+.li-tiefe > *:nth-child(4) { animation-delay: 0.12s; }
+.li-tiefe > *:nth-child(5) { animation-delay: 0.15s; }
+.li-tiefe > *:nth-child(6) { animation-delay: 0.18s; }
+.li-tiefe > *:nth-child(7) { animation-delay: 0.21s; }
+@keyframes li-zeile-auf {
+  from { opacity: 0; transform: translateY(7px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Der Farbtupfer bestätigt den Griff */
+.li-tupfer { transition: transform 0.16s cubic-bezier(0.34, 1.5, 0.64, 1), box-shadow 0.16s ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  .li-tiefe, .li-tiefe > * { animation: none; }
+  .li-karte { transition: none; }
+  .li-palette { transition: none; }
+}
+
+/* Das Namensfeld beim Merken — erscheint an der Stelle des Knopfes */
+.li-taufe { display: flex; align-items: center; gap: 7px; margin-top: 7px; }
+.li-taufe input {
+  flex: 1;
+  min-width: 0;
+  padding: 7px 10px;
+  border: 1px solid color-mix(in srgb, var(--licht, var(--blue)) 45%, transparent);
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.28);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12.5px;
+  outline: none;
+}
+.li-taufe input:focus {
+  border-color: var(--licht, var(--blue));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--licht, var(--blue)) 15%, transparent);
+}
+.li-taufe button {
+  flex-shrink: 0;
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: 0.16s ease;
+}
+.li-taufe button[type="submit"] {
+  border-color: color-mix(in srgb, var(--licht, var(--blue)) 45%, transparent);
+  color: var(--licht, var(--blue));
+}
+.li-taufe button:hover { background: rgba(255, 255, 255, 0.1); color: var(--text); }
+html.finger .li-taufe input { font-size: 16px; }
+
+/* Die aufgeklappte Karte gehört nach vorn. Ohne das legen sich die
+   Kacheln, die gerade an ihren Platz gleiten, über sie: ihr
+   transform erzeugt einen eigenen Stapelkontext, und in der
+   Dokumentreihenfolge stehen sie dahinter. Auf einer Spalte —
+   also am Telefon — verdeckten sie den halben Inhalt. */
+.licht-gitter > .li-karte { z-index: 1; }
+.licht-gitter > .li-karte.offen { z-index: 5; }
+
+/* Jede Kachel darf schmaler werden als ihr Inhalt — was nicht passt,
+   bricht um oder rollt in seinem eigenen Kasten. Ohne das schiebt
+   eine einzige lange Reihe die ganze Kachel ueber den Bildschirm. */
+.licht-gitter > .li-karte { min-width: 0; }
+.li-tiefe, .li-tiefe > * { min-width: 0; }
+.li-schnell, .li-palettenreihe, .li-farbreihe { min-width: 0; }
+
+/* Ein eigenes display schlaegt das hidden-Attribut — sonst steht das
+   Namensfeld dauerhaft offen, obwohl es erst auf Klick erscheinen soll. */
+.li-taufe[hidden] { display: none; }
+
+/* Am Ende der Liste soll das Rad nicht die Seite darunter mitziehen —
+   sonst rollt die Seite weg und das Menue schliesst mitten im Suchen. */
+.aw-rollen { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }

@@ -267,6 +267,52 @@ router.post("/google/kalender", (req, res) => {
   res.json({ ok });
 });
 
+/* ==========================================================
+   WLED — LICHT
+   Der Browser darf die Lichter nicht direkt fragen: das Dashboard
+   läuft über HTTPS, die Geräte sprechen HTTP, und der Browser
+   blockiert die Mischung. Hier ist die Brücke.
+   ========================================================== */
+const wled = () => require("../lib/wled");
+
+router.get("/wled/geraete", async (req, res) => {
+  try { res.json({ ok: true, geraete: await wled().alleZustaende() }); }
+  catch (fehler) { res.status(500).json({ ok: false, fehler: fehler.message }); }
+});
+
+router.post("/wled/suchen", async (req, res) => {
+  try {
+    const gefunden = await wled().suchen();
+    wled().uebernehmen(gefunden);
+    res.json({ ok: true, gefunden: gefunden.length,
+               geraete: await wled().alleZustaende() });
+  } catch (fehler) { res.status(500).json({ ok: false, fehler: fehler.message }); }
+});
+
+router.get("/wled/listen", async (req, res) => {
+  try { res.json({ ok: true, ...(await wled().listen(String(req.query.ip || ""))) }); }
+  catch (fehler) { res.status(400).json({ ok: false, fehler: fehler.message }); }
+});
+
+router.post("/wled/setzen", async (req, res) => {
+  const k = req.body || {};
+  try {
+    if (k.alle) { res.json({ ok: true, ergebnis: await wled().alleSetzen(k) }); return; }
+    await wled().setzen(String(k.ip || ""), k);
+    /* Den frischen Zustand gleich zurück — dann muss der Browser
+       nicht nachfragen und die Anzeige stimmt sofort. */
+    res.json({ ok: true, zustand: await wled().zustand(String(k.ip || "")) });
+  } catch (fehler) { res.status(400).json({ ok: false, fehler: fehler.message }); }
+});
+
+router.post("/wled/geraet", (req, res) => {
+  const k = req.body || {};
+  const w = wled();
+  if (k.weg) return res.json({ ok: true, geraete: w.entfernen(String(k.ip || "")) });
+  if (k.name != null && !k.neu) return res.json({ ok: w.umbenennen(String(k.ip || ""), k.name) });
+  res.json({ ok: true, geraete: w.hinzufuegen(String(k.ip || ""), k.name) });
+});
+
 router.post("/google/ziele", (req, res) => {
   /* { klausur: id, hausaufgabe: id, fahrschule: id, termin: id } —
      welche Art in welchen Kalender geschrieben wird. */

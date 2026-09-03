@@ -2408,6 +2408,198 @@
     sections.forEach(sec => spy.observe(sec));
   }
 
+  /* ==========================================================
+     AUSWAHLMENÜS
+     Ein <select> lässt sich nur außen gestalten. Die aufgeklappte
+     Liste kommt vom Betriebssystem: helle Kästen, Systemschrift,
+     fremde Ränder — mitten in einem dunklen Layout ein Fremdkörper.
+     Und bei 220 Effekten scrollt man sich durch eine Liste ohne
+     jede Hilfe.
+
+     Deshalb liegt hier ein eigenes Menü darüber. Das <select>
+     bleibt bestehen und behält seinen Wert — es wird nur versteckt
+     und weiterhin beschrieben. Jede vorhandene Logik hängt an
+     seinem "change" und merkt von diesem Aufsatz nichts.
+
+     Nur am Rechner: auf dem Telefon öffnet ein <select> das
+     Auswahlrad des Systems, das mit dem Daumen besser zu bedienen
+     ist als jede nachgebaute Liste.
+     ========================================================== */
+  const AUSWAHL_SUCHE_AB = 12;      // ab so vielen Einträgen ein Suchfeld
+  let auswahlOffen = null;
+
+  function auswahlMoeglich() {
+    return !document.documentElement.classList.contains("finger");
+  }
+
+  function auswahlAufwerten(bereich) {
+    if (!auswahlMoeglich()) return;
+    (bereich || document).querySelectorAll("select:not([data-aufgewertet])").forEach(feld => {
+      feld.dataset.aufgewertet = "1";
+
+      const huelle = document.createElement("div");
+      huelle.className = "aw" + (feld.className ? " aw-" + feld.className.split(" ")[0] : "");
+
+      const knopf = document.createElement("button");
+      knopf.type = "button";
+      knopf.className = "aw-knopf";
+      knopf.setAttribute("aria-haspopup", "listbox");
+      knopf.setAttribute("aria-expanded", "false");
+      knopf.innerHTML = `<span class="aw-wert"></span><span class="aw-pfeil" aria-hidden="true"></span>`;
+
+      feld.parentNode.insertBefore(huelle, feld);
+      huelle.appendChild(feld);
+      huelle.appendChild(knopf);
+
+      const beschriften = () => {
+        const gewaehlt = feld.selectedOptions[0];
+        knopf.querySelector(".aw-wert").textContent = gewaehlt ? gewaehlt.textContent : "—";
+        knopf.disabled = feld.disabled;
+      };
+      beschriften();
+      /* Ändert sich der Wert von außen — etwa weil ein anderes Gerät
+         etwas gesetzt hat —, zieht die Beschriftung mit. */
+      feld.addEventListener("change", beschriften);
+      feld._awBeschriften = beschriften;
+
+      knopf.addEventListener("click", e => {
+        e.stopPropagation();
+        auswahlOeffnen(feld, knopf);
+      });
+      knopf.addEventListener("keydown", e => {
+        if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          auswahlOeffnen(feld, knopf);
+        }
+      });
+    });
+  }
+
+  function auswahlSchliessen() {
+    if (!auswahlOffen) return;
+    const { liste, knopf } = auswahlOffen;
+    knopf.setAttribute("aria-expanded", "false");
+    liste.classList.remove("offen");
+    /* Erst nach der Ausblendung entfernen, sonst springt es weg */
+    setTimeout(() => liste.remove(), 160);
+    auswahlOffen = null;
+  }
+
+  function auswahlOeffnen(feld, knopf) {
+    if (auswahlOffen && auswahlOffen.feld === feld) return auswahlSchliessen();
+    auswahlSchliessen();
+
+    const liste = document.createElement("div");
+    liste.className = "aw-liste";
+    liste.setAttribute("role", "listbox");
+
+    const eintraege = [...feld.options];
+    const vieleEintraege = eintraege.length >= AUSWAHL_SUCHE_AB;
+
+    liste.innerHTML =
+      (vieleEintraege
+        ? `<div class="aw-suchzeile">
+             <input type="text" class="aw-suche" placeholder="Suchen …" autocomplete="off"
+                    spellcheck="false" aria-label="In der Liste suchen">
+           </div>` : "")
+      + `<div class="aw-rollen" role="none"></div>`;
+
+    const rollen = liste.querySelector(".aw-rollen");
+
+    const zeichnen = filter => {
+      const f = String(filter || "").trim().toLowerCase();
+      const passend = eintraege.filter(o => !f || o.textContent.toLowerCase().includes(f));
+      rollen.innerHTML = passend.length
+        ? passend.map(o => `
+            <button type="button" class="aw-eintrag${o.value === feld.value ? " gewaehlt" : ""}"
+                    role="option" aria-selected="${o.value === feld.value}"
+                    data-wert="${escapeHTML(o.value)}">
+              <span>${escapeHTML(o.textContent)}</span>
+              ${o.value === feld.value ? '<i class="aw-haken" aria-hidden="true"></i>' : ""}
+            </button>`).join("")
+        : `<div class="aw-nichts">Nichts gefunden</div>`;
+
+      rollen.querySelectorAll("[data-wert]").forEach(b =>
+        b.addEventListener("click", () => {
+          feld.value = b.dataset.wert;
+          if (feld._awBeschriften) feld._awBeschriften();
+          feld.dispatchEvent(new Event("change", { bubbles: true }));
+          auswahlSchliessen();
+          knopf.focus();
+        }));
+    };
+    zeichnen("");
+
+    document.body.appendChild(liste);
+    auswahlOffen = { feld, knopf, liste };
+    knopf.setAttribute("aria-expanded", "true");
+
+    /* Fest im Fenster ausrichten: die Karten haben overflow, ein
+       Menü im Fluss würde dort abgeschnitten. Passt es nach unten
+       nicht, klappt es nach oben auf. */
+    const stellen = () => {
+      const r = knopf.getBoundingClientRect();
+      const hoehe = liste.offsetHeight;
+      const platzUnten = innerHeight - r.bottom - 12;
+      const nachOben = platzUnten < hoehe && r.top > platzUnten;
+      liste.style.left = Math.max(8, Math.min(r.left, innerWidth - liste.offsetWidth - 8)) + "px";
+      liste.style.minWidth = r.width + "px";
+      liste.style.top = nachOben ? Math.max(8, r.top - hoehe - 6) + "px" : (r.bottom + 6) + "px";
+      liste.classList.toggle("nach-oben", nachOben);
+    };
+    stellen();
+    requestAnimationFrame(() => { stellen(); liste.classList.add("offen"); });
+
+    const suche = liste.querySelector(".aw-suche");
+    if (suche) {
+      suche.addEventListener("input", () => { zeichnen(suche.value); stellen(); });
+      setTimeout(() => suche.focus(), 30);
+    } else {
+      const gewaehlt = rollen.querySelector(".gewaehlt");
+      if (gewaehlt) gewaehlt.scrollIntoView({ block: "center" });
+    }
+
+    liste.addEventListener("keydown", e => {
+      if (e.key === "Escape") { e.preventDefault(); auswahlSchliessen(); knopf.focus(); }
+    });
+  }
+
+  /* Draußen klicken, rollen oder Fenstergröße ändern schließt */
+  document.addEventListener("mousedown", e => {
+    if (!auswahlOffen) return;
+    if (e.target.closest(".aw-liste") || e.target.closest(".aw-knopf")) return;
+    auswahlSchliessen();
+  });
+  window.addEventListener("resize", auswahlSchliessen);
+
+  /* Rollt die Seite unter dem Menü weg, steht es an der falschen
+     Stelle — dann schließt es. Rollt aber die Liste selbst, ist das
+     genau das, was man wollte: dieses Ereignis muss durch.
+
+     Der Lauscher hört in der Einfangphase mit, weil ein Rollen
+     innerhalb eines Kastens nicht nach oben steigt. Ohne die
+     Ausnahme schloss das Menü deshalb beim ersten Radzug. */
+  document.addEventListener("scroll", e => {
+    if (!auswahlOffen) return;
+    if (e.target && auswahlOffen.liste.contains(e.target)) return;
+    auswahlSchliessen();
+  }, true);
+
+  /* Felder entstehen laufend neu — etwa bei jedem Neuzeichnen der
+     Lichter. Ein Beobachter fängt sie ein, statt an jeder Stelle
+     einen Aufruf nachzutragen. */
+  if (auswahlMoeglich() && "MutationObserver" in window) {
+    auswahlAufwerten();
+    new MutationObserver(aenderungen => {
+      let neu = false;
+      aenderungen.forEach(a => a.addedNodes.forEach(n => {
+        if (n.nodeType !== 1) return;
+        if (n.tagName === "SELECT" || n.querySelector?.("select")) neu = true;
+      }));
+      if (neu) auswahlAufwerten();
+    }).observe(document.body, { childList: true, subtree: true });
+  }
+
   /* ---------- Avatar ---------- */
   function updateAvatar() {
     const name = (settings.name || "").trim();
@@ -2461,8 +2653,9 @@
     { id: "kalorien",       befehl: "/kalorien",       titel: "Kalorien",          info: "Heutiger Stand und Verlauf" },
     { id: "bildschirmzeit", befehl: "/bildschirmzeit", titel: "Bildschirmzeit",    info: "Handy und PC im Verlauf" },
     { id: "lernen",         befehl: "/lernen",         titel: "Lernen",            info: "Kurse und anstehende Klausuren" },
-    { id: "planung",        befehl: "/planung",        titel: "Planung",           info: "Abläufe mit Zeitpunkt" },
+    { id: "planung",        befehl: "/automation",     titel: "Automation",        info: "Abläufe mit Zeitpunkt" },
     { id: "projekte",       befehl: "/projekte",       titel: "Projekte",          info: "Schritte und Termine" },
+    { id: "licht",          befehl: "/licht",          titel: "Licht",             info: "Lichterketten steuern" },
     { id: "analyse",        befehl: "/analyse",        titel: "Analyse",           info: "Zahlen der letzten Wochen" }
   ];
 
@@ -2583,6 +2776,10 @@
     if (id === "lernen")         baueLernen();
     if (id === "planung")        bauePlanung();
     if (id === "projekte")       baueProjekte();
+    if (id === "licht")          baueLicht();
+    /* Der Licht-Takt fragt zehn Geräte ab — er läuft nur, solange
+       man auch hinschaut. */
+    else lichtTaktSetzen(false);
     if (id === "analyse")        baueAnalyse();
   }
 
@@ -6486,6 +6683,764 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
     return block;
   }
 
+  /* ==========================================================
+     LICHT — WLED
+     Die Lichterketten hängen als eigene kleine Server im Netz. Der
+     Browser fragt sie nicht selbst: über HTTPS wäre eine Anfrage an
+     HTTP verboten, und der Server hier kann es ohnehin besser —
+     er kennt alle Geräte und wartet nicht auf eines, das gerade
+     stromlos ist.
+
+     Gezeigt wird nur, was man täglich anfasst: an, Helligkeit,
+     Effekt, Palette, Farben. Alles Weitere — Segmente, Zeitpläne,
+     Netzwerkkram — steht in WLED selbst besser aufgehoben.
+     ========================================================== */
+  let lichtGeraete = [];
+  let lichtOffen = null;          // welches Gerät ist aufgeklappt
+  let lichtBearbeitet = null;     // bei welchem sind Name und Gruppe offen
+
+  /* ==========================================================
+     EIGENE NAMEN UND GRUPPEN
+     Ein Gerät heißt im Netz so, wie es beim Einrichten getauft
+     wurde — „WLED Luefter", „Effekt". Hier soll es heißen, wie man
+     im Zimmer darüber spricht.
+
+     Diese Namen bleiben ausdrücklich hier: an WLED wird nichts
+     geschickt. Wer das Gerät über seine eigene App oder eine
+     andere Anwendung ansieht, findet dort weiterhin den Namen, den
+     es immer hatte — sonst würde ein Umbenennen hier still an
+     Stellen wirken, die man gerade gar nicht im Blick hat.
+
+     Gespeichert wird im Bestand, also auf allen Geräten gleich.
+     ========================================================== */
+  let lichtEigen = store.get("lifeos_licht_eigen", {});   // { ip: {name, gruppe} }
+
+  const eigenSichern = () => store.set("lifeos_licht_eigen", lichtEigen);
+
+  /* Der Name, der angezeigt wird: eigener, sonst der vom Gerät */
+  const lichtName = g => (lichtEigen[g.ip] && lichtEigen[g.ip].name) || g.name || g.ip;
+  const lichtGruppe = g => (lichtEigen[g.ip] && lichtEigen[g.ip].gruppe) || "";
+
+  /* Alle vergebenen Gruppen, für die Vorschlagsliste */
+  function lichtGruppen() {
+    const raus = new Set();
+    Object.values(lichtEigen).forEach(e => { if (e && e.gruppe) raus.add(e.gruppe); });
+    return [...raus].sort((a, b) => a.localeCompare(b, "de"));
+  }
+
+  function eigenSetzen(ip, name, gruppe) {
+    const eintrag = lichtEigen[ip] || {};
+    const n = String(name || "").trim();
+    const gr = String(gruppe || "").trim();
+    if (n) eintrag.name = n; else delete eintrag.name;
+    if (gr) eintrag.gruppe = gr; else delete eintrag.gruppe;
+    if (Object.keys(eintrag).length) lichtEigen[ip] = eintrag;
+    else delete lichtEigen[ip];
+    eigenSichern();
+  }
+  let lichtListen = {};           // Effekt- und Palettennamen je Gerät
+  let lichtLaeuft = false;
+  let lichtEingelaufen = false;   // die Einlaufanimation gibt es einmal
+
+  /* Wer am Regler zieht, erzeugt Dutzende Werte je Sekunde. An das
+     Licht geht nur der letzte — sonst kommt es mit dem Antworten
+     nicht nach und ruckelt. */
+  const lichtWartet = new Map();
+
+  function lichtSenden(ip, wunsch, sofort) {
+    const alt = lichtWartet.get(ip);
+    if (alt) clearTimeout(alt.uhr);
+    const zusammen = { ...(alt ? alt.wunsch : {}), ...wunsch };
+
+    const losschicken = () => {
+      lichtWartet.delete(ip);
+      fetch("/api/wled/setzen", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ip, ...zusammen })
+      })
+        .then(a => a.json())
+        .then(d => {
+          if (!d.ok) throw new Error(d.fehler || "ging nicht");
+          if (d.zustand) {
+            const i = lichtGeraete.findIndex(g => g.ip === ip);
+            if (i >= 0) { lichtGeraete[i] = d.zustand; lichtZeichnen(); }
+          }
+          /* Die Geräte hören einander zu: WLED verschickt Änderungen
+             im Netz, und wer sie empfängt, zieht mit. Ein Griff hier
+             kann deshalb drei Lichter umlegen — die Seite fragt
+             danach alle nach, sonst stimmt sie bis zum Neuladen
+             nicht. Nur bei echten Schaltvorgängen, nicht bei jedem
+             Schritt am Regler. */
+          if (zusammen.an != null || zusammen.umschalten
+              || zusammen.effekt != null || zusammen.palette != null
+              || zusammen.farben) lichtNachfassen();
+        })
+        .catch(f => showToast("Licht antwortet nicht: " + f.message, "warn"));
+    };
+
+    if (sofort) return losschicken();
+    lichtWartet.set(ip, { wunsch: zusammen, uhr: setTimeout(losschicken, 120) });
+  }
+
+  /* ==========================================================
+     NACHFASSEN
+     Zwei Wege, auf denen sich ein Licht ändert, ohne dass diese
+     Seite es veranlasst hat:
+
+       – die Geräte hören einander zu und ziehen mit,
+       – jemand greift zur WLED-App oder zu einem Taster.
+
+     Beides sieht man hier sonst erst nach dem Neuladen. Deshalb
+     wird nach jedem Schaltvorgang kurz nachgefragt, und solange die
+     Seite offen liegt, auch von selbst alle acht Sekunden.
+     ========================================================== */
+  let lichtNachfassUhr = null;
+  let lichtTakt = null;
+
+  function lichtNachfassen() {
+    if (lichtNachfassUhr) clearTimeout(lichtNachfassUhr);
+    /* Kurz warten: die Sync-Nachrichten im Netz brauchen einen
+       Moment, und ein sofortiger Abruf liefe ihnen davon. */
+    lichtNachfassUhr = setTimeout(() => { lichtNachfassUhr = null; lichtHolen(true); }, 450);
+  }
+
+  function lichtTaktSetzen(an) {
+    if (lichtTakt) { clearInterval(lichtTakt); lichtTakt = null; }
+    if (!an) return;
+    lichtTakt = setInterval(() => {
+      /* Nicht dazwischenfunken, während jemand am Regler zieht oder
+         ein Menü offen steht — sonst springt die Anzeige weg. */
+      if (document.hidden || lichtWartet.size || auswahlOffen) return;
+      lichtHolen(true);
+    }, 8000);
+  }
+
+  function baueLicht() {
+    lichtZeichnen();
+    lichtHolen();
+    lichtTaktSetzen(true);
+  }
+
+  /* `leise` heißt: kein Fehlerkasten, wenn gerade nichts geht — beim
+     Nachfassen im Hintergrund wäre das nur störend. */
+  function lichtHolen(leise) {
+    if (lichtLaeuft) return;
+    lichtLaeuft = true;
+    fetch("/api/wled/geraete", { cache: "no-store" })
+      .then(a => a.json())
+      .then(d => {
+        lichtLaeuft = false;
+        if (!d.ok) throw new Error(d.fehler || "Liste nicht lesbar");
+        lichtGeraete = d.geraete || [];
+
+        /* Erst die Effektnamen holen, dann einmal zeichnen. Zeichnete
+           man vorher und ließe jede eintreffende Liste neu zeichnen,
+           liefe das Gitter zehnmal hintereinander neu auf — die
+           Einlaufanimation würde jedes Mal abgeschnitten, und statt
+           der Namen stünde kurz „Effekt 0" da. */
+        const fehlen = lichtGeraete.filter(g => g.da && !lichtListen[g.ip]);
+        if (!fehlen.length) return lichtZeichnen();
+        Promise.all(fehlen.map(lichtListenHolen)).then(() => lichtZeichnen());
+      })
+      .catch(f => {
+        lichtLaeuft = false;
+        if (leise) return;                     // im Hintergrund still bleiben
+        const gitter = $("lichtGitter");
+        if (gitter) gitter.innerHTML =
+          `<div class="block li-leer"><div class="ll-titel">Keine Verbindung</div>
+             <div class="ll-text">${escapeHTML(f.message)}</div></div>`;
+      });
+  }
+
+  /* Holt die Namen und legt sie ab — gezeichnet wird vom Aufrufer,
+     wenn alle da sind. */
+  function lichtListenHolen(g) {
+    return fetch("/api/wled/listen?ip=" + encodeURIComponent(g.ip))
+      .then(a => a.json())
+      .then(d => {
+        if (!d.ok) return;
+        lichtListen[g.ip] = { effekte: d.effekte || [], paletten: d.paletten || [] };
+      })
+      .catch(() => { /* dann eben Nummern statt Namen */ });
+  }
+
+  /* Wie weit der Balken gefüllt ist. Ein Regler zeigt von sich aus
+     nur einen Punkt auf einer Schiene — erst die gefüllte Strecke
+     davor sagt auf einen Blick, wie hell es ist. CSS kann das nicht
+     allein: die Zahl muss von hier kommen. */
+  function fuellstand(regler) {
+    const min = Number(regler.min) || 0;
+    const max = Number(regler.max) || 100;
+    const wert = Number(regler.value);
+    const anteil = max > min ? ((wert - min) / (max - min)) * 100 : 0;
+    regler.style.setProperty("--fuell", Math.max(0, Math.min(100, anteil)) + "%");
+  }
+
+  /* Aus [255,0,0] wird #ff0000 und zurück */
+  const alsHex = c => "#" + (Array.isArray(c) ? c : [0, 0, 0]).slice(0, 3)
+    .map(n => Math.max(0, Math.min(255, n | 0)).toString(16).padStart(2, "0")).join("");
+  const ausHex = h => {
+    const m = /^#?([0-9a-f]{6})$/i.exec(String(h || ""));
+    if (!m) return [0, 0, 0];
+    const z = parseInt(m[1], 16);
+    return [(z >> 16) & 255, (z >> 8) & 255, z & 255];
+  };
+
+  /* ==========================================================
+     UMSORTIEREN OHNE SPRUNG
+     Schaltet man ein Licht ein, wandert seine Kachel vom unteren
+     Abschnitt nach oben und wird dabei größer. Weil das Gitter neu
+     geschrieben wird, geschieht das schlagartig — man sieht nicht,
+     was wohin ging, und die Nachbarn springen mit.
+
+     Deshalb werden vor dem Neuschreiben alle Positionen gemerkt.
+     Danach bekommt jede Kachel den Weg, den sie zurückgelegt hat,
+     als Startpunkt aufgedrückt und gleitet von dort an ihren neuen
+     Platz. Das Auge folgt der Bewegung und weiß hinterher, welche
+     Kachel welche war.
+     ========================================================== */
+  function positionenMerken(gitter) {
+    const karte = new Map();
+    gitter.querySelectorAll("[data-licht]").forEach(e => {
+      const r = e.getBoundingClientRect();
+      karte.set(e.dataset.licht, { x: r.left, y: r.top, b: r.width, h: r.height });
+    });
+    return karte;
+  }
+
+  function positionenGleiten(gitter, vorher) {
+    if (!vorher || !vorher.size) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    gitter.querySelectorAll("[data-licht]").forEach(e => {
+      const alt = vorher.get(e.dataset.licht);
+      if (!alt) return;
+      const neu = e.getBoundingClientRect();
+      const dx = alt.x - neu.left;
+      const dy = alt.y - neu.top;
+      /* Unter einem Pixel lohnt keine Bewegung */
+      if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+
+      e.style.transition = "none";
+      e.style.transform = `translate(${dx}px, ${dy}px)`;
+      requestAnimationFrame(() => {
+        e.style.transition = "transform 0.42s cubic-bezier(0.22, 1, 0.36, 1)";
+        e.style.transform = "";
+        setTimeout(() => { e.style.transition = ""; }, 460);
+      });
+    });
+  }
+
+  /* `ohneGleiten` beim Auf- und Zuklappen: dort wächst die Karte
+     selbst, und die gemessenen Zielpositionen der Nachbarn stimmen
+     nicht mehr, sobald der Inhalt seine eigene Animation läuft.
+     Beide zusammen ließen die Kacheln übereinander stehenbleiben. */
+  function lichtZeichnen(ohneGleiten) {
+    const gitter = $("lichtGitter");
+    if (!gitter) return;
+    const vorherigePlaetze = ohneGleiten ? null : positionenMerken(gitter);
+
+    const erreichbar = lichtGeraete.filter(g => g.da);
+    const an = erreichbar.filter(g => g.an).length;
+    const sub = $("lichtSub");
+    if (sub) {
+      sub.textContent = !lichtGeraete.length ? "Noch nichts gefunden"
+        : an + " von " + erreichbar.length + " an"
+          + (lichtGeraete.length > erreichbar.length
+             ? " · " + (lichtGeraete.length - erreichbar.length) + " nicht erreichbar" : "");
+    }
+
+    if (!lichtGeraete.length) {
+      gitter.innerHTML =
+        `<div class="block li-leer">
+           <div class="ll-titel">Noch keine Lichter</div>
+           <div class="ll-text">Oben auf <b>Suchen</b> tippen — das durchsucht das
+             Heimnetz nach WLED-Geräten. Das dauert einen Moment.</div>
+         </div>`;
+      return;
+    }
+
+    /* Was an ist, steht oben und nimmt Platz ein — das ist der
+       Zustand, den man verändern will. Was aus ist, rutscht nach
+       unten und wird zur schmalen Zeile: da gibt es nichts
+       einzustellen außer dem Einschalten. Nicht erreichbare Geräte
+       ganz zuletzt, sie sind gerade ohnehin nicht zu ändern. */
+    /* Innerhalb von An und Aus stehen die Geräte nach Gruppe
+       beieinander — was zusammengehört, soll auch zusammenstehen.
+       Ohne Gruppe ganz unten, sonst wäre die leere Gruppe die
+       erste. */
+    const rang = g => (!g.da ? 2 : g.an ? 0 : 1);
+    const nachGruppe = g => lichtGruppe(g) || "￿";
+    const sortiert = [...lichtGeraete].sort((a, b) =>
+      rang(a) - rang(b)
+      || nachGruppe(a).localeCompare(nachGruppe(b), "de")
+      || lichtName(a).localeCompare(lichtName(b), "de"));
+
+    const brennen = sortiert.filter(g => g.da && g.an);
+    const dunkel = sortiert.filter(g => g.da && !g.an);
+    const weg = sortiert.filter(g => !g.da);
+
+    const abschnitt = (titel, liste, klasse) => liste.length
+      ? `<div class="li-trenner ${klasse}"><span>${titel}</span><i>${liste.length}</i></div>`
+        + liste.map(g => lichtKarte(g)).join("")
+      : "";
+
+    gitter.innerHTML =
+      abschnitt("An", brennen, "ist-an")
+      + abschnitt("Aus", dunkel, "ist-aus")
+      + abschnitt("Nicht erreichbar", weg, "ist-weg")
+      /* Schon vergebene Gruppen schlagen sich beim Tippen selbst
+         vor — so entstehen keine zwei Schreibweisen derselben. */
+      + `<datalist id="lichtGruppenListe">${lichtGruppen()
+          .map(n => `<option value="${escapeHTML(n)}">`).join("")}</datalist>`;
+
+    /* Einlaufen nur beim ersten Aufbau der Seite. Bei jedem
+       Neuzeichnen — und das geschieht bei jedem Knopfdruck — würde
+       die ganze Wand ständig neu hochspringen. Die Verzögerung je
+       Kachel lässt sie nacheinander erscheinen statt alle auf
+       einmal; sie ist gedeckelt, damit die zehnte nicht ewig
+       braucht. */
+    /* Erst wenn wirklich Kacheln dastehen. Beim ersten Zeichnen ist
+       die Liste noch leer und es steht nur der Hinweis dort — der
+       würde die einmalige Animation sonst aufbrauchen. */
+    if (!lichtEingelaufen && gitter.querySelector(".li-karte")) {
+      lichtEingelaufen = true;
+      [...gitter.children].forEach((e, i) => {
+        e.classList.add("laeuft-ein");
+        e.style.setProperty("--verzug", Math.min(i * 45, 420) + "ms");
+      });
+      setTimeout(() => [...gitter.children].forEach(e => {
+        e.classList.remove("laeuft-ein");
+        e.style.removeProperty("--verzug");
+      }), 1200);
+    } else {
+      /* Kein Einlauf mehr, aber vielleicht ist etwas umgezogen */
+      positionenGleiten(gitter, vorherigePlaetze);
+    }
+
+    lichtBinden();
+  }
+
+  function lichtKarte(g) {
+    if (!g.da) {
+      const gr = lichtGruppe(g);
+      return `<div class="block li-karte aus-dem-netz" data-licht="${escapeHTML(g.ip)}">
+          <div class="li-kopf">
+            <span class="li-punkt weg"></span>
+            <div class="li-name"><b>${escapeHTML(lichtName(g))}${
+              gr ? `<span class="li-gruppe">${escapeHTML(gr)}</span>` : ""}</b>
+              <span>${escapeHTML(g.ip)} · antwortet nicht</span></div>
+          </div>
+        </div>`;
+    }
+
+    const offen = lichtOffen === g.ip;
+    const bearbeitet = lichtBearbeitet === g.ip;
+    const gruppe = lichtGruppe(g);
+    const listen = lichtListen[g.ip] || { effekte: [], paletten: [] };
+    const farbe = alsHex(g.farben && g.farben[0]);
+    const prozent = Math.round((g.helligkeit / 255) * 100);
+
+    return `<div class="block li-karte${g.an ? " an" : ""}${offen ? " offen" : ""}"
+                 data-licht="${escapeHTML(g.ip)}" style="--licht: ${farbe}">
+        <div class="li-kopf">
+          <button type="button" class="li-schalter${g.an ? " an" : ""}" data-schalt="${escapeHTML(g.ip)}"
+                  role="switch" aria-checked="${g.an}" aria-label="${escapeHTML(g.name)} an oder aus">
+            <span class="li-knauf"></span>
+          </button>
+          <div class="li-name">
+            <b>${escapeHTML(lichtName(g))}${gruppe
+              ? `<span class="li-gruppe">${escapeHTML(gruppe)}</span>` : ""}</b>
+            <span>${g.an ? escapeHTML(lichtEffektName(g))
+                          : (g.lichter ? g.lichter + " LEDs" : escapeHTML(g.ip))}</span>
+          </div>
+          <button type="button" class="li-stift" data-stift="${escapeHTML(g.ip)}"
+                  aria-expanded="${bearbeitet}" aria-label="Name und Gruppe">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M16.4 4.6a2 2 0 0 1 2.8 2.8L8.5 18.1l-3.7.9.9-3.7Z"/>
+            </svg>
+          </button>
+          <button type="button" class="li-mehr" data-mehr="${escapeHTML(g.ip)}"
+                  aria-expanded="${offen}" aria-label="Einstellungen">
+            <span class="li-pfeil"></span>
+          </button>
+        </div>
+
+        ${bearbeitet ? `
+        <form class="li-taufe li-umbenennen" data-eigen="${escapeHTML(g.ip)}">
+          <label class="li-feld">
+            <span>Name auf dieser Website</span>
+            <input type="text" data-feld="name" maxlength="30" autocomplete="off"
+                   value="${escapeHTML(lichtEigen[g.ip]?.name || "")}"
+                   placeholder="${escapeHTML(g.name)}">
+          </label>
+          <label class="li-feld">
+            <span>Gruppe</span>
+            <input type="text" data-feld="gruppe" maxlength="24" autocomplete="off"
+                   list="lichtGruppenListe" placeholder="z. B. Schlafzimmer"
+                   value="${escapeHTML(lichtGruppe(g))}">
+          </label>
+          <div class="li-umbenennen-fuss">
+            <span class="li-hinweis">Bleibt hier — an das Gerät wird nichts geschickt.
+              Es heißt weiterhin „${escapeHTML(g.name)}".</span>
+            <div class="li-umbenennen-knoepfe">
+              <button type="submit">Sichern</button>
+              <button type="button" data-eigen-zu>Schließen</button>
+            </div>
+          </div>
+        </form>` : ""}
+
+        ${g.an ? `<div class="li-regler">
+          <input type="range" min="1" max="255" value="${g.helligkeit || 1}"
+                 data-hell="${escapeHTML(g.ip)}" aria-label="Helligkeit ${escapeHTML(g.name)}">
+          <span class="li-prozent">${prozent} %</span>
+        </div>` : ""}
+
+        ${offen ? `
+        <div class="li-tiefe">
+          <label class="li-feld">
+            <span>Effekt</span>
+            <select data-fx="${escapeHTML(g.ip)}">${
+              (listen.effekte.length ? listen.effekte : [String(g.effekt)]).map((name, i) =>
+                `<option value="${i}"${i === g.effekt ? " selected" : ""}>${escapeHTML(name)}</option>`
+              ).join("")}</select>
+          </label>
+
+          <label class="li-feld">
+            <span>Palette</span>
+            <select data-pal="${escapeHTML(g.ip)}">${
+              (listen.paletten.length ? listen.paletten : [String(g.palette)]).map((name, i) =>
+                `<option value="${i}"${i === g.palette ? " selected" : ""}>${escapeHTML(name)}</option>`
+              ).join("")}</select>
+          </label>
+
+          <div class="li-farben">
+            <span class="li-marke">Farben</span>
+            <div class="li-farbreihe">${[0, 1, 2].map(i => `
+              <label class="li-farbe${i === 0 ? " haupt" : ""}">
+                <input type="color" value="${alsHex((g.farben || [])[i])}"
+                       data-farbe="${escapeHTML(g.ip)}" data-nr="${i}"
+                       aria-label="Farbe ${i + 1}">
+                <span style="background:${alsHex((g.farben || [])[i])}"></span>
+              </label>`).join("")}
+            </div>
+          </div>
+
+          <div class="li-schnell">${LICHT_FARBEN.map(f => `
+            <button type="button" class="li-tupfer" style="background:${f.hex}"
+                    data-schnell="${escapeHTML(g.ip)}" data-hex="${f.hex}"
+                    title="${escapeHTML(f.name)}" aria-label="${escapeHTML(f.name)}"></button>`).join("")}
+          </div>
+
+          ${palettenReihe(g)}
+
+          <div class="li-zwei">
+            <label class="li-feld">
+              <span>Tempo</span>
+              <input type="range" min="0" max="255" value="${g.tempo == null ? 128 : g.tempo}"
+                     data-sx="${escapeHTML(g.ip)}">
+            </label>
+            <label class="li-feld">
+              <span>Stärke</span>
+              <input type="range" min="0" max="255" value="${g.staerke == null ? 128 : g.staerke}"
+                     data-ix="${escapeHTML(g.ip)}">
+            </label>
+          </div>
+
+          <div class="li-fuss">${g.lichter ? g.lichter + " LEDs · " : ""}${escapeHTML(g.ip)}</div>
+        </div>` : ""}
+      </div>`;
+  }
+
+  /* ==========================================================
+     EIGENE FARBPALETTEN
+     Eine Farbe zu treffen dauert; sie an zehn Geräten wieder zu
+     treffen, dauert zehnmal so lang. Deshalb lassen sich die drei
+     Farben eines Lichts unter einem Namen ablegen und anderswo mit
+     einem Tippen wieder aufrufen.
+
+     Gespeichert wird im Bestand — die Paletten stehen damit auch
+     auf iPad und Telefon bereit.
+     ========================================================== */
+  let farbpaletten = store.get("lifeos_farbpaletten", []);
+
+  const palettenSichern = () => store.set("lifeos_farbpaletten", farbpaletten);
+
+  function paletteAnlegen(name, farben) {
+    const p = {
+      id: "fp" + Date.now().toString(36),
+      name: String(name || "").trim() || "Ohne Namen",
+      farben: [0, 1, 2].map(i => (farben || [])[i] || [0, 0, 0])
+    };
+    farbpaletten.push(p);
+    palettenSichern();
+    return p;
+  }
+
+  function paletteLoeschen(id) {
+    farbpaletten = farbpaletten.filter(p => p.id !== id);
+    palettenSichern();
+  }
+
+  /* Die Reihe unter den Farbfeldern: gespeicherte Paletten als
+     dreifarbige Streifen, dahinter der Knopf zum Ablegen. */
+  function palettenReihe(g) {
+    return `<div class="li-paletten">
+        <span class="li-marke">Eigene Paletten</span>
+        <div class="li-palettenreihe">
+          ${farbpaletten.map(p => `
+            <button type="button" class="li-palette" data-palette="${escapeHTML(p.id)}"
+                    data-ip="${escapeHTML(g.ip)}" title="${escapeHTML(p.name)} anwenden">
+              <span class="li-streifen">${p.farben.map(f =>
+                `<i style="background:${alsHex(f)}"></i>`).join("")}</span>
+              <b>${escapeHTML(p.name)}</b>
+              <i class="li-palette-weg" data-weg="${escapeHTML(p.id)}"
+                 role="button" tabindex="0" aria-label="Palette löschen">✕</i>
+            </button>`).join("")}
+          <button type="button" class="li-palette neu" data-merken="${escapeHTML(g.ip)}"
+                  title="Die drei Farben dieses Lichts ablegen">
+            <span class="li-plus" aria-hidden="true">+</span>
+            <b>Merken</b>
+          </button>
+        </div>
+        <form class="li-taufe" data-taufe="${escapeHTML(g.ip)}" hidden>
+          <span class="li-streifen">${(g.farben || []).slice(0, 3).map(f =>
+            `<i style="background:${alsHex(f)}"></i>`).join("")}</span>
+          <input type="text" placeholder="Name der Palette" maxlength="24"
+                 autocomplete="off" aria-label="Name der Palette">
+          <button type="submit">Sichern</button>
+          <button type="button" data-abbrechen>Abbrechen</button>
+        </form>
+      </div>`;
+  }
+
+  /* Ein paar Farben, die man ohne Farbwähler trifft */
+  const LICHT_FARBEN = [
+    { name: "Warmweiß", hex: "#ffb46b" }, { name: "Weiß", hex: "#ffffff" },
+    { name: "Rot", hex: "#ff2d2d" },      { name: "Orange", hex: "#ff8c1a" },
+    { name: "Gelb", hex: "#ffd400" },     { name: "Grün", hex: "#25d366" },
+    { name: "Türkis", hex: "#00d4c8" },   { name: "Blau", hex: "#2d6cff" },
+    { name: "Violett", hex: "#8b5cf6" },  { name: "Pink", hex: "#ff3ea5" }
+  ];
+
+  function lichtEffektName(g) {
+    const l = lichtListen[g.ip];
+    if (l && l.effekte && l.effekte[g.effekt]) return l.effekte[g.effekt];
+    return "Effekt " + g.effekt;
+  }
+
+  function lichtBinden() {
+    const gitter = $("lichtGitter");
+
+    gitter.querySelectorAll("[data-schalt]").forEach(b =>
+      b.addEventListener("click", () => {
+        const ip = b.dataset.schalt;
+        const g = lichtGeraete.find(x => x.ip === ip);
+        if (!g) return;
+        /* Sofort umschalten, ohne auf die Antwort zu warten — das
+           Licht braucht einen Moment, der Knopf soll das nicht. */
+        g.an = !g.an;
+        lichtZeichnen();
+        lichtSenden(ip, { an: g.an }, true);
+      }));
+
+    /* ---------- Name und Gruppe ---------- */
+    gitter.querySelectorAll("[data-stift]").forEach(b =>
+      b.addEventListener("click", () => {
+        const ip = b.dataset.stift;
+        lichtBearbeitet = lichtBearbeitet === ip ? null : ip;
+        lichtZeichnen(true);
+        const feld = gitter.querySelector(`[data-eigen="${ip}"] [data-feld="name"]`);
+        if (feld) { feld.focus(); feld.select(); }
+      }));
+
+    gitter.querySelectorAll("[data-eigen]").forEach(form => {
+      const zu = () => { lichtBearbeitet = null; lichtZeichnen(true); };
+      form.querySelector("[data-eigen-zu]").addEventListener("click", zu);
+      form.addEventListener("keydown", e => { if (e.key === "Escape") zu(); });
+      form.addEventListener("submit", e => {
+        e.preventDefault();
+        const ip = form.dataset.eigen;
+        const g = lichtGeraete.find(x => x.ip === ip);
+        eigenSetzen(ip,
+          form.querySelector('[data-feld="name"]').value,
+          form.querySelector('[data-feld="gruppe"]').value);
+        lichtBearbeitet = null;
+        lichtZeichnen();
+        if (g) showToast("Heißt hier jetzt „" + lichtName(g) + "“"
+                         + (lichtGruppe(g) ? " · " + lichtGruppe(g) : ""), "success");
+      });
+    });
+
+    gitter.querySelectorAll("[data-mehr]").forEach(b =>
+      b.addEventListener("click", () => {
+        const ip = b.dataset.mehr;
+        lichtOffen = lichtOffen === ip ? null : ip;
+        if (lichtOffen && !lichtListen[lichtOffen]) {
+          const g = lichtGeraete.find(x => x.ip === lichtOffen);
+          if (g) lichtListenHolen(g).then(() => lichtZeichnen(true));
+        }
+        lichtZeichnen(true);
+      }));
+
+    gitter.querySelectorAll("[data-hell]").forEach(r => {
+      fuellstand(r);
+      r.addEventListener("input", () => {
+        const ip = r.dataset.hell;
+        const g = lichtGeraete.find(x => x.ip === ip);
+        if (g) { g.helligkeit = Number(r.value); g.an = true; }
+        fuellstand(r);
+        /* Die Prozentzahl daneben zieht sofort mit — sie wartet nicht
+           auf die Antwort des Geräts. */
+        const zahl = r.parentElement.querySelector(".li-prozent");
+        if (zahl) zahl.textContent = Math.round(r.value / 255 * 100) + " %";
+        lichtSenden(ip, { helligkeit: Number(r.value), an: true });
+      });
+    });
+
+    /* Auch Tempo und Stärke bekommen ihren Balken */
+    gitter.querySelectorAll("[data-sx], [data-ix]").forEach(r => {
+      fuellstand(r);
+      r.addEventListener("input", () => fuellstand(r));
+    });
+
+    gitter.querySelectorAll("[data-fx]").forEach(w =>
+      w.addEventListener("change", () => lichtSenden(w.dataset.fx, { effekt: Number(w.value) }, true)));
+    gitter.querySelectorAll("[data-pal]").forEach(w =>
+      w.addEventListener("change", () => lichtSenden(w.dataset.pal, { palette: Number(w.value) }, true)));
+
+    gitter.querySelectorAll("[data-farbe]").forEach(f =>
+      f.addEventListener("input", () => {
+        const ip = f.dataset.farbe;
+        const nr = Number(f.dataset.nr);
+        const g = lichtGeraete.find(x => x.ip === ip);
+        if (!g) return;
+        const farben = [0, 1, 2].map(i => (g.farben || [])[i] || [0, 0, 0]);
+        farben[nr] = ausHex(f.value);
+        g.farben = farben;
+        const punkt = f.nextElementSibling;
+        if (punkt) punkt.style.background = f.value;
+        lichtSenden(ip, { farben });
+      }));
+
+    gitter.querySelectorAll("[data-schnell]").forEach(b =>
+      b.addEventListener("click", () => {
+        const ip = b.dataset.schnell;
+        const g = lichtGeraete.find(x => x.ip === ip);
+        if (!g) return;
+        const farben = [0, 1, 2].map(i => (g.farben || [])[i] || [0, 0, 0]);
+        farben[0] = ausHex(b.dataset.hex);
+        g.farben = farben;
+        /* Eine gewählte Farbe will man sehen — also auf einfarbig
+           und an, sonst passiert scheinbar nichts. */
+        lichtSenden(ip, { farben, effekt: 0, an: true }, true);
+      }));
+
+    gitter.querySelectorAll("[data-sx]").forEach(r =>
+      r.addEventListener("input", () => lichtSenden(r.dataset.sx, { tempo: Number(r.value) })));
+    gitter.querySelectorAll("[data-ix]").forEach(r =>
+      r.addEventListener("input", () => lichtSenden(r.dataset.ix, { staerke: Number(r.value) })));
+
+    /* ---------- Eigene Paletten ---------- */
+    gitter.querySelectorAll("[data-palette]").forEach(b =>
+      b.addEventListener("click", e => {
+        if (e.target.closest("[data-weg]")) return;      // das Kreuz löscht
+        const p = farbpaletten.find(x => x.id === b.dataset.palette);
+        const g = lichtGeraete.find(x => x.ip === b.dataset.ip);
+        if (!p || !g) return;
+        g.farben = p.farben.map(f => f.slice());
+        lichtSenden(g.ip, { farben: g.farben, an: true }, true);
+        showToast("„" + p.name + "“ auf " + g.name, "success");
+      }));
+
+    gitter.querySelectorAll("[data-weg]").forEach(x => {
+      const weg = e => {
+        e.stopPropagation();
+        e.preventDefault();
+        const p = farbpaletten.find(y => y.id === x.dataset.weg);
+        paletteLoeschen(x.dataset.weg);
+        lichtZeichnen();
+        if (p) showToast("Palette „" + p.name + "“ gelöscht");
+      };
+      x.addEventListener("click", weg);
+      x.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") weg(e); });
+    });
+
+    /* Merken klappt ein kleines Feld auf, statt ein Systemfenster zu
+       öffnen — das steht in einer Website-App quer und lässt sich
+       auf dem Telefon kaum bedienen. */
+    gitter.querySelectorAll("[data-merken]").forEach(b =>
+      b.addEventListener("click", () => {
+        const form = gitter.querySelector(`[data-taufe="${b.dataset.merken}"]`);
+        if (!form) return;
+        form.hidden = false;
+        b.hidden = true;
+        const feld = form.querySelector("input");
+        feld.value = "Palette " + (farbpaletten.length + 1);
+        feld.focus();
+        feld.select();
+      }));
+
+    gitter.querySelectorAll("[data-taufe]").forEach(form => {
+      const schliessen = () => {
+        form.hidden = true;
+        const knopf = gitter.querySelector(`[data-merken="${form.dataset.taufe}"]`);
+        if (knopf) knopf.hidden = false;
+      };
+      form.querySelector("[data-abbrechen]").addEventListener("click", schliessen);
+      form.addEventListener("keydown", e => { if (e.key === "Escape") schliessen(); });
+      form.addEventListener("submit", e => {
+        e.preventDefault();
+        const g = lichtGeraete.find(x => x.ip === form.dataset.taufe);
+        if (!g) return;
+        const p = paletteAnlegen(form.querySelector("input").value, g.farben);
+        lichtZeichnen();
+        showToast("Palette „" + p.name + "“ gemerkt", "success");
+      });
+    });
+  }
+
+  /* ---------- Die Knöpfe oben ---------- */
+  const lichtAlle = (wunsch, text) => {
+    fetch("/api/wled/setzen", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ alle: true, ...wunsch })
+    })
+      .then(a => a.json())
+      .then(d => {
+        const schief = (d.ergebnis || []).filter(x => !x.ok).length;
+        showToast(text + (schief ? " · " + schief + " antworteten nicht" : ""),
+                  schief ? "warn" : "success");
+        lichtHolen();
+      })
+      .catch(f => showToast("Ging nicht: " + f.message, "warn"));
+  };
+
+  const lichtAn = $("lichtAlleAn");
+  if (lichtAn) lichtAn.addEventListener("click", () => lichtAlle({ an: true }, "Alle an"));
+  const lichtAus = $("lichtAlleAus");
+  if (lichtAus) lichtAus.addEventListener("click", () => lichtAlle({ an: false }, "Alle aus"));
+
+  const lichtSuch = $("lichtSuchen");
+  if (lichtSuch) lichtSuch.addEventListener("click", () => {
+    const alt = lichtSuch.textContent;
+    lichtSuch.disabled = true;
+    lichtSuch.textContent = "Sucht …";
+    fetch("/api/wled/suchen", { method: "POST" })
+      .then(a => a.json())
+      .then(d => {
+        if (!d.ok) throw new Error(d.fehler || "Suche fehlgeschlagen");
+        lichtGeraete = d.geraete || [];
+        lichtZeichnen();
+        const fehlen = lichtGeraete.filter(g => g.da && !lichtListen[g.ip]);
+        if (fehlen.length) Promise.all(fehlen.map(lichtListenHolen)).then(() => lichtZeichnen());
+        showToast(d.gefunden + (d.gefunden === 1 ? " Gerät gefunden" : " Geräte gefunden"), "success");
+      })
+      .catch(f => showToast(f.message, "warn"))
+      .finally(() => { lichtSuch.disabled = false; lichtSuch.textContent = alt; });
+  });
+
   /* ---------- Projekte ---------- */
   let projekte = store.get("lifeos_projekte", null);
   if (!Array.isArray(projekte)) {
@@ -6530,11 +7485,14 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
   });
 
   /* ==========================================================
-     PLANUNG UND PROJEKTE — Baukasten
+     AUTOMATION UND PROJEKTE — Baukasten
      Zwei Fenster mit demselben Werkzeug, aber verschiedenem Zweck:
 
-       Planung  – ein Ablauf aus Bausteinen, der von selbst losläuft,
-                  sobald sein Zeitpunkt erreicht ist.
+       Automation – ein Ablauf aus Bausteinen, der von selbst
+                  losläuft, sobald sein Zeitpunkt erreicht ist.
+                  Kennung und Speicher heißen weiterhin „planung":
+                  ein Umbenennen dort würde die Daten auf allen
+                  Geräten verlieren.
        Projekte – Schritte zum Abhaken und Termine für den Kalender,
                   von Hand ausgeführt.
 
@@ -8438,7 +9396,7 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
 
     { wort: "/lernen", titel: "Lernen", info: "Kurse und anstehende Klausuren", seite: "lernen" },
 
-    { wort: "/planung", titel: "Planung", info: "Abläufe mit Zeitpunkt", seite: "planung",
+    { wort: "/automation", titel: "Automation", info: "Abläufe mit Zeitpunkt", seite: "planung",
       unter: [
         { wort: "neu", titel: "Ablauf anlegen", info: "Name eingeben, dann Enter", art: "frei",
           tun: name => {
@@ -10431,6 +11389,10 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
     lifeos_klausuren:    w => { klausuren = w;  renderNaechste(); renderTabLists(); kalenderAuffrischen(); lernPanelZeichnen(); },
     lifeos_hausaufgaben: w => { hausaufgaben = w; renderNaechste(); kalenderAuffrischen(); hausPanelZeichnen(); },
     lifeos_lernkarten:   w => { lernkarten = w; kartenZeichnen(); },
+    lifeos_farbpaletten: w => { farbpaletten = Array.isArray(w) ? w : [];
+                                if (aktuelleSeite === "licht") lichtZeichnen(); },
+    lifeos_licht_eigen:  w => { lichtEigen = (w && typeof w === "object") ? w : {};
+                                if (aktuelleSeite === "licht") lichtZeichnen(); },
     lifeos_klausurdauer: w => { klausurDauer = (w && typeof w === "object") ? w : {};
                                 if (aktuelleSeite === "lernen" && lernReiter === "klausuren") {
                                   baueLernKlausuren();
