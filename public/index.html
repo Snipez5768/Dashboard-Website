@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<!-- viewport-fit=cover: als Website-App darf die Seite bis unter die
+     Statusleiste und den Home-Balken reichen; die Ränder holt sich das
+     Layout ueber env(safe-area-inset-*) zurueck. -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>LIFE OS // Dashboard</title>
+
+<!-- ============ ALS APP AUF DEM STARTBILDSCHIRM ============
+     Ohne diese Angaben oeffnet iOS die Seite beim Tippen auf das
+     Symbol wie einen Safari-Tab: mit Adressleiste, ohne eigenen
+     Namen und mit einem Bildschirmfoto als Symbol.
+     ======================================================== -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#070a12">
+
+<!-- iOS liest bis heute seine eigenen Angaben, nicht das Manifest -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Life OS">
+<!-- "black": schwarze Statusleiste mit weisser Schrift, passt zum
+     dunklen Hintergrund und laesst den Inhalt darunter beginnen -->
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<!-- Nur PNG: ein SVG wird hier ignoriert -->
+<link rel="apple-touch-icon" href="symbol-180.png">
+<!-- Sonst macht iOS aus Uhrzeiten und Zahlen anrufbare Links -->
+<meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect x=%2210%22 y=%2210%22 width=%2280%22 height=%2280%22 rx=%2224%22 fill=%22%23070a12%22 stroke=%22%235b8cff%22 stroke-width=%228%22/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+
+<!-- ============ WELCHES GERÄT? ============
+     Safari lädt auf dem iPad Seiten standardmäßig in Desktop-Breite.
+     Nach der Fensterbreite allein bekäme das Dashboard dort also das
+     Rechner-Layout — im Browser sähe es anders aus als in der App vom
+     Startbildschirm, obwohl es dasselbe Gerät ist.
+
+     Deshalb wird hier am Gerät entschieden: "hover: none" und
+     "pointer: coarse" trifft auf Finger zu, nicht auf Maus. Der
+     zweite Test fängt das iPad auch dann, wenn eine Tastatur mit
+     Trackpad angesteckt ist — iPadOS meldet sich dann als "MacIntel",
+     hat aber im Gegensatz zu einem echten Mac Touchpunkte.
+
+     Läuft direkt im Kopf der Seite, damit die Klassen stehen, bevor
+     das erste Bild gezeichnet wird. Sonst blitzte kurz das falsche
+     Layout auf.
+     ======================================== -->
+<script>
+  (function () {
+    var wurzel = document.documentElement;
+    var finger = false;
+    try {
+      finger = matchMedia("(hover: none) and (pointer: coarse)").matches
+            || (navigator.maxTouchPoints > 1 && /Mac|iPad|iPhone|iPod/.test(navigator.platform || ""));
+    } catch (e) { /* dann eben nach Breite */ }
+
+    function einordnen() {
+      var b = window.innerWidth, h = window.innerHeight;
+      /* Tablet-Aufteilung: auf Fingergeräten unabhängig davon, welche
+         Breite der Browser meldet — sonst nur in schmalen Fenstern. */
+      var tablet = h >= 620 && b >= 700 && (finger || b <= 1180);
+      /* Enge Widget-Innenleben: knappere Kopfzeilen, kleinere Schalter */
+      var eng = finger || b <= 1180 || h <= 619;
+
+      wurzel.classList.toggle("finger", finger);
+      wurzel.classList.toggle("tablet", tablet);
+      wurzel.classList.toggle("eng", eng);
+    }
+
+    einordnen();
+    window.addEventListener("resize", einordnen);
+    window.addEventListener("orientationchange", einordnen);
+  })();
+</script>
+</head>
+<body>
+
+<div class="bg-wash" aria-hidden="true"></div>
+
+<!-- ============ EINRICHTUNG FÜR DEN OFFLINE-BETRIEB ============
+     Erscheint nur, wenn die Seite über eine Netzadresse ohne
+     Verschlüsselung geöffnet wurde. Dort stellt der Browser keinen
+     Service Worker bereit — die App kann dann nicht offline laufen,
+     egal wie sie gebaut ist. Die Schritte stehen deshalb direkt hier,
+     mit anklickbaren Adressen. -->
+<div class="einricht" id="einricht" hidden>
+  <div class="einricht-kopf">
+    <span class="einricht-marke">Offline noch nicht möglich</span>
+    <button type="button" class="einricht-zu" id="einrichtZu" aria-label="Hinweis schließen">✕</button>
+  </div>
+  <p class="einricht-text">
+    Diese Seite läuft über <b id="einrichtJetzt">http</b>. Dabei gibt Safari ihr keinen
+    Zwischenspeicher — sobald der Rechner aus ist, bleibt die App leer.
+    Einmal einrichten, dann läuft sie auch ohne Rechner:
+  </p>
+  <ol class="einricht-schritte">
+    <li><a id="einrichtZert" href="#">Zertifikat laden</a> und im Profil bestätigen</li>
+    <li>Einstellungen → Allgemein → Info → <b>Zertifikatsvertrauens&shy;einstellungen</b> → „Life OS Lokal" einschalten</li>
+    <li><a id="einrichtHttps" href="#">Sichere Adresse öffnen</a></li>
+    <li>Dort <b>Zum Home-Bildschirm</b> hinzufügen — das alte Symbol kann weg</li>
+  </ol>
+</div>
+
+<div class="app-shell">
+
+  <!-- ============ SIDEBAR ============ -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <a class="brand" href="#hero">
+        <span class="brand-mark"></span>
+        <span class="brand-name">Life OS</span>
+      </a>
+      <button class="collapse-btn" id="sidebarToggle" title="Sidebar ein-/ausklappen" aria-label="Sidebar ein-/ausklappen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 5.5 8.5 12l6 6.5"/></svg>
+      </button>
+    </div>
+
+    <div class="sidebar-profile">
+      <div class="avatar" id="avatarCircle">LU</div>
+      <div class="profile-text">
+        <div class="profile-name" id="avatarName">Luca</div>
+        <div class="profile-role">Personal OS</div>
+      </div>
+    </div>
+
+    <div class="nav-scroll">
+      <div class="nav-group">
+        <ul class="nav-list">
+          <li><a href="#/dashboard" class="nav-link active" data-seite="dashboard">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.8 9.6V20h4.4v-5.6h3.6V20h4.4V9.6"/></svg>
+            <span>Dashboard</span>
+          </a></li>
+          <li><a href="#/kalender" class="nav-link" data-seite="kalender">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3.2v3.6M16 3.2v3.6"/></svg>
+            <span>Kalender<span class="nav-lang"> &amp; Schule</span></span>
+          </a></li>
+          <li><a href="#/habits" class="nav-link" data-seite="habits">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 6.5 10 17l-5-4.7"/><path d="M3.5 19.5h17"/></svg>
+            <span>Habits<span class="nav-lang"> &amp; Streaks</span></span>
+          </a></li>
+          <li><a href="#/kalorien" class="nav-link" data-seite="kalorien">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2c1.1 3.2-2.1 4.2-2.1 7.6a4.1 4.1 0 0 0 8.2 0c0-1.3-.6-2.4-1.1-2.5.3 2.4-1 3.5-2.2 3.5-1.6 0-2.2-1.5-1.1-3.5.9-1.7.5-3.7-1.7-5.1Z"/><path d="M8.3 14.4a3.7 3.7 0 0 0 7.4 0"/></svg>
+            <span>Kalorien</span>
+          </a></li>
+          <li><a href="#/bildschirmzeit" class="nav-link" data-seite="bildschirmzeit">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.8" y="4" width="18.4" height="12.5" rx="2.2"/><path d="M9 20.5h6M12 16.5v4"/></svg>
+            <span>Bildschirmzeit</span>
+          </a></li>
+          <li><a href="#/lernen" class="nav-link" data-seite="lernen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7.3C10.4 5.9 8.4 5.2 5.6 5.2c-.9 0-1.6.7-1.6 1.6v9.7c0 .9.7 1.6 1.6 1.6 2.8 0 4.8.7 6.4 2.1 1.6-1.4 3.6-2.1 6.4-2.1.9 0 1.6-.7 1.6-1.6V6.8c0-.9-.7-1.6-1.6-1.6-2.8 0-4.8.7-6.4 2.1Z"/><path d="M12 7.3v13"/></svg>
+            <span>Lernen</span>
+          </a></li>
+          <li><a href="#/planung" class="nav-link" data-seite="planung">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.6"/><path d="M12 7.4V12l3.1 1.9"/></svg>
+            <span>Planung</span>
+          </a></li>
+          <li><a href="#/projekte" class="nav-link" data-seite="projekte">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.2c0-1.2 1-2.2 2.2-2.2h3.1l2 2.4h7.5c1.2 0 2.2 1 2.2 2.2v7.6c0 1.2-1 2.2-2.2 2.2H5.7a2.2 2.2 0 0 1-2.2-2.2Z"/></svg>
+            <span>Projekte</span>
+          </a></li>
+          <li><a href="#/analyse" class="nav-link" data-seite="analyse">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5V12M9.3 19.5V6.5M14.7 19.5v-8M20 19.5V9"/></svg>
+            <span>Analyse</span>
+          </a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="sidebar-foot">
+      <!-- Notizen liegen bewusst nicht auf einer eigenen Seite: was
+           man festhalten will, will man sofort festhalten, ohne die
+           Seite zu wechseln. -->
+      <button class="nav-link" id="notizBtn" type="button" title="Notizen (Taste n)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h9L20 9.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5Z"/><path d="M14 4v6h6"/><path d="M8.5 13.5h7M8.5 16.5h4"/></svg>
+        <span>Notizen</span>
+      </button>
+      <button class="nav-link" id="settingsBtn" type="button" title="Einstellungen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3.3"/><path d="M19.2 13.4a1.7 1.7 0 0 0 .34 1.86l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.04 1.56v.17a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.1-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.04H2.6a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.25 8.9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.08A1.7 1.7 0 0 0 9.72 3v-.17a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1.04 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.08a1.7 1.7 0 0 0 1.56 1.04h.17a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.56 1.04Z"/></svg>
+        <span>Einstellungen</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+    <div class="layout">
+
+      <!-- HERO -->
+      <section class="hero" id="hero">
+        <div class="hero-row">
+          <h1 class="hero-title">
+            <span class="hero-greet" id="greetingWord">Hallo</span>
+            <span class="hero-name" id="greetingName">Luca</span>
+          </h1>
+          <div class="hero-chip" id="heroChip">
+            <span class="chip-pulse"></span>
+            <span id="heroClock">--:--</span>
+            <span class="chip-sep">·</span>
+            <span id="heroDate">—</span>
+          </div>
+        </div>
+
+        <form id="captureForm" class="search" autocomplete="off">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.4"/><path d="m16 16 4 4"/></svg>
+          <input id="captureInput" class="search-input" type="text"
+            placeholder="Suchen — oder Termin / Klausur eintragen …">
+          <button type="submit" class="search-btn">Suchen</button>
+        </form>
+
+        <!-- Vorschlaege fuer Slash-Befehle, erscheinen beim Tippen von "/" -->
+        <div class="slash-box" id="slashBox" role="listbox" aria-label="Befehle"></div>
+      </section>
+
+      <!-- ============ SEITE: DASHBOARD ============ -->
+      <section class="seite aktiv" id="seite-dashboard">
+      <!-- WIDGET-RASTER: Anordnung und Größe stehen in lifeos_layout -->
+      <div class="widget-grid" id="widgetGrid">
+
+        <!-- MULTI-WIDGET: Tab-Leiste ersetzt die Überschrift -->
+        <section class="card" id="card-vorschlag">
+          <div class="card-head">
+            <div class="tab-bar" id="cardTabs" role="tablist">
+              <button type="button" class="tab" data-tab="habits" role="tab">Habits</button>
+              <button type="button" class="tab" data-tab="kalender" role="tab">Kalender</button>
+              <button type="button" class="tab" data-tab="schule" role="tab">Schule</button>
+              <button type="button" class="tab active" data-tab="vorschlag" role="tab">Vorschlag</button>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="tab-panel" data-panel="habits">
+              <div class="habit-list" id="habitListMain"></div>
+            </div>
+
+            <div class="tab-panel" data-panel="kalender">
+              <ul class="entry-list" id="kalenderList"></ul>
+            </div>
+
+            <div class="tab-panel" data-panel="schule">
+              <ul class="entry-list" id="schuleList"></ul>
+            </div>
+
+            <div class="tab-panel active" data-panel="vorschlag">
+              <span class="vorschlag-icon" id="vorschlagIcon"></span>
+              <div class="vorschlag-text" id="vorschlagText">—</div>
+              <div class="vorschlag-sub" id="vorschlagSub"></div>
+              <div class="vorschlag-foot">
+                <div class="vorschlag-dots" id="vorschlagDots"></div>
+                <button type="button" class="icon-btn" id="vorschlagNext" title="Nächster Vorschlag">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-13.7-5.7L3.5 8"/><path d="M3.5 4v4h4"/><path d="M4 13a8 8 0 0 0 13.7 5.7l2.8-2.7"/><path d="M20.5 20v-4h-4"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- KALORIEN -->
+        <section class="card" id="card-kalorien">
+          <div class="card-head">
+            <span class="card-title">Kalorien</span>
+            <span class="card-badge">Heute</span>
+          </div>
+          <div class="card-body cal-body" id="calWidget">
+            <div class="cal-ring-area">
+              <div class="cal-gauge-wrap">
+                <svg class="cal-gauge" viewBox="0 0 200 200" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="calTickGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                      <stop offset="0%" stop-color="#2fd39a"/>
+                      <stop offset="50%" stop-color="#4ee0a8"/>
+                      <stop offset="100%" stop-color="#5b8cff"/>
+                    </linearGradient>
+                  </defs>
+                  <g id="calGaugeTicks"></g>
+                </svg>
+                <div class="cal-center">
+                  <div class="cal-value"><span id="calConsumed">0</span></div>
+                  <div class="cal-sub"><span class="cal-slash">/</span><span id="calGoalDisplay">0</span> kcal</div>
+                </div>
+              </div>
+              <div class="cal-empty">Noch nichts getrackt</div>
+            </div>
+            <button type="button" class="ghost-btn" id="calDetailsBtn">Details anzeigen</button>
+          </div>
+        </section>
+
+        <!-- BILDSCHIRMZEIT -->
+        <section class="card card-wide" id="card-screentime">
+          <div class="card-head">
+            <span class="card-title">Bildschirmzeit</span>
+            <div class="legend" id="stLegend">
+              <button type="button" class="legend-item" data-series="phone">
+                <span class="legend-dot phone"></span>
+                <span class="legend-text">Handy</span>
+                <b id="stPhoneVal">0h 00</b>
+              </button>
+              <button type="button" class="legend-item" data-series="pc">
+                <span class="legend-dot pc"></span>
+                <span class="legend-text">PC</span>
+                <b id="stPcVal">0h 00</b>
+              </button>
+            </div>
+            <div class="seg-toggle" id="screenTimeToggle">
+              <button type="button" class="stbtn active" data-range="24h">24H</button>
+              <button type="button" class="stbtn" data-range="week">Woche</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="st-chart" id="stChart">
+              <svg id="stSvg" preserveAspectRatio="none" aria-hidden="true"></svg>
+              <div class="st-axis" id="stAxis"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- WETTER -->
+        <section class="card" id="card-wetter">
+          <div class="card-head">
+            <span class="card-title">Wetter</span>
+            <span class="card-badge" id="weatherCityLabel">—</span>
+            <button type="button" class="icon-btn" id="weatherViewToggle" title="7-Tage-Vorhersage anzeigen">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/><path d="M8.5 4.5v15"/></svg>
+            </button>
+          </div>
+          <div class="card-body weather" id="weatherBody">
+            <div class="muted-line">Lade Wetterdaten …</div>
+          </div>
+        </section>
+
+        <!-- PLANUNG: Termine und Klausuren untereinander -->
+        <!-- Zeigt Termine und Klausuren zusammen, nach Datum sortiert.
+             Ist nichts eingetragen, wird der Inhalt unscharf und ein
+             Hinweis eingeblendet. -->
+        <section class="card" id="card-naechste">
+            <div class="card-head">
+              <span class="card-title">Nächste Termine</span>
+              <span class="card-badge" id="naechsteCount">0</span>
+            </div>
+          <div class="card-body naechste" id="naechsteWidget">
+            <ul class="entry-list" id="naechsteList"></ul>
+            <div class="naechste-empty">Nichts steht an</div>
+          </div>
+        </section>
+
+        <!-- STREAKS (zieht später mit auf die Habits-Seite um) -->
+        <section class="card" id="card-streaks">
+          <div class="card-head">
+            <span class="card-title">Streaks</span>
+            <span class="card-badge" id="streakBest">Best 0</span>
+          </div>
+          <div class="card-body streaks">
+            <div class="streak-list" id="streakList"></div>
+          </div>
+        </section>
+
+        <!-- HABITS: Punkt-Matrix auf dem breiten Platz -->
+        <section class="card" id="card-habits">
+          <div class="card-head">
+            <span class="card-title">Habits</span>
+            <div class="seg-toggle" id="habitAnsicht">
+              <button type="button" class="stbtn active" data-hansicht="tage">14T</button>
+              <button type="button" class="stbtn" data-hansicht="jahr">Jahr</button>
+            </div>
+            <span class="card-badge" id="habitsCount">0/0</span>
+          </div>
+          <div class="card-body habits">
+            <div class="habit-list" id="habitList"></div>
+          </div>
+        </section>
+      </div>
+
+      <!-- SCHNELLZUGRIFF (immer ganz unten) -->
+      <section class="card card-quick" id="card-quick" aria-label="Schnellzugriff">
+        <div class="quick-grid" id="quickGrid"></div>
+      </section>
+      </section><!-- /seite-dashboard -->
+
+      <!-- ============ SEITE: KALENDER & SCHULE ============ -->
+      <section class="seite" id="seite-kalender">
+        <div class="seiten-kopf">
+          <h2 class="seiten-titel">Kalender &amp; Schule</h2>
+          <span class="seiten-sub" id="kalenderSub">—</span>
+        </div>
+
+        <!-- WICHTIG: was als Nächstes ansteht und Vorbereitung braucht.
+             Steht bewusst über dem Kalender — beim Öffnen der Seite
+             sieht man zuerst, worum man sich kümmern sollte. -->
+        <div class="block wichtig" id="pgWichtig">
+          <div class="block-kopf">
+            <h3>Wichtig</h3>
+            <span class="block-zahl" id="pgWichtigZahl">0</span>
+          </div>
+          <div class="wi-inhalt" id="pgWichtigInhalt"></div>
+        </div>
+
+        <!-- Monatsansicht wie in gängigen Kalendern -->
+        <div class="block">
+          <div class="monat-kopf">
+            <button type="button" class="monat-pfeil" data-monat="-1" aria-label="Vorheriger Monat">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M14.5 5.5 8.5 12l6 6.5"/></svg>
+            </button>
+            <h3 class="monat-titel" id="pgMonatTitel">&#8212;</h3>
+            <button type="button" class="monat-pfeil" data-monat="1" aria-label="N&#228;chster Monat">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9.5 5.5 15.5 12l-6 6.5"/></svg>
+            </button>
+            <button type="button" class="monat-heute" data-monat="heute">Heute</button>
+            <span class="block-zahl" id="pgMonatZahl">0</span>
+          </div>
+          <div class="monat-wochentage">
+            <span data-kurz="Mo">Montag</span><span data-kurz="Di">Dienstag</span><span data-kurz="Mi">Mittwoch</span><span data-kurz="Do">Donnerstag</span>
+            <span data-kurz="Fr">Freitag</span><span data-kurz="Sa">Samstag</span><span data-kurz="So">Sonntag</span>
+          </div>
+          <div class="monat-gitter" id="pgMonatGitter"></div>
+        </div>
+
+        <!-- Die Liste startet zugeklappt: der Monat darüber ist der
+             Überblick, die Aufzählung braucht man nur auf Nachfrage. -->
+        <div class="block" id="pgTermineBlock">
+          <button type="button" class="block-kopf klappbar" id="pgTermineKopf"
+                  aria-expanded="false" aria-controls="pgTermineListe">
+            <span class="block-pfeil" aria-hidden="true"></span>
+            <h3 id="pgTermineTitel">Kommende Termine</h3>
+            <span class="block-zahl" id="pgTermineZahl">0</span>
+          </button>
+          <div class="block-unterschlupf" id="pgTermineHuelle">
+            <ul class="voll-liste" id="pgTermineListe"></ul>
+          </div>
+        </div>
+        <div class="block">
+          <div class="block-kopf">
+            <h3>Stundenplan</h3>
+            <span class="block-unter" id="pgPlanJetzt">&#8212;</span>
+            <span class="block-zahl" id="pgPlanZahl">0</span>
+          </div>
+          <div class="plan-rolle">
+            <div class="plan" id="pgPlan"></div>
+          </div>
+          <div class="plan-legende" id="pgPlanLegende"></div>
+        </div>
+        <div class="block">
+          <div class="block-kopf"><h3>Schulisches</h3><span class="block-zahl" id="pgSchuleZahl">0</span></div>
+          <div class="block-unter">Klausurtermine</div>
+          <ul class="voll-liste" id="pgKlausurenListe"></ul>
+        </div>
+        <div class="block">
+          <div class="block-kopf"><h3>Hausaufgaben</h3><span class="block-zahl" id="pgHausZahl">0</span></div>
+          <div class="block-unter">Nach F&#228;lligkeit</div>
+          <ul class="voll-liste" id="pgHausListe"></ul>
+        </div>
+      </section>
+
+      <!-- ============ SEITE: HABITS & STREAKS ============ -->
+      <section class="seite" id="seite-habits">
+        <div class="seiten-kopf">
+          <h2 class="seiten-titel">Habits &amp; Streaks</h2>
+          <span class="seiten-sub" id="habitsSub">—</span>
+        </div>
+        <div class="block">
+          <div class="block-kopf"><h3>Habits</h3><span class="block-zahl" id="pgHabitsZahl">0/0</span></div>
+          <div class="habit-kalender" id="pgHabitMatrix"></div>
+        </div>
+        <div class="block">
+          <div class="block-kopf"><h3>Streaks</h3><span class="block-zahl" id="pgStreakZahl">0</span></div>
+          <div class="streak-tafel" id="pgStreakTafel"></div>
+        </div>
+      </section>
+
+      <!-- ============ SEITE: KALORIEN ============ -->
+      <section class="seite" id="seite-kalorien">
+        <div class="seiten-kopf">
+          <h2 class="seiten-titel">Kalorien</h2>
+          <span class="seiten-sub" id="kalorienSub">&#8212;</span>
+        </div>
+        <div class="block">
+          <div class="kal-oben">
+            <div class="kal-ring-gross">
+              <svg class="cal-gauge" viewBox="0 0 200 200" aria-hidden="true">
+                <defs>
+                  <linearGradient id="pgCalGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#2fd39a"/>
+                    <stop offset="50%" stop-color="#4ee0a8"/>
+                    <stop offset="100%" stop-color="#5b8cff"/>
+                  </linearGradient>
+                </defs>
+                <g id="pgCalTicks"></g>
+              </svg>
+              <div class="cal-center">
+                <div class="cal-value"><span id="pgCalWert">0</span></div>
+                <div class="cal-sub"><span class="cal-slash">/</span><span id="pgCalZiel">0</span> kcal</div>
+              </div>
+            </div>
+            <div class="kal-rechts">
+              <div class="kennzahl-reihe" id="pgKalKennzahlen"></div>
+              <form class="zeilen-form" id="kalForm" autocomplete="off">
+                <input class="zeilen-input" id="kalInput" type="number" min="0" step="10" placeholder="Kalorien eintragen &#8230;">
+                <button class="zeilen-btn" type="submit">Hinzuf&#252;gen</button>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="block">
+          <div class="block-kopf"><h3>Die letzten 14 Tage</h3></div>
+          <ul class="voll-liste" id="pgKalTage"></ul>
+        </div>
+      </section>
+
+      <!-- ============ SEITE: BILDSCHIRMZEIT ============ -->
+      <section class="seite" id="seite-bildschirmzeit">
+        <div class="seiten-kopf">
+          <h2 class="seiten-titel">Bildschirmzeit</h2>
+          <span class="seiten-sub" id="stSub">&#8212;</span>
+          <div class="ansicht-schalter" id="stAnsicht">
+            <button type="button" data-ansicht="tag">Tag</button>
+            <button type="button" data-ansicht="woche">Woche</button>
+            <button type="button" data-ansicht="monat">Monat</button>
+            <button type="button" data-ansicht="jahr">Jahr</button>
+          </div>
+        </div>
+        <div class="block">
+          <div class="kennzahl-reihe" id="pgStKennzahlen"></div>
+          <div class="gross-diagramm" id="pgStChart">
+            <svg id="pgStSvg" preserveAspectRatio="none" aria-hidden="true"></svg>
+            <div class="st-axis" id="pgStAxis"></div>
+          </div>
+          <div class="legend gross-legende" id="pgStLegende"></div>
+        </div>
+        <div class="block">
+          <div class="block-kopf">
+            <h3>Genutzte Programme</h3>
+            <span class="block-zahl" id="pgAppZahl">&#8212;</span>
+          </div>
+          <div class="block-unter" id="pgAppStatus">&#8212;</div>
+          <ul class="app-liste" id="pgAppListe"></ul>
+        </div>
+        <div class="block">
+          <div class="block-kopf">
+            <h3>Inaktive Zeit</h3>
+            <span class="block-zahl" id="pgInaktivZahl">&#8212;</span>
+          </div>
+          <div class="block-unter">Zeit ohne Eingabe &#8212; z&#228;hlt nicht als Bildschirmzeit</div>
+          <div class="iv-verhaeltnis" id="pgInaktivBalken"></div>
+          <ul class="app-liste" id="pgInaktivListe"></ul>
+        </div>
+
+        <!-- Wof&#252;r die Zeit draufgeht: Programme und Seiten in Gruppen -->
+        <div class="block">
+          <div class="block-kopf">
+            <h3>Wof&#252;r die Zeit draufgeht</h3>
+            <span class="block-zahl" id="pgKatZahl">&#8212;</span>
+          </div>
+          <div class="block-unter">Aus Programmen und besuchten Seiten zusammengerechnet</div>
+          <div class="kat-raum">
+            <div class="kat-ring">
+              <svg id="pgKatSvg" viewBox="0 0 200 200" aria-hidden="true"></svg>
+              <div class="kat-mitte">
+                <b id="pgKatGesamt">&#8212;</b>
+                <span>gesamt</span>
+              </div>
+            </div>
+            <ul class="kat-liste" id="pgKatListe"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SEITE: PROJEKTE ============ -->
+      <!-- ============ SEITE: LERNEN ============ -->
+      <section class="seite" id="seite-lernen">
+        <div class="seiten-kopf">
+          <h2 class="seiten-titel">Lernen</h2>
+          <span class="seiten-sub" id="lernenSub">&#8212;</span>
+        </div>
+        <!-- Die Reiterleiste trägt rechts das Plus: es legt an, was
+             im gerade offenen Reiter fehlt — deshalb steht es auf
+             derselben Höhe und nicht irgendwo darunter. -->
+        <div class="lern-leiste">
+          <div class="lern-reiter" id="lernReiter" role="tablist">
+            <button type="button" class="lr-tab active" data-lreiter="klausuren" role="tab">Klausuren</button>
+            <button type="button" class="lr-tab" data-lreiter="hausaufgaben" role="tab">Hausaufgaben</button>
+            <button type="button" class="lr-tab" data-lreiter="themen" role="tab">Sonstiges</button>
+          </div>
+          <button type="button" class="lr-plus" id="lernPlus" title="Neu anlegen" aria-label="Neu anlegen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                 stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+        <!-- Unterfenster: eine einzelne Klausur im Detail -->
+        <div class="lern-panel" id="pgLernPanel"></div>
+        <div class="lern-gruppen" id="pgLernGruppen"></div>
+        <!-- Unterfenster: eine einzelne Hausaufgabe im Detail -->
+        <div class="lern-panel aus" id="pgHausPanel"></div>
+        <div class="lern-gruppen aus" id="pgHausGruppen"></div>
+        <!-- Eigene Themen: alles, was weder Klausur noch Hausaufgabe ist -->
+        <div class="lern-panel aus" id="pgThemaPanel"></div>
+        <div class="lern-gruppen aus" id="pgThemenGruppen"></div>
+      </section>
+
+      <!-- ============ SEITE: PLANUNG ============ -->
+      <section class="seite" id="seite-planung">
+        <div class="seiten-kopf">
+          <h2 class="seiten-titel">Planung</h2>
+          <span class="seiten-sub" id="planungSub">&#8212;</span>
+        </div>
+        <div class="pj-raum">
+          <div class="block pj-spalte">
+            <div class="block-kopf">
+              <h3>Planung</h3>
+              <span class="block-zahl" id="pgPlanungZahl">0</span>
+            </div>
+            <div class="block-unter">L&#228;uft von selbst, sobald der Zeitpunkt da ist</div>
+            <form class="zeilen-form" id="planungForm" autocomplete="off">
+              <input class="zeilen-input" id="planungInput" type="text" placeholder="Neuer Ablauf &#8230;">
+              <button class="zeilen-btn" type="submit">Anlegen</button>
+            </form>
+            <ul class="voll-liste" id="pgPlanungListe"></ul>
+          </div>
+          <div class="block pj-bau" id="pgPlanungBau"></div>
+        </div>
+
+      </section>
+
+      <!-- ============ SEITE: PROJEKTE ============ -->
+      <section class="seite" id="seite-projekte">
+        <div class="seiten-kopf">
+          <h2 class="seiten-titel">Projekte</h2>
+          <span class="seiten-sub" id="projekteSub">&#8212;</span>
+        </div>
+        <div class="pj-raum">
+          <div class="block pj-spalte">
+            <div class="block-kopf">
+              <h3>Projekte</h3>
+              <span class="block-zahl" id="pgProjektZahl">0</span>
+            </div>
+            <div class="block-unter">Schritte und Termine, von Hand ausgef&#252;hrt</div>
+            <form class="zeilen-form" id="projektForm" autocomplete="off">
+              <input class="zeilen-input" id="projektInput" type="text" placeholder="Neues Projekt &#8230;">
+              <button class="zeilen-btn" type="submit">Anlegen</button>
+            </form>
+            <ul class="voll-liste" id="pgProjektListe"></ul>
+          </div>
+          <div class="block pj-bau" id="pgProjektBau"></div>
+        </div>
+
+      </section>
+
+      <!-- ============ SEITE: ANALYSE ============ -->
+      <section class="seite" id="seite-analyse">
+        <div class="seiten-kopf">
+          <h2 class="seiten-titel">Analyse</h2>
+          <span class="seiten-sub" id="analyseSub">—</span>
+
+          <!-- Zeitraum gilt für die ganze Seite -->
+          <div class="seg-toggle an-zeitraum" id="anZeitraum">
+            <button type="button" class="stbtn" data-anz="7">7 T</button>
+            <button type="button" class="stbtn active" data-anz="30">30 T</button>
+            <button type="button" class="stbtn" data-anz="90">90 T</button>
+          </div>
+        </div>
+
+        <!-- Reiter: jeder Bereich bekommt die volle Seite, statt dass
+             man an fünf Themen vorbeiscrollt -->
+        <div class="seg-toggle an-reiter" id="anReiter">
+          <button type="button" class="stbtn active" data-areiter="ueberblick">Überblick</button>
+          <button type="button" class="stbtn" data-areiter="bildschirm">Bildschirmzeit</button>
+          <button type="button" class="stbtn" data-areiter="habits">Habits</button>
+          <button type="button" class="stbtn" data-areiter="schule">Schule</button>
+          <button type="button" class="stbtn" data-areiter="kalorien">Kalorien</button>
+          <button type="button" class="stbtn" data-areiter="nutzung">Nutzung</button>
+        </div>
+
+        <div class="an-tafel" id="anUeberblick"></div>
+        <div class="an-tafel aus" id="anBildschirm"></div>
+        <div class="an-tafel aus" id="anHabits"></div>
+        <div class="an-tafel aus" id="anSchule"></div>
+        <div class="an-tafel aus" id="anKalorien"></div>
+        <div class="an-tafel aus" id="anNutzung"></div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- ============ NOTIZEN ============
+     Schiebt von rechts herein und legt sich über die Seite, statt sie
+     umzubauen. So bleibt der Zusammenhang stehen, in dem einem etwas
+     eingefallen ist. -->
+<div class="notiz-schicht" id="notizSchicht" hidden>
+  <aside class="notiz-fenster" role="dialog" aria-modal="false" aria-label="Notizen">
+    <div class="nz-kopf">
+      <h3>Notizen</h3>
+      <span class="nz-zahl" id="nzZahl">0</span>
+      <button type="button" class="nz-neu" id="nzNeu">Neue Notiz</button>
+      <button type="button" class="nz-zu" id="nzZu" aria-label="Schließen">&#10005;</button>
+    </div>
+    <div class="nz-suche">
+      <input type="search" id="nzSuche" placeholder="In Notizen suchen …" autocomplete="off">
+    </div>
+    <div class="nz-liste" id="nzListe"></div>
+  </aside>
+</div>
+
+<div class="toast-stack" id="toastStack" aria-live="polite"></div>
+<div class="chart-tooltip" id="chartTooltip" role="tooltip"></div>
+<div class="kat-tipp" id="katTipp" role="tooltip" aria-hidden="true"></div>
+
+<!-- ============ SETTINGS MODAL ============ -->
+<!-- Eingabehilfe: oeffnet sich als eigenes Fenster ueber der Seite.
+     Die Auswahlfenster liegen daneben, nicht darin - so koennen sie
+     sich ueber die Karte legen, ohne von ihr abgeschnitten zu werden. -->
+<!-- Rückfrage vor dem Löschen -->
+<div class="frage-schicht" id="frageSchicht">
+  <div class="frage-fenster" id="frageFenster" role="dialog" aria-modal="true" aria-labelledby="frageTitel">
+    <h3 class="frage-titel" id="frageTitel">&#8212;</h3>
+    <p class="frage-text" id="frageText">&#8212;</p>
+    <div class="frage-knoepfe">
+      <button type="button" class="pj-knopf" id="frageNein">Abbrechen</button>
+      <button type="button" class="pj-knopf gefahr" id="frageJa">L&#246;schen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Auswahl der Bausteine: eigene Schicht, nicht im Komponisten -
+     der steht auf display:none, solange kein Entwurf offen ist. -->
+<div class="pj-schicht" id="pjSchicht">
+  <div class="pj-waehler" id="pjWaehler" role="dialog" aria-label="Baustein w&#228;hlen"></div>
+</div>
+
+<div class="modal-overlay kp-schicht" id="kpSchicht">
+  <div class="modal komponist" id="komponist" role="dialog" aria-modal="true" aria-labelledby="kpTitel">
+    <div class="kp-kopf">
+      <span class="kp-art" id="kpArt">Termin</span>
+      <button type="button" class="kp-weg" id="kpAbbrechen" aria-label="Abbrechen">&#10005;</button>
+    </div>
+    <h3 class="kp-titel" id="kpTitel">&#8212;</h3>
+    <div class="kp-felder">
+  <button type="button" class="kp-knopf nur-schule" data-feld="fach" id="kpFach">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.2A1.7 1.7 0 0 1 5.7 3.5H19v14.2H5.7A1.7 1.7 0 0 0 4 19.4Z"/><path d="M4 19.4a1.7 1.7 0 0 0 1.7 1.7H19"/></svg>
+    <span>Fach</span>
+  </button>
+  <button type="button" class="kp-knopf nur-schule nur-stunde" data-feld="stunde" id="kpStunde">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5"/><path d="M3.5 9h17M9 9v11.5"/></svg>
+    <span>Stunde</span>
+  </button>
+  <button type="button" class="kp-knopf" data-feld="datum" id="kpDatum">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3.2v3.6M16 3.2v3.6"/></svg>
+    <span>Datum</span>
+  </button>
+  <button type="button" class="kp-knopf nur-ha" data-feld="wichtig" id="kpWichtig">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 21V4.2M5.5 4.6h11l-2 3.6 2 3.6h-11"/></svg>
+    <span>Wichtigkeit</span>
+  </button>
+  <button type="button" class="kp-knopf nur-termin" data-feld="ganztags" id="kpGanztags">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 12.5 9.5 18 20 6.5"/></svg>
+    <span>Ganzt&#228;gig</span>
+  </button>
+  <button type="button" class="kp-knopf nur-zeit" data-feld="start" id="kpStart">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.2V12l3.2 2"/></svg>
+    <span>Start</span>
+  </button>
+  <button type="button" class="kp-knopf nur-zeit" data-feld="ende" id="kpEnde">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.2V12l3.2 2"/></svg>
+    <span>Ende</span>
+  </button>
+    </div>
+    <span class="kp-hinweis" id="kpHinweis"></span>
+    <div class="kp-fuss">
+      <button type="button" class="kp-anlegen" id="kpAnlegen">Anlegen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Datum, Uhrzeit und Listen: eigene Fenster auf Seitenebene. Im
+     Komponisten liegend waeren sie ueberall sonst unsichtbar, weil
+     dessen Schicht dann auf display:none steht. -->
+<div class="pop pop-datum" id="popDatum" role="dialog" aria-label="Datum waehlen"></div>
+<div class="pop pop-zeit" id="popZeit" role="dialog" aria-label="Uhrzeit waehlen"></div>
+<div class="pop pop-liste" id="popListe" role="dialog" aria-label="Auswahl"></div>
+
+<!-- Lernkarten: eigenes Fenster zum Bearbeiten und Abfragen -->
+<div class="modal-overlay karten-schicht" id="kartenSchicht">
+  <div class="modal karten-fenster" id="kartenFenster" role="dialog" aria-modal="true"></div>
+</div>
+
+<!-- Vorschau einer angehaengten Datei -->
+<div class="modal-overlay datei-schicht" id="dateiSchicht">
+  <div class="datei-rahmen" id="dateiRahmen" role="dialog" aria-modal="true"></div>
+</div>
+
+<input type="file" id="dateiWahl" multiple hidden
+  accept="image/*,application/pdf,.goodnotes,.note,.pdf">
+
+<!-- Fach-Uebersicht: oeffnet sich aus dem Stundenplan -->
+<div class="modal-overlay fach-schicht" id="fachSchicht">
+  <div class="modal fach-fenster" id="fachFenster" role="dialog" aria-modal="true" aria-labelledby="ffTitel"></div>
+</div>
+
+<div class="modal-overlay" id="settingsOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="card-title">Einstellungen</span>
+      <button class="icon-btn" id="settingsClose" aria-label="Schließen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m6.5 6.5 11 11M17.5 6.5l-11 11"/></svg>
+      </button>
+    </div>
+
+    <div class="modal-section">
+      <label class="modal-label">Dein Name</label>
+      <input type="text" id="settingName" placeholder="z.B. Luca">
+    </div>
+
+    <div class="modal-section">
+      <label class="modal-label">Wetter-Ort</label>
+      <div class="row">
+        <input type="text" id="settingCity" placeholder="z.B. Berlin">
+        <button id="settingCitySave" type="button">Speichern</button>
+      </div>
+      <p class="modal-hint" id="settingCityStatus"></p>
+    </div>
+
+    <div class="modal-section">
+      <label class="modal-label">Kalorien</label>
+      <p class="modal-hint">Kommt später automatisch aus deiner Tracker-App — bis dahin manuell.</p>
+      <div class="row">
+        <input type="number" id="settingCalGoal" placeholder="Ziel (kcal)" min="0">
+        <button id="settingCalGoalSave" type="button">Speichern</button>
+      </div>
+      <div class="row">
+        <input type="number" id="settingCalConsumed" placeholder="Heute verbraucht (kcal)" min="0">
+        <button id="settingCalConsumedSave" type="button">Speichern</button>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <label class="modal-label">Bildschirmzeit heute</label>
+      <p class="modal-hint">Später per API — bis dahin trägst du die Werte hier ein.</p>
+      <div class="row">
+        <input type="text" id="settingStPhone" placeholder="Handy (z.B. 3:45)">
+        <button id="settingStPhoneSave" type="button">Speichern</button>
+      </div>
+      <div class="row">
+        <input type="text" id="settingStPc" placeholder="PC (z.B. 5:30)">
+        <button id="settingStPcSave" type="button">Speichern</button>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <label class="modal-label">Schnellzugriff-Links</label>
+      <ul class="link-edit-list" id="linkEditList"></ul>
+      <div class="row">
+        <input type="text" id="newLinkLabel" placeholder="Name (z.B. Notion)">
+        <input type="text" id="newLinkUrl" placeholder="https://…">
+      </div>
+      <button id="newLinkAdd" type="button" class="full-btn">+ Link hinzufügen</button>
+    </div>
+
+    <!-- ============ GOOGLE KALENDER ============
+         Termine kommen von Google hierher, Klausuren gehen dorthin.
+         Der Kasten zeigt je nach Stand die nächste Handlung — und
+         nur die. -->
+    <div class="modal-section">
+      <label class="modal-label">Google Kalender</label>
+      <div class="gk-kasten" id="gkKasten">
+        <div class="gk-lade">Wird geprüft …</div>
+      </div>
+    </div>
+
+    <!-- Ob die App ohne den Rechner startet, hängt an Bedingungen,
+         die man ihr nicht ansieht. Hier stehen sie nachlesbar —
+         sonst merkt man erst dann, dass etwas fehlt, wenn man
+         unterwegs ist und nichts mehr geht. -->
+    <div class="modal-section">
+      <label class="modal-label">Offline-Betrieb</label>
+      <div class="gk-kasten" id="offKasten">
+        <div class="gk-lade">Wird geprüft …</div>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <p class="modal-hint">Deine Daten liegen im Browser und werden über den Server
+        zwischen deinen Geräten abgeglichen — im Heimnetz, nicht darüber hinaus.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Holt den gemeinsamen Stand vom Server und laedt danach das
+     Dashboard. So sieht das iPad dieselben Daten wie der Rechner. -->
+<!-- Kopie der App für den Fall, dass der Rechner aus ist. Ohne
+     Service Worker holt Safari jede Datei vom Server und die
+     Website-App bleibt dann schlicht weiß. -->
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("sw.js").catch(() => { /* dann eben nur online */ });
+    });
+  }
+</script>
+<script src="bestand.js"></script>
+</body>
+</html>
