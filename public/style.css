@@ -422,6 +422,7 @@ button { cursor: pointer; }
   transition: 0.16s ease;
 }
 .search-btn:hover { filter: brightness(1.12); }
+.search-btn-pfeil { display: none; width: 17px; height: 17px; }
 /* ==========================================================
    KARTEN & RASTER
    ========================================================== */
@@ -1207,7 +1208,9 @@ html.tablet #card-kalorien { display: none; }
   position: fixed;
   top: 20px;
   right: 20px;
-  z-index: 800;
+  /* Ueber dem Kontopanel (1400): eine Meldung, die hinter dem
+     Panel liegt, meldet nichts. */
+  z-index: 1600;
   /* Meldungen liegen ueber allem, duerfen aber nichts abfangen —
      sonst geht ein Klick auf einen Knopf darunter ins Leere. */
   pointer-events: none;
@@ -6110,7 +6113,26 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
   .search { padding: 4px 4px 4px 13px; gap: 8px; }
   .search-icon { width: 15px; height: 15px; }
   .search-input { padding: 9px 0; font-size: 13.5px; }
-  .search-btn { padding: 9px 15px; font-size: 12.5px; }
+
+  /* Auf 375 px fraß das Wort „Suchen" ein Drittel der Zeile, obwohl
+     das Feld daneben der eigentliche Inhalt ist. Der Knopf wird
+     deshalb rund und trägt nur noch den Pfeil — abgeschickt wird
+     ohnehin meist mit der Eingabetaste. */
+  .search-btn {
+    width: 36px; height: 36px;
+    padding: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .search-btn-wort { display: none; }
+  .search-btn-pfeil { display: block; }
+
+  /* ---------- Widget-Köpfe ----------
+     Titel und Bedienelemente teilten sich eine Zeile, und der Titel
+     war der einzige, der nachgab: aus „Bildschirmzeit" wurde
+     „Bildschir…". Jetzt behält der Titel seine Breite, und was
+     nicht mehr danebenpasst, rutscht in die zweite Zeile. */
+  .card-head { flex-wrap: wrap; row-gap: 8px; }
+  .card-title { flex-shrink: 0; max-width: 100%; }
 
   /* ---------- Karten ----------
      Weniger Rand und knappere Mindesthöhen: die Widgets bleiben
@@ -8497,3 +8519,1092 @@ html.finger .li-taufe input { font-size: 16px; }
 /* Am Ende der Liste soll das Rad nicht die Seite darunter mitziehen —
    sonst rollt die Seite weg und das Menue schliesst mitten im Suchen. */
 .aw-rollen { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+
+
+/* ==========================================================
+   EIGENE NAMEN UND GRUPPEN
+   Der Stift sitzt neben dem Pfeil: beide öffnen etwas an derselben
+   Kachel, also gehören sie nebeneinander. Er bleibt blass, bis man
+   die Kachel überfährt — man benennt selten um, und ein ständig
+   sichtbares Werkzeug lenkt von den zwei Griffen ab, die man
+   täglich braucht.
+   ========================================================== */
+.li-stift {
+  flex-shrink: 0;
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  border: none; border-radius: 9px;
+  background: none;
+  color: var(--text-faint);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.16s ease, background 0.16s ease, color 0.16s ease;
+}
+.li-stift svg { width: 15px; height: 15px; }
+.li-karte:hover .li-stift,
+.li-stift:focus-visible,
+.li-stift[aria-expanded="true"] { opacity: 1; }
+.li-stift:hover { color: var(--text); background: rgba(255, 255, 255, 0.07); }
+.li-stift[aria-expanded="true"] {
+  color: var(--licht, var(--blue));
+  background: color-mix(in srgb, var(--licht, var(--blue)) 14%, transparent);
+}
+/* Am Finger gibt es kein Überfahren — dort steht er immer da */
+html.finger .li-stift { opacity: 0.65; width: 38px; height: 38px; }
+html.finger .li-stift svg { width: 17px; height: 17px; }
+
+/* Die Gruppe steht als kleines Schild hinter dem Namen.
+   Zwei Klassen im Selektor, weil `.li-name span` sonst gewinnt und
+   das Schild als eigene Zeile darunter setzt — die Kachel wurde
+   dadurch hoeher und riss eine Luecke ins Raster. */
+.li-name .li-gruppe {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text-faint);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+.li-karte.an .li-name .li-gruppe {
+  background: color-mix(in srgb, var(--licht) 18%, transparent);
+  color: color-mix(in srgb, var(--licht) 82%, white);
+}
+
+/* ---------- Das Formular ---------- */
+.li-umbenennen {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  margin-top: 13px;
+  padding-top: 13px;
+  border-top: 1px solid var(--border);
+  animation: li-tiefe-auf 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.li-umbenennen .li-feld input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.26);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+.li-umbenennen .li-feld input:focus {
+  border-color: color-mix(in srgb, var(--licht, var(--blue)) 60%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--licht, var(--blue)) 14%, transparent);
+}
+.li-umbenennen .li-feld input::placeholder { color: var(--text-faint); }
+
+.li-umbenennen-fuss {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.li-hinweis {
+  flex: 1;
+  min-width: 180px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-faint);
+}
+.li-umbenennen-knoepfe { display: flex; gap: 8px; flex-shrink: 0; }
+.li-umbenennen-knoepfe button {
+  padding: 8px 15px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: 0.16s ease;
+}
+.li-umbenennen-knoepfe button[type="submit"] {
+  border-color: color-mix(in srgb, var(--licht, var(--blue)) 45%, transparent);
+  color: var(--licht, var(--blue));
+}
+.li-umbenennen-knoepfe button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text);
+}
+html.finger .li-umbenennen .li-feld input { font-size: 16px; }
+
+/* Eine ausgeschaltete Kachel ist eine schmale Zeile — beim
+   Umbenennen braucht sie kurz die volle Form. */
+.li-karte:not(.an):has(.li-umbenennen) { padding: 15px 16px 17px; }
+@media (min-width: 1101px) {
+  .licht-gitter > .li-karte:not(.an):has(.li-umbenennen) { grid-column: span 2; }
+}
+
+/* Der Stift gehoert nicht zur Lichtfarbe — er benennt um, das hat
+   mit dem Licht nichts zu tun. In der Farbe des Geraets sah ein
+   aktiver Stift bei einem roten Licht nach einer Warnung aus. */
+.li-stift[aria-expanded="true"] {
+  color: var(--blue-soft);
+  background: rgba(91, 140, 255, 0.16);
+}
+
+
+/* ---------- Wo das Gruppenschild steht ----------
+   Am Rechner hinter dem Namen, wo es sofort ins Auge faellt. Auf
+   schmalen Kacheln draengt der Name es dort hinaus — deshalb rutscht
+   es in die zweite Zeile, wo ohnehin Platz ist. Die Angabe ist zu
+   nuetzlich, um sie einfach wegzukuerzen.
+
+   Reihenfolge zaehlt: die Grundregel zuerst, die Ausnahme danach. */
+.li-name span .li-gruppe-klein {
+  display: none;
+  margin: 0 7px 0 0;
+  font-size: 9px;
+  vertical-align: baseline;
+}
+@media (max-width: 699px) {
+  .li-name b .li-gruppe { display: none; }
+  .li-name span .li-gruppe-klein { display: inline-block; }
+}
+
+
+/* ==========================================================
+   ANMELDUNG
+   Eine ruhige Karte auf dem Grundton der Seite. Sie soll nicht wie
+   eine Sperre wirken, sondern wie die Tür zum eigenen Zimmer —
+   dieselben Formen, dieselben Farben wie das Dashboard dahinter.
+   ========================================================== */
+/* Eigenes "display" schlaegt das hidden-Attribut des Browsers —
+   ohne diese Zeile bliebe die Schicht nach dem Anmelden stehen. */
+.anmeldung[hidden] { display: none; }
+
+.anmeldung {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background:
+    radial-gradient(900px 600px at 50% -10%, rgba(91, 140, 255, 0.14), transparent 60%),
+    rgba(4, 6, 12, 0.86);
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  animation: an-auf 0.35s ease both;
+}
+@keyframes an-auf { from { opacity: 0; } to { opacity: 1; } }
+
+/* Solange gesperrt ist, rollt nichts dahinter */
+body.gesperrt { overflow: hidden; }
+body.gesperrt .app-shell { filter: blur(3px); pointer-events: none; user-select: none; }
+
+.an-karte {
+  width: 100%;
+  max-width: 380px;
+  padding: 30px 30px 26px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(16, 21, 36, 0.62);
+  backdrop-filter: blur(50px) saturate(180%);
+  -webkit-backdrop-filter: blur(50px) saturate(180%);
+  box-shadow:
+    0 30px 74px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  animation: an-karte-auf 0.42s cubic-bezier(0.22, 1, 0.36, 1) both 0.06s;
+}
+@keyframes an-karte-auf {
+  from { opacity: 0; transform: translateY(14px) scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
+
+.an-marke {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.an-zeichen {
+  width: 22px; height: 22px;
+  border-radius: 7px;
+  background: linear-gradient(135deg, var(--blue), var(--violet));
+  box-shadow: 0 0 16px rgba(91, 140, 255, 0.45);
+}
+
+.an-titel {
+  margin: 22px 0 6px;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.an-text {
+  margin: 0 0 22px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.an-form { display: flex; flex-direction: column; gap: 13px; }
+.an-feld { display: flex; flex-direction: column; gap: 6px; }
+.an-feld > span {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.an-feld input {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.28);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+.an-feld input:focus {
+  border-color: color-mix(in srgb, var(--blue) 60%, transparent);
+  background: rgba(0, 0, 0, 0.36);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 15%, transparent);
+}
+
+.an-fehler {
+  margin: 2px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(251, 113, 133, 0.12);
+  border: 1px solid rgba(251, 113, 133, 0.28);
+  color: var(--red);
+  font-size: 12.5px;
+  line-height: 1.5;
+  animation: an-fehler-auf 0.24s ease both;
+}
+@keyframes an-fehler-auf {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.an-knopf {
+  margin-top: 6px;
+  padding: 13px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--blue), #4a6fe8);
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.16s ease, transform 0.12s ease;
+}
+.an-knopf:hover:not(:disabled) { filter: brightness(1.1); }
+.an-knopf:active:not(:disabled) { transform: scale(0.985); }
+.an-knopf:disabled { opacity: 0.6; cursor: default; }
+
+.an-fuss {
+  margin: 16px 0 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-faint);
+  text-align: center;
+}
+
+/* Auf dem Telefon fuellt die Karte die Breite, und die Felder
+   tragen 16px — sonst zoomt iOS beim Antippen die ganze Seite. */
+@media (max-width: 480px) {
+  .anmeldung { padding: 16px; align-items: flex-start; padding-top: 12vh; }
+  .an-karte { padding: 26px 22px 22px; }
+  .an-titel { font-size: 23px; }
+}
+html.finger .an-feld input { font-size: 16px; }
+
+
+/* ==========================================================
+   KONTO — Kasten und Formulare im Kontopanel
+   Derselbe Kasten wie bei Google und Offline, damit die drei
+   Abschnitte als eine Familie lesbar bleiben. Die Knöpfe sind
+   ruhig; nur „Abmelden" trägt Farbe, weil es das einzige ist,
+   was einen aus der App hinausbringt.
+   ========================================================== */
+.ko-knopf {
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease, transform 0.12s ease;
+}
+.ko-knopf:hover { background: rgba(255, 255, 255, 0.08); border-color: var(--border-strong, var(--border)); }
+.ko-knopf:active { transform: scale(0.98); }
+
+.ko-knopf.ko-haupt {
+  background: linear-gradient(135deg, var(--blue), #4a6fe8);
+  border-color: transparent;
+  color: #fff;
+  font-weight: 600;
+}
+.ko-knopf.ko-weg { color: var(--red); border-color: rgba(251, 113, 133, 0.3); }
+.ko-knopf.ko-weg:hover { background: rgba(251, 113, 133, 0.12); }
+
+.ko-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+  animation: ko-auf 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes ko-auf {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: none; }
+}
+.ko-form input {
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.24);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+.ko-form input:focus {
+  border-color: color-mix(in srgb, var(--blue) 55%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 14%, transparent);
+}
+
+.ko-nutzer {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.ko-titel {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.ko-zeile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.ko-loeschen {
+  padding: 4px 9px;
+  border: 1px solid rgba(251, 113, 133, 0.28);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--red);
+  font-family: inherit;
+  font-size: 11.5px;
+  cursor: pointer;
+  transition: background 0.16s ease;
+}
+.ko-loeschen:hover { background: rgba(251, 113, 133, 0.12); }
+
+/* Auf dem Telefon tragen Felder 16px — sonst zoomt iOS beim Antippen */
+html.finger .ko-form input { font-size: 16px; }
+
+
+/* ==========================================================
+   KONTOPANEL
+   Der Weg hinein ist das Profilbild links oben. Was dann kommt,
+   soll nicht wie ein Fenster über dem Dashboard wirken, sondern
+   wie ein eigener Ort: die ganze Fläche, links die Bereiche,
+   rechts der gewählte. Deshalb kein Schatten und kein Rahmen um
+   das Ganze — nur der Grundton der Seite, eine Spur dunkler.
+   ========================================================== */
+.kop[hidden] { display: none; }
+
+.kop {
+  position: fixed;
+  inset: 0;
+  z-index: 1400;
+  display: flex;
+  background: var(--bg);
+  animation: kop-auf 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.kop.schliesst { animation: kop-zu 0.18s ease both; }
+
+@keyframes kop-auf {
+  from { opacity: 0; transform: scale(1.03); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes kop-zu {
+  from { opacity: 1; transform: none; }
+  to   { opacity: 0; transform: scale(1.02); }
+}
+
+/* Solange das Panel offen ist, rollt nichts dahinter */
+body.kop-auf { overflow: hidden; }
+
+/* ---------- linke Spalte ---------- */
+.kop-rand {
+  width: 258px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 28px 10px 20px 20px;
+  background: var(--bg-2);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+}
+
+.kop-ich {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 0 8px 16px;
+  padding: 10px 11px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-el);
+  background: rgba(255, 255, 255, 0.035);
+  overflow: hidden;
+}
+.kop-ich-text { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.kop-ich-name {
+  font-size: 13px; font-weight: 600; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.kop-ich-konto {
+  font-size: 10.5px; color: var(--text-faint);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.kop-ich-bild {
+  width: 34px; height: 34px;
+  flex-shrink: 0;
+  border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--blue), var(--violet));
+  color: #06090f;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 12px;
+  overflow: hidden;
+}
+.kop-ich-bild img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.kop-liste { display: flex; flex-direction: column; gap: 2px; }
+
+.kop-gruppe {
+  margin: 10px 12px 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.kop-reiter {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.14s ease, color 0.14s ease;
+}
+.kop-reiter:hover { background: rgba(255, 255, 255, 0.05); color: var(--text); }
+.kop-reiter.aktiv {
+  background: rgba(91, 140, 255, 0.16);
+  color: var(--text);
+  font-weight: 600;
+}
+.kop-reiter.kop-weg { color: var(--red); }
+.kop-reiter.kop-weg:hover { background: rgba(251, 113, 133, 0.12); color: var(--red); }
+
+.kop-trenner {
+  height: 1px;
+  margin: 10px 12px;
+  background: var(--border);
+}
+
+/* ---------- rechte Spalte ---------- */
+/* Der Inhalt bekommt eine Obergrenze, sonst stuende das Kreuz auf
+   einem breiten Bildschirm einen halben Meter neben dem Text. */
+.kop-inhalt {
+  flex: 1;
+  min-width: 0;
+  max-width: 900px;
+  position: relative;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.kop-bahn {
+  flex: 1;
+  min-width: 0;
+  max-width: 760px;
+  padding: 56px 60px 80px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.kop-bahn.wechsel > .kop-bereich:not([hidden]) {
+  animation: kop-rein 0.26s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes kop-rein {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.kop-titel {
+  margin: 0 0 22px;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.kop-unter {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.kop-hinweis {
+  margin: 0 0 12px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-dim);
+}
+.kop-abschnitt {
+  padding-top: 22px;
+  margin-top: 22px;
+  border-top: 1px solid var(--border);
+}
+.kop-abschnitt:first-of-type { border-top: none; margin-top: 0; padding-top: 0; }
+.kop-bereich > .kop-abschnitt:first-child { border-top: none; margin-top: 0; padding-top: 0; }
+
+/* Die Eingabefelder folgen dem Rest der Seite */
+.kop-bereich input[type="text"],
+.kop-bereich input[type="number"],
+.kop-bereich input[type="password"] {
+  width: 100%;
+  padding: 10px 13px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-el);
+  background: rgba(0, 0, 0, 0.26);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13.5px;
+  outline: none;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+.kop-bereich input:focus {
+  border-color: color-mix(in srgb, var(--blue) 55%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 14%, transparent);
+}
+.kop-bereich .row { display: flex; gap: 8px; align-items: center; }
+.kop-bereich .row + .row { margin-top: 8px; }
+.kop-bereich .row button {
+  flex-shrink: 0;
+  padding: 10px 15px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-el);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.14s ease;
+}
+.kop-bereich .row button:hover { background: rgba(255, 255, 255, 0.09); }
+
+/* ---------- Schließen: Kreis mit ESC darunter ---------- */
+.kop-zu {
+  position: absolute;
+  top: 56px; right: 26px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: color 0.14s ease;
+}
+.kop-zu:hover { color: var(--text); }
+.kop-zu-kreis {
+  width: 34px; height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1.5px solid var(--border-2);
+  border-radius: 50%;
+  transition: background 0.14s ease, border-color 0.14s ease, transform 0.14s ease;
+}
+.kop-zu:hover .kop-zu-kreis { background: rgba(255, 255, 255, 0.07); border-color: var(--text-dim); }
+.kop-zu:active .kop-zu-kreis { transform: scale(0.94); }
+.kop-zu-kreis svg { width: 15px; height: 15px; }
+.kop-zu-text {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+/* ---------- Kontokarte ---------- */
+.kop-karte {
+  border: 1px solid var(--border);
+  border-radius: var(--r-card);
+  background: var(--card);
+  overflow: hidden;
+}
+.kop-banner {
+  height: 82px;
+  background:
+    radial-gradient(420px 140px at 22% 120%, rgba(167, 139, 250, 0.5), transparent 70%),
+    linear-gradient(120deg, #2c3a63 0%, #24304e 45%, #1b2340 100%);
+}
+.kop-karte-kopf {
+  display: flex;
+  align-items: flex-end;
+  gap: 15px;
+  padding: 0 22px;
+  margin-top: -34px;
+}
+.kop-karte-namen { padding-bottom: 6px; min-width: 0; }
+.kop-karte-name {
+  font-size: 19px; font-weight: 600; letter-spacing: -0.01em; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.kop-karte-konto { font-size: 12px; color: var(--text-faint); }
+
+/* Großes Bild mit Kamerahut beim Überfahren */
+.kop-gross {
+  position: relative;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  line-height: 0;
+  border-radius: 24px;
+}
+.kop-gross-bild {
+  display: flex; align-items: center; justify-content: center;
+  width: 82px; height: 82px;
+  border-radius: 24px;
+  border: 4px solid var(--bg);
+  background: linear-gradient(135deg, var(--blue), var(--violet));
+  color: #06090f;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 25px;
+  line-height: 1;
+  overflow: hidden;
+}
+.kop-gross-bild img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.kop-gross-hut {
+  position: absolute;
+  inset: 4px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 20px;
+  background: rgba(4, 7, 14, 0.66);
+  color: #fff;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.16s ease;
+}
+.kop-gross:hover .kop-gross-hut, .kop-gross:focus-visible .kop-gross-hut { opacity: 1; }
+
+.kop-felder {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 20px 16px 16px;
+  border-radius: var(--r-el);
+  overflow: hidden;
+  background: var(--border);
+}
+.kop-feld {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 15px;
+  background: rgba(10, 14, 26, 0.72);
+}
+.kop-feld-text { min-width: 0; }
+.kop-feld-marke {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.kop-feld-wert {
+  margin-top: 3px;
+  font-size: 13.5px;
+  color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.kop-klein {
+  flex-shrink: 0;
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.14s ease, transform 0.12s ease;
+}
+.kop-klein:hover:not(:disabled) { background: rgba(255, 255, 255, 0.1); }
+.kop-klein:active:not(:disabled) { transform: scale(0.97); }
+.kop-klein:disabled { opacity: 0.45; cursor: default; }
+.kop-klein.kop-haupt {
+  background: linear-gradient(135deg, var(--blue), #4a6fe8);
+  border-color: transparent;
+  color: #fff;
+  font-weight: 600;
+}
+.kop-klein.kop-haupt:hover { filter: brightness(1.1); }
+
+#kopPasswortFach { padding: 0 16px 16px; }
+
+/* ---------- Profilbild-Bereich ---------- */
+.kop-bildreihe { display: flex; align-items: center; gap: 18px; }
+.kop-vorschau { border-width: 0; }
+.kop-bildknoepfe { display: flex; flex-direction: column; gap: 8px; }
+
+/* ---------- Profilknopf in der Seitenleiste ----------
+   Er war ein Kasten und ist jetzt ein Knopf: das braucht die
+   üblichen Rücknahmen, sonst bringt der Browser seinen eigenen
+   Rahmen und seine eigene Schrift mit. */
+button.sidebar-profile {
+  width: calc(100% - 24px);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease;
+}
+button.sidebar-profile:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: var(--border-2);
+}
+button.sidebar-profile:active { transform: scale(0.99); }
+.sidebar-profile .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.sidebar-profile .avatar { overflow: hidden; }
+.profile-name, .profile-role { display: block; }
+
+/* ---------- Handy und schmale Fenster ----------
+   Die zwei Spalten passen nicht nebeneinander. Also untereinander:
+   oben die Bereiche als scrollbare Reihe, darunter der Inhalt. */
+@media (max-width: 820px) {
+  .kop { flex-direction: column; }
+  .kop-rand {
+    width: 100%;
+    flex-direction: column;
+    gap: 0;
+    padding: calc(14px + env(safe-area-inset-top, 0)) 14px 10px;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    overflow: visible;
+  }
+  .kop-ich { margin: 0 0 12px; }
+  .kop-liste {
+    flex-direction: row;
+    gap: 6px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+  .kop-liste::-webkit-scrollbar { display: none; }
+  .kop-gruppe, .kop-trenner { display: none; }
+  .kop-reiter {
+    width: auto;
+    flex-shrink: 0;
+    padding: 7px 13px;
+    border-radius: var(--r-pill);
+    border: 1px solid var(--border);
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+  .kop-reiter.aktiv { border-color: transparent; }
+  .kop-bahn { padding: 22px 16px calc(48px + env(safe-area-inset-bottom, 0)); max-width: none; }
+  .kop-zu { top: calc(14px + env(safe-area-inset-top, 0)); right: 14px; }
+  .kop-zu-text { display: none; }
+  .kop-karte-kopf { padding: 0 16px; }
+  .kop-gross-bild { width: 70px; height: 70px; font-size: 21px; }
+  .kop-titel { padding-right: 46px; }
+}
+
+/* iOS zoomt beim Antippen, wenn ein Feld unter 16px trägt */
+html.finger .kop-bereich input { font-size: 16px; }
+
+
+/* ==========================================================
+   TASTENKÜRZEL-ÜBERSICHT
+   Vier Spalten auf dem Rechner, eine auf dem Telefon. Die Tasten
+   stehen als echte kbd-Kästchen da, damit man sie als Tasten liest
+   und nicht als Text.
+   ========================================================== */
+.tasten-fenster { max-width: 620px; }
+
+.ts-raster {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(230px, 100%), 1fr));
+  gap: 22px 30px;
+}
+.ts-gruppe { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+.ts-kopf {
+  margin-bottom: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.ts-zeile {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.ts-tasten { display: flex; gap: 4px; flex-shrink: 0; }
+.ts-was { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.ts-raster kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  padding: 2px 6px;
+  border: 1px solid var(--border-2);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.ts-fuss {
+  margin: 22px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  font-size: 11.5px;
+  color: var(--text-faint);
+}
+
+
+/* ==========================================================
+   SCHULFREIE TAGE IM MONATSGITTER
+   Ferien und Feiertage sollen als Fläche lesbar sein, nicht als
+   Beschriftung: eine Woche Ferien erkennt man dann am Block, ohne
+   ein einziges Wort zu lesen.
+   ========================================================== */
+.monat-tag.ferien {
+  background:
+    repeating-linear-gradient(135deg,
+      rgba(52, 211, 153, 0.07) 0 6px,
+      rgba(52, 211, 153, 0.02) 6px 12px);
+}
+.monat-tag.feiertag {
+  background:
+    repeating-linear-gradient(135deg,
+      rgba(245, 169, 78, 0.09) 0 6px,
+      rgba(245, 169, 78, 0.03) 6px 12px);
+}
+.mt-frei {
+  display: block;
+  margin: 2px 0 3px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-faint);
+}
+.monat-tag.ferien .mt-frei   { color: color-mix(in srgb, var(--green) 70%, var(--text-faint)); }
+.monat-tag.feiertag .mt-frei { color: color-mix(in srgb, var(--amber) 75%, var(--text-faint)); }
+
+
+/* ==========================================================
+   HEUTE FÄLLIGE KARTEN
+   Ein Streifen über den Reitern der Lernseite und eine Zahl im
+   Menü. Beides soll auffallen, ohne zu drängeln — deshalb der
+   ruhige blaue Grund statt eines roten Punktes.
+   ========================================================== */
+.lern-faellig[hidden] { display: none; }
+.lern-faellig {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 14px;
+  padding: 14px 18px;
+  border: 1px solid color-mix(in srgb, var(--blue) 30%, transparent);
+  border-radius: var(--r-card);
+  background:
+    linear-gradient(120deg, rgba(91, 140, 255, 0.14), rgba(167, 139, 250, 0.07));
+  animation: lf-rein 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes lf-rein {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: none; }
+}
+.lf-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.lf-text b { font-size: 14px; font-weight: 600; color: var(--text); }
+.lf-text span { font-size: 12px; line-height: 1.45; color: var(--text-dim); }
+.lf-knopf {
+  flex-shrink: 0;
+  margin-left: auto;
+  padding: 10px 18px;
+  border: none;
+  border-radius: var(--r-el);
+  background: linear-gradient(135deg, var(--blue), #4a6fe8);
+  color: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.16s ease, transform 0.12s ease;
+}
+.lf-knopf:hover { filter: brightness(1.1); }
+.lf-knopf:active { transform: scale(0.98); }
+
+/* Die Zahl im Menü */
+.nav-zahl {
+  margin-left: auto;
+  min-width: 19px;
+  padding: 1px 6px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--blue) 34%, transparent);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.7;
+}
+.sidebar.collapsed .nav-zahl {
+  position: absolute;
+  top: 4px; right: 8px;
+  margin: 0;
+  padding: 0 4px;
+  font-size: 9px;
+}
+.sidebar.collapsed .nav-link { position: relative; }
+
+/* Der Eintrag im Dashboard-Reiter */
+.entry-item.entry-karten { cursor: pointer; }
+.entry-item.entry-karten .entry-accent { background: var(--blue); }
+.entry-item.entry-karten:hover { background: rgba(255, 255, 255, 0.05); }
+
+/* Auf dem Telefon steht der Knopf unter dem Text */
+@media (max-width: 699px) {
+  .lern-faellig { flex-direction: column; align-items: stretch; gap: 12px; padding: 14px; }
+  .lf-knopf { margin-left: 0; }
+  /* In der Navigationsreihe unten ist kein Platz für eine Zahl neben
+     dem Wort — sie sitzt dort als Punkt in der Ecke. */
+  .nav-zahl {
+    position: absolute;
+    top: 2px; right: 4px;
+    margin: 0;
+    min-width: 15px;
+    padding: 0 3px;
+    font-size: 9px;
+    line-height: 1.6;
+  }
+  .nav-link { position: relative; }
+}
+
+
+/* ==========================================================
+   PAPIERKORB
+   Eine Liste von Dingen, die weg sind. Sie soll ruhig aussehen —
+   der Schreck liegt schon hinter einem, wenn man hier landet.
+   ========================================================== */
+.pk-liste { display: flex; flex-direction: column; gap: 1px; border-radius: var(--r-el); overflow: hidden; background: var(--border); }
+.pk-zeile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 15px;
+  background: rgba(10, 14, 26, 0.72);
+}
+.pk-text { min-width: 0; }
+.pk-titel {
+  font-size: 13.5px;
+  color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pk-sub { margin-top: 3px; font-size: 11.5px; color: var(--text-faint); }
+.pk-leer {
+  padding: 22px 16px;
+  border: 1px dashed var(--border);
+  border-radius: var(--r-el);
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-dim);
+  background: none;
+}
+.pk-leer span { display: block; margin-top: 6px; font-size: 11.5px; color: var(--text-faint); }
+
+
+/* ==========================================================
+   KARTEN OHNE THEMA
+   Der Knopf steht direkt in der Zeile: was hier steht, will man
+   entweder behalten oder loswerden, und beides soll einen Klick
+   entfernt sein.
+   ========================================================== */
+.vw-knopf {
+  flex-shrink: 0;
+  padding: 6px 13px;
+  border: 1px solid color-mix(in srgb, var(--blue) 34%, transparent);
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--blue) 14%, transparent);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.14s ease;
+}
+.vw-knopf:hover { background: color-mix(in srgb, var(--blue) 26%, transparent); }
+
+@media (max-width: 699px) {
+  .vw-knopf { padding: 6px 10px; font-size: 11.5px; }
+}

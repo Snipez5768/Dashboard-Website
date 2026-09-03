@@ -1,7 +1,9 @@
 /* ==========================================================
    LIFE OS // DASHBOARD — script.js
-   Alles läuft rein im Browser, keine Server, keine Accounts.
-   Daten liegen in localStorage dieses Browsers.
+   Die Oberfläche läuft im Browser, die Daten gehören einem Konto:
+   sie liegen lokal in localStorage und beim Server unter dem
+   angemeldeten Nutzer. anmeldung.js startet dieses Skript erst,
+   wenn jemand angemeldet ist.
    ========================================================== */
 
 (() => {
@@ -55,7 +57,10 @@
     city: "Berlin",
     lat: 52.52,
     lon: 13.405,
-    calGoal: 0
+    calGoal: 0,
+    /* Profilbild als eingebettete Datenadresse, auf 256 Kanten
+       gestutzt — so reist es mit den Einstellungen zum iPad. */
+    bild: ""
   };
   let settings = { ...DEFAULT_SETTINGS, ...store.get("lifeos_settings", DEFAULT_SETTINGS) };
 
@@ -76,6 +81,27 @@
      tragen Karten wie eine Klausur, aber kein Fach und kein
      Stundenplan; ein Datum ist freiwillig. */
   let themen = store.get("lifeos_themen", []);           // [ {id, title, date, notiz} ]
+
+  /* ---------- Lernplan der Karteikarten ----------
+     Wann eine Karte wieder dran ist. Steht hier oben, weil schon der
+     erste Aufbau des Dashboards wissen will, wie viele heute fällig
+     sind. Die Regeln dazu stehen weiter unten bei den Karten. */
+  const ABSTAENDE = [1, 2, 4, 8, 16, 32];   // Tage je Stufe
+  const PORTION = "__faellig";              // der Stapel "heute fällig"
+
+  let kartenPlan = store.get("lifeos_karten_plan", {}) || {};
+  const kartenPlanSichern = () => store.set("lifeos_karten_plan", kartenPlan);
+
+  const tagPlus = zahl => {
+    const d = new Date(); d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() + zahl);
+    return dateKey(d);
+  };
+
+  const karteFaellig = c => {
+    const e = c && kartenPlan[c.id];
+    return !e || !e.faellig || e.faellig <= todayStr();
+  };
 
   /* ==========================================================
      WIE LANGE EINE KLAUSUR DAUERT
@@ -110,9 +136,18 @@
 
   /* ==========================================================
      STUNDENPLAN — Periode 1
-     Das Raster und die Kurse stehen fest im Code, weil sie sich
-     nur einmal im Halbjahr aendern. Klausuren zeigen ueber "fach"
-     auf einen Kurs; daraus ergeben sich Stunde, Zeit und Raum.
+     Das Raster der Stunden gilt für die Schule und steht deshalb
+     fest. Kurse, Lehrer und Belegung gehören dagegen dem Nutzer:
+     sie liegen in seinem Bestand, damit ein zweites Konto nicht
+     den Plan des ersten sieht.
+
+     Was unten als Vorgabe steht, ist Lucas Plan. Er wandert genau
+     einmal in den Bestand — beim ersten Konto, dem auch die
+     übrigen bisherigen Daten gehören. Jedes weitere Konto fängt
+     mit einem leeren Plan an.
+
+     Klausuren zeigen ueber "fach" auf einen Kurs; daraus ergeben
+     sich Stunde, Zeit und Raum.
      ========================================================== */
   const STUNDEN = [
     { nr: 1,  von: "08:00", bis: "08:45" },
@@ -128,7 +163,7 @@
   ];
 
   /* "ton" steuert nur die Farbe der Kachel im Plan */
-  const FAECHER = {
+  const FAECHER_VORGABE = {
     "LK12-CH1":  { lang: "Leistungskurs Chemie",    kurz: "Chemie LK",    ton: "pink"   },
     "LK12-GEO1": { lang: "Leistungskurs Geografie", kurz: "Geografie LK", ton: "hellgruen"    },
     "gk12-de1":  { lang: "Grundkurs Deutsch",       kurz: "Deutsch",     ton: "rot"     },
@@ -140,14 +175,14 @@
     "spo11":     { lang: "Grundkurs Sport",         kurz: "Sport",       ton: "gelb"  }
   };
 
-  const LEHRER = {
+  const LEHRER_VORGABE = {
     Ah: "Ahlmeyer Vieira", Ba: "Ballout",  Bar: "Baran",   Bc: "Böttcher",
     Fi: "Fischer",         Hng: "Hanning", Ren: "Rendant", Schm: "Schmidt",
     Ska: "Skrabar",        Vest: "Vester"
   };
 
   /* tag: 1 = Montag … 5 = Freitag, von/bis sind Stundennummern */
-  const STUNDENPLAN = [
+  const STUNDENPLAN_VORGABE = [
     { tag: 1, von: 1, bis: 1,  fach: "LK12-GEO1", lehrer: ["Ah"],        raum: "229" },
     { tag: 1, von: 2, bis: 2,  fach: "gk12-ku2",  lehrer: ["Schm"],      raum: "260" },
     { tag: 1, von: 3, bis: 4,  fach: "gk12-de1",  lehrer: ["Hng"],       raum: "226" },
@@ -172,6 +207,56 @@
     { tag: 5, von: 7, bis: 8,  fach: "gk12-ma1",  lehrer: ["Ren"],       raum: "147" },
     { tag: 5, von: 9, bis: 10, fach: "spo11",     lehrer: ["Vest"],      raum: "U1"  }
   ];
+
+  /* Der Plan dieses Nutzers. Kein const: er wird gleich aus dem
+     Bestand gefuellt und laesst sich spaeter aendern. */
+  let FAECHER = {};
+  let LEHRER = {};
+  let STUNDENPLAN = [];
+
+  /* Ist dies das erste Konto? Nur ihm gehoert die Vorgabe. */
+  function ersterNutzer() {
+    const n = window.lifeosNutzer;
+    if (n && typeof n.verwalter === "boolean") return n.verwalter;
+    try { return localStorage.getItem("lifeos_konto_verwalter") === "1"; }
+    catch (e) { return false; }
+  }
+
+  function planSichern() {
+    store.set("lifeos_faecher", FAECHER);
+    store.set("lifeos_stundenplan", { stunden: STUNDENPLAN, lehrer: LEHRER });
+  }
+
+  function planLaden() {
+    const f = store.get("lifeos_faecher", null);
+    const p = store.get("lifeos_stundenplan", null);
+    if (f && typeof f === "object" && p && Array.isArray(p.stunden)) {
+      FAECHER = f;
+      STUNDENPLAN = p.stunden;
+      LEHRER = (p.lehrer && typeof p.lehrer === "object") ? p.lehrer : {};
+      return;
+    }
+
+    /* Noch nichts gespeichert. Die Vorgabe nur dann anlegen, wenn der
+       Stand des Nutzers auch wirklich vom Server kam — sonst schriebe
+       ein Start ohne Server einen spaeter geaenderten Plan wieder auf
+       die Vorgabe zurueck. */
+    const standDa = window.lifeosBestand && window.lifeosBestand.standGeholt;
+    if (ersterNutzer() && standDa) {
+      FAECHER = { ...FAECHER_VORGABE };
+      LEHRER = { ...LEHRER_VORGABE };
+      STUNDENPLAN = STUNDENPLAN_VORGABE.map(l => ({ ...l, lehrer: l.lehrer.slice() }));
+      planSichern();
+      return;
+    }
+    /* Ohne Server: die Vorgabe zeigen, aber nichts speichern. */
+    if (ersterNutzer()) {
+      FAECHER = { ...FAECHER_VORGABE };
+      LEHRER = { ...LEHRER_VORGABE };
+      STUNDENPLAN = STUNDENPLAN_VORGABE.map(l => ({ ...l, lehrer: l.lehrer.slice() }));
+    }
+  }
+  planLaden();
 
   const TAGE_LANG = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
 
@@ -1062,11 +1147,108 @@
     const d = new Date(dateStr + "T00:00:00");
     return `${String(d.getDate()).padStart(2,"0")}.${String(d.getMonth()+1).padStart(2,"0")}.${d.getFullYear()}`;
   }
-  const badgeFor = diff =>
-    diff < 0  ? (diff === -1 ? "seit gestern" : `seit ${-diff} Tagen`)
-    : diff === 0 ? "HEUTE"
-    : diff === 1 ? "morgen"
-    : `in ${diff} Tagen`;
+  /* ==========================================================
+     SCHULTAGE
+     „In 137 Tagen" klingt nach Ewigkeit. Für eine Klausur zählt
+     aber, wie oft man bis dahin noch in dem Fach sitzt — und
+     zwischen heute und der Klausur liegen Wochenenden, Feiertage
+     und Ferien.
+
+     Die Feiertage rechnet das Dashboard selbst aus (Berlin, mit
+     dem Osterdatum als Angelpunkt). Die Ferien kommen aus deinem
+     Google-Kalender: dort stehen sie ohnehin, und bisher wurden
+     sie nur ausgeblendet.
+     ========================================================== */
+  let ferien = store.get("lifeos_ferien", []);
+
+  /* Osterformel nach Gauß/Butcher — gilt für den gregorianischen
+     Kalender und damit für jedes Jahr, das hier vorkommt. */
+  function ostersonntag(jahr) {
+    const a = jahr % 19, b = Math.floor(jahr / 100), c = jahr % 100;
+    const d = Math.floor(b / 4), e = b % 4;
+    const f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3);
+    const h = (19 * a + b - d - g + 15) % 30;
+    const i = Math.floor(c / 4), k = c % 4;
+    const l = (32 + 2 * e + 2 * i - h - k) % 7;
+    const m = Math.floor((a + 11 * h + 22 * l) / 451);
+    const tage = h + l - 7 * m + 114;
+    return new Date(jahr, Math.floor(tage / 31) - 1, (tage % 31) + 1);
+  }
+
+  const feiertagCache = {};
+
+  /* Die gesetzlichen Feiertage in Berlin. Der Frauentag am 8. März
+     ist einer davon — außerhalb Berlins wäre die Liste kürzer. */
+  function feiertage(jahr) {
+    if (feiertagCache[jahr]) return feiertagCache[jahr];
+    const ostern = ostersonntag(jahr);
+    const versetzt = tage => {
+      const d = new Date(ostern); d.setDate(ostern.getDate() + tage);
+      return dateKey(d);
+    };
+    const fest = (monat, tag) => dateKey(new Date(jahr, monat - 1, tag));
+
+    const liste = {
+      [fest(1, 1)]:   "Neujahr",
+      [fest(3, 8)]:   "Frauentag",
+      [versetzt(-2)]: "Karfreitag",
+      [versetzt(1)]:  "Ostermontag",
+      [fest(5, 1)]:   "Tag der Arbeit",
+      [versetzt(39)]: "Christi Himmelfahrt",
+      [versetzt(50)]: "Pfingstmontag",
+      [fest(10, 3)]:  "Tag der Deutschen Einheit",
+      [fest(12, 25)]: "1. Weihnachtstag",
+      [fest(12, 26)]: "2. Weihnachtstag"
+    };
+    feiertagCache[jahr] = liste;
+    return liste;
+  }
+
+  const feiertagName = iso =>
+    feiertage(Number(String(iso).slice(0, 4)))[iso] || null;
+
+  /* In welchem Ferienblock liegt der Tag? Gibt den Titel zurück,
+     damit die Kachel im Kalender sagen kann, welche Ferien es sind. */
+  function ferienName(iso) {
+    const f = (ferien || []).find(x => x && iso >= x.von && iso <= x.bis);
+    return f ? f.titel : null;
+  }
+
+  const istWochenende = iso => {
+    const t = new Date(iso + "T00:00:00").getDay();
+    return t === 0 || t === 6;
+  };
+
+  const istSchultag = iso =>
+    !istWochenende(iso) && !feiertagName(iso) && !ferienName(iso);
+
+  /* Wie viele Schultage liegen zwischen morgen und diesem Datum —
+     der Tag selbst zählt mit, wenn er ein Schultag ist. */
+  function schultageBis(iso) {
+    const ziel = new Date(iso + "T00:00:00");
+    const lauf = new Date(); lauf.setHours(0, 0, 0, 0);
+    lauf.setDate(lauf.getDate() + 1);
+    let zahl = 0, schutz = 0;
+    while (lauf <= ziel && schutz++ < 1500) {
+      if (istSchultag(dateKey(lauf))) zahl++;
+      lauf.setDate(lauf.getDate() + 1);
+    }
+    return zahl;
+  }
+
+  /* Mit "iso" rechnet die Pille in Schultagen — das ist für alles
+     Schulische die ehrlichere Zahl. Ohne "iso" bleibt es beim
+     Kalendertag, denn ein Zahnarzttermin schert sich nicht um
+     Ferien. */
+  const badgeFor = (diff, iso) => {
+    if (diff < 0) return diff === -1 ? "seit gestern" : `seit ${-diff} Tagen`;
+    if (diff === 0) return "HEUTE";
+    if (diff === 1) return "morgen";
+    if (!iso) return `in ${diff} Tagen`;
+    const schul = schultageBis(iso);
+    if (schul === 0) return "erst nach den Ferien";
+    return `in ${schul} ${schul === 1 ? "Schultag" : "Schultagen"}`;
+  };
 
   const SYM_KALENDER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3.2v3.6M16 3.2v3.6"/></svg>';
   const SYM_WECKER   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="7.4"/><path d="M12 9.6V13l2.4 1.5M5.2 4.2 3 6.4M18.8 4.2 21 6.4"/></svg>';
@@ -1179,7 +1361,7 @@
             : e.art === "thema" ? "Thema · "
               : ""}${fmtDate(e.date)}${e.time ? " · " + e.time : ""}</div>
         </div>
-        <span class="entry-badge">${badgeFor(diff)}</span>
+        <span class="entry-badge">${badgeFor(diff, e.art === "termin" ? null : e.date)}</span>
         <button class="entry-go" data-id="${e.id}" data-art="${e.art}"
           title="${e.art === "termin" ? "Zum Kalender" : "Zur Lernseite"}"
           aria-label="${e.art === "termin" ? "Zum Kalender" : "Zur Lernseite"}">${
@@ -2093,6 +2275,9 @@
       .filter(k => daysUntil(k.date) >= 0)
       .sort((a,b) => a.date.localeCompare(b.date))
       .slice(0, 6), false);
+    /* Die fälligen Karten stehen oben — sie sind das Einzige in
+       dieser Liste, was heute etwas von einem will. */
+    if (typeof faelligAuffrischen === "function") faelligAuffrischen();
   }
 
   function fillTabList(listId, items, withTime) {
@@ -2110,7 +2295,7 @@
           <div class="entry-title">${escapeHTML(item.title)}</div>
           <div class="entry-sub">${klausurZusatz(item) ? klausurZusatz(item) + " · " : ""}${fmtDate(item.date)}${withTime && item.time ? " · " + item.time : ""}</div>
         </div>
-        <span class="entry-badge">${badgeFor(diff)}</span>`;
+        <span class="entry-badge">${badgeFor(diff, item.date)}</span>`;
       list.appendChild(li);
     });
   }
@@ -2153,10 +2338,39 @@
   renderQuickLinks();
 
   /* ==========================================================
-     SETTINGS MODAL
+     KONTOPANEL
+     Der Weg hinein ist das Profilbild links oben — dort erwartet
+     man sein Konto, nicht in einem Zahnrad ganz unten. Das Zahnrad
+     bleibt trotzdem, es führt an dieselbe Stelle.
+
+     Statt eines kleinen Fensters mit einer langen Liste liegt hier
+     die ganze Fläche: links die Bereiche, rechts der gewählte. Die
+     Felder sind dieselben wie vorher und tragen dieselben
+     Kennungen — sie stehen nur nicht mehr alle untereinander.
      ========================================================== */
-  const overlay = $("settingsOverlay");
-  function openSettings() {
+  const kpanel = $("kontoPanel");
+  let kpOffen = false;
+
+  function kpBereichZeigen(name) {
+    kpanel.querySelectorAll(".kop-bereich").forEach(b => {
+      b.hidden = b.dataset.bereich !== name;
+    });
+    kpanel.querySelectorAll(".kop-reiter[data-bereich]").forEach(r => {
+      r.classList.toggle("aktiv", r.dataset.bereich === name);
+    });
+    const bahn = $("kopBahn");
+    if (bahn) { bahn.scrollTop = 0; bahn.classList.remove("wechsel"); void bahn.offsetWidth; bahn.classList.add("wechsel"); }
+
+    /* Die drei Kästen fragen den Server. Das passiert erst, wenn man
+       den Bereich wirklich ansieht — beim Öffnen des Panels wären es
+       sonst drei Abrufe für einen, den man sehen will. */
+    if (name === "konto")      kontoZeichnen();
+    if (name === "google")     gkStandHolen();
+    if (name === "app")        offZeichnen();
+    if (name === "papierkorb") papierkorbZeichnen();
+  }
+
+  function openSettings(bereich) {
     $("settingName").value = settings.name || "";
     $("settingCity").value = settings.city || "";
     $("settingCalGoal").value = settings.calGoal || "";
@@ -2166,15 +2380,131 @@
     $("settingStPc").value = t.pc ? formatMinutes(t.pc) : "";
     $("settingCityStatus").textContent = "";
     renderLinkEditList();
-    overlay.classList.add("open");
-  }
-  const closeSettings = () => overlay.classList.remove("open");
+    kpKopfZeichnen();
 
-  $("settingsBtn").addEventListener("click", openSettings);
-  $("settingsClose").addEventListener("click", closeSettings);
-  $("calDetailsBtn").addEventListener("click", openSettings);
-  overlay.addEventListener("click", e => { if (e.target === overlay) closeSettings(); });
+    kpanel.hidden = false;
+    kpanel.classList.remove("schliesst");
+    document.body.classList.add("kop-auf");
+    kpOffen = true;
+    kpBereichZeigen(typeof bereich === "string" ? bereich : "konto");
+  }
+
+  function closeSettings() {
+    if (!kpOffen) return;
+    kpOffen = false;
+    document.body.classList.remove("kop-auf");
+    /* Erst die Abgangsanimation, dann wirklich weg — sonst
+       verschwindet das Panel schlagartig. */
+    kpanel.classList.add("schliesst");
+    setTimeout(() => {
+      kpanel.classList.remove("schliesst");
+      kpanel.hidden = true;
+    }, 200);
+  }
+
+  $("profilKnopf").addEventListener("click", () => openSettings("konto"));
+  $("settingsBtn").addEventListener("click", () => openSettings("konto"));
+  /* "Details anzeigen" im Kalorien-Widget meint die Felder, nicht das Konto */
+  $("calDetailsBtn").addEventListener("click", () => openSettings("werte"));
+  $("kopZu").addEventListener("click", closeSettings);
+  $("kopAbmelden").addEventListener("click", () => {
+    if (window.lifeosAbmelden) window.lifeosAbmelden();
+  });
+
+  kpanel.querySelectorAll(".kop-reiter[data-bereich]").forEach(reiter => {
+    reiter.addEventListener("click", () => kpBereichZeigen(reiter.dataset.bereich));
+  });
+  /* "Bearbeiten" neben einem Wert springt in den Bereich, wo er steht */
+  kpanel.querySelectorAll("[data-springe]").forEach(knopf => {
+    knopf.addEventListener("click", () => kpBereichZeigen(knopf.dataset.springe));
+  });
+
   document.addEventListener("keydown", e => { if (e.key === "Escape") closeSettings(); });
+
+  /* ---------- Kopf des Panels ----------
+     Name und Bild stehen an vier Stellen zugleich: in der Leiste
+     links, in der Kontokarte und in der Vorschau. Sie kommen alle
+     von hier, damit keine davon zurückbleibt. */
+  function kpKopfZeichnen() {
+    if (!kpanel) return;
+    const name = (settings.name || "").trim() || "Gast";
+    const konto = window.lifeosNutzer || {};
+    const setzen = (id, text) => { const el = $(id); if (el) el.textContent = text; };
+
+    setzen("kopName", name);
+    setzen("kopKonto", konto.name ? "Konto: " + konto.name : "angemeldet");
+    setzen("kopKarteName", name);
+    setzen("kopKarteKonto", konto.name || "–");
+    setzen("kopWertName", name);
+    setzen("kopWertKonto", konto.name || "–");
+
+    ["kopAvatar", "kopGrossAvatar", "kopVorschau"].forEach(id => avatarFuellen($(id), name));
+    const weg = $("kopBildWeg");
+    if (weg) weg.disabled = !settings.bild;
+  }
+
+  /* ---------- Profilbild ----------
+     Es liegt bei den Einstellungen und wandert damit über den
+     Bestand auf die anderen Geräte. Damit das gutgeht, wird es
+     vorher auf 256 Kanten gestutzt: ein Foto vom Telefon wäre
+     mehrere Megabyte groß und würde bei jedem Abgleich mitreisen. */
+  const BILD_KANTE = 256;
+
+  function bildVerkleinern(datei) {
+    return new Promise((fertig, schiefgehen) => {
+      if (!datei.type || datei.type.indexOf("image/") !== 0) {
+        return schiefgehen(new Error("Das ist kein Bild."));
+      }
+      const leser = new FileReader();
+      leser.onerror = () => schiefgehen(new Error("Die Datei ließ sich nicht lesen."));
+      leser.onload = () => {
+        const bild = new Image();
+        bild.onerror = () => schiefgehen(new Error("Das Bild ließ sich nicht öffnen."));
+        bild.onload = () => {
+          /* Mittig quadratisch beschneiden — sonst verzerrt das Rund */
+          const kante = Math.min(bild.width, bild.height);
+          const platte = document.createElement("canvas");
+          platte.width = platte.height = BILD_KANTE;
+          const stift = platte.getContext("2d");
+          /* Durchsichtige Bilder bekommen einen dunklen Grund; als
+             JPEG wäre er sonst schwarz. */
+          stift.fillStyle = "#161c2c";
+          stift.fillRect(0, 0, BILD_KANTE, BILD_KANTE);
+          stift.drawImage(bild,
+            (bild.width - kante) / 2, (bild.height - kante) / 2, kante, kante,
+            0, 0, BILD_KANTE, BILD_KANTE);
+          fertig(platte.toDataURL("image/jpeg", 0.82));
+        };
+        bild.src = leser.result;
+      };
+      leser.readAsDataURL(datei);
+    });
+  }
+
+  async function bildSetzen(datei) {
+    if (!datei) return;
+    try {
+      settings.bild = await bildVerkleinern(datei);
+      store.set("lifeos_settings", settings);
+      updateAvatar();
+      showToast("Profilbild gespeichert.", "success");
+    } catch (fehler) {
+      showToast(fehler.message, "error");
+    }
+  }
+
+  const bildFeld = $("kopBildDatei");
+  const bildWaehlen = () => { if (bildFeld) { bildFeld.value = ""; bildFeld.click(); } };
+  $("kopBildWahl").addEventListener("click", bildWaehlen);
+  $("kopBildKnopf").addEventListener("click", bildWaehlen);
+  bildFeld.addEventListener("change", e => bildSetzen(e.target.files && e.target.files[0]));
+  $("kopBildWeg").addEventListener("click", () => {
+    if (!settings.bild) return;
+    settings.bild = "";
+    store.set("lifeos_settings", settings);
+    updateAvatar();
+    showToast("Profilbild entfernt.", "success");
+  });
 
   $("settingName").addEventListener("input", e => {
     settings.name = e.target.value;
@@ -2351,6 +2681,13 @@
       store.set("lifeos_termine", termine);
       renderTermine();
       showToast(`Termin „${title}" am ${fmtDate(date.iso)} hinzugefügt.`, "success");
+      return;
+    }
+
+    /* Bevor es ins Netz geht: steht es vielleicht hier drin? */
+    const eigene = fundstellen(trimmed);
+    if (eigene.length) {
+      eigene[0].tun();
       return;
     }
 
@@ -2564,13 +2901,30 @@
     });
   }
 
-  /* Draußen klicken, rollen oder Fenstergröße ändern schließt */
+  /* Ein Zug mit gedrückter Maus gehört zusammen, auch wenn er über
+     den Rand des Menüs hinausführt: Wer im Suchfeld Text markiert
+     und dabei nach draußen zieht, will das Menü nicht schließen.
+     Deshalb wird gemerkt, wo der Zug begann — und solange die Taste
+     unten ist, schließt gar nichts. */
+  let mausUnten = false;
+  let zugBegannImMenue = false;
+
   document.addEventListener("mousedown", e => {
-    if (!auswahlOffen) return;
-    if (e.target.closest(".aw-liste") || e.target.closest(".aw-knopf")) return;
+    mausUnten = true;
+    const drin = !!(e.target.closest(".aw-liste") || e.target.closest(".aw-knopf"));
+    zugBegannImMenue = drin;
+    if (!auswahlOffen || drin) return;
     auswahlSchliessen();
   });
-  window.addEventListener("resize", auswahlSchliessen);
+
+  document.addEventListener("mouseup", () => {
+    mausUnten = false;
+    /* Erst nach dem Loslassen zurücksetzen: ein Klick außerhalb
+       feuert sein mouseup, bevor das nächste mousedown kommt. */
+    setTimeout(() => { zugBegannImMenue = false; }, 0);
+  });
+
+  window.addEventListener("resize", () => { if (!mausUnten) auswahlSchliessen(); });
 
   /* Rollt die Seite unter dem Menü weg, steht es an der falschen
      Stelle — dann schließt es. Rollt aber die Liste selbst, ist das
@@ -2578,9 +2932,15 @@
 
      Der Lauscher hört in der Einfangphase mit, weil ein Rollen
      innerhalb eines Kastens nicht nach oben steigt. Ohne die
-     Ausnahme schloss das Menü deshalb beim ersten Radzug. */
+     Ausnahme schloss das Menü beim ersten Radzug.
+
+     Und während die Maustaste unten ist, wird gar nicht geschlossen:
+     zieht man beim Markieren über den Rand, rollt der Browser die
+     Seite von selbst mit — das Menü verschwand dann mitten im
+     Markieren. */
   document.addEventListener("scroll", e => {
     if (!auswahlOffen) return;
+    if (mausUnten || zugBegannImMenue) return;
     if (e.target && auswahlOffen.liste.contains(e.target)) return;
     auswahlSchliessen();
   }, true);
@@ -2600,11 +2960,30 @@
     }).observe(document.body, { childList: true, subtree: true });
   }
 
-  /* ---------- Avatar ---------- */
+  /* ---------- Avatar ----------
+     Ohne Bild die ersten beiden Buchstaben, mit Bild das Bild. Ein
+     Element, zwei Zustände — deshalb hier und nicht an jeder
+     Stelle einzeln. */
+  function avatarFuellen(el, name) {
+    if (!el) return;
+    el.innerHTML = "";
+    if (settings.bild) {
+      const bild = document.createElement("img");
+      bild.src = settings.bild;
+      bild.alt = "";
+      el.appendChild(bild);
+      el.classList.add("mit-bild");
+      return;
+    }
+    el.classList.remove("mit-bild");
+    el.textContent = name ? name.slice(0, 2).toUpperCase() : "–";
+  }
+
   function updateAvatar() {
     const name = (settings.name || "").trim();
     $("avatarName").textContent = name || "Gast";
-    $("avatarCircle").textContent = name ? name.slice(0, 2).toUpperCase() : "–";
+    avatarFuellen($("avatarCircle"), name);
+    kpKopfZeichnen();
   }
   updateAvatar();
 
@@ -2842,11 +3221,18 @@
       const eintraege = eintraegeAm(key);
       if (!fremd) imMonat += eintraege.length;
 
+      /* Schulfreie Tage bekommen einen eigenen Grund — sonst sieht
+         eine Ferienwoche aus wie eine leere Arbeitswoche. */
+      const feier = feiertagName(key);
+      const frei = feier || ferienName(key);
+
       const zelle = document.createElement("button");
       zelle.type = "button";
       zelle.className = "monat-tag" + (fremd ? " fremd" : "") + (wochenende ? " wochenende" : "") +
+                        (frei && !wochenende ? (feier ? " feiertag" : " ferien") : "") +
                         (key === heute ? " heute" : "") + (key === gewaehlterTag ? " gewaehlt" : "");
       zelle.dataset.tag = key;
+      if (frei) zelle.title = frei;
 
       // Höchstens drei Einträge zeigen, der Rest als Zähler
       const sichtbar = eintraege.slice(0, 3);
@@ -2857,7 +3243,9 @@
          </span>`).join("");
       const mehr = eintraege.length > 3 ? `<span class="mt-mehr">+${eintraege.length - 3} weitere</span>` : "";
 
-      zelle.innerHTML = `<span class="mt-zahl">${d.getDate()}</span>${chips}${mehr}`;
+      const freiMarke = frei && !wochenende && !fremd
+        ? `<span class="mt-frei">${escapeHTML(feier || "Ferien")}</span>` : "";
+      zelle.innerHTML = `<span class="mt-zahl">${d.getDate()}</span>${freiMarke}${chips}${mehr}`;
       gitter.appendChild(zelle);
     }
 
@@ -3048,6 +3436,15 @@
     const tage = daysUntil(e.date);
     if (tage < 0) return { zahl: Math.abs(tage), einheit: Math.abs(tage) === 1 ? "Tag über" : "Tage über", ton: "rot" };
     if (tage === 0) return { zahl: "heute", einheit: "", ton: "rot" };
+    /* Für Schulisches zählen Schultage: bis zu einer Klausur ist
+       nicht die Zahl der Kalendertage die Frage, sondern wie oft man
+       bis dahin noch in dem Fach sitzt. */
+    if (e.art !== "termin" && tage >= 2) {
+      const schul = schultageBis(e.date);
+      if (schul === 0) return { zahl: "nach", einheit: "den Ferien", ton: "ruhig" };
+      return { zahl: schul, einheit: schul === 1 ? "Schultag" : "Schultage",
+               ton: tage <= 3 ? "gelb" : "ruhig" };
+    }
     return { zahl: tage, einheit: tage === 1 ? "Tag" : "Tage", ton: tage <= 3 ? "gelb" : "ruhig" };
   }
 
@@ -3143,7 +3540,7 @@
              <div class="vz-sub">${fmtDate(e.date)}${e.time ? " · " + e.time + " Uhr" : ""}${
                klausurZusatz(e) ? ` <span class="vz-fach">${escapeHTML(klausurZusatz(e))}</span>` : ""}</div>
            </div>
-           <span class="vz-badge">${diff >= 0 ? badgeFor(diff) : "vorbei"}</span>
+           <span class="vz-badge">${diff >= 0 ? badgeFor(diff, art === "termin" ? null : e.date) : "vorbei"}</span>
            <button class="vz-del" data-id="${e.id}" data-art="${art}" aria-label="Löschen">✕</button>`,
           (art === "hausaufgabe" ? hausFrist(diff) : fristKlasse(diff))
           + (diff === 0 ? " heute" : diff > 0 && diff <= 3 ? " bald" : "")));
@@ -4416,7 +4813,7 @@
             <span class="ffk-titel">${escapeHTML(k.title)}</span>
             <span class="ffk-wann">${fmtDate(k.date)}${
               k.von ? " \u00b7 " + blockName(k.von, k.bis || k.von) : ""}</span>
-            <span class="ffk-badge">${badgeFor(daysUntil(k.date))}</span>
+            <span class="ffk-badge">${badgeFor(daysUntil(k.date), k.date)}</span>
           </li>`).join("")}</ul>`
           : '<div class="ff-leer">Noch keine Klausur eingetragen</div>'}
       </div>
@@ -4481,6 +4878,7 @@
   let abfrageOffen = false;      // Rueckseite sichtbar?
   let abfrageStapel = [];
   let abfrageGewusst = 0;
+  let abfrageErstLaenge = 0;
   /* Für Auswahl, Lücke und Wahr/Falsch: was angetippt bzw. getippt
      wurde, und ob schon geprüft ist. */
   let abfrageWahl = new Set();
@@ -4494,7 +4892,53 @@
     abfrageErgebnis = null;
   }
 
-  const kartenVon = id => lernkarten[id] || [];
+  /* ==========================================================
+     LERNPLAN — WANN IST EINE KARTE WIEDER DRAN
+     Eine Karte, die man kann, muss man morgen nicht nochmal sehen;
+     eine, die man nicht kann, schon. Deshalb hat jede Karte eine
+     Stufe: gewusst rückt eine hoch, nicht gewusst fällt auf null
+     zurück. Die Stufe bestimmt, wie viele Tage bis zum Wiedersehen
+     vergehen.
+
+     Neue Karten haben noch keine Stufe — die sind sofort fällig.
+     ========================================================== */
+  /* Alle fälligen Karten quer über Klausuren und eigene Themen.
+     Ein Stapel, dessen Besitzer gelöscht wurde, zählt nicht mit. */
+  function faelligeKarten() {
+    const raus = [];
+    Object.entries(lernkarten).forEach(([besitzer, karten]) => {
+      if (!Array.isArray(karten)) return;
+      const wo = klausuren.find(k => k.id === besitzer) || themen.find(t => t.id === besitzer);
+      /* Ein Stapel ohne Besitzer wird nicht abgefragt: man wüsste
+         beim Antworten nicht, wozu die Karte gehört. Verloren ist er
+         trotzdem nicht — er steht unter „Sonstiges" und lässt sich
+         von dort als eigenes Thema übernehmen. */
+      if (!wo) return;
+      karten.forEach(c => { if (karteFaellig(c)) raus.push({ ...c, ausStapel: wo.title }); });
+    });
+    return raus;
+  }
+
+  /* Bewusst eine Funktionsdeklaration: die Zahl wird schon beim
+     ersten Zeichnen der Dashboard-Reiter gebraucht. */
+  function faelligZahl() { return faelligeKarten().length; }
+
+  /* Nach jeder Antwort: Stufe setzen und den nächsten Termin
+     ausrechnen. Das passiert auch beim normalen Abfragen eines
+     Stapels — sonst hätte man zwei Wahrheiten. */
+  function karteBewerten(c, gewusst) {
+    if (!c || !c.id) return;
+    const alt = kartenPlan[c.id] || { stufe: 0 };
+    const stufe = gewusst ? Math.min(alt.stufe + 1, ABSTAENDE.length - 1) : 0;
+    kartenPlan[c.id] = {
+      stufe,
+      faellig: tagPlus(gewusst ? ABSTAENDE[stufe] : 1),
+      zuletzt: todayStr()
+    };
+    kartenPlanSichern();
+  }
+
+  const kartenVon = id => id === PORTION ? faelligeKarten() : (lernkarten[id] || []);
   const kartenSichern = () => store.set("lifeos_lernkarten", lernkarten);
 
   /* ==========================================================
@@ -4886,8 +5330,12 @@ Gib die Datei als eine einzige Markdown-Datei aus.`;
   function kartenSchliessen() {
     /* Zurück zu dem Unterfenster, aus dem die Karten kamen */
     const warThema = !!themen.find(x => x.id === kartenKlausur);
+    const warPortion = kartenKlausur === PORTION;
     kartenKlausur = null;
     kartenSchicht.classList.remove("open");
+    /* Nach der Tagesportion sind Zahlen im Menü und im Dashboard
+       überholt — sie werden hier nachgezogen. */
+    if (warPortion) { faelligAuffrischen(); renderTabLists(); return; }
     if (warThema) { themaPanelZeichnen(); baueThemen(); }
     else lernPanelZeichnen();
   }
@@ -4901,6 +5349,9 @@ Gib die Datei als eine einzige Markdown-Datei aus.`;
     }
     abfrageIndex = 0;
     abfrageGewusst = 0;
+    /* Wie viele Karten der Durchgang ursprünglich hatte — was danach
+       hinten wieder draufkommt, zählt für den Lernplan nicht mehr. */
+    abfrageErstLaenge = abfrageStapel.length;
     abfrageZuruecksetzen();
   }
 
@@ -4908,14 +5359,19 @@ Gib die Datei als eine einzige Markdown-Datei aus.`;
     if (!kartenKlausur) return kartenSchliessen();
     /* Karten hängen an einer Klausur oder an einem eigenen Thema —
        für das Fenster ist das dasselbe: ein Name und eine Kennung. */
-    const k = klausuren.find(x => x.id === kartenKlausur)
-           || themen.find(x => x.id === kartenKlausur);
+    /* Die Tagesportion gehört keinem Stapel — sie ist einer */
+    const k = kartenKlausur === PORTION
+      ? { id: PORTION, title: "Heute fällig" }
+      : (klausuren.find(x => x.id === kartenKlausur)
+         || themen.find(x => x.id === kartenKlausur));
     if (!k) return kartenSchliessen();
     /* Ein eigenes Thema hat kein Fach \u2014 dann steht das statt eines
        Gedankenstrichs, sonst wirkt der Kopf halb leer. */
     const istThema = !!themen.find(x => x.id === kartenKlausur);
     const f = k.fach ? fachInfo(k.fach)
-            : { kurz: istThema ? "Eigenes Thema" : "\u2014", ton: "grau" };
+            : { kurz: k.id === PORTION ? "aus allen Stapeln"
+                     : istThema ? "Eigenes Thema" : "\u2014",
+                ton: k.id === PORTION ? "blau" : "grau" };
     const karten = kartenVon(k.id);
 
     kartenFenster.className = "modal karten-fenster ton-" + f.ton;
@@ -4930,7 +5386,8 @@ Gib die Datei als eine einzige Markdown-Datei aus.`;
           </div>
         </div>
         <div class="kf-schalter">
-          <button type="button" class="kf-tab${kartenSeite === "liste" ? " an" : ""}" data-kf="liste">Bearbeiten</button>
+          ${k.id === PORTION ? "" : `
+          <button type="button" class="kf-tab${kartenSeite === "liste" ? " an" : ""}" data-kf="liste">Bearbeiten</button>`}
           <button type="button" class="kf-tab${kartenSeite === "abfrage" ? " an" : ""}" data-kf="abfrage"
             ${karten.length ? "" : "disabled"}>Abfragen</button>
         </div>
@@ -5454,12 +5911,19 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
   }
 
   function abfrageWeiter(gewusst) {
+    const laufende = abfrageStapel[abfrageIndex];
     if (gewusst) abfrageGewusst++;
     /* Nicht Gewusstes kommt hinten wieder drauf */
-    else abfrageStapel.push(abfrageStapel[abfrageIndex]);
+    else abfrageStapel.push(laufende);
+    /* Und in den Lernplan: davon hängt ab, wann die Karte wieder
+       auf dem Tagesstapel liegt. Nur beim ersten Durchgang, sonst
+       zählte eine Karte doppelt, die man hinten nochmal sieht. */
+    if (abfrageIndex < abfrageErstLaenge) karteBewerten(laufende, gewusst);
     abfrageIndex++;
     abfrageZuruecksetzen();
     kartenZeichnen();
+    /* Die Zahl im Menü und auf dem Dashboard zieht mit */
+    faelligAuffrischen();
   }
 
   kartenSchicht.addEventListener("mousedown", e => {
@@ -5778,7 +6242,7 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
     panel.innerHTML = `
       <div class="lp-kopf">
         <span class="lp-fach"><i></i>${escapeHTML(f.lang)}</span>
-        <span class="lp-frist">${diff >= 0 ? badgeFor(diff) : "vorbei"}</span>
+        <span class="lp-frist">${diff >= 0 ? badgeFor(diff, k.date) : "vorbei"}</span>
         <button type="button" class="lp-zu" aria-label="Schlie\u00dfen">\u2715</button>
       </div>
       <h3 class="lp-titel">${escapeHTML(k.title)}</h3>
@@ -6049,6 +6513,7 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
 
   function baueLernen() {
     reiterAnwenden();
+    faelligAuffrischen();
     if (lernReiter === "hausaufgaben") { hausPanelZeichnen(); baueHausaufgaben(); }
     else if (lernReiter === "themen") { themaPanelZeichnen(); baueThemen(); }
     else baueLernKlausuren();
@@ -6108,6 +6573,43 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
   const themaVon = id => themen.find(t => t.id === id) || null;
   const themenSichern = () => store.set("lifeos_themen", themen);
 
+  /* ---------- Stapel ohne Besitzer ----------
+     Wird eine Klausur gelöscht, gehen ihre Karten normalerweise mit.
+     Bleibt einmal einer übrig — durch einen Abgleich von zwei Geräten
+     oder weil eine Liste zurückgesetzt wurde —, hängt er in der Luft:
+     kein Fenster führt hin, und in der Tagesportion würde man nach
+     Karten gefragt, deren Klausur es nicht mehr gibt.
+
+     Deshalb stehen sie sichtbar unter „Sonstiges", mit genau zwei
+     Wegen: als eigenes Thema übernehmen oder wegwerfen. */
+  function verwaisteStapel() {
+    return Object.entries(lernkarten)
+      .filter(([id, karten]) => Array.isArray(karten) && karten.length
+        && !klausuren.some(k => k.id === id)
+        && !themen.some(t => t.id === id))
+      .map(([id, karten]) => ({
+        id,
+        anzahl: karten.length,
+        /* Ein Name aus dem, was auf den Karten steht — besser als
+           „Stapel 1". */
+        name: (karten.find(c => c && c.thema) || {}).thema || "Übernommene Karten"
+      }));
+  }
+
+  function stapelUebernehmen(alt, name) {
+    const karten = lernkarten[alt];
+    if (!Array.isArray(karten) || !karten.length) return null;
+    const neu = { id: "t" + Date.now().toString(36), title: name, date: "", notiz: "" };
+    themen.unshift(neu);
+    /* Die Karten behalten ihre Kennungen — damit bleibt auch der
+       Lernplan gültig, den sie schon haben. */
+    lernkarten[neu.id] = karten;
+    delete lernkarten[alt];
+    themenSichern();
+    kartenSichern();
+    return neu;
+  }
+
   function themenSortiert() {
     /* Mit Datum zuerst und nach Nähe, danach der Rest alphabetisch —
        was eine Frist hat, drängt. */
@@ -6144,10 +6646,63 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
     baueLernen();
   }
 
+  /* Der Kasten mit den herrenlosen Stapeln — er hängt unter der
+     Themenliste und ist meistens gar nicht da. */
+  function verwaisteHtml() {
+    const weg = verwaisteStapel();
+    if (!weg.length) return "";
+    const karten = weg.reduce((s, x) => s + x.anzahl, 0);
+    return `<div class="block lern-gruppe">
+      <div class="block-kopf"><h3>Karten ohne Thema</h3>
+        <span class="block-zahl">${karten}</span></div>
+      <div class="block-unter">Diese Stapel gehörten zu Klausuren, die es nicht mehr gibt.
+        Abgefragt werden sie erst wieder, wenn sie ein Thema haben.</div>
+      <ul class="voll-liste">${weg.map(x => `
+        <li class="voll-zeile ton-grau">
+          <span class="vz-punkt termin"></span>
+          <div class="vz-haupt">
+            <div class="vz-titel">${escapeHTML(x.name)}</div>
+            <div class="vz-sub">${x.anzahl} ${x.anzahl === 1 ? "Karte" : "Karten"} · ohne Klausur</div>
+          </div>
+          <button type="button" class="vw-knopf" data-vw-nimm="${escapeHTML(x.id)}">Als Thema übernehmen</button>
+          <button type="button" class="vz-del" data-vw-weg="${escapeHTML(x.id)}"
+            aria-label="Stapel löschen">✕</button>
+        </li>`).join("")}</ul>
+    </div>`;
+  }
+
+  function verwaisteBinden(behaelter) {
+    behaelter.querySelectorAll("[data-vw-nimm]").forEach(b =>
+      b.addEventListener("click", () => {
+        const alt = b.dataset.vwNimm;
+        const eintrag = verwaisteStapel().find(x => x.id === alt);
+        const neu = stapelUebernehmen(alt, eintrag ? eintrag.name : "Übernommene Karten");
+        if (!neu) return;
+        offenesThema = neu.id;
+        themaPanelZeichnen();
+        baueThemen();
+        faelligAuffrischen();
+        showToast("Als Thema „" + neu.title + "“ übernommen.", "success");
+      }));
+
+    behaelter.querySelectorAll("[data-vw-weg]").forEach(b =>
+      b.addEventListener("click", () => {
+        const id = b.dataset.vwWeg;
+        const anzahl = (lernkarten[id] || []).length;
+        if (!confirm(anzahl + " Karten endgültig löschen?")) return;
+        delete lernkarten[id];
+        kartenSichern();
+        baueThemen();
+        faelligAuffrischen();
+        showToast(anzahl + " Karten gelöscht");
+      }));
+  }
+
   function baueThemen() {
     const behaelter = $("pgThemenGruppen");
     if (!behaelter) return;
     const liste = themenSortiert();
+    const verwaist = verwaisteHtml();
 
     if (!liste.length) {
       $("lernenSub").textContent = "Keine eigenen Themen";
@@ -6157,7 +6712,8 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
            <div class="ll-text">Alles, was du lernst, ohne dass eine Klausur dahintersteht —
              eine Sprache, ein Kapitel nebenher, die Theorieprüfung.
              Über das <b>+</b> oben rechts oder mit <b>/themen neu</b>.</div>
-         </div>`;
+         </div>` + verwaist;
+      verwaisteBinden(behaelter);
       return;
     }
 
@@ -6179,11 +6735,13 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
                                              : "noch keine Karten"}${
                  t.date ? " · " + fmtDate(t.date) : ""}</div>
              </div>
-             ${t.date ? `<span class="vz-badge">${badgeFor(tage)}</span>` : ""}
+             ${t.date ? `<span class="vz-badge">${badgeFor(tage, t.date)}</span>` : ""}
              <button class="vz-del" data-thema-weg="${t.id}" aria-label="Thema löschen">✕</button>
            </li>`; }).join("")}
          </ul>
-       </div>`;
+       </div>` + verwaist;
+
+    verwaisteBinden(behaelter);
 
     behaelter.querySelectorAll("[data-thema]").forEach(li =>
       li.addEventListener("click", e => {
@@ -6209,16 +6767,25 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
     const panel = $("pgThemaPanel");
     if (!panel) return;
     const t = offenesThema ? themaVon(offenesThema) : null;
-    if (!t) { panel.innerHTML = ""; panel.classList.add("leer"); return; }
-    panel.classList.remove("leer");
+    /* Ob der Reiter gerade dran ist, entscheidet reiterAnwenden —
+       das darf hier nicht verlorengehen. */
+    const aus = panel.classList.contains("aus") ? " aus" : "";
+    if (!t) { panel.innerHTML = ""; panel.className = "lern-panel leer" + aus; return; }
 
     const anzahl = kartenVon(t.id).length;
     const tage = t.date ? daysUntil(t.date) : null;
 
+    /* Ohne "offen" bleibt das Unterfenster auf display:none stehen —
+       es war gefüllt, aber unsichtbar, und das Thema ließ sich nach
+       dem Anlegen mit nichts mehr bedienen. Klausuren und
+       Hausaufgaben setzen ihre Klassen an derselben Stelle. */
+    panel.className = "lern-panel offen ton-grau" + aus
+                    + (tage !== null ? " " + fristKlasse(tage) : "");
+
     panel.innerHTML = `
       <div class="lp-kopf">
         <span class="lp-fach"><i></i>Eigenes Thema</span>
-        ${t.date ? `<span class="lp-frist">${badgeFor(tage)}</span>` : ""}
+        ${t.date ? `<span class="lp-frist">${badgeFor(tage, t.date)}</span>` : ""}
         <button type="button" class="lp-zu" data-tp="zu" aria-label="Schließen">✕</button>
       </div>
       <div class="lp-titel">${escapeHTML(t.title)}</div>
@@ -6311,7 +6878,7 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
     panel.innerHTML = `
       <div class="lp-kopf">
         <span class="lp-fach"><i></i>${escapeHTML(f.lang)}</span>
-        <span class="lp-frist">${badgeFor(diff)}</span>
+        <span class="lp-frist">${badgeFor(diff, h.date)}</span>
         <button type="button" class="lp-zu" aria-label="Schließen">✕</button>
       </div>
       <h3 class="lp-titel">${escapeHTML(h.title)}</h3>
@@ -6505,7 +7072,7 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
              <div class="vz-sub">${escapeHTML(f.lang)} · ${escapeHTML(hausGrund(h))}</div>
            </div>
            <span class="ha-stufe stufe-${stufe}">${HA_STUFEN[stufe]}</span>
-           <span class="vz-badge">${diff >= 0 ? badgeFor(diff) : "überfällig"}</span>
+           <span class="vz-badge">${diff >= 0 ? badgeFor(diff, h.date) : "überfällig"}</span>
            <button type="button" class="ha-haken" data-haus="${h.id}"
              aria-label="Als erledigt abhaken">${HAKEN_SVG}</button>`,
           "ton-" + f.ton + " " + hausFrist(diff) + " klickbar" + (zuerst ? " empfohlen" : "")));
@@ -6601,7 +7168,7 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
            </div>
            <span class="vz-material${zahl ? " da" : ""}">${
              zahl ? zahl + (zahl === 1 ? " Material" : " Materialien") : "kein Material"}</span>
-           <span class="vz-badge">${badgeFor(diff)}</span>`,
+           <span class="vz-badge">${badgeFor(diff, k.date)}</span>`,
           "ton-" + f.ton + " " + fristKlasse(diff) + " klickbar" + (erster ? " empfohlen" : "")));
         liste.lastElementChild.addEventListener("click", () => {
           lernKlausur = k.id;
@@ -7051,8 +7618,10 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
           <div class="li-name">
             <b>${escapeHTML(lichtName(g))}${gruppe
               ? `<span class="li-gruppe">${escapeHTML(gruppe)}</span>` : ""}</b>
-            <span>${g.an ? escapeHTML(lichtEffektName(g))
-                          : (g.lichter ? g.lichter + " LEDs" : escapeHTML(g.ip))}</span>
+            <span>${gruppe
+              ? `<span class="li-gruppe li-gruppe-klein">${escapeHTML(gruppe)}</span>` : ""}${
+              g.an ? escapeHTML(lichtEffektName(g))
+                   : (g.lichter ? g.lichter + " LEDs" : escapeHTML(g.ip))}</span>
           </div>
           <button type="button" class="li-stift" data-stift="${escapeHTML(g.ip)}"
                   aria-expanded="${bearbeitet}" aria-label="Name und Gruppe">
@@ -9265,6 +9834,34 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
   const BAUM = [
     { wort: "/dashboard", titel: "Dashboard", info: "Zur Übersicht", seite: "dashboard" },
 
+    { wort: "/papierkorb", titel: "Papierkorb", info: "Gelöschtes zurückholen",
+      unter: [
+        { wort: "öffnen", titel: "Papierkorb öffnen", info: "zeigt, was verschwunden ist", art: "sofort",
+          tun: () => openSettings("papierkorb") }
+      ] },
+
+    { wort: "/rückblick", titel: "Wochenrückblick", info: "Schreibt die Notiz jetzt",
+      unter: [
+        { wort: "woche", titel: "Vergangene Woche", info: "als Notiz ablegen", art: "sofort",
+          tun: () => {
+            const start = wochenStart(new Date());
+            start.setDate(start.getDate() - 7);
+            const n = rueckblickSchreiben(start);
+            notizOffen = n.id;
+            notizenOeffnen(true);
+            notizenZeichnen();
+            showToast("Rückblick geschrieben.", "success");
+          } },
+        { wort: "diese", titel: "Laufende Woche", info: "Zwischenstand als Notiz", art: "sofort",
+          tun: () => {
+            const n = rueckblickSchreiben(wochenStart(new Date()));
+            notizOffen = n.id;
+            notizenOeffnen(true);
+            notizenZeichnen();
+            showToast("Zwischenstand geschrieben.", "success");
+          } }
+      ] },
+
     { wort: "/kalender", titel: "Kalender & Schule", info: "Termine und Klausuren", seite: "kalender",
       unter: [
         { wort: "neu", titel: "Termin anlegen", info: "Name eingeben, dann Enter",
@@ -9486,8 +10083,170 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
     slashZeichnen();
   }
 
+  /* ==========================================================
+     FUNDSTELLEN
+     Tippt man etwas ohne Schrägstrich, wird nicht mehr sofort
+     Google aufgemacht: erst wird im eigenen Bestand gesucht.
+     Termine, Klausuren, Hausaufgaben, Themen, Notizen, Karteikarten,
+     Fächer und Seiten — alles, was das Dashboard führt.
+
+     Die Treffer laufen durch dieselbe Liste wie die Befehle, mit
+     denselben Tasten. Zwei Auswahllisten übereinander wären eine zu
+     viel.
+     ========================================================== */
+  let suchModus = false;
+
+  const fundAktiv = () => !slashAktiv() && sucheFeld.value.trim().length >= 2;
+
+  /* 2 = trifft vorne, 1 = kommt irgendwo vor, 0 = nicht */
+  function passt(text, q) {
+    const t = String(text || "").toLowerCase();
+    if (!t) return 0;
+    if (t.startsWith(q)) return 2;
+    /* Auch der Anfang eines Wortes zählt als "vorne" — "phi" soll
+       "Grundkurs Philosophie" finden. */
+    if (t.split(/[\s,.;:/-]+/).some(w => w.startsWith(q))) return 2;
+    return t.includes(q) ? 1 : 0;
+  }
+
+  const kurzText = (text, max) => {
+    const t = String(text || "").replace(/\s+/g, " ").trim();
+    return t.length > max ? t.slice(0, max - 1) + "…" : t;
+  };
+
+  function fundstellen(roh) {
+    const q = String(roh || "").trim().toLowerCase();
+    if (q.length < 2) return [];
+    const treffer = [];
+    const nimm = (rang, text, info, symbol, tun) =>
+      treffer.push({ rang, text, info, symbol, taste: "Enter", tun });
+
+    /* --- Seiten --- */
+    document.querySelectorAll(".nav-link[data-seite]").forEach(a => {
+      const name = a.querySelector("span").textContent.trim();
+      const r = passt(name, q);
+      if (r) nimm(r, name, "Seite öffnen", NAV_SYMBOLE[a.dataset.seite],
+                  () => seiteZeigen(a.dataset.seite));
+    });
+
+    /* --- Termine --- */
+    termine.forEach(t => {
+      const r = passt(t.title, q);
+      if (!r) return;
+      nimm(r, t.title, "Termin · " + fmtDate(t.date) + (t.time ? " · " + t.time : ""),
+        NAV_SYMBOLE.kalender, () => {
+          monatAnsicht = new Date(t.date + "T00:00:00"); monatAnsicht.setDate(1);
+          gewaehlterTag = t.date;
+          seiteZeigen("kalender");
+          baueKalender();
+        });
+    });
+
+    /* --- Klausuren --- */
+    klausuren.forEach(k => {
+      const r = Math.max(passt(k.title, q), k.fach ? passt(fachInfo(k.fach).lang, q) : 0);
+      if (!r) return;
+      const anzahl = kartenVon(k.id).length;
+      nimm(r, k.title, "Klausur · " + fmtDate(k.date)
+             + (anzahl ? " · " + anzahl + (anzahl === 1 ? " Karte" : " Karten") : ""),
+        NAV_SYMBOLE.lernen, () => lernenZeigen(k.id));
+    });
+
+    /* --- Hausaufgaben --- */
+    hausaufgaben.forEach(h => {
+      const r = Math.max(passt(h.title, q), h.fach ? passt(fachInfo(h.fach).lang, q) : 0);
+      if (!r) return;
+      nimm(r, h.title, "Hausaufgabe" + (h.fach ? " " + fachInfo(h.fach).kurz : "")
+             + (h.date ? " · " + fmtDate(h.date) : ""),
+        NAV_SYMBOLE.lernen, () => {
+          hausOffen = h.id;
+          lernReiter = "hausaufgaben";
+          store.set("lifeos_lern_reiter", lernReiter);
+          seiteZeigen("lernen");
+        });
+    });
+
+    /* --- Eigene Themen --- */
+    themen.forEach(t => {
+      const r = passt(t.title, q);
+      if (!r) return;
+      const anzahl = kartenVon(t.id).length;
+      nimm(r, t.title, "Thema" + (anzahl ? " · " + anzahl + (anzahl === 1 ? " Karte" : " Karten") : ""),
+        NAV_SYMBOLE.lernen, () => {
+          offenesThema = t.id;
+          lernReiter = "themen";
+          store.set("lifeos_lern_reiter", lernReiter);
+          seiteZeigen("lernen");
+        });
+    });
+
+    /* --- Notizen --- */
+    notizen.forEach(n => {
+      const r = Math.max(passt(notizTitel(n), q), passt(n.text, q));
+      if (!r) return;
+      nimm(r, notizTitel(n), "Notiz · " + kurzText(n.text, 46),
+        null, () => {
+          notizOffen = n.id;
+          notizenOeffnen(true);
+          notizenZeichnen();
+        });
+    });
+
+    /* --- Karteikarten --- */
+    Object.entries(lernkarten).forEach(([besitzer, karten]) => {
+      if (!Array.isArray(karten)) return;
+      const wo = klausuren.find(k => k.id === besitzer) || themen.find(t => t.id === besitzer);
+      if (!wo) return;
+      karten.forEach(c => {
+        const r = Math.max(passt(c.frage, q), passt(c.antwort, q), passt(c.thema, q));
+        if (!r) return;
+        nimm(r - 0.5, kurzText(c.frage, 52), "Karte in „" + kurzText(wo.title, 26) + "“",
+          NAV_SYMBOLE.lernen, () => kartenOeffnen(besitzer, "liste"));
+      });
+    });
+
+    /* --- Fächer --- */
+    Object.keys(FAECHER).forEach(id => {
+      const f = fachInfo(id);
+      const r = Math.max(passt(f.lang, q), passt(f.kurz, q));
+      if (!r) return;
+      const stunden = STUNDENPLAN.filter(l => l.fach === id).length;
+      nimm(r, f.lang, "Fach · " + stunden + (stunden === 1 ? " Stunde" : " Stunden") + " pro Woche",
+        NAV_SYMBOLE.kalender, () => fachUebersicht(id));
+    });
+
+    /* Vorne-Treffer zuerst, danach alphabetisch — sonst wechselt die
+       Reihenfolge bei gleichem Rang von Tastendruck zu Tastendruck. */
+    treffer.sort((a, b) => b.rang - a.rang || a.text.localeCompare(b.text, "de"));
+    return treffer.slice(0, 9);
+  }
+
+  function fundZeichnen() {
+    suchModus = true;
+    slashPfad = null;
+    const roh = sucheFeld.value.trim();
+    slashTreffer = fundstellen(roh);
+
+    /* Google bleibt — aber als letzte Zeile, nicht als erste Antwort */
+    slashTreffer.push({
+      text: "Bei Google suchen", info: "„" + kurzText(roh, 42) + "“ im Netz",
+      taste: "Enter", symbol: null,
+      tun: () => window.open("https://www.google.com/search?q=" + encodeURIComponent(roh),
+                             "_blank", "noopener,noreferrer")
+    });
+
+    if (slashIndex >= slashTreffer.length) slashIndex = 0;
+    slashBox.innerHTML = slashTreffer.map((t, i) => eintragZeichnen(t, i, roh)).join("");
+    slashBox.classList.add("offen");
+    klickeBinden();
+  }
+
   function slashZeichnen() {
-    if (!slashAktiv()) return slashSchliessen();
+    if (!slashAktiv()) {
+      if (fundAktiv()) return fundZeichnen();
+      return slashSchliessen();
+    }
+    suchModus = false;
     slashPfad = pfadLesen(sucheFeld.value);
     const p = slashPfad;
 
@@ -9614,6 +10373,7 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
     slashTreffer = [];
     slashIndex = 0;
     slashPfad = null;
+    suchModus = false;
   }
 
   /* Wie sähe das Feld aus, wenn dieser Vorschlag gesetzt wird?
@@ -9633,6 +10393,15 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
     const gewaehlt = slashTreffer[slashIndex];
     if (!gewaehlt) return;
     nutzAktion("slash");
+
+    /* Ein Fundstück hat keinen Befehlspfad — es hat ein Ziel */
+    if (suchModus) {
+      sucheFeld.value = "";
+      slashSchliessen();
+      if (typeof gewaehlt.tun === "function") gewaehlt.tun();
+      return;
+    }
+
     const p = slashPfad;
 
     /* Oberbegriff: Seite öffnen oder eine Stufe tiefer gehen */
@@ -9692,7 +10461,8 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
   /* Nur die Markierung neu setzen — ohne die Liste neu zu filtern */
   function nurHervorheben() {
     if (!slashTreffer.length) return;
-    slashBox.innerHTML = slashTreffer.map((s, i) => eintragZeichnen(s, i, slashPrefix)).join("");
+    const hervor = suchModus ? sucheFeld.value.trim() : slashPrefix;
+    slashBox.innerHTML = slashTreffer.map((s, i) => eintragZeichnen(s, i, hervor)).join("");
     klickeBinden();
     const aktiv = slashBox.querySelector(".gewaehlt");
     if (aktiv) aktiv.scrollIntoView({ block: "nearest" });
@@ -9761,12 +10531,22 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
     slashZeichnen();
   });
   sucheFeld.addEventListener("blur", () => setTimeout(slashSchliessen, 120));
-  sucheFeld.addEventListener("focus", () => { if (slashAktiv()) slashZeichnen(); });
+  sucheFeld.addEventListener("focus", () => {
+    if (slashAktiv() || fundAktiv()) slashZeichnen();
+  });
 
   sucheFeld.addEventListener("keydown", e => {
-    if (!slashAktiv()) return;
+    if (!slashAktiv() && !suchModus) return;
     if (e.key === "Tab") {
       e.preventDefault();
+      /* In den Fundstellen gibt es nichts zu vervollständigen —
+         dort blättert Tab wie der Pfeil nach unten. */
+      if (suchModus) {
+        if (!slashTreffer.length) return;
+        slashIndex = (slashIndex + (e.shiftKey ? -1 : 1) + slashTreffer.length) % slashTreffer.length;
+        nurHervorheben();
+        return;
+      }
       slashVervollstaendigen(e.shiftKey);
     } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
       if (!slashTreffer.length) return;
@@ -9798,6 +10578,7 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
     .then(() => {
       /* Erst wenn die Messung da ist, lässt sich die Woche vergleichen */
       try { wochenberichtMelden(); } catch (e) { /* nicht so wichtig */ }
+      try { rueckblickPruefen(); } catch (e) { /* nicht so wichtig */ }
       /* Wurde die Analyse gezeichnet, bevor die Messung ankam, stünden
          dort Nullen — dann noch einmal zeichnen. */
       if (aktuelleSeite === "analyse") baueAnalyse();
@@ -10809,7 +11590,9 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
      ========================================================== */
   const SPRUNG = {
     d: "dashboard", k: "kalender", h: "habits", c: "kalorien",
-    b: "bildschirmzeit", l: "lernen", p: "planung", j: "projekte", a: "analyse"
+    b: "bildschirmzeit", l: "lernen", p: "planung", j: "projekte", a: "analyse",
+    /* "l" gehört Lernen, deshalb steht Licht auf dem w von WLED */
+    w: "licht"
   };
   let sprungBereit = 0;        // Zeitpunkt, an dem "g" gedrückt wurde
 
@@ -10836,11 +11619,444 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
 
     if (taste === "n") { e.preventDefault(); notizenOeffnen(true); notizNeu(); return; }
 
+    /* Das Fragezeichen ist die übliche Stelle für „was kann ich hier
+       eigentlich drücken" */
+    if (e.key === "?") { e.preventDefault(); tastenZeigen(); return; }
+
     /* Wie in den meisten Werkzeugen: Schrägstrich springt in die Suche */
     if (e.key === "/") {
       const feld = $("captureInput");
       if (feld) { e.preventDefault(); feld.focus(); feld.select(); }
     }
+  });
+
+  /* ==========================================================
+     PAPIERKORB
+     Der Server hebt je Schlüssel die letzten Fassungen auf. Was
+     zwischen einer alten Fassung und heute fehlt, war einmal da und
+     ist es nicht mehr — das ist der Papierkorb, ohne dass je etwas
+     „in den Papierkorb gelegt" werden musste.
+
+     Zurückgeholt wird der einzelne Eintrag, nicht die ganze Fassung:
+     wer einen Termin von gestern sucht, will nicht auch die drei
+     Änderungen von heute rückgängig machen.
+     ========================================================== */
+  const PAPIERKORB = [
+    { schluessel: "lifeos_termine", art: "Termin",
+      liste: () => termine,
+      titel: e => e.title,
+      wann:  e => e.date ? fmtDate(e.date) : "",
+      zurueck: e => { termine = termine.concat(e); store.set("lifeos_termine", termine);
+                      renderNaechste(); kalenderAuffrischen(); } },
+
+    { schluessel: "lifeos_klausuren", art: "Klausur",
+      liste: () => klausuren,
+      titel: e => e.title,
+      wann:  e => e.date ? fmtDate(e.date) : "",
+      /* klausurenSichern stößt auch den Google-Abgleich an — die
+         Klausur soll ja wieder im Kalender stehen. */
+      zurueck: e => { klausuren = klausuren.concat(e); klausurenSichern();
+                      renderNaechste(); renderTabLists(); kalenderAuffrischen(); baueLernen(); } },
+
+    { schluessel: "lifeos_hausaufgaben", art: "Hausaufgabe",
+      liste: () => hausaufgaben,
+      titel: e => e.title,
+      wann:  e => e.date ? fmtDate(e.date) : "",
+      zurueck: e => { hausaufgaben = hausaufgaben.concat(e); store.set("lifeos_hausaufgaben", hausaufgaben);
+                      renderNaechste(); kalenderAuffrischen(); baueLernen(); } },
+
+    { schluessel: "lifeos_themen", art: "Thema",
+      liste: () => themen,
+      titel: e => e.title,
+      wann:  e => e.date ? fmtDate(e.date) : "",
+      zurueck: e => { themen = themen.concat(e); store.set("lifeos_themen", themen);
+                      renderNaechste(); baueLernen(); } },
+
+    { schluessel: "lifeos_notizen", art: "Notiz",
+      liste: () => notizen,
+      titel: e => notizTitel(e),
+      wann:  e => e.erstellt ? fmtDate(dateKey(new Date(e.erstellt))) : "",
+      zurueck: e => { notizen = [e].concat(notizen); store.set("lifeos_notizen", notizen);
+                      notizenZeichnen(); } },
+
+    { schluessel: "lifeos_projekte", art: "Projekt",
+      liste: () => projekte,
+      titel: e => e.title || e.name,
+      wann:  () => "",
+      zurueck: e => { projekte = projekte.concat(e); store.set("lifeos_projekte", projekte);
+                      bereichZeichnen(BEREICHE.projekt); } },
+
+    { schluessel: "lifeos_planung", art: "Ablauf",
+      liste: () => planung,
+      titel: e => e.title || e.name,
+      wann:  () => "",
+      zurueck: e => { planung = planung.concat(e); store.set("lifeos_planung", planung);
+                      bereichZeichnen(BEREICHE.planung); } }
+  ];
+
+  const vorZeit = stand => {
+    const min = Math.round((Date.now() - stand) / 60000);
+    if (min < 2) return "gerade eben";
+    if (min < 60) return "vor " + min + " Minuten";
+    const std = Math.round(min / 60);
+    if (std < 24) return "vor " + std + (std === 1 ? " Stunde" : " Stunden");
+    const tage = Math.round(std / 24);
+    return "vor " + tage + (tage === 1 ? " Tag" : " Tagen");
+  };
+
+  /* Was war in einer früheren Fassung da und ist es heute nicht mehr? */
+  async function verschwundene(quelle) {
+    let fassungen = [];
+    try {
+      const d = await fetch("/api/bestand/frueher?schluessel=" + encodeURIComponent(quelle.schluessel))
+        .then(a => a.json());
+      if (!d.ok) return [];
+      fassungen = d.fassungen || [];
+    } catch (fehler) { return []; }
+
+    const jetzt = quelle.liste() || [];
+    const daIds = new Set(jetzt.filter(e => e && e.id != null).map(e => e.id));
+    const gesehen = new Set();
+    const raus = [];
+
+    /* Von der neuesten Fassung nach hinten: der erste Fund nennt den
+       Zeitpunkt, zu dem der Eintrag zuletzt noch da war. */
+    fassungen.forEach(f => {
+      if (!Array.isArray(f.wert)) return;
+      f.wert.forEach(e => {
+        if (!e || e.id == null) return;
+        if (daIds.has(e.id) || gesehen.has(e.id)) return;
+        gesehen.add(e.id);
+        raus.push({ quelle, eintrag: e, stand: f.stand });
+      });
+    });
+    return raus;
+  }
+
+  async function papierkorbZeichnen() {
+    const kasten = $("pkListe");
+    if (!kasten) return;
+    kasten.innerHTML = '<div class="gk-lade">Wird geprüft …</div>';
+
+    let alle = [];
+    for (const q of PAPIERKORB) {
+      alle = alle.concat(await verschwundene(q));
+    }
+    /* Zuletzt Verschwundenes zuerst — danach sucht man */
+    alle.sort((a, b) => (b.stand || 0) - (a.stand || 0));
+
+    if (!alle.length) {
+      kasten.innerHTML =
+        `<div class="pk-leer">Nichts vermisst.
+           <span>Gelöschtes taucht hier auf, solange der Server die alte Fassung noch hat.</span></div>`;
+      return;
+    }
+
+    kasten.innerHTML = alle.map((x, i) => {
+      const wann = x.quelle.wann(x.eintrag);
+      return `<div class="pk-zeile" data-i="${i}">
+        <div class="pk-text">
+          <div class="pk-titel">${escapeHTML(x.quelle.titel(x.eintrag) || "Ohne Titel")}</div>
+          <div class="pk-sub">${escapeHTML(x.quelle.art)}${wann ? " · " + escapeHTML(wann) : ""}
+            · weg ${escapeHTML(vorZeit(x.stand || Date.now()))}</div>
+        </div>
+        <button type="button" class="kop-klein" data-pk="${i}">Zurückholen</button>
+      </div>`;
+    }).join("");
+
+    kasten.querySelectorAll("[data-pk]").forEach(knopf => {
+      knopf.addEventListener("click", () => {
+        const x = alle[+knopf.dataset.pk];
+        if (!x) return;
+        /* Zweimal drücken darf nicht doppelt anlegen */
+        if ((x.quelle.liste() || []).some(e => e && e.id === x.eintrag.id)) {
+          return showToast("Ist schon wieder da.", "warn");
+        }
+        x.quelle.zurueck(x.eintrag);
+        showToast(x.quelle.art + " zurückgeholt: " + (x.quelle.titel(x.eintrag) || ""), "success");
+        papierkorbZeichnen();
+      });
+    });
+  }
+
+  /* ==========================================================
+     WOCHENRÜCKBLICK
+     Sonntagabend liegt eine Notiz bereit: Bildschirmzeit gegen das
+     Ziel, wie viele Habits standen, welche Serie am längsten hielt,
+     und was in der nächsten Woche ansteht.
+
+     Geschrieben wird sie einmal je Woche und nur, wenn die Woche
+     auch vorbei ist — Sonntag ab 18 Uhr, oder eben nachträglich,
+     wenn man erst am Dienstag wieder hereinschaut.
+     ========================================================== */
+
+  /* Montag der Woche, in der dieses Datum liegt */
+  function wochenStart(d) {
+    const x = new Date(d); x.setHours(0, 0, 0, 0);
+    x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
+    return x;
+  }
+
+  /* Kalenderwoche nach ISO — die Zahl, die auch im Kalender steht */
+  function kalenderWoche(d) {
+    const x = new Date(d); x.setHours(0, 0, 0, 0);
+    x.setDate(x.getDate() + 3 - ((x.getDay() + 6) % 7));   // Donnerstag der Woche
+    const jan4 = new Date(x.getFullYear(), 0, 4);
+    const versatz = (jan4.getDay() + 6) % 7;
+    return { jahr: x.getFullYear(),
+             kw: 1 + Math.round((x - jan4 + versatz * 86400000) / (7 * 86400000)) };
+  }
+
+  const stundenText = minuten => {
+    const m = Math.max(0, Math.round(minuten));
+    return Math.floor(m / 60) + " h " + String(m % 60).padStart(2, "0") + " min";
+  };
+
+  /* Der Text selbst. "start" ist der Montag der Woche, um die es
+     geht — so lässt sich derselbe Rückblick auch für die Woche davor
+     schreiben, ohne die Funktion zu ändern. */
+  function rueckblickText(start) {
+    const tage = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(start); d.setDate(start.getDate() + i);
+      tage.push(dateKey(d));
+    }
+    const woche = kalenderWoche(start);
+    const bis = new Date(start); bis.setDate(start.getDate() + 6);
+
+    const zeilen = [];
+    zeilen.push("Rückblick KW " + woche.kw + " · " + fmtDate(tage[0]) + " – " + fmtDate(dateKey(bis)));
+    zeilen.push("");
+
+    /* --- Bildschirmzeit --- */
+    const erfasst = tage.map(t => getDayEntry(t)).map(e => (e.phone || 0) + (e.pc || 0));
+    const mitWert = erfasst.filter(m => m > 0);
+    if (mitWert.length) {
+      const schnitt = Math.round(mitWert.reduce((a, b) => a + b, 0) / mitWert.length);
+      const grenze = (ziele && ziele.bildschirm) || 0;
+      const drueber = grenze ? mitWert.filter(m => m > grenze).length : 0;
+      zeilen.push("Bildschirmzeit: " + stundenText(schnitt) + " am Tag"
+        + (grenze ? " (Ziel " + stundenText(grenze) + ")" : "")
+        + " · erfasst an " + mitWert.length + " von 7 Tagen");
+      if (grenze) {
+        zeilen.push(drueber
+          ? "  An " + drueber + (drueber === 1 ? " Tag" : " Tagen") + " über dem Ziel."
+          : "  Kein Tag über dem Ziel.");
+      }
+    } else {
+      zeilen.push("Bildschirmzeit: diese Woche nichts erfasst.");
+    }
+
+    /* --- Habits --- */
+    const sichtbar = habits.list.slice(0, HABIT_LIMIT);
+    if (sichtbar.length) {
+      const moeglich = sichtbar.length * 7;
+      const geschafft = tage.reduce((summe, t) =>
+        summe + sichtbar.filter(h => habitErledigt(h.id, t)).length, 0);
+      const quote = Math.round(geschafft / moeglich * 100);
+      zeilen.push("Habits: " + geschafft + " von " + moeglich + " Haken (" + quote + " %)");
+
+      /* Was gut lief und was liegen blieb — je einer reicht */
+      const proHabit = sichtbar.map(h => ({
+        name: h.name,
+        zahl: tage.filter(t => habitErledigt(h.id, t)).length
+      })).sort((a, b) => b.zahl - a.zahl);
+      if (proHabit.length) {
+        zeilen.push("  Am besten: " + proHabit[0].name + " (" + proHabit[0].zahl + "×)");
+        const letzter = proHabit[proHabit.length - 1];
+        if (letzter.zahl < proHabit[0].zahl) {
+          zeilen.push("  Liegen geblieben: " + letzter.name + " (" + letzter.zahl + "×)");
+        }
+      }
+    }
+
+    /* --- Streaks --- */
+    const laengste = streaks.list
+      .map(e => ({ name: e.name, tage: streakLaenge(e.id) }))
+      .sort((a, b) => b.tage - a.tage)[0];
+    if (laengste && laengste.tage > 0) {
+      zeilen.push("Längste Serie: " + laengste.name + " · " + laengste.tage + " Tage");
+    }
+
+    /* --- Was ansteht --- */
+    zeilen.push("");
+    zeilen.push("Nächste Woche:");
+    const heute = todayStr();
+    const inSicht = d => d >= heute && daysUntil(d) <= 7;
+
+    const kommend = [];
+    klausuren.filter(k => inSicht(k.date))
+      .forEach(k => kommend.push("Klausur " + k.title + " · " + fmtDate(k.date)));
+    hausaufgaben.filter(h => !h.erledigt && h.date && inSicht(h.date))
+      .forEach(h => kommend.push("Hausaufgabe " + h.title + " · " + fmtDate(h.date)));
+    termine.filter(t => inSicht(t.date))
+      .forEach(t => kommend.push(t.title + " · " + fmtDate(t.date) + (t.time ? " " + t.time : "")));
+
+    if (kommend.length) kommend.slice(0, 8).forEach(z => zeilen.push("  " + z));
+    else zeilen.push("  Nichts eingetragen.");
+
+    const karten = faelligZahl();
+    if (karten) zeilen.push("  " + karten + (karten === 1 ? " Karteikarte" : " Karteikarten") + " sind fällig.");
+
+    return zeilen.join("\n");
+  }
+
+  /* Schreibt den Rückblick als Notiz und gibt sie zurück */
+  function rueckblickSchreiben(start) {
+    const text = rueckblickText(start);
+    const n = {
+      id: "n" + Date.now().toString(36),
+      text,
+      erstellt: Date.now(),
+      geaendert: Date.now(),
+      art: "rueckblick"
+    };
+    notizen.unshift(n);
+    store.set("lifeos_notizen", notizen);
+    return n;
+  }
+
+  /* Einmal je Woche, und nur wenn die Woche vorbei ist */
+  function rueckblickPruefen() {
+    const jetzt = new Date();
+    const sonntag = jetzt.getDay() === 0;
+    /* Sonntag erst abends — vorher ist die Woche noch im Gange */
+    if (sonntag && jetzt.getHours() < 18) return;
+
+    /* Um welche Woche geht es? Sonntagabend um die laufende, an
+       jedem anderen Tag um die vergangene. */
+    const start = wochenStart(jetzt);
+    if (!sonntag) start.setDate(start.getDate() - 7);
+    const marke = dateKey(start);
+
+    const stand = store.get("lifeos_rueckblick", {}) || {};
+    if (stand.letzte === marke) return;
+
+    rueckblickSchreiben(start);
+    store.set("lifeos_rueckblick", { letzte: marke, geschrieben: Date.now() });
+    const kw = kalenderWoche(start).kw;
+    setTimeout(() => showToast("Rückblick auf KW " + kw + " liegt in den Notizen.", "success"), 2200);
+  }
+
+  /* ==========================================================
+     WIE VIELE KARTEN SIND HEUTE DRAN
+     Die Zahl steht an drei Stellen: im Menü, auf der Lernseite und
+     im Dashboard-Reiter „Schule". Sie kommt von hier, damit keine
+     davon zurückbleibt.
+     ========================================================== */
+  function faelligAuffrischen() {
+    const zahl = faelligZahl();
+
+    /* Menü */
+    const link = document.querySelector('.nav-link[data-seite="lernen"]');
+    if (link) {
+      let marke = link.querySelector(".nav-zahl");
+      if (!zahl) { if (marke) marke.remove(); }
+      else {
+        if (!marke) {
+          marke = document.createElement("span");
+          marke.className = "nav-zahl";
+          link.appendChild(marke);
+        }
+        marke.textContent = zahl;
+        marke.title = zahl + (zahl === 1 ? " Karte ist heute dran" : " Karten sind heute dran");
+      }
+    }
+
+    /* Lernseite */
+    const streifen = $("lernFaellig");
+    if (streifen) {
+      streifen.hidden = !zahl;
+      if (zahl) {
+        streifen.innerHTML =
+          `<div class="lf-text">
+             <b>${zahl} ${zahl === 1 ? "Karte" : "Karten"} heute fällig</b>
+             <span>Aus allen Stapeln zusammen — gewusst heißt später wieder, nicht gewusst morgen.</span>
+           </div>
+           <button type="button" class="lf-knopf" id="lernFaelligStart">Abfrage starten</button>`;
+        $("lernFaelligStart").addEventListener("click", () => kartenOeffnen(PORTION, "abfrage"));
+      }
+    }
+
+    /* Dashboard-Reiter „Schule" */
+    const liste = $("schuleList");
+    if (liste) {
+      const alte = liste.querySelector(".entry-karten");
+      if (alte) alte.remove();
+      if (zahl) {
+        const li = document.createElement("li");
+        li.className = "entry-item entry-karten klickbar";
+        li.innerHTML =
+          `<span class="entry-accent"></span>
+           <div class="entry-main">
+             <div class="entry-title">${zahl} ${zahl === 1 ? "Karte" : "Karten"} abfragen</div>
+             <div class="entry-sub">Lernkarten · heute dran</div>
+           </div>
+           <span class="entry-badge">HEUTE</span>`;
+        li.addEventListener("click", () => kartenOeffnen(PORTION, "abfrage"));
+        liste.insertBefore(li, liste.firstChild);
+      }
+    }
+  }
+
+  /* ==========================================================
+     TASTENKÜRZEL — DIE ÜBERSICHT
+     Die Tasten gab es von Anfang an, nur stand nirgends welche.
+     Die Liste steht hier neben dem Handler, damit sie nicht
+     auseinanderläuft: wer oben eine Taste ergänzt, sieht hier, dass
+     sie auch erklärt werden will.
+     ========================================================== */
+  const TASTEN = [
+    { gruppe: "Springen", zeilen: [
+      ["g d", "Dashboard"], ["g k", "Kalender & Schule"], ["g h", "Habits & Streaks"],
+      ["g c", "Kalorien"],  ["g b", "Bildschirmzeit"],    ["g l", "Lernen"],
+      ["g p", "Automation"],["g j", "Projekte"],          ["g w", "Licht"],
+      ["g a", "Analyse"]
+    ]},
+    { gruppe: "Überall", zeilen: [
+      ["/", "In die Suche springen"],
+      ["n", "Neue Notiz"],
+      ["?", "Diese Übersicht"],
+      ["Esc", "Fenster schließen"]
+    ]},
+    { gruppe: "In der Suche", zeilen: [
+      ["/", "Befehle anzeigen"],
+      ["Tab", "Befehl vervollständigen"],
+      ["\u2191 \u2193", "Auswählen"],
+      ["Enter", "Ausführen"]
+    ]},
+    { gruppe: "Beim Abfragen", zeilen: [
+      ["Leer", "Karte umdrehen"],
+      ["Enter", "Karte umdrehen"],
+      ["Esc", "Abfrage beenden"]
+    ]}
+  ];
+
+  const tastenSchicht = $("tastenSchicht");
+
+  function tastenZeigen() {
+    /* Die Tasten einzeln setzen, damit "g d" als zwei Anschläge
+       lesbar ist — so drückt man sie ja auch. */
+    $("tastenRaster").innerHTML = TASTEN.map(g => `
+      <div class="ts-gruppe">
+        <div class="ts-kopf">${escapeHTML(g.gruppe)}</div>
+        ${g.zeilen.map(([taste, was]) => `
+          <div class="ts-zeile">
+            <span class="ts-tasten">${taste.split(" ")
+              .map(t => `<kbd>${escapeHTML(t)}</kbd>`).join("")}</span>
+            <span class="ts-was">${escapeHTML(was)}</span>
+          </div>`).join("")}
+      </div>`).join("");
+    tastenSchicht.classList.add("open");
+  }
+
+  const tastenSchliessen = () => tastenSchicht.classList.remove("open");
+  $("tastenZu").addEventListener("click", tastenSchliessen);
+  tastenSchicht.addEventListener("click", e => {
+    if (e.target === tastenSchicht) tastenSchliessen();
+  });
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") tastenSchliessen();
   });
 
   /* ==========================================================
@@ -11177,10 +12393,8 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
       .catch(() => { gkStand = null; gkZeichnen(); });
   }
 
-  /* Erst beim Öffnen der Einstellungen laden — vorher braucht es das
-     niemand, und der Abruf kostet beim Start Zeit. */
-  const gkKnopf = $("settingsBtn");
-  if (gkKnopf) gkKnopf.addEventListener("click", () => { gkStandHolen(); });
+  /* Geholt wird erst, wenn der Bereich im Kontopanel geöffnet wird —
+     siehe kpBereichZeigen. */
 
   /* ==========================================================
      VERBINDUNGSANZEIGE
@@ -11346,9 +12560,7 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
       Laden ein. Einmal neu laden, solange der Rechner läuft.</p>`;
   }
 
-  /* Wie beim Google-Kasten: erst beim Öffnen der Einstellungen */
-  const offKnopf = $("settingsBtn");
-  if (offKnopf) offKnopf.addEventListener("click", () => { offZeichnen(); });
+  /* Wie beim Google-Kasten: geholt wird beim Öffnen des Bereichs */
 
   /* Einmal bestätigen, wenn der Offline-Betrieb wirklich steht —
      sonst weiß man nie, ob die Einrichtung geklappt hat. */
@@ -11359,6 +12571,153 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
       setTimeout(() => showToast("Offline bereit — die App läuft jetzt auch ohne den Rechner.", "success"), 1800);
     }).catch(() => { /* dann eben nicht */ });
   }
+
+  /* ==========================================================
+     KONTO
+     Wer angemeldet ist, wie man das Passwort wechselt und wie man
+     wieder herauskommt — alles im Bereich „Mein Konto".
+
+     Weitere Konten legt nur das erste an. Das ist keine Hierarchie,
+     sondern die einfachste Antwort auf die Frage, wer im Heimnetz
+     ein Konto anlegen darf.
+     ========================================================== */
+  function kontoZeichnen() {
+    const kasten = $("kontoKasten");
+    if (!kasten) return;
+
+    fetch("/api/anmeldung/stand", { cache: "no-store" })
+      .then(a => a.json())
+      .then(d => {
+        const konten = $("kopKontenAbschnitt");
+
+        if (!d.angemeldet) {
+          kasten.innerHTML = `<div class="gk-zeile"><span class="gk-punkt aus"></span>
+            <b>Nicht angemeldet</b></div>
+            <p class="gk-text gk-leise">Die Sitzung ist abgelaufen. Beim nächsten Laden
+              fragt die Seite wieder nach dem Passwort.</p>`;
+          if (konten) konten.hidden = true;
+          return;
+        }
+
+        /* Der Name des Kontos kann sich geändert haben — Karte und
+           Leiste ziehen mit. */
+        window.lifeosNutzer = d.nutzer;
+        kpKopfZeichnen();
+
+        kasten.innerHTML =
+          `<div class="gk-zeile"><span class="gk-punkt an"></span>
+             <b>Angemeldet als ${escapeHTML(d.nutzer.name)}</b>
+             ${d.nutzer.verwalter ? '<span class="gk-leise">Erstes Konto</span>' : ""}</div>
+           <p class="gk-text gk-leise">Die Anmeldung hält 90 Tage auf diesem Gerät.
+             Abmelden räumt sie weg — danach kommst du auch ohne laufenden
+             Rechner nicht mehr an die App.</p>`;
+
+        if (konten) konten.hidden = !d.nutzer.verwalter;
+        if (d.nutzer.verwalter) nutzerListeZeichnen();
+      })
+      .catch(() => {
+        kasten.innerHTML = `<div class="gk-zeile"><span class="gk-punkt aus"></span>
+          <b>Kein Server erreichbar</b></div>
+          <p class="gk-text gk-leise">Das Konto lässt sich nur ändern, solange der Rechner läuft.</p>`;
+        const konten = $("kopKontenAbschnitt");
+        if (konten) konten.hidden = true;
+      });
+  }
+
+  /* Beim Wechsel wird das alte Passwort verlangt — sonst könnte ein
+     offen liegendes Gerät das Konto übernehmen. */
+  function passwortFormular() {
+    const fach = $("kopPasswortFach");
+    if (!fach) return;
+    if (fach.querySelector(".ko-form")) { fach.innerHTML = ""; return; }
+
+    fach.innerHTML =
+      `<form class="ko-form" id="koForm" autocomplete="off">
+         <input type="password" id="koAlt" placeholder="Bisheriges Passwort" autocomplete="current-password">
+         <input type="password" id="koNeu" placeholder="Neues Passwort" autocomplete="new-password">
+         <input type="password" id="koNeu2" placeholder="Neues Passwort wiederholen" autocomplete="new-password">
+         <button type="submit" class="ko-knopf ko-haupt">Passwort ändern</button>
+       </form>`;
+
+    $("koForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      const alt = $("koAlt").value, neu = $("koNeu").value;
+      if (neu !== $("koNeu2").value) return showToast("Die beiden neuen Passwörter sind nicht gleich.", "error");
+      try {
+        const antwort = await fetch("/api/anmeldung/passwort", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ alt, neu })
+        });
+        const daten = await antwort.json();
+        if (!daten.ok) throw new Error(daten.fehler || "Hat nicht geklappt");
+        fach.innerHTML = "";
+        showToast("Passwort geändert.", "success");
+      } catch (fehler) {
+        showToast(fehler.message, "error");
+      }
+    });
+    $("koAlt").focus();
+  }
+
+  $("kopPasswort").addEventListener("click", passwortFormular);
+
+  /* Nur für das erste Konto: die übrigen Konten im Haus */
+  async function nutzerListeZeichnen() {
+    const fach = $("kopKonten");
+    if (!fach) return;
+    let liste = [];
+    try {
+      const d = await fetch("/api/anmeldung/nutzer").then(a => a.json());
+      if (!d.ok) return;
+      liste = d.nutzer || [];
+    } catch (fehler) { return; }
+
+    const zeilen = liste.map(n =>
+      `<div class="ko-zeile">
+         <span>${escapeHTML(n.name)}${n.verwalter ? " · erstes Konto" : ""}</span>
+         ${n.verwalter ? "" : `<button type="button" class="ko-loeschen" data-id="${escapeHTML(n.id)}"
+              aria-label="Konto löschen">Löschen</button>`}
+       </div>`).join("");
+
+    fach.innerHTML = zeilen +
+      `<form class="ko-form ko-neu" id="koNeuForm" autocomplete="off">
+         <input type="text" id="koNeuName" placeholder="Name des neuen Kontos">
+         <input type="password" id="koNeuPasswort" placeholder="Passwort für dieses Konto" autocomplete="new-password">
+         <button type="submit" class="ko-knopf">Konto anlegen</button>
+       </form>`;
+
+    fach.querySelectorAll(".ko-loeschen").forEach(knopf => {
+      knopf.addEventListener("click", async () => {
+        /* Mit dem Konto gehen dessen Daten. Deshalb die Rückfrage —
+           rückgängig macht das hier niemand. */
+        if (!confirm("Dieses Konto und alle seine Daten löschen?")) return;
+        try {
+          const d = await fetch("/api/anmeldung/nutzer/" + encodeURIComponent(knopf.dataset.id),
+                                { method: "DELETE" }).then(a => a.json());
+          if (!d.ok) throw new Error(d.fehler || "Hat nicht geklappt");
+          showToast("Konto gelöscht.", "success");
+          nutzerListeZeichnen();
+        } catch (fehler) { showToast(fehler.message, "error"); }
+      });
+    });
+
+    $("koNeuForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      try {
+        const d = await fetch("/api/anmeldung/nutzer", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: $("koNeuName").value.trim(), passwort: $("koNeuPasswort").value })
+        }).then(a => a.json());
+        if (!d.ok) throw new Error(d.fehler || "Hat nicht geklappt");
+        showToast("Konto „" + d.nutzer.name + "“ angelegt.", "success");
+        nutzerListeZeichnen();
+      } catch (fehler) { showToast(fehler.message, "error"); }
+    });
+  }
+
+  /* Wie die anderen Kästen: geholt wird beim Öffnen des Bereichs */
 
   /* ==========================================================
      ÄNDERUNG VOM ANDEREN GERÄT ÜBERNEHMEN
@@ -11386,9 +12745,13 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
     lifeos_habits:       w => { habits = w;     renderHabits(); renderVorschlag(true); },
     lifeos_streaks:      w => { streaks = w;    renderStreaks(); },
     lifeos_termine:      w => { termine = w;    renderNaechste(); renderTabLists(); kalenderAuffrischen(); },
+    lifeos_ferien:       w => { ferien = Array.isArray(w) ? w : [];
+                                renderNaechste(); kalenderAuffrischen(); },
     lifeos_klausuren:    w => { klausuren = w;  renderNaechste(); renderTabLists(); kalenderAuffrischen(); lernPanelZeichnen(); },
     lifeos_hausaufgaben: w => { hausaufgaben = w; renderNaechste(); kalenderAuffrischen(); hausPanelZeichnen(); },
-    lifeos_lernkarten:   w => { lernkarten = w; kartenZeichnen(); },
+    lifeos_lernkarten:   w => { lernkarten = w; kartenZeichnen(); faelligAuffrischen(); },
+    lifeos_karten_plan:  w => { kartenPlan = (w && typeof w === "object") ? w : {};
+                                faelligAuffrischen(); },
     lifeos_farbpaletten: w => { farbpaletten = Array.isArray(w) ? w : [];
                                 if (aktuelleSeite === "licht") lichtZeichnen(); },
     lifeos_licht_eigen:  w => { lichtEigen = (w && typeof w === "object") ? w : {};
@@ -11412,7 +12775,8 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
     /* Ziele wirken auf die Analyse — die wird nur neu gezeichnet,
        wenn sie gerade offen ist. */
     lifeos_ziele:        w => { ziele = w; if (aktuelleSeite === "analyse") baueAnalyse(); },
-    lifeos_settings:     w => { settings = { ...DEFAULT_SETTINGS, ...w }; renderWeather(); renderCalories(); }
+    lifeos_settings:     w => { settings = { ...DEFAULT_SETTINGS, ...w };
+                                updateAvatar(); renderWeather(); renderCalories(); }
   };
 
   /* Reine Anzeigesachen dieses Geräts — welcher Reiter offen ist,

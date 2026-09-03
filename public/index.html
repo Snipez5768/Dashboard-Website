@@ -81,6 +81,50 @@
 
 <div class="bg-wash" aria-hidden="true"></div>
 
+<!-- ============ ANMELDUNG ============
+     Liegt über allem und verdeckt das Dashboard, solange niemand
+     angemeldet ist. Der eigentliche Schutz sitzt am Server: diese
+     Schicht hält nur den Blick fern, die Daten gibt der Server
+     ohne gültige Sitzung gar nicht erst heraus.
+
+     Beim allerersten Start steht hier die Einrichtung statt der
+     Anmeldung — das Passwort setzt der Besitzer selbst, es steht
+     nirgends im Programm. -->
+<div class="anmeldung" id="anmeldung" hidden>
+  <div class="an-karte">
+    <div class="an-marke">
+      <span class="an-zeichen"></span>
+      <span>Life OS</span>
+    </div>
+
+    <h1 class="an-titel" id="anTitel">Anmelden</h1>
+    <p class="an-text" id="anText">Deine Daten liegen hinter diesem Konto.</p>
+
+    <form class="an-form" id="anForm" autocomplete="on">
+      <label class="an-feld">
+        <span>Name</span>
+        <input type="text" id="anName" name="username" autocomplete="username"
+               autocapitalize="none" spellcheck="false" required>
+      </label>
+      <label class="an-feld">
+        <span>Passwort</span>
+        <input type="password" id="anPasswort" name="password"
+               autocomplete="current-password" required>
+      </label>
+      <label class="an-feld" id="anZweitesFeld" hidden>
+        <span>Passwort wiederholen</span>
+        <input type="password" id="anPasswort2" autocomplete="new-password">
+      </label>
+
+      <p class="an-fehler" id="anFehler" hidden></p>
+
+      <button type="submit" class="an-knopf" id="anKnopf">Anmelden</button>
+    </form>
+
+    <p class="an-fuss" id="anFuss"></p>
+  </div>
+</div>
+
 <!-- ============ EINRICHTUNG FÜR DEN OFFLINE-BETRIEB ============
      Erscheint nur, wenn die Seite über eine Netzadresse ohne
      Verschlüsselung geöffnet wurde. Dort stellt der Browser keinen
@@ -119,13 +163,15 @@
       </button>
     </div>
 
-    <div class="sidebar-profile">
-      <div class="avatar" id="avatarCircle">LU</div>
-      <div class="profile-text">
-        <div class="profile-name" id="avatarName">Luca</div>
-        <div class="profile-role">Personal OS</div>
-      </div>
-    </div>
+    <!-- Der Weg ins Kontopanel. Ein Knopf, kein Kasten: was sich
+         anklicken laesst, soll auch danach aussehen. -->
+    <button class="sidebar-profile" id="profilKnopf" type="button" title="Konto und Einstellungen">
+      <span class="avatar" id="avatarCircle">LU</span>
+      <span class="profile-text">
+        <span class="profile-name" id="avatarName">Luca</span>
+        <span class="profile-role">Konto &amp; Einstellungen</span>
+      </span>
+    </button>
 
     <div class="nav-scroll">
       <div class="nav-group">
@@ -212,7 +258,11 @@
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.4"/><path d="m16 16 4 4"/></svg>
           <input id="captureInput" class="search-input" type="text"
             placeholder="Suchen — oder Termin / Klausur eintragen …">
-          <button type="submit" class="search-btn">Suchen</button>
+          <button type="submit" class="search-btn">
+            <span class="search-btn-wort">Suchen</span>
+            <svg class="search-btn-pfeil" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+          </button>
         </form>
 
         <!-- Vorschlaege fuer Slash-Befehle, erscheinen beim Tippen von "/" -->
@@ -580,6 +630,11 @@
         <!-- Die Reiterleiste trägt rechts das Plus: es legt an, was
              im gerade offenen Reiter fehlt — deshalb steht es auf
              derselben Höhe und nicht irgendwo darunter. -->
+        <!-- Was heute an Karten dran ist, steht über allem anderen:
+             es ist das Einzige auf dieser Seite mit einer Frist von
+             genau einem Tag. -->
+        <div class="lern-faellig" id="lernFaellig" hidden></div>
+
         <div class="lern-leiste">
           <div class="lern-reiter" id="lernReiter" role="tablist">
             <button type="button" class="lr-tab active" data-lreiter="klausuren" role="tab">Klausuren</button>
@@ -818,90 +873,258 @@
   <div class="modal fach-fenster" id="fachFenster" role="dialog" aria-modal="true" aria-labelledby="ffTitel"></div>
 </div>
 
-<div class="modal-overlay" id="settingsOverlay">
-  <div class="modal">
+<!-- ============ TASTENKÜRZEL ============
+     Es gab sie schon immer, nur wusste das niemand. Das Fragezeichen
+     öffnet die Liste; der Inhalt wird aus derselben Tabelle gebaut,
+     nach der auch die Tasten wirken. -->
+<div class="modal-overlay" id="tastenSchicht">
+  <div class="modal tasten-fenster" role="dialog" aria-modal="true" aria-labelledby="tastenTitel">
     <div class="modal-head">
-      <span class="card-title">Einstellungen</span>
-      <button class="icon-btn" id="settingsClose" aria-label="Schließen">
+      <span class="card-title" id="tastenTitel">Tastenkürzel</span>
+      <button class="icon-btn" id="tastenZu" aria-label="Schließen">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m6.5 6.5 11 11M17.5 6.5l-11 11"/></svg>
       </button>
     </div>
+    <div class="ts-raster" id="tastenRaster"></div>
+    <p class="ts-fuss">Tippst du gerade in ein Feld, gelten die Tasten dort — nicht hier.</p>
+  </div>
+</div>
 
-    <div class="modal-section">
-      <label class="modal-label">Dein Name</label>
-      <input type="text" id="settingName" placeholder="z.B. Luca">
+<!-- ============ KONTOPANEL ============
+     Öffnet sich über das Profilbild links oben — und über das
+     Zahnrad. Statt eines kleinen Fensters mit einer langen Liste
+     liegt hier die ganze Fläche: links die Bereiche, rechts der
+     gewählte. So findet man etwas wieder, statt zu scrollen.
+
+     Die Felder darin sind dieselben wie vorher, mit denselben
+     Kennungen — nur anders einsortiert. -->
+<div class="kop" id="kontoPanel" hidden>
+  <div class="kop-rand">
+    <div class="kop-ich">
+      <span class="kop-ich-bild" id="kopAvatar">LU</span>
+      <span class="kop-ich-text">
+        <span class="kop-ich-name" id="kopName">Luca</span>
+        <span class="kop-ich-konto" id="kopKonto">angemeldet</span>
+      </span>
     </div>
 
-    <div class="modal-section">
-      <label class="modal-label">Wetter-Ort</label>
-      <div class="row">
-        <input type="text" id="settingCity" placeholder="z.B. Berlin">
-        <button id="settingCitySave" type="button">Speichern</button>
-      </div>
-      <p class="modal-hint" id="settingCityStatus"></p>
-    </div>
+    <nav class="kop-liste" id="kopListe">
+      <div class="kop-gruppe">Nutzer</div>
+      <button class="kop-reiter aktiv" type="button" data-bereich="konto">Mein Konto</button>
+      <button class="kop-reiter" type="button" data-bereich="profil">Profil</button>
 
-    <div class="modal-section">
-      <label class="modal-label">Kalorien</label>
-      <p class="modal-hint">Kommt später automatisch aus deiner Tracker-App — bis dahin manuell.</p>
-      <div class="row">
-        <input type="number" id="settingCalGoal" placeholder="Ziel (kcal)" min="0">
-        <button id="settingCalGoalSave" type="button">Speichern</button>
-      </div>
-      <div class="row">
-        <input type="number" id="settingCalConsumed" placeholder="Heute verbraucht (kcal)" min="0">
-        <button id="settingCalConsumedSave" type="button">Speichern</button>
-      </div>
-    </div>
+      <div class="kop-trenner"></div>
+      <div class="kop-gruppe">Dashboard</div>
+      <button class="kop-reiter" type="button" data-bereich="werte">Werte von Hand</button>
+      <button class="kop-reiter" type="button" data-bereich="links">Schnellzugriff</button>
+      <button class="kop-reiter" type="button" data-bereich="papierkorb">Papierkorb</button>
 
-    <div class="modal-section">
-      <label class="modal-label">Bildschirmzeit heute</label>
-      <p class="modal-hint">Später per API — bis dahin trägst du die Werte hier ein.</p>
-      <div class="row">
-        <input type="text" id="settingStPhone" placeholder="Handy (z.B. 3:45)">
-        <button id="settingStPhoneSave" type="button">Speichern</button>
-      </div>
-      <div class="row">
-        <input type="text" id="settingStPc" placeholder="PC (z.B. 5:30)">
-        <button id="settingStPcSave" type="button">Speichern</button>
-      </div>
-    </div>
+      <div class="kop-trenner"></div>
+      <div class="kop-gruppe">Verbindungen</div>
+      <button class="kop-reiter" type="button" data-bereich="google">Google Kalender</button>
+      <button class="kop-reiter" type="button" data-bereich="app">App &amp; Offline</button>
 
-    <div class="modal-section">
-      <label class="modal-label">Schnellzugriff-Links</label>
-      <ul class="link-edit-list" id="linkEditList"></ul>
-      <div class="row">
-        <input type="text" id="newLinkLabel" placeholder="Name (z.B. Notion)">
-        <input type="text" id="newLinkUrl" placeholder="https://…">
-      </div>
-      <button id="newLinkAdd" type="button" class="full-btn">+ Link hinzufügen</button>
-    </div>
+      <div class="kop-trenner"></div>
+      <button class="kop-reiter kop-weg" type="button" id="kopAbmelden">Abmelden</button>
+    </nav>
+  </div>
 
-    <!-- ============ GOOGLE KALENDER ============
-         Termine kommen von Google hierher, Klausuren gehen dorthin.
-         Der Kasten zeigt je nach Stand die nächste Handlung — und
-         nur die. -->
-    <div class="modal-section">
-      <label class="modal-label">Google Kalender</label>
-      <div class="gk-kasten" id="gkKasten">
-        <div class="gk-lade">Wird geprüft …</div>
-      </div>
-    </div>
+  <div class="kop-inhalt">
+    <button class="kop-zu" id="kopZu" type="button" aria-label="Schließen">
+      <span class="kop-zu-kreis">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m7 7 10 10M17 7 7 17"/></svg>
+      </span>
+      <span class="kop-zu-text">ESC</span>
+    </button>
 
-    <!-- Ob die App ohne den Rechner startet, hängt an Bedingungen,
-         die man ihr nicht ansieht. Hier stehen sie nachlesbar —
-         sonst merkt man erst dann, dass etwas fehlt, wenn man
-         unterwegs ist und nichts mehr geht. -->
-    <div class="modal-section">
-      <label class="modal-label">Offline-Betrieb</label>
-      <div class="gk-kasten" id="offKasten">
-        <div class="gk-lade">Wird geprüft …</div>
-      </div>
-    </div>
+    <div class="kop-bahn" id="kopBahn">
 
-    <div class="modal-section">
-      <p class="modal-hint">Deine Daten liegen im Browser und werden über den Server
-        zwischen deinen Geräten abgeglichen — im Heimnetz, nicht darüber hinaus.</p>
+      <!-- ---------- MEIN KONTO ---------- -->
+      <section class="kop-bereich" data-bereich="konto">
+        <h2 class="kop-titel">Mein Konto</h2>
+
+        <div class="kop-karte">
+          <div class="kop-banner"></div>
+          <div class="kop-karte-kopf">
+            <button class="kop-gross" id="kopBildKnopf" type="button" title="Profilbild ändern">
+              <span class="kop-gross-bild" id="kopGrossAvatar">LU</span>
+              <span class="kop-gross-hut">Ändern</span>
+            </button>
+            <div class="kop-karte-namen">
+              <div class="kop-karte-name" id="kopKarteName">Luca</div>
+              <div class="kop-karte-konto" id="kopKarteKonto">–</div>
+            </div>
+          </div>
+
+          <div class="kop-felder">
+            <div class="kop-feld">
+              <div class="kop-feld-text">
+                <div class="kop-feld-marke">Anzeigename</div>
+                <div class="kop-feld-wert" id="kopWertName">–</div>
+              </div>
+              <button class="kop-klein" type="button" data-springe="profil">Bearbeiten</button>
+            </div>
+            <div class="kop-feld">
+              <div class="kop-feld-text">
+                <div class="kop-feld-marke">Kontoname</div>
+                <div class="kop-feld-wert" id="kopWertKonto">–</div>
+              </div>
+            </div>
+            <div class="kop-feld">
+              <div class="kop-feld-text">
+                <div class="kop-feld-marke">Passwort</div>
+                <div class="kop-feld-wert">••••••••••</div>
+              </div>
+              <button class="kop-klein" type="button" id="kopPasswort">Ändern</button>
+            </div>
+          </div>
+          <div id="kopPasswortFach"></div>
+        </div>
+
+        <div class="kop-abschnitt" id="kopKontenAbschnitt" hidden>
+          <h3 class="kop-unter">Konten im Haus</h3>
+          <p class="kop-hinweis">Jedes Konto hat seinen eigenen Bestand — Termine, Noten,
+            Stundenplan. Keines sieht die Daten eines anderen.</p>
+          <div id="kopKonten"></div>
+        </div>
+
+        <div class="kop-abschnitt">
+          <h3 class="kop-unter">Sitzung</h3>
+          <div class="gk-kasten" id="kontoKasten">
+            <div class="gk-lade">Wird geprüft …</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- PROFIL ---------- -->
+      <section class="kop-bereich" data-bereich="profil" hidden>
+        <h2 class="kop-titel">Profil</h2>
+
+        <div class="kop-abschnitt">
+          <h3 class="kop-unter">Profilbild</h3>
+          <p class="kop-hinweis">Wird auf 256 × 256 verkleinert und mit deinen übrigen Daten
+            abgeglichen — es steht danach auch auf dem iPad.</p>
+          <div class="kop-bildreihe">
+            <span class="kop-gross-bild kop-vorschau" id="kopVorschau">LU</span>
+            <div class="kop-bildknoepfe">
+              <button class="kop-klein kop-haupt" type="button" id="kopBildWahl">Bild wählen</button>
+              <button class="kop-klein" type="button" id="kopBildWeg">Entfernen</button>
+            </div>
+          </div>
+          <input type="file" id="kopBildDatei" accept="image/*" hidden>
+        </div>
+
+        <div class="kop-abschnitt">
+          <h3 class="kop-unter">Anzeigename</h3>
+          <p class="kop-hinweis">Steht in der Begrüßung oben und in der Seitenleiste.</p>
+          <input type="text" id="settingName" placeholder="z.B. Luca">
+        </div>
+
+        <div class="kop-abschnitt">
+          <h3 class="kop-unter">Wetter-Ort</h3>
+          <div class="row">
+            <input type="text" id="settingCity" placeholder="z.B. Berlin">
+            <button id="settingCitySave" type="button">Speichern</button>
+          </div>
+          <p class="modal-hint" id="settingCityStatus"></p>
+        </div>
+      </section>
+
+      <!-- ---------- WERTE VON HAND ---------- -->
+      <section class="kop-bereich" data-bereich="werte" hidden>
+        <h2 class="kop-titel">Werte von Hand</h2>
+        <p class="kop-hinweis">Was noch keine Schnittstelle liefert, trägst du hier ein.</p>
+
+        <div class="kop-abschnitt">
+          <h3 class="kop-unter">Kalorien</h3>
+          <p class="kop-hinweis">Kommt später automatisch aus deiner Tracker-App — bis dahin manuell.</p>
+          <div class="row">
+            <input type="number" id="settingCalGoal" placeholder="Ziel (kcal)" min="0">
+            <button id="settingCalGoalSave" type="button">Speichern</button>
+          </div>
+          <div class="row">
+            <input type="number" id="settingCalConsumed" placeholder="Heute verbraucht (kcal)" min="0">
+            <button id="settingCalConsumedSave" type="button">Speichern</button>
+          </div>
+        </div>
+
+        <div class="kop-abschnitt">
+          <h3 class="kop-unter">Bildschirmzeit heute</h3>
+          <p class="kop-hinweis">Der Rechner misst sich selbst, das Telefon schickt seine Zeit
+            per Kurzbefehl. Was fehlt, trägst du hier nach.</p>
+          <div class="row">
+            <input type="text" id="settingStPhone" placeholder="Handy (z.B. 3:45)">
+            <button id="settingStPhoneSave" type="button">Speichern</button>
+          </div>
+          <div class="row">
+            <input type="text" id="settingStPc" placeholder="PC (z.B. 5:30)">
+            <button id="settingStPcSave" type="button">Speichern</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- SCHNELLZUGRIFF ---------- -->
+      <section class="kop-bereich" data-bereich="links" hidden>
+        <h2 class="kop-titel">Schnellzugriff</h2>
+        <p class="kop-hinweis">Die Symbolreihe ganz unten auf dem Dashboard.</p>
+        <div class="kop-abschnitt">
+          <ul class="link-edit-list" id="linkEditList"></ul>
+          <div class="row">
+            <input type="text" id="newLinkLabel" placeholder="Name (z.B. Notion)">
+            <input type="text" id="newLinkUrl" placeholder="https://…">
+          </div>
+          <button id="newLinkAdd" type="button" class="full-btn">+ Link hinzufügen</button>
+        </div>
+      </section>
+
+      <!-- ---------- PAPIERKORB ----------
+           Der Server hebt die letzten Fassungen jedes Eintrags auf.
+           Daraus lässt sich ausrechnen, was verschwunden ist — und
+           genau das steht hier, nicht die Fassungen selbst. -->
+      <section class="kop-bereich" data-bereich="papierkorb" hidden>
+        <h2 class="kop-titel">Papierkorb</h2>
+        <p class="kop-hinweis">Was in den letzten Tagen aus einer Liste verschwunden ist.
+          Der Server hebt die letzten acht Fassungen auf; älteres ist weg.</p>
+        <div class="kop-abschnitt">
+          <div class="pk-liste" id="pkListe">
+            <div class="gk-lade">Wird geprüft …</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- GOOGLE KALENDER ----------
+           Termine kommen von Google hierher, Klausuren gehen dorthin.
+           Der Kasten zeigt je nach Stand die nächste Handlung — und
+           nur die. -->
+      <section class="kop-bereich" data-bereich="google" hidden>
+        <h2 class="kop-titel">Google Kalender</h2>
+        <p class="kop-hinweis">Termine kommen von Google herüber, Klausuren und Hausaufgaben
+          gehen dorthin. Der Zugang gehört deinem Konto.</p>
+        <div class="kop-abschnitt">
+          <div class="gk-kasten" id="gkKasten">
+            <div class="gk-lade">Wird geprüft …</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- APP & OFFLINE ----------
+           Ob die App ohne den Rechner startet, hängt an Bedingungen,
+           die man ihr nicht ansieht. Hier stehen sie nachlesbar —
+           sonst merkt man erst dann, dass etwas fehlt, wenn man
+           unterwegs ist und nichts mehr geht. -->
+      <section class="kop-bereich" data-bereich="app" hidden>
+        <h2 class="kop-titel">App &amp; Offline</h2>
+        <div class="kop-abschnitt">
+          <div class="gk-kasten" id="offKasten">
+            <div class="gk-lade">Wird geprüft …</div>
+          </div>
+        </div>
+        <div class="kop-abschnitt">
+          <p class="kop-hinweis">Deine Daten liegen im Browser und werden über den Server
+            zwischen deinen Geräten abgeglichen — im Heimnetz, nicht darüber hinaus.</p>
+        </div>
+      </section>
+
     </div>
   </div>
 </div>
@@ -918,6 +1141,9 @@
     });
   }
 </script>
-<script src="bestand.js"></script>
+<!-- Die Anmeldung lädt bestand.js und script.js nach, sobald jemand
+     angemeldet ist. Vorher laufen sie gar nicht erst an: sie kämen
+     an keine Daten und würden bei jedem Abruf stolpern. -->
+<script src="anmeldung.js"></script>
 </body>
 </html>

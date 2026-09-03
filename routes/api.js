@@ -10,6 +10,157 @@
 const express = require("express");
 const router = express.Router();
 
+/* ==========================================================
+   ANMELDUNG
+   Ohne gültige Sitzung geht nichts an Daten heraus. Die Prüfung
+   steht bewusst hier vor allen Routen und nicht nur vor der
+   Oberfläche: eine Sperre, die man mit dem Aufruf einer Adresse
+   umgeht, ist keine.
+
+   Frei bleiben nur die Wege, die man braucht, um überhaupt
+   hineinzukommen — der Zustand der Anmeldung, das Anmelden selbst
+   und die einmalige Einrichtung des ersten Kontos.
+   ========================================================== */
+const nutzer = () => require("../lib/nutzer");
+
+const MARKE = "lifeos_sitzung";
+
+/* Das Häkchen "secure" nur bei verschlüsselter Verbindung: über
+   http://localhost würde der Browser das Plätzchen sonst verwerfen
+   und niemand käme mehr herein. */
+function markeSetzen(req, res, marke) {
+  const verschluesselt = req.secure || (req.socket && req.socket.encrypted);
+  res.cookie(MARKE, marke, {
+    httpOnly: true,                 // kein Zugriff aus JavaScript
+    sameSite: "Lax",                // nicht von fremden Seiten mitschicken
+    secure: !!verschluesselt,
+    maxAge: nutzer().SITZUNG_TAGE * 86400000,
+    path: "/"
+  });
+}
+
+/* Plätzchen lesen, ohne ein Paket dafür einzubinden */
+function markeLesen(req) {
+  const roh = req.headers.cookie || "";
+  const treffer = roh.split(";").map(t => t.trim())
+    .find(t => t.startsWith(MARKE + "="));
+  return treffer ? decodeURIComponent(treffer.slice(MARKE.length + 1)) : null;
+}
+
+/* Hängt den angemeldeten Nutzer an die Anfrage — oder nichts */
+router.use((req, res, next) => {
+  req.nutzer = nutzer().markeLesen(markeLesen(req));
+  next();
+});
+
+/* Diese Wege bleiben offen. Die ersten vier braucht man, um
+   überhaupt hereinzukommen.
+
+   Die drei Meldewege des Telefons sind ein bewusster Kompromiss:
+   sie kommen aus der Kurzbefehle-App, die kein Plätzchen mitschickt
+   und sich nicht anmelden kann. Sie tragen nur Zahlen ein — Minuten
+   und App-Namen — und geben nichts heraus. Gelesen wird die
+   Bildschirmzeit weiter nur mit Anmeldung. */
+const OHNE_ANMELDUNG = new Set([
+  "/health", "/anmeldung/stand", "/anmeldung/an", "/anmeldung/einrichten",
+  "/bildschirmzeit/handy", "/bildschirmzeit/handy/ereignis", "/bildschirmzeit/text"
+]);
+
+router.use((req, res, next) => {
+  if (OHNE_ANMELDUNG.has(req.path)) return next();
+  if (req.nutzer) return next();
+  res.status(401).json({ ok: false, fehler: "Nicht angemeldet", anmeldung: true });
+});
+
+/* Der Bestand des angemeldeten Nutzers — jeder sieht nur seinen */
+const meinBestand = req => require("../lib/bestand").fuer(req.nutzer.id);
+
+router.get("/anmeldung/stand", (req, res) => {
+  res.json({
+    ok: true,
+    eingerichtet: nutzer().gibtNutzer(),
+    angemeldet: !!req.nutzer,
+    nutzer: req.nutzer || null
+  });
+});
+
+/* Das allererste Konto. Danach ist dieser Weg zu — sonst könnte
+   sich jeder im Netz selbst eines anlegen. */
+router.post("/anmeldung/einrichten", async (req, res) => {
+  try {
+    if (nutzer().gibtNutzer()) {
+      return res.status(403).json({ ok: false, fehler: "Es gibt schon ein Konto" });
+    }
+    const { name, passwort } = req.body || {};
+    const konto = await nutzer().anlegen(name, passwort);
+    markeSetzen(req, res, nutzer().markeBauen(konto.id));
+    /* Die Ablage jetzt anlegen und dabei die bisherigen Daten aus
+       der gemeinsamen Datei übernehmen — nur hier, nur einmal. */
+    require("../lib/bestand").fuer(konto.id, true);
+    res.json({ ok: true, nutzer: konto });
+  } catch (fehler) {
+    res.status(400).json({ ok: false, fehler: fehler.message });
+  }
+});
+
+router.post("/anmeldung/an", async (req, res) => {
+  try {
+    const { name, passwort } = req.body || {};
+    const konto = await nutzer().pruefen(name, passwort);
+    if (!konto) {
+      /* Keine Auskunft darüber, was falsch war — Name oder Passwort */
+      return res.status(401).json({ ok: false, fehler: "Name oder Passwort stimmt nicht" });
+    }
+    markeSetzen(req, res, nutzer().markeBauen(konto.id));
+    require("../lib/bestand").fuer(konto.id);
+    res.json({ ok: true, nutzer: konto });
+  } catch (fehler) {
+    res.status(400).json({ ok: false, fehler: fehler.message });
+  }
+});
+
+router.post("/anmeldung/aus", (req, res) => {
+  res.clearCookie(MARKE, { path: "/" });
+  res.json({ ok: true });
+});
+
+router.post("/anmeldung/passwort", async (req, res) => {
+  try {
+    const { alt, neu } = req.body || {};
+    await nutzer().passwortAendern(req.nutzer.id, alt, neu);
+    res.json({ ok: true });
+  } catch (fehler) {
+    res.status(400).json({ ok: false, fehler: fehler.message });
+  }
+});
+
+/* Weitere Konten legt nur an, wer das erste angelegt hat */
+router.get("/anmeldung/nutzer", (req, res) => {
+  if (!req.nutzer.verwalter) return res.status(403).json({ ok: false, fehler: "Nicht erlaubt" });
+  res.json({ ok: true, nutzer: nutzer().alleNutzer()
+    .map(n => ({ id: n.id, name: n.name, verwalter: !!n.verwalter, angelegt: n.angelegt })) });
+});
+
+router.post("/anmeldung/nutzer", async (req, res) => {
+  try {
+    if (!req.nutzer.verwalter) return res.status(403).json({ ok: false, fehler: "Nicht erlaubt" });
+    const { name, passwort } = req.body || {};
+    res.json({ ok: true, nutzer: await nutzer().anlegen(name, passwort) });
+  } catch (fehler) {
+    res.status(400).json({ ok: false, fehler: fehler.message });
+  }
+});
+
+router.delete("/anmeldung/nutzer/:id", (req, res) => {
+  if (!req.nutzer.verwalter) return res.status(403).json({ ok: false, fehler: "Nicht erlaubt" });
+  if (req.params.id === req.nutzer.id) {
+    return res.status(400).json({ ok: false, fehler: "Das eigene Konto lässt sich hier nicht löschen" });
+  }
+  const weg = nutzer().entfernen(req.params.id);
+  require("../lib/bestand").vergessen(req.params.id);
+  res.json({ ok: weg });
+});
+
 router.get("/health", (req, res) => {
   /* "https" sagt, ob der verschlüsselte Zugang steht. Ohne ihn gibt
      es auf dem iPad keinen Service Worker und damit keinen
@@ -27,12 +178,12 @@ router.get("/health", (req, res) => {
    Browser. Damit sah das iPad andere Zahlen als der Rechner. Jetzt
    liegen sie hier, und jedes Gerät holt sie sich beim Öffnen. */
 router.get("/bestand", (req, res) => {
-  res.json({ ok: true, eintraege: require("../lib/bestand").alles() });
+  res.json({ ok: true, eintraege: meinBestand(req).alles() });
 });
 
 router.put("/bestand", (req, res) => {
   try {
-    const bestand = require("../lib/bestand");
+    const bestand = meinBestand(req);
     const { eintraege, geraet } = req.body || {};
     if (!eintraege || typeof eintraege !== "object") {
       return res.status(400).json({ ok: false, fehler: "eintraege fehlt" });
@@ -61,7 +212,7 @@ router.put("/bestand", (req, res) => {
    ========================================================== */
 router.get("/bestand/frueher", (req, res) => {
   const schluessel = String(req.query.schluessel || "");
-  const bestand = require("../lib/bestand");
+  const bestand = meinBestand(req);
   if (!bestand.ERLAUBT.has(schluessel)) {
     return res.status(400).json({ ok: false, fehler: "unbekannter Schlüssel" });
   }
@@ -81,7 +232,7 @@ router.get("/bestand/frueher", (req, res) => {
 
 router.post("/bestand/frueher", (req, res) => {
   try {
-    const bestand = require("../lib/bestand");
+    const bestand = meinBestand(req);
     const { schluessel, nummer } = req.body || {};
     if (!bestand.ERLAUBT.has(String(schluessel))) {
       return res.status(400).json({ ok: false, fehler: "unbekannter Schlüssel" });
@@ -120,7 +271,7 @@ router.get("/bestand/strom", (req, res) => {
   res.flushHeaders && res.flushHeaders();
   res.write("retry: 3000\n\n");        // nach Abriss in 3 s wieder versuchen
 
-  const abmelden = require("../lib/bestand").anmelden(nachricht => {
+  const abmelden = meinBestand(req).anmelden(nachricht => {
     if (nachricht.quelle && nachricht.quelle === geraet) return;   // eigene Änderung
     res.write("event: stand\n");
     res.write("data: " + JSON.stringify({
@@ -169,6 +320,23 @@ function rueckAdresse(req) {
   return "http://localhost:" + port + RUECK_PFAD;
 }
 
+/* ----------------------------------------------------------
+   Der Google-Kalender gehört einem Konto, nicht dem Haus. Wer ihn
+   verbunden hat, darf ihn lesen und beschreiben; alle anderen nicht
+   — sonst stünden Lucas Termine im Dashboard des Zweitkontos.
+
+   Ist noch nichts verbunden, darf das erste Konto verbinden. Zwei
+   getrennte Google-Zugänge kann diese Ablage noch nicht führen;
+   dann bräuchte es eine Datei je Nutzer.
+   ---------------------------------------------------------- */
+router.use((req, res, next) => {
+  if (!req.path.startsWith("/google")) return next();
+  const g = require("../lib/google");
+  const eigner = g.kalenderNutzer ? g.kalenderNutzer() : null;
+  if (eigner ? eigner === req.nutzer.id : !!req.nutzer.verwalter) return next();
+  res.status(403).json({ ok: false, fehler: "Der Kalender gehört einem anderen Konto" });
+});
+
 router.get("/google/status", (req, res) => {
   const g = require("../lib/google");
   res.json({ ok: true, ...g.stand(), rueckAdresse: rueckAdresse(req) });
@@ -212,6 +380,9 @@ router.get(RUECK_PFAD.replace("/api", ""), async (req, res) => {
   }
   try {
     await g.codeTauschen(String(req.query.code || ""), rueckAdresse(req));
+    /* Festhalten, wem der Kalender gehört — ein zweites Konto im Haus
+       soll darüber weder lesen noch schreiben. */
+    g.kalenderNutzerSetzen(req.nutzer.id);
     /* Gleich einmal abgleichen, damit sofort etwas zu sehen ist — und
        zwar abwarten. Vorher lief das nebenher und ein Fehler blieb
        unsichtbar: die Seite meldete "Verbunden", während in Wahrheit
@@ -346,12 +517,24 @@ router.post("/nutzung", (req, res) => {
 });
 
 router.get("/nutzung", (req, res) => {
+  /* Wie bei der Bildschirmzeit: die Zähler stammen von den Geräten
+     des ersten Kontos. */
+  if (!req.nutzer.verwalter) return res.json({ ok: true, tage: {} });
   const von = typeof req.query.von === "string" ? req.query.von : null;
   res.json({ ok: true, tage: require("../lib/nutzung").verlauf(von) });
 });
 
-/* Bildschirmzeit dieses Rechners — gemessen, solange der Server läuft */
+/* Bildschirmzeit dieses Rechners — gemessen, solange der Server läuft.
+
+   Gemessen wird dieser eine Rechner und dieses eine Telefon; beide
+   gehören dem, der das Dashboard aufgesetzt hat. Ein zweites Konto
+   bekommt deshalb nichts davon zu sehen — sonst stünde dort fremde
+   Zeit als die eigene. */
 router.get("/bildschirmzeit", (req, res) => {
+  if (!req.nutzer.verwalter) {
+    return res.json({ aktiv: false, takt: 0, plattform: process.platform, fehler: null,
+                      zuletzt: null, tage: {}, handy: {}, handyOffen: null, fremd: true });
+  }
   res.json(require("../lib/bildschirmzeit").stand());
 });
 

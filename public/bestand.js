@@ -124,6 +124,9 @@
     /* Ob der Server gerade erreichbar ist */
     verbunden: null,
 
+    /* Ob der Bestand des Nutzers beim Start wirklich geholt wurde */
+    standGeholt: false,
+
     /* Wie viele Änderungen noch darauf warten, hochzuwandern */
     offeneAenderungen: () => offen.size,
 
@@ -440,8 +443,23 @@
   const notbremse = setTimeout(einmalStarten, WARTEN_MAX);
 
   mitFrist("/api/bestand", null, 3000)
-    .then(a => a.ok ? a.json() : Promise.reject(new Error(a.status)))
-    .then(daten => { verbindungMelden(true); anwenden(daten.eintraege); })
+    .then(a => {
+      /* 401 heisst: die Sitzung ist abgelaufen. Dann nicht stumm
+         weiterlaufen, sondern zurueck zur Anmeldung. */
+      if (a.status === 401) {
+        if (window.lifeosSitzungWeg) window.lifeosSitzungWeg();
+        return Promise.reject(new Error("nicht angemeldet"));
+      }
+      return a.ok ? a.json() : Promise.reject(new Error(a.status));
+    })
+    .then(daten => {
+      verbindungMelden(true);
+      anwenden(daten.eintraege);
+      /* Das Dashboard darf jetzt davon ausgehen, den Stand des
+         Nutzers wirklich zu kennen — wichtig für alles, was beim
+         Fehlen eines Eintrags eine Vorgabe anlegen würde. */
+      window.lifeosBestand.standGeholt = true;
+    })
     .catch(() => {
       /* Rechner aus: das Dashboard läuft mit dem, was lokal liegt.
          Änderungen sammeln sich und gehen hoch, sobald er wieder da ist. */

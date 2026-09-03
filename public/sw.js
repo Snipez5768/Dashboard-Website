@@ -18,7 +18,7 @@
 /* Bei jeder Aenderung hochzaehlen: der Browser tauscht den Worker
    nur aus, wenn sich seine Datei unterscheidet, und ein neuer Name
    raeumt zugleich die alte Kopie weg. */
-const LAGER = "lifeos-v3";
+const LAGER = "lifeos-v5";
 
 /* So lange wird auf den Server gewartet, bevor die Kopie einspringt */
 const NETZ_FRIST = 2000;
@@ -29,6 +29,7 @@ const GERUEST = [
   "/",
   "/index.html",
   "/style.css",
+  "/anmeldung.js",
   "/bestand.js",
   "/script.js",
   "/manifest.json",
@@ -130,10 +131,13 @@ self.addEventListener("fetch", e => {
 
       if (kopie) return kopie;
 
-      /* Noch nichts gespeichert: dann bleibt nur der Server — aber
-         mit Frist, sonst hängt der Start ins Leere. */
-      const frist = new Promise(fertig => setTimeout(() => fertig(null), NETZ_FRIST));
-      const antwort = await Promise.race([auffrischen, frist]);
+      /* Noch nichts gespeichert: dann bleibt nur der Server, und auf
+         den lohnt das Warten — eine Frist bringt hier nichts, weil
+         es nichts gibt, worauf man ausweichen könnte. Genau das
+         passierte nach einem geleerten Zwischenspeicher: der Server
+         lief, brauchte aber einen Moment, und die Frist lieferte die
+         Notfallseite, obwohl die echte längst unterwegs war. */
+      const antwort = await auffrischen;
       return antwort || new Response(
         "<!doctype html><meta charset=utf-8><title>Life OS</title>" +
         "<body style='font-family:system-ui;background:#070a12;color:#e7ebf3;padding:48px;line-height:1.6'>" +
