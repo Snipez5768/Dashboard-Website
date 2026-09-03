@@ -6438,7 +6438,7 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
          <h3>Wie lange dauert eine Klausur?</h3>
          <span class="block-zahl">${KLAUSUR_DAUER_VORGABE} min</span>
        </button>
-       <div class="block-unterschlupf" id="dauerHuelle">
+       <div class="block-unterschlupf" id="dauerHuelle"><div>
          <div class="block-unter">Gilt je Fach und steht so im Kalender.
            Leer heißt ${KLAUSUR_DAUER_VORGABE} Minuten.</div>
          <ul class="dauer-liste">${faecher.map(id => {
@@ -6458,7 +6458,7 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
              <span class="dauer-klar">${dauerText(dauerFuer(id))}</span>
            </li>`; }).join("")}
          </ul>
-       </div>`;
+       </div></div>`;
 
     const kopf = block.querySelector("#dauerKopf");
     const huelle = block.querySelector("#dauerHuelle");
