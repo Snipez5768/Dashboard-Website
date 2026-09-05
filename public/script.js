@@ -1661,6 +1661,13 @@
   }
 
   function glutZeigen(punkt, stufe) {
+    /* Der Lichtschein beim Abhaken ist entfernt — auf Wunsch, und er
+       passt auch nicht mehr: er lag hinter den Karten und schien durch
+       sie hindurch. Die Karten sind jetzt feste Flaechen, eine Scheibe
+       die nichts durchlaesst kann auch nichts zeigen. Die Funktion
+       bleibt als leere Huelle, damit die zwei Aufrufstellen nichts
+       wissen muessen. */
+    return;
     const plan = GLUT[stufe];
     if (!plan || !punkt) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;

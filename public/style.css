@@ -1176,8 +1176,7 @@ html.tablet #card-kalorien { display: none; }
 .hb-zeile:hover { background: var(--auflage-2); }
 
 /* Der Knopf für heute */
-.hb-knopf {
-  --glut: 168, 85, 247;                /* Farbe für das Licht beim Abhaken */
+.hb-knopf {
   position: relative;
   width: var(--knopf);
   height: var(--knopf);
@@ -5072,8 +5071,7 @@ html.finger .kf-ablage { padding: 26px 16px; }
   grid-template-columns: repeat(7, 1fr);
   gap: 3px;
 }
-.hk-feld {
-  --glut: 168, 85, 247;                /* Farbe für das Licht beim Abhaken */
+.hk-feld {
   aspect-ratio: 1 / 1;
   border: none;
   border-radius: 4px;
@@ -5200,218 +5198,11 @@ button.hk-feld:hover { transform: scale(1.12); }
 }
 
 
-/* ==========================================================
-   GLUT — das Licht beim Abhaken
-   Es liegt zwischen dem Seitenhintergrund und den Widgets: auf
-   z-index: -1, eine Lage über dem Grundverlauf, unter allem
-   anderen. Die Karten sind mattes Glas, ihr backdrop-filter
-   greift ab, was hier darunter leuchtet — sie färben sich also
-   von selbst ein, ohne dass ihnen etwas übergelegt wird.
-
-   Es nimmt bewusst nicht den Bildschirm ein: der Schein bleibt
-   ein weicher Hof um die Flamme, die Ränder der Seite bleiben
-   dunkel. Drei Lagen mit verschiedenem Tempo geben ihm Tiefe —
-   ein großer, träger Hof, der eigentliche Schein und eine feine
-   Welle, die vorausläuft. Erst dehnt sich alles, steht kurz und
-   sammelt sich dann wieder in der Flamme.
-   ========================================================== */
-.glut {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.glut-licht,
-.glut-hof,
-.glut-welle {
-  position: absolute;
-  left: var(--fx);
-  top: var(--fy);
-  border-radius: 50%;
-  will-change: transform, opacity;
-}
-
-/* Der eigentliche Schein: weich, ohne harte Kante */
-.glut-licht {
-  width: var(--weite);
-  height: var(--weite);
-  margin: calc(var(--weite) / -2) 0 0 calc(var(--weite) / -2);
-  background: radial-gradient(circle,
-              rgba(var(--rgb), 0.85) 0%,
-              rgba(var(--rgb), 0.45) 26%,
-              rgba(var(--rgb), 0.18) 50%,
-              rgba(var(--rgb), 0.05) 72%,
-              rgba(var(--rgb), 0.00) 88%);
-  animation: glut-atem var(--dauer) both;
-}
-
-/* Ein größerer, viel blasserer Hof zieht langsamer nach. Der Versatz
-   ist das, was den Schein tief wirken lässt statt flach. */
-.glut-hof {
-  width: calc(var(--weite) * 1.35);
-  height: calc(var(--weite) * 1.35);
-  margin: calc(var(--weite) * -0.675) 0 0 calc(var(--weite) * -0.675);
-  background: radial-gradient(circle,
-              rgba(var(--rgb), 0.22) 0%,
-              rgba(var(--rgb), 0.10) 40%,
-              rgba(var(--rgb), 0.03) 66%,
-              rgba(var(--rgb), 0.00) 84%);
-  animation: glut-atem var(--dauer) both;
-  animation-delay: calc(var(--dauer) * 0.06);
-}
-
-/* Eine feine Welle läuft voraus und ist längst weg, bevor sich der
-   Schein wieder sammelt. */
-.glut-welle {
-  width: calc(var(--weite) * 1.3);
-  height: calc(var(--weite) * 1.3);
-  margin: calc(var(--weite) * -0.65) 0 0 calc(var(--weite) * -0.65);
-  border: 1px solid rgba(var(--rgb), 0.35);
-  animation: glut-welle calc(var(--dauer) * 0.4) cubic-bezier(0.1, 0.75, 0.3, 1) both;
-}
-
-/* Hinaus, kurz stehen, wieder herein. Die Kurven stehen an den
-   Bildpunkten, damit jeder Abschnitt sein eigenes Tempo hat. */
-@keyframes glut-atem {
-  0% {
-    transform: scale(0.05);
-    opacity: 0;
-    animation-timing-function: cubic-bezier(0.15, 0.75, 0.25, 1);   /* dehnt sich */
-  }
-  12% {
-    opacity: var(--wucht);
-    animation-timing-function: cubic-bezier(0.15, 0.75, 0.25, 1);
-  }
-  30% {
-    transform: scale(1);
-    opacity: var(--wucht);
-    animation-timing-function: linear;                              /* steht kurz */
-  }
-  42% {
-    transform: scale(0.97);
-    opacity: var(--wucht);
-    animation-timing-function: cubic-bezier(0.36, 0.04, 0.36, 1);   /* sammelt sich */
-  }
-  93% {
-    transform: scale(0.09);
-    opacity: calc(var(--wucht) * 0.9);
-  }
-  100% {
-    transform: scale(0.04);
-    opacity: 0;
-  }
-}
-
-@keyframes glut-welle {
-  0%   { transform: scale(0.04); opacity: 0.55; }
-  60%  {                         opacity: 0.22; }
-  100% { transform: scale(1);    opacity: 0; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .glut { display: none; }
-}
-
-/* ==========================================================
-   GLANZ — die Karten als Glasscheiben
-   Das Licht hinter den Widgets scheint nicht nur durch, es spiegelt
-   sich auch auf ihnen. Jede Karte bekommt den Lichtpunkt in ihren
-   eigenen Koordinaten (gesetzt in glutZeigen). Dadurch liegen die
-   Reflexe über alle Karten hinweg auf einer Linie, als läge alles
-   auf einer einzigen Scheibe. "background-attachment: fixed" wäre
-   kürzer, greift hier aber nicht: der backdrop-filter jeder Karte
-   macht sie selbst zum Bezugsrahmen.
-
-   Zwei Lagen: ein weicher Schimmer auf der Fläche und ein harter
-   Lichtpunkt auf der Kante. Beide bewegen sich mit dem Licht, das
-   dahinter größer und wieder kleiner wird.
-   ========================================================== */
-@property --glanz {
-  syntax: "<number>";
-  initial-value: 0;
-  inherits: true;
-}
-@property --glanz-r {
-  syntax: "<length>";
-  initial-value: 0px;
-  inherits: true;
-}
-
-/* Der Lauf steht am body, damit alle Karten denselben Takt haben */
-body.glanzt { animation: glanz-lauf var(--glanz-dauer, 1400ms) both; }
-@keyframes glanz-lauf {
-  0% {
-    --glanz-r: 30px;
-    --glanz: 0;
-    animation-timing-function: cubic-bezier(0.15, 0.75, 0.25, 1);
-  }
-  12% { --glanz: 1; animation-timing-function: cubic-bezier(0.15, 0.75, 0.25, 1); }
-  30% { --glanz-r: var(--glanz-weit, 500px); --glanz: 1; animation-timing-function: linear; }
-  42% { --glanz-r: var(--glanz-weit, 500px); --glanz: 1;
-        animation-timing-function: cubic-bezier(0.36, 0.04, 0.36, 1); }
-  93% { --glanz-r: 70px; --glanz: 0.9; }
-  100% { --glanz-r: 34px; --glanz: 0; }
-}
-
-/* Schimmer auf der Fläche — über dem Inhalt, wie eine Spiegelung */
-.card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  border-radius: inherit;
-  pointer-events: none;
-  opacity: 0;
-}
-body.glanzt .card::before {
-  background: radial-gradient(circle var(--glanz-r) at var(--glanz-fx) var(--glanz-fy),
-              rgba(var(--glanz-rgb), 0.26) 0%,
-              rgba(var(--glanz-rgb), 0.10) 38%,
-              rgba(var(--glanz-rgb), 0.05) 60%,
-              rgba(var(--glanz-rgb), 0) 80%);
-  mix-blend-mode: screen;
-  opacity: var(--glanz);
-}
-
-/* Das Glas klart auf, solange Licht dahinter steht: heller und
-   farbiger. Ohne das schluckt brightness(0.6) genau den Schein, der
-   hinter der Karte liegt — sie bliebe als einziges dunkel. */
-body.glanzt .card {
-  backdrop-filter: blur(26px)
-                   saturate(calc(140% + 40% * var(--glanz)))
-                   brightness(calc(0.6 + 0.16 * var(--glanz)));
-  -webkit-backdrop-filter: blur(26px)
-                   saturate(calc(140% + 40% * var(--glanz)))
-                   brightness(calc(0.6 + 0.16 * var(--glanz)));
-}
-body.glanzt .card-quick { backdrop-filter: none; -webkit-backdrop-filter: none; }
-
-/* Die Kante fängt das Licht härter ein als die Fläche */
-.card::after { z-index: 3; }
-body.glanzt .card::after {
-  background:
-    radial-gradient(circle var(--glanz-r) at var(--glanz-fx) var(--glanz-fy),
-      rgba(var(--glanz-rgb), calc(0.95 * var(--glanz))) 0%,
-      rgba(var(--glanz-rgb), calc(0.42 * var(--glanz))) 38%,
-      rgba(var(--glanz-rgb), calc(0.10 * var(--glanz))) 60%,
-      rgba(var(--glanz-rgb), 0) 76%),
-    linear-gradient(150deg,
-      var(--auflage-4) 0%,
-      var(--auflage-2) 30%,
-      var(--auflage-1) 55%,
-      var(--auflage-3) 78%,
-      var(--auflage-4) 100%);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  body.glanzt { animation: none; }
-  body.glanzt .card::before { opacity: 0; }
-}
-
-/* Der Schnellzugriff ist keine Glasscheibe — dort auch kein Reflex */
-.card-quick::before { content: none; }
+/* Hier lagen GLUT und GLANZ: ein Lichtschein, der beim Abhaken hinter
+   der Seite aufleuchtete, und die Spiegelung dieses Lichts auf den
+   Karten. Beides ist entfernt — auf Wunsch, und es passt auch nicht
+   mehr: die Karten sind jetzt feste Flaechen statt Glasscheiben, und
+   eine Scheibe, die nichts durchlaesst, kann auch nichts spiegeln. */
 
 /* ==========================================================
    HAUSAUFGABEN
@@ -10576,3 +10367,193 @@ input:focus, textarea:focus, select:focus {
   background: #8E8E93;
   box-shadow: 0 0 8px color-mix(in srgb, #8E8E93 60%, transparent);
 }
+
+/* ==========================================================
+   PHASE 4 — DIE MUSTERSEITE WIRKLICH NACHGEBAUT
+
+   Der erste Durchgang hat die neuen Farben ueber die alten Formen
+   gelegt. Das ist etwas anderes, als die Formen zu bauen, die auf
+   der Musterseite standen. Hier kommen sie nach.
+
+   Der wichtigste Unterschied steckt in Foto 1 und ich hatte ihn
+   umgedreht: dort ist die SPUR weiss und erhaben, und sie liegt auf
+   grauem Grund. Ich hatte sie grau und eingelassen gemacht. Damit
+   fehlte der Optik ihr ganzes Fundament — eine erhabene weisse
+   Flaeche, in der eine feste Pille sitzt.
+   ========================================================== */
+
+/* ----------------------------------------------------------
+   DIE SPUR — weiss, erhaben, mit Lichtkante
+   ---------------------------------------------------------- */
+.tab-bar,
+.seg-toggle,
+.lern-reiter {
+  padding: 5px;
+  gap: 2px;
+  border: none;
+  border-radius: var(--r-pill);
+  background: var(--flaeche);
+  box-shadow: var(--heb-2), var(--lichtkante);
+}
+
+/* Die Segmente darin tragen im Ruhezustand nichts — die Spur ist
+   schon die Flaeche. */
+.tab,
+.seg-toggle button,
+.lr-tab {
+  padding: 8px 16px;
+  border-radius: var(--r-pill);
+  background: none;
+  border: none;
+  color: var(--text-2);
+  font-weight: 500;
+}
+.tab:hover,
+.seg-toggle button:hover,
+.lr-tab:hover { color: var(--text); background: none; }
+
+/* ----------------------------------------------------------
+   DIE KARTEN — wie auf der Musterseite
+   Dort trug die Karte keine Kontur. Sie hebt sich allein ueber
+   Schatten und Lichtkante ab; eine Linie ringsum macht daraus
+   wieder einen Kasten statt einer schwebenden Flaeche.
+   ---------------------------------------------------------- */
+.card,
+.block {
+  border: none;
+  padding: 20px clamp(16px, 1.4vw, 24px) 22px;
+  border-radius: var(--r-card);
+  box-shadow: var(--heb-3), var(--lichtkante);
+}
+
+/* Der Titel tritt zurueck, der Inhalt traegt die Karte. Genau das
+   unterscheidet ein Apple-Widget von einem Kasten mit Ueberschrift. */
+.card-title,
+.block-kopf > :first-child {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--text-2);
+}
+
+/* Das Abzeichen traegt Bedeutung und darf deshalb Farbe haben —
+   als ruhige Flaeche, nicht als Umrandung. */
+.card-badge {
+  padding: 4px 10px;
+  border: none;
+  border-radius: var(--r-pill);
+  background: var(--flaeche-3);
+  color: var(--text-2);
+  font-family: var(--sans);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.card-badge.gut  { background: var(--gruen-fond); color: var(--gruen); }
+.card-badge.warn { background: var(--gelb-fond);  color: var(--gelb-schrift); }
+.card-badge.rot  { background: var(--rot-fond);   color: var(--rot); }
+
+/* Grosse Zahlen sind die Hauptsache im Widget. Tabellenziffern,
+   damit sie beim Hochzaehlen nicht wackeln. */
+.block-zahl {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
+}
+.cal-value,
+.weather-temp,
+.st-gross,
+.kal-gross {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+}
+
+/* ----------------------------------------------------------
+   RUNDE SYMBOLFELDER — die Blaetterleiste aus Foto 1
+   Ein Feld im Ruhezustand hellgrau, beim Annaehern angehoben,
+   ausgewaehlt fest. Gilt fuer die kleinen Auswahlfelder quer
+   durch die App.
+   ---------------------------------------------------------- */
+.kal-tag,
+.rad-wert,
+.wtag {
+  border-radius: 14px;
+  transition: background var(--w-normal) var(--kurve-weich),
+              color var(--w-normal) var(--kurve-weich),
+              transform var(--w-normal) var(--kurve),
+              box-shadow var(--w-normal) var(--kurve-weich);
+}
+.kal-tag:hover,
+.rad-wert:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--heb-1);
+}
+.kal-tag.gewaehlt {
+  background: var(--fest);
+  color: var(--fest-text);
+  box-shadow: var(--heb-fest);
+  font-weight: 700;
+}
+
+/* ----------------------------------------------------------
+   DER ABHAK-KNOPF
+   Ohne Leuchten, ohne Ring der davonlaeuft. Er sinkt beim Druecken
+   ein und fuellt sich — mehr braucht es nicht, und Gruen sagt hier
+   ohnehin schon alles.
+   ---------------------------------------------------------- */
+.hb-zeile.erledigt .hb-knopf {
+  background: var(--gruen-voll);
+  box-shadow: inset 0 0 0 2px var(--gruen-voll);
+}
+.hb-knopf.hb-pop { animation: none; }
+.hb-knopf.hb-pop::after { content: none; }
+
+/* ----------------------------------------------------------
+   DIE SPUR RICHTET SICH NACH IHREM UNTERGRUND
+
+   In Foto 1 ist die Spur weiss und erhaben — das funktioniert dort,
+   weil sie auf grauem Grund liegt. Innerhalb einer weissen Karte
+   waere dieselbe Spur weiss auf weiss und damit unsichtbar. Sie
+   dreht sich deshalb um: auf der Seite erhaben und hell, in der
+   Karte eingelassen und etwas dunkler. Die feste Pille darin bleibt
+   in beiden Faellen dieselbe.
+   ---------------------------------------------------------- */
+.card .tab-bar,
+.card .seg-toggle,
+.block .seg-toggle,
+.modal .seg-toggle,
+.kop .seg-toggle {
+  background: var(--flaeche-3);
+  box-shadow: var(--rille);
+}
+
+/* Die gleitende Pille sitzt hinter den Beschriftungen und traegt
+   die Auswahl. Sie muss die Hoehe der Spur ausfuellen, sonst sitzt
+   sie als schmaler Streifen mittendrin. */
+.tab-indicator {
+  top: 5px;
+  height: calc(100% - 10px);
+  background: var(--fest);
+  box-shadow: var(--heb-fest);
+  border-radius: var(--r-pill);
+}
+
+/* Im Kartenkopf ist weniger Platz als auf der Musterseite. Dort
+   standen drei Segmente auf voller Breite, hier teilen sich vier
+   die Kopfzeile eines Widgets. Die grosszuegige Polsterung liess
+   den letzten Reiter aus der Karte laufen. */
+.card-head .tab-bar { padding: 3px; gap: 0; width: 100%; }
+.card-head .tab {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 4px;
+  font-size: 10.5px;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.card-head .tab-indicator { top: 3px; height: calc(100% - 6px); }
