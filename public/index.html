@@ -1134,6 +1134,22 @@
            unterwegs ist und nichts mehr geht. -->
       <section class="kop-bereich" data-bereich="app" hidden>
         <h2 class="kop-titel">App &amp; Offline</h2>
+
+        <!-- Die Wahl gilt nur auf diesem Geraet. Sie wandert absichtlich
+             nicht ueber den Server: sonst wuerde das Handy den Rechner
+             abends mit umstellen. -->
+        <div class="kop-abschnitt">
+          <h3 class="kop-unter">Erscheinungsbild</h3>
+          <div class="seg-toggle thema-wahl" id="themaWahl" role="group" aria-label="Erscheinungsbild">
+            <button type="button" data-thema="auto">Automatisch</button>
+            <button type="button" data-thema="hell">Hell</button>
+            <button type="button" data-thema="dunkel">Dunkel</button>
+          </div>
+          <p class="kop-hinweis" id="themaHinweis">Automatisch folgt der Einstellung deines
+            Geräts und wechselt abends von selbst. Die Wahl gilt nur hier, nicht auf deinen
+            anderen Geräten.</p>
+        </div>
+
         <div class="kop-abschnitt">
           <div class="gk-kasten" id="offKasten">
             <div class="gk-lade">Wird geprüft …</div>

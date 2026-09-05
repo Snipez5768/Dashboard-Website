@@ -3546,15 +3546,15 @@ button.matrix-feld:hover { transform: scale(1.12); }
    als getrennte Kinder im selben Gitter.
    ========================================================== */
 .ton-gruen   { --ton: var(--gruen); }
-.ton-hellgruen { --ton: #a3e635; }
-.ton-cyan    { --ton: #22d3ee; }
+.ton-hellgruen { --ton: color-mix(in srgb, var(--gruen) 70%, var(--gelb)); }
+.ton-cyan    { --ton: color-mix(in srgb, var(--blau) 78%, var(--gruen)); }
 .ton-rot     { --ton: var(--rot); }
 .ton-blau    { --ton: var(--blau); }
-.ton-pink    { --ton: #f472b6; }
+.ton-pink    { --ton: color-mix(in srgb, var(--rot) 74%, var(--blau)); }
 .ton-violett { --ton: var(--blau); }
-.ton-gelb    { --ton: #fbbf24; }
-.ton-tuerkis { --ton: #22d3ee; }
-.ton-orange  { --ton: #fb923c; }
+.ton-gelb    { --ton: var(--gelb); }
+.ton-tuerkis { --ton: color-mix(in srgb, var(--blau) 60%, var(--gruen)); }
+.ton-orange  { --ton: color-mix(in srgb, var(--gelb) 60%, var(--rot)); }
 .ton-grau    { --ton: var(--text-2); }
 
 .plan-rolle {
@@ -10094,3 +10094,360 @@ html.tablet #weatherCityLabel { display: none; }
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+
+
+/* ==========================================================
+   ==========================================================
+   DIE FORMENSPRACHE
+   ==========================================================
+
+   Ab hier steht die neue Gestalt. Der Block liegt bewusst am Ende:
+   bei gleicher Stärke gewinnt die spätere Regel. Damit muss keine
+   der rund 2300 bestehenden Regeln angefasst werden — was hier
+   steht, sticht, was darüber steht.
+
+   Die Grundform ist überall dieselbe: eine ruhige Fläche, und was
+   ausgewählt ist, trägt --fest — schwarz im Hellen, weiß im Dunkeln.
+   Farbe bleibt der Bedeutung vorbehalten und erscheint überwiegend
+   erst beim Annähern.
+   ========================================================== */
+
+/* ----------------------------------------------------------
+   KARTEN UND BLÖCKE
+
+   Vorher lag hier "dunkles Glas": eine durchsichtige Fläche mit
+   backdrop-filter: brightness(0.6), die absichtlich abdunkelte, was
+   hinter ihr lag. Auf schwarzem Grund ergab das Tiefe. Auf hellem
+   Grund macht dieselbe Rechnung aus Weiß zwangsläufig Grau — die
+   Karte wäre dunkler als die Seite, auf der sie liegt. Deshalb
+   tragen Karten jetzt eine eigene Fläche statt einer Rechnung auf
+   dem Untergrund.
+   ---------------------------------------------------------- */
+.card,
+.block {
+  background: var(--flaeche);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid var(--kontur);
+  border-radius: var(--r-card);
+  box-shadow: var(--heb-3), var(--lichtkante);
+  transition: transform var(--w-gleit) var(--kurve),
+              box-shadow var(--w-gleit) var(--kurve-weich);
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--heb-4), var(--lichtkante);
+}
+.card-quick,
+.card-quick:hover {
+  background: none;
+  border-color: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Die kleinen Knöpfe im Kartenkopf treten zurück, bis man sich
+   nähert. Wo es kein Annähern gibt, bleiben sie stehen — sonst
+   wären sie auf dem Telefon unerreichbar. */
+.card-head .icon-btn,
+.card-head .seg-toggle {
+  opacity: 0;
+  transition: opacity var(--w-normal) var(--kurve-weich);
+}
+.card:hover .card-head .icon-btn,
+.card:hover .card-head .seg-toggle,
+.card:focus-within .card-head .icon-btn,
+.card:focus-within .card-head .seg-toggle { opacity: 1; }
+@media (hover: none) and (pointer: coarse) {
+  .card-head .icon-btn,
+  .card-head .seg-toggle { opacity: 1; }
+}
+
+/* ----------------------------------------------------------
+   DIE SPUR MIT DER FESTEN PILLE
+   Reiter, Schalterleisten, Segmente — alle dieselbe Form.
+   ---------------------------------------------------------- */
+.tab-bar,
+.seg-toggle,
+.lern-reiter {
+  background: var(--flaeche-3);
+  border: 1px solid var(--kontur);
+  border-radius: var(--r-pill);
+  padding: 4px;
+  gap: 2px;
+}
+.tab-indicator {
+  background: var(--fest);
+  box-shadow: var(--heb-fest);
+  border-radius: var(--r-pill);
+  transition: transform var(--w-gleit) var(--kurve),
+              width var(--w-gleit) var(--kurve),
+              left var(--w-gleit) var(--kurve);
+}
+.tab,
+.seg-toggle button,
+.lr-tab,
+.kop-reiter button {
+  border-radius: var(--r-pill);
+  color: var(--text-2);
+  background: none;
+  border: none;
+  transition: color var(--w-normal) var(--kurve-weich),
+              background var(--w-normal) var(--kurve-weich),
+              transform var(--w-schnell) var(--kurve);
+}
+.tab:hover,
+.seg-toggle button:hover,
+.lr-tab:hover,
+.kop-reiter button:hover { color: var(--text); }
+.tab:active,
+.seg-toggle button:active,
+.lr-tab:active,
+.kop-reiter button:active { transform: scale(.97); }
+
+/* Ausgewählt heißt: das Gegenteil des Grundes, nie eine Farbe */
+.tab.active,
+.tab[aria-selected="true"] { color: var(--fest-text); font-weight: 600; }
+.seg-toggle button.active,
+.seg-toggle button.an,
+.lr-tab.active,
+.lr-tab[aria-selected="true"],
+.kop-reiter button.active {
+  background: var(--fest);
+  color: var(--fest-text);
+  font-weight: 600;
+  box-shadow: var(--heb-fest);
+}
+
+/* ----------------------------------------------------------
+   NAVIGATION
+   ---------------------------------------------------------- */
+.nav-link {
+  border-radius: var(--r-el);
+  border-color: transparent;
+  transition: background var(--w-normal) var(--kurve-weich),
+              color var(--w-normal) var(--kurve-weich),
+              transform var(--w-schnell) var(--kurve);
+}
+.nav-link:hover { background: var(--auflage-2); color: var(--text); }
+.nav-link:active { transform: scale(.98); }
+.nav-link.active {
+  background: var(--fest);
+  color: var(--fest-text);
+  border-color: transparent;
+  font-weight: 600;
+  box-shadow: var(--heb-fest);
+}
+.nav-link.active svg { color: var(--fest-text); animation: none; }
+
+/* ----------------------------------------------------------
+   KNÖPFE
+   Ruhezustand erhaben und farblos, Farbe erst beim Annähern.
+   ---------------------------------------------------------- */
+.ghost-btn, .full-btn, .gk-knopf, .ko-knopf, .kp-knopf, .lp-knopf,
+.pj-knopf, .ps-knopf, .lf-knopf, .dv-knopf, .vw-knopf, .zeilen-btn,
+.kf-import-knopf, .kf-muster-knopf, .kf-prompt-knopf, .kf-wf-knopf {
+  border-radius: var(--r-pill);
+  border: 1px solid var(--kontur);
+  background: var(--flaeche);
+  color: var(--text);
+  box-shadow: var(--heb-1), var(--lichtkante);
+  transition: transform var(--w-normal) var(--kurve),
+              box-shadow var(--w-normal) var(--kurve-weich),
+              background var(--w-normal) var(--kurve-weich),
+              color var(--w-normal) var(--kurve-weich);
+}
+.ghost-btn:hover, .full-btn:hover, .gk-knopf:hover, .ko-knopf:hover,
+.kp-knopf:hover, .lp-knopf:hover, .pj-knopf:hover, .ps-knopf:hover,
+.lf-knopf:hover, .dv-knopf:hover, .vw-knopf:hover, .zeilen-btn:hover,
+.kf-import-knopf:hover, .kf-muster-knopf:hover,
+.kf-prompt-knopf:hover, .kf-wf-knopf:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--heb-2), var(--lichtkante);
+  color: var(--text);
+  border-color: var(--kontur-2);
+}
+.ghost-btn:active, .full-btn:active, .gk-knopf:active, .ko-knopf:active,
+.kp-knopf:active, .lp-knopf:active, .pj-knopf:active, .ps-knopf:active,
+.lf-knopf:active, .dv-knopf:active, .vw-knopf:active, .zeilen-btn:active,
+.kf-import-knopf:active, .kf-muster-knopf:active,
+.kf-prompt-knopf:active, .kf-wf-knopf:active {
+  transform: scale(.97);
+  box-shadow: var(--heb-1);
+  transition-duration: var(--w-schnell);
+}
+
+/* Die Haupthandlung trägt --fest */
+.search-btn, .an-knopf, .kp-knopf.haupt, .lp-knopf.haupt, .ko-knopf.haupt {
+  background: var(--fest);
+  color: var(--fest-text);
+  border: none;
+  border-radius: var(--r-pill);
+  font-weight: 600;
+  box-shadow: var(--heb-fest);
+  transition: transform var(--w-normal) var(--kurve),
+              box-shadow var(--w-normal) var(--kurve-weich);
+}
+.search-btn:hover, .an-knopf:hover,
+.kp-knopf.haupt:hover, .lp-knopf.haupt:hover, .ko-knopf.haupt:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--fest) 26%, transparent),
+              0 12px 28px color-mix(in srgb, var(--fest) 18%, transparent);
+}
+.search-btn:active, .an-knopf:active,
+.kp-knopf.haupt:active, .lp-knopf.haupt:active, .ko-knopf.haupt:active {
+  transform: scale(.97);
+  transition-duration: var(--w-schnell);
+}
+
+/* Symbolknöpfe: rund, ruhig, heben beim Annähern */
+.icon-btn, .li-kopfknopf, .collapse-btn {
+  border-radius: var(--r-pill);
+  border: 1px solid var(--kontur);
+  background: var(--flaeche);
+  color: var(--text-2);
+  box-shadow: var(--heb-1);
+  transition: transform var(--w-normal) var(--kurve),
+              box-shadow var(--w-normal) var(--kurve-weich),
+              color var(--w-normal) var(--kurve-weich),
+              background var(--w-normal) var(--kurve-weich);
+}
+.icon-btn:hover, .li-kopfknopf:hover, .collapse-btn:hover {
+  color: var(--text);
+  transform: translateY(-1px);
+  box-shadow: var(--heb-2);
+  background: var(--flaeche);
+  border-color: var(--kontur-2);
+}
+.icon-btn:active, .li-kopfknopf:active, .collapse-btn:active {
+  transform: scale(.92);
+  transition-duration: var(--w-schnell);
+}
+.icon-btn.active {
+  background: var(--fest);
+  color: var(--fest-text);
+  border-color: transparent;
+  box-shadow: var(--heb-fest);
+}
+
+/* ----------------------------------------------------------
+   EINGABEN
+   ---------------------------------------------------------- */
+input[type="text"], input[type="password"], input[type="number"],
+input[type="search"], input[type="date"], input[type="time"],
+textarea, select {
+  border-radius: var(--r-el);
+  border: 1px solid var(--kontur);
+  background: var(--senke-1);
+  color: var(--text);
+  transition: border-color var(--w-normal) var(--kurve-weich),
+              box-shadow var(--w-normal) var(--kurve-weich),
+              background var(--w-normal) var(--kurve-weich);
+}
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: color-mix(in srgb, var(--blau) 55%, transparent);
+  box-shadow: 0 0 0 3px var(--blau-fond);
+  background: var(--flaeche);
+}
+::placeholder { color: var(--text-3); }
+
+/* ----------------------------------------------------------
+   TASTATUR
+   Wer mit der Tastatur unterwegs ist, muss sehen können, wo er
+   steht. :focus-visible zeigt sich nur dort und stört die Maus
+   nicht.
+   ---------------------------------------------------------- */
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--blau-fond), 0 0 0 1.5px var(--blau);
+}
+
+/* ----------------------------------------------------------
+   ROLLBALKEN
+   ---------------------------------------------------------- */
+* { scrollbar-color: var(--kontur-2) transparent; scrollbar-width: thin; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--kontur-2);
+  border-radius: var(--r-pill);
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-3);
+  background-clip: content-box;
+}
+
+/* ----------------------------------------------------------
+   AUSWAHL UND FENSTER
+   ---------------------------------------------------------- */
+::selection {
+  background: color-mix(in srgb, var(--blau) 26%, transparent);
+  color: var(--text);
+}
+
+.modal, .pop, .kop {
+  border-radius: var(--r-card);
+  border: 1px solid var(--kontur);
+  background: var(--flaeche);
+  box-shadow: var(--heb-4), var(--lichtkante);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.modal-overlay { background: var(--schleier); }
+
+
+/* ----------------------------------------------------------
+   NACHTRAG: DIE DEUTSCHE SCHWESTERKLASSE
+
+   Die App markiert Ausgewaehltes an manchen Stellen mit "active"
+   und an anderen mit "aktiv". Der erste Durchgang kannte nur die
+   englische Form — dadurch blieben die Bereichsknoepfe im
+   Kontopanel und die Planzeilen blau, waehrend alles daneben
+   schon neutral war.
+   ---------------------------------------------------------- */
+
+/* Die Bereichsliste im Kontopanel ist eine Navigation, keine Spur.
+   Der erste Entwurf hatte sie versehentlich als Schalterleiste
+   behandelt — daher hier die Richtigstellung. */
+.kop-reiter {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--r-el);
+  padding: 8px 11px;
+  color: var(--text-2);
+  transition: background var(--w-normal) var(--kurve-weich),
+              color var(--w-normal) var(--kurve-weich),
+              transform var(--w-schnell) var(--kurve);
+}
+.kop-reiter:hover { background: var(--auflage-2); color: var(--text); }
+.kop-reiter:active { transform: scale(.98); }
+.kop-reiter.aktiv {
+  background: var(--fest);
+  color: var(--fest-text);
+  border-color: transparent;
+  font-weight: 600;
+  box-shadow: var(--heb-fest);
+}
+
+/* Planzeilen und Segmente, die die deutsche Form benutzen */
+.pl-zeile.aktiv {
+  background: var(--fest);
+  color: var(--fest-text);
+}
+.seg-toggle button.aktiv,
+.lr-tab.aktiv,
+.tab.aktiv {
+  background: var(--fest);
+  color: var(--fest-text);
+  font-weight: 600;
+  box-shadow: var(--heb-fest);
+}
+
+/* Der Streifen im Wochenblick trug einen Blau-Violett-Verlauf.
+   Violett gibt es nicht mehr, und ein Verlauf ueber zwei Akzente
+   waere hier Zierde ohne Aussage. */
+.iv-teil.aktiv { background: var(--blau); }
+.iv-punkt.aktiv { background: var(--blau); }

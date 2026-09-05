@@ -919,13 +919,19 @@
     // Farbverläufe
     const defs = el("defs", {});
     defs.innerHTML = `
+      <!-- Zwei Geraete, zwei Toene. Handy traegt das Blau, der Rechner
+           ein neutrales Grau: die Unterscheidung ist hier keine
+           Bewertung, deshalb hat sie auch keine Signalfarbe verdient.
+           Feste Werte statt Variablen — ein stop-color ist ein
+           Praesentationsattribut und kennt kein var(). Beide Toene
+           tragen auf schwarzem wie auf weissem Grund. -->
       <linearGradient id="stGradPhone" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#5b8cff" stop-opacity="0.55"/>
-        <stop offset="100%" stop-color="#5b8cff" stop-opacity="0.04"/>
+        <stop offset="0%" stop-color="#007AFF" stop-opacity="0.55"/>
+        <stop offset="100%" stop-color="#007AFF" stop-opacity="0.04"/>
       </linearGradient>
       <linearGradient id="stGradPc" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.45"/>
-        <stop offset="100%" stop-color="#a78bfa" stop-opacity="0.03"/>
+        <stop offset="0%" stop-color="#8E8E93" stop-opacity="0.45"/>
+        <stop offset="100%" stop-color="#8E8E93" stop-opacity="0.03"/>
       </linearGradient>`;
     svg.appendChild(defs);
 
@@ -2023,9 +2029,15 @@
     if (aktuelleSeite === "habits") baueHabits();
   }
 
+  /* Ein abgehakter Tag ist ein erledigter Tag — und Erledigtes ist in
+     dieser App gruen. Frueher stand hier ein Violettverlauf mit fest
+     eingebauten Kanalwerten; der liess sich weder dem Modus noch der
+     Farblogik anpassen. Jetzt traegt der Ton die Bedeutung, und nur
+     die Deckkraft erzaehlt das Alter: je frischer der Tag, desto
+     kraeftiger der Punkt. */
   function punktFarbe(alterAnteil) {
-    const hell = 1 - alterAnteil * 0.6;
-    return `rgba(${Math.round(168 + 62 * (1 - alterAnteil))}, ${Math.round(85 + 28 * (1 - alterAnteil))}, 247, ${0.32 + hell * 0.68})`;
+    const deckung = 0.32 + (1 - alterAnteil * 0.6) * 0.68;
+    return `color-mix(in srgb, var(--gruen-voll) ${Math.round(deckung * 100)}%, transparent)`;
   }
 
   /* Das Widget kann statt der letzten Tage das ganze Jahr zeigen:
@@ -2411,9 +2423,84 @@
        sonst drei Abrufe für einen, den man sehen will. */
     if (name === "konto")      kontoZeichnen();
     if (name === "google")     gkStandHolen();
-    if (name === "app")        offZeichnen();
+    if (name === "app")      { offZeichnen(); themaZeichnen(); }
     if (name === "papierkorb") papierkorbZeichnen();
   }
+
+  /* ==========================================================
+     HELL ODER DUNKEL
+
+     Drei Stellungen. "Automatisch" heisst: kein Attribut setzen,
+     dann entscheidet die Medienabfrage in style.css nach der
+     Einstellung des Geraets. "Hell" und "Dunkel" setzen das
+     Attribut und stechen die Geraeteeinstellung.
+
+     Die Wahl liegt bewusst nur im Browserspeicher dieses Geraets und
+     wird nicht mit dem Server abgeglichen: sonst wuerde das Handy,
+     das abends auf Dunkel geht, den Rechner mitziehen.
+
+     Gesetzt wird das Attribut schon im Kopf der index.html, vor dem
+     ersten Bildaufbau — hier geht es nur noch um den Umschalter und
+     um die Farbe der Statusleiste.
+     ========================================================== */
+  const THEMA = "lifeos_thema";
+
+  const themaWahl = () => {
+    try { const w = localStorage.getItem(THEMA); return (w === "hell" || w === "dunkel") ? w : "auto"; }
+    catch (f) { return "auto"; }
+  };
+
+  /* Welcher Modus am Ende wirklich gilt */
+  const themaEcht = () => {
+    const w = themaWahl();
+    if (w !== "auto") return w;
+    return matchMedia("(prefers-color-scheme: dark)").matches ? "dunkel" : "hell";
+  };
+
+  /* iOS faerbt die Statusleiste nach diesem Wert. Bleibt er auf dem
+     alten Navy stehen, sitzt im Hellen ein dunkler Balken ueber der
+     Seite. */
+  function statusleisteFaerben() {
+    const dunkel = themaEcht() === "dunkel";
+    const marke = document.querySelector('meta[name="theme-color"]');
+    if (marke) marke.setAttribute("content", dunkel ? "#000000" : "#EDEDEF");
+    const ios = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+    if (ios) ios.setAttribute("content", dunkel ? "black" : "default");
+  }
+
+  function themaSetzen(wahl) {
+    if (wahl === "hell" || wahl === "dunkel") {
+      document.documentElement.setAttribute("data-thema", wahl);
+      try { localStorage.setItem(THEMA, wahl); } catch (f) { /* dann nur fuer jetzt */ }
+    } else {
+      document.documentElement.removeAttribute("data-thema");
+      try { localStorage.removeItem(THEMA); } catch (f) { /* egal */ }
+    }
+    statusleisteFaerben();
+    themaZeichnen();
+  }
+
+  function themaZeichnen() {
+    const leiste = $("themaWahl");
+    if (!leiste) return;
+    const jetzt = themaWahl();
+    leiste.querySelectorAll("button[data-thema]").forEach(k =>
+      k.classList.toggle("active", k.dataset.thema === jetzt));
+    if (!leiste.dataset.gebunden) {
+      leiste.dataset.gebunden = "1";
+      leiste.addEventListener("click", e => {
+        const k = e.target.closest("button[data-thema]");
+        if (k) themaSetzen(k.dataset.thema);
+      });
+    }
+  }
+
+  /* Steht der Schalter auf "Automatisch", muss die Seite mitwechseln,
+     wenn das Geraet abends umstellt — ohne Neuladen. */
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+    if (themaWahl() === "auto") statusleisteFaerben();
+  });
+  statusleisteFaerben();
 
   function openSettings(bereich) {
     $("settingName").value = settings.name || "";
@@ -3828,11 +3915,14 @@
      lässt, bleibt ehrlich unter "Sonstiges" stehen.
      ========================================================== */
   const KATEGORIEN = [
-    { id: "produktiv", titel: "Produktivität", ton: "#34d399" },
-    { id: "youtube",   titel: "YouTube",       ton: "#fb7185" },
-    { id: "tiktok",    titel: "TikTok",        ton: "#22d3ee" },
-    { id: "spiele",    titel: "Videospiele",   ton: "#a78bfa" },
-    { id: "rest",      titel: "Sonstiges",     ton: "#8c97b0" }
+    /* Diese Toene landen als stroke-Attribut im SVG und koennen darum
+       keine Variablen sein. Sie kommen aus derselben Palette wie der
+       Rest und sind so gewaehlt, dass sie auf beiden Gruenden tragen. */
+    { id: "produktiv", titel: "Produktivität", ton: "#34C759" },
+    { id: "youtube",   titel: "YouTube",       ton: "#FF3B30" },
+    { id: "tiktok",    titel: "TikTok",        ton: "#0A84FF" },
+    { id: "spiele",    titel: "Videospiele",   ton: "#FFB800" },
+    { id: "rest",      titel: "Sonstiges",     ton: "#8E8E93" }
   ];
 
   const KAT_BROWSER = ["chrome", "msedge", "firefox", "brave", "opera", "operagx",
