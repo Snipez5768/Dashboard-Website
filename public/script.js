@@ -2502,6 +2502,41 @@
   });
   statusleisteFaerben();
 
+  /* ==========================================================
+     DIE SCHWEBENDE LEISTE AUF DEM HANDY
+
+     Zehn Seiten passen nicht nebeneinander in eine Pille, also
+     wischt man seitlich. Damit man das ueberhaupt merkt, verlaeuft
+     der Rand weich — aber nur auf der Seite, auf der wirklich noch
+     etwas liegt. Ein Verlauf, der auch am Anfang steht, wuerde ueber
+     den ersten Eintrag waschen und Weiterlaufen behaupten, wo
+     Schluss ist.
+     ========================================================== */
+  (function leisteRaender() {
+    const leiste = document.querySelector(".sidebar");
+    const bahn = document.querySelector(".nav-scroll");
+    if (!leiste || !bahn) return;
+
+    function raender() {
+      const rest = bahn.scrollWidth - bahn.clientWidth - bahn.scrollLeft;
+      leiste.classList.toggle("mehr-links", bahn.scrollLeft > 2);
+      leiste.classList.toggle("mehr-rechts", rest > 2);
+    }
+    bahn.addEventListener("scroll", raender, { passive: true });
+    window.addEventListener("resize", raender);
+    raender();
+
+    /* Der gewaehlte Punkt zieht sich in Sicht, damit er nicht halb
+       hinter dem Rand klemmt. */
+    bahn.addEventListener("click", e => {
+      const k = e.target.closest(".nav-link");
+      if (k) setTimeout(() => {
+        k.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+      }, 40);
+    });
+  })();
+
+
   function openSettings(bereich) {
     $("settingName").value = settings.name || "";
     $("settingCity").value = settings.city || "";
