@@ -1301,6 +1301,9 @@
     return `in ${schul} ${schul === 1 ? "Schultag" : "Schultagen"}`;
   };
 
+  /* Der Pfeil sagt "hier geht es weiter" — er ersetzt das doppelte
+     Seitensymbol, das vorher im Malzeichen und im Knopf stand. */
+  const SYM_PFEIL_RECHTS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
   const SYM_KALENDER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3.2v3.6M16 3.2v3.6"/></svg>';
   const SYM_WECKER   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="7.4"/><path d="M12 9.6V13l2.4 1.5M5.2 4.2 3 6.4M18.8 4.2 21 6.4"/></svg>';
   const SYM_LERNEN   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7.3C10.4 5.9 8.4 5.2 5.6 5.2c-.9 0-1.6.7-1.6 1.6v9.7c0 .9.7 1.6 1.6 1.6 2.8 0 4.8.7 6.4 2.1 1.6-1.4 3.6-2.1 6.4-2.1.9 0 1.6-.7 1.6-1.6V6.8c0-.9-.7-1.6-1.6-1.6-2.8 0-4.8.7-6.4 2.1Z"/><path d="M12 7.3v13"/></svg>';
@@ -1399,24 +1402,31 @@
       const diff = daysUntil(e.date);
       const li = document.createElement("li");
       const frist = e.art === "hausaufgabe" ? hausFrist(diff) : fristKlasse(diff);
-      li.className = "entry-item " + e.art + " " + frist
+      /* Nach Bild 1 eine Kapsel, nach Bild 2 an einem Strahl:
+         links das Malzeichen mit der Farbe der Frist, in der Mitte
+         Sache und Zusammenhang, rechts die Frist als Marke.
+         Der Punkt am Strahl entsteht in der style.css aus diesen
+         Zustandsklassen — heute, bald, sonst. */
+      li.className = "insel entry-item " + e.art + " " + frist
                    + (diff === 0 ? " today" : diff <= 3 ? " soon" : "");
+      const ton = diff === 0 ? " rot" : diff <= 3 ? " gelb" : " blau";
       li.innerHTML = `
-        <span class="entry-accent"></span>
-        <div class="entry-main">
-          <div class="entry-title">${escapeHTML(e.title)}</div>
-          <div class="entry-sub">${
+        <span class="i-mal${ton}">${e.art === "termin" ? SYM_KALENDER : SYM_LERNEN}</span>
+        <div class="i-text">
+          <div class="i-sache">${
             e.art === "klausur" ? (klausurZusatz(e) || pruefungWort(e)) + " · "
             : e.art === "hausaufgabe"
               ? "Hausaufgabe" + (e.fach ? " " + fachInfo(e.fach).kurz : "") + " · "
             : e.art === "thema" ? "Thema · "
               : ""}${fmtDate(e.date)}${e.time ? " · " + e.time : ""}</div>
+          <div class="i-wert">${escapeHTML(e.title)}</div>
         </div>
-        <span class="entry-badge">${badgeFor(diff, e.art === "termin" ? null : e.date)}</span>
-        <button class="entry-go" data-id="${e.id}" data-art="${e.art}"
-          title="${e.art === "termin" ? "Zum Kalender" : "Zur Lernseite"}"
-          aria-label="${e.art === "termin" ? "Zum Kalender" : "Zur Lernseite"}">${
-          e.art === "termin" ? SYM_KALENDER : SYM_LERNEN}</button>`;
+        <span class="i-rechts">
+          <span class="marke${ton}">${badgeFor(diff, e.art === "termin" ? null : e.date)}</span>
+          <button class="entry-go" data-id="${e.id}" data-art="${e.art}"
+            title="${e.art === "termin" ? "Zum Kalender" : "Zur Lernseite"}"
+            aria-label="${e.art === "termin" ? "Zum Kalender" : "Zur Lernseite"}">${SYM_PFEIL_RECHTS}</button>
+        </span>`;
       list.appendChild(li);
     });
 
@@ -1747,17 +1757,25 @@
       const row = document.createElement("button");
       row.type = "button";
       const dringend = !heuteErledigt && tagNeigtSich;
-      row.className = "streak-row" + (heuteErledigt ? " erledigt stufe-" + stufe : " offen") + (dringend ? " dringend" : "");
+      row.className = "insel streak-row" + (heuteErledigt ? " erledigt stufe-" + stufe : " offen") + (dringend ? " dringend" : "");
       row.style.setProperty("--reihe", reihe);
       row.dataset.habit = eintrag.id;
       row.title = `${eintrag.name}: ${eintrag.tage} ${eintrag.tage === 1 ? "Tag" : "Tage"} am Stück` +
                   ` (Bestwert ${streakBest(eintrag.id)}) — zum Abhaken klicken` +
                   (dringend ? " · heute noch offen!" : "");
+      /* Nach Bild 1: links das Malzeichen mit der Flamme, in der
+         Mitte die Zahl als Aussage und darueber der Zusammenhang,
+         rechts nur noch eine Marke, wenn es etwas zu melden gibt.
+         Vorher trug die Flamme die Aussage und die Zahl stand klein
+         daneben — genau andersherum gewichtet. */
       row.innerHTML = `
-        <span class="sr-name">${escapeHTML(eintrag.name)}</span>
-        <span class="sr-wert">
-          <b>${eintrag.tage}</b>
-          <span class="sr-flamme${entfaltenId === eintrag.id && heuteErledigt ? " entfalten" : ""}">${FLAMME_SVG}${dringend ? '<i class="sr-warnung" aria-hidden="true">!</i>' : ""}</span>
+        <span class="i-mal${dringend ? " rot" : heuteErledigt ? " gelb" : ""} sr-flamme${entfaltenId === eintrag.id && heuteErledigt ? " entfalten" : ""}">${FLAMME_SVG}</span>
+        <span class="i-text">
+          <span class="i-sache">${escapeHTML(eintrag.name)}</span>
+          <span class="i-wert">${eintrag.tage}<small> ${eintrag.tage === 1 ? "Tag" : "Tage"}</small></span>
+        </span>
+        <span class="i-rechts">
+          ${dringend ? '<span class="marke rot"><span class="punkt"></span>offen</span>' : heuteErledigt ? '<span class="marke gruen"><span class="punkt"></span>heute</span>' : ''}
         </span>`;
       row.addEventListener("click", e => toggleStreak(eintrag.id, e));
       wrap.appendChild(row);
@@ -2232,18 +2250,33 @@
       const diese = habitWoche(h.id);
       const erfuellt = diese >= ziel;
 
-      return `<button type="button" class="hb-zeile${fertig ? " erledigt" : ""}${erfuellt ? " woche-voll" : ""}"
+      /* Sieben Perlen: die letzte Woche, die aeusserste rechts ist
+         heute. Vierzehn Striche waeren in einer Kapsel kein Verlauf
+         mehr, sondern ein Muster. */
+      const perlen = tage.slice(-7).map(t => {
+        const voll = habitErledigt(h.id, t.key);
+        return `<i class="perle${voll ? " voll" : ""}${t.key === heute ? " heute" : ""}"
+                  title="${fmtDate(t.key)} · ${voll ? "erledigt" : "offen"}"></i>`;
+      }).join("");
+
+      /* Das Malzeichen traegt den Anfangsbuchstaben. Ein Symbol
+         muesste erst erfunden werden und saehe bei "Lesen" und
+         "Lernen" gleich aus. */
+      const zeichen = escapeHTML((h.name || "?").trim().charAt(0).toUpperCase());
+
+      return `<button type="button" class="insel hb-zeile${fertig ? " erledigt" : ""}${erfuellt ? " woche-voll" : ""}"
                 data-habit="${h.id}"
                 title="${escapeHTML(h.name)} — heute ${fertig ? "erledigt" : "offen"} · diese Woche ${diese} von ${ziel} · ${serie} ${serie === 1 ? "Tag" : "Tage"} am Stück"
                 aria-pressed="${fertig}">
-          <span class="hb-knopf">${HAKEN_SVG}</span>
-          <span class="hb-mitte">
-            <span class="hb-name">${escapeHTML(h.name)}</span>
-            <span class="hb-spur">${spur}</span>
+          <span class="i-mal${erfuellt ? " gruen" : ""}">${zeichen}</span>
+          <span class="i-text">
+            <span class="i-sache">${erfuellt ? "Woche geschafft" : diese + " von " + ziel + " diese Woche"}</span>
+            <span class="i-wert">${escapeHTML(h.name)}</span>
           </span>
-          <span class="hb-woche">${erfuellt
-            ? `<b>✓</b><i>${diese}</i>`
-            : `<b>${diese}</b><i>/${ziel}</i>`}</span>
+          <span class="i-rechts">
+            <span class="perlen">${perlen}</span>
+            <span class="hb-knopf">${HAKEN_SVG}</span>
+          </span>
         </button>`;
     }).join("");
 

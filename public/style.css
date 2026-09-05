@@ -11037,3 +11037,216 @@ input:focus, textarea:focus, select:focus {
    nicht mehr an den alten Kartenrand rechnen. */
 #card-habits .hb-zeile { gap: 11px; }
 #card-streaks .streak-row { gap: 11px; padding: 12px 15px; }
+
+
+/* ==========================================================
+   PHASE 8 — DIE BAUSTEINE AUS DER DEMO, JETZT ECHT
+
+   Die Durchgaenge davor haben die alten Bausteine mit CSS
+   ueberschrieben. Das konnte nie ganz passen, weil das Geruest
+   darunter ein anderes war: eine Habit-Zeile war ein Knopf mit
+   Spur und Wochenstand, keine Kapsel mit Malzeichen, Sache und
+   Wert.
+
+   Jetzt liefert script.js den Aufbau aus der Demo, und hier steht
+   die Gestaltung dazu — dieselben Werte wie auf der Musterseite.
+   ========================================================== */
+/* ==========================================================
+   DIE INSEL — der einzige Baustein
+
+   Bild 1 zeigt keine Karten mit Ueberschrift. Es zeigt Kapseln:
+   jede eine abgeschlossene Aussage aus Symbol, Sache und Wert.
+   Was nichts sagt, steht nicht drin — kein Rahmen, keine
+   Bereichsueberschrift, kein Fuellwerk.
+
+   Runde: aussen 26 Pixel, innen 14. Genau dieser Abstand liegt in
+   Bild 1 zwischen Kapsel und Symbolfeld, und er sorgt dafuer, dass
+   die Ecken parallel laufen statt sich zu schneiden.
+   ========================================================== */
+.insel {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 13px 18px 13px 13px;
+  border-radius: 26px;
+  background: var(--flaeche);
+  box-shadow: var(--heb-2), var(--lichtkante);
+  min-width: 0;
+  transition: transform var(--w-normal) var(--kurve), box-shadow var(--w-normal) var(--kurve-weich);
+}
+a.insel, button.insel { border: 0; font: inherit; color: inherit; text-align: left; cursor: pointer; width: 100%; }
+.insel:hover { transform: translateY(-1px); box-shadow: var(--heb-3), var(--lichtkante); }
+.insel:active { transform: scale(.985); transition-duration: var(--w-schnell); }
+
+/* Das Symbolfeld traegt die Farbe der Insel — als einzige Flaeche.
+   So bleibt Farbe Bedeutung und ueberzieht nicht die ganze Kapsel. */
+.i-mal {
+  width: 42px; height: 42px; flex-shrink: 0;
+  border-radius: 14px;
+  display: grid; place-items: center;
+  background: var(--flaeche-3);
+  color: var(--text-2);
+}
+.i-mal svg { width: 21px; height: 21px; }
+.i-mal.gruen { background: var(--gruen-fond); color: var(--gruen); }
+.i-mal.rot   { background: var(--rot-fond);   color: var(--rot); }
+.i-mal.gelb  { background: var(--gelb-fond);  color: var(--gelb-schrift); }
+.i-mal.blau  { background: var(--blau-fond);  color: var(--blau); }
+.i-mal.fest  { background: var(--fest);       color: var(--fest-text); }
+
+.i-text { min-width: 0; flex: 1; }
+.i-sache { font-size: 12px; font-weight: 500; color: var(--text-2); letter-spacing: .005em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.i-wert { font-size: 19px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15;
+  font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.i-wert small { font-size: 12.5px; font-weight: 500; color: var(--text-3); letter-spacing: 0; }
+.i-rechts { margin-left: auto; flex-shrink: 0; display: flex; align-items: center; gap: 9px; }
+
+/* Grosse Insel: dieselbe Kapsel, nur mit der Zahl als Hauptsache */
+.insel.gross { flex-direction: column; align-items: stretch; gap: 11px; padding: 17px 18px 18px; }
+.insel.gross .i-zeile { display: flex; align-items: center; gap: 11px; }
+.insel.gross .i-zahl { font-size: 34px; font-weight: 700; letter-spacing: -0.035em; line-height: 1;
+  font-variant-numeric: tabular-nums; }
+.insel.gross .i-zahl small { font-size: 15px; font-weight: 500; color: var(--text-3); letter-spacing: -0.01em; }
+.insel.gross .i-unter { font-size: 12.5px; color: var(--text-2); }
+
+/* Marke: ein Wert, der fuer sich steht */
+.marke { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: var(--r-pill);
+  font-size: 11.5px; font-weight: 600; background: var(--flaeche-3); color: var(--text-2); }
+.marke.gruen { background: var(--gruen-fond); color: var(--gruen); }
+.marke.rot   { background: var(--rot-fond);   color: var(--rot); }
+.marke.gelb  { background: var(--gelb-fond);  color: var(--gelb-schrift); }
+.marke.blau  { background: var(--blau-fond);  color: var(--blau); }
+.punkt { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+/* Balken: eine Mulde, darin volle Farbe */
+.balken { height: 7px; border-radius: var(--r-pill); background: var(--senke-1); overflow: hidden; }
+.balken i { display: block; height: 100%; border-radius: var(--r-pill); }
+
+/* Perlen: der Verlauf einer Woche in wenigen Zeichen */
+.perlen { display: flex; gap: 4px; }
+.perle { width: 8px; height: 8px; border-radius: 50%; background: var(--senke-1); }
+.perle.voll { background: var(--gruen-voll); }
+
+.ring { width: 64px; height: 64px; flex-shrink: 0; }
+.ring circle { fill: none; stroke-linecap: round; }
+.ring .bahn { stroke: var(--senke-1); }
+
+
+/* Die Perlen: eine Woche in sieben Zeichen. Heute traegt einen Ring,
+   damit man den aktuellen Tag findet, ohne zu zaehlen. */
+.perlen { display: flex; gap: 4px; align-items: center; }
+.perle { width: 8px; height: 8px; border-radius: 50%; background: var(--senke-1); flex-shrink: 0; }
+.perle.voll { background: var(--gruen-voll); }
+.perle.heute { box-shadow: 0 0 0 2px var(--kontur-2); }
+.perle.voll.heute { box-shadow: 0 0 0 2px color-mix(in srgb, var(--gruen-voll) 45%, transparent); }
+
+/* Das Malzeichen mit einem Buchstaben statt einem Symbol */
+.i-mal { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; }
+.i-mal svg { width: 20px; height: 20px; }
+
+/* Der Abhak-Knopf sitzt jetzt rechts in der Kapsel */
+.insel .hb-knopf {
+  --knopf: 28px;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 2px var(--kontur-2);
+  background: transparent;
+  color: #fff;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+}
+.insel .hb-knopf svg { width: 62%; height: 62%; opacity: 0; transform: scale(.4);
+  transition: opacity .16s ease, transform .24s cubic-bezier(.34,1.6,.64,1); }
+.insel.erledigt .hb-knopf { background: var(--gruen-voll); box-shadow: inset 0 0 0 2px var(--gruen-voll); }
+.insel.erledigt .hb-knopf svg { opacity: 1; transform: none; }
+
+/* Die Streak-Flamme sitzt im Malzeichen */
+.i-mal.sr-flamme svg { width: 20px; height: 20px; }
+
+/* Der Weiter-Pfeil am Ende einer Termin-Insel */
+.entry-go {
+  width: 28px; height: 28px; flex-shrink: 0;
+  border: none; background: none; border-radius: 50%;
+  color: var(--text-3);
+  display: grid; place-items: center; cursor: pointer;
+  transition: background var(--w-normal) var(--kurve-weich), color var(--w-normal) var(--kurve-weich);
+}
+.entry-go:hover { background: var(--flaeche-3); color: var(--text); }
+.entry-go svg { width: 16px; height: 16px; }
+
+/* ==========================================================
+   DER STRAHL — Bild 2
+
+   Er laeuft hinter den Termin-Inseln entlang. Kraeftig oben, wo
+   das Naechste steht, und nach unten verlaufend: was weiter weg
+   liegt, draengt weniger.
+
+   Der Punkt sitzt in der Polsterung links, nicht in der Kapsel —
+   sonst muesste jede Kapsel Platz dafuer freihalten.
+   ========================================================== */
+#card-naechste .entry-list {
+  position: relative;
+  padding-left: 26px;
+}
+#card-naechste .entry-list::before {
+  content: "";
+  position: absolute;
+  left: 5px; top: 16px; bottom: 16px;
+  width: 2px; border-radius: 2px;
+  background: linear-gradient(180deg,
+    var(--blau-voll) 0%,
+    color-mix(in srgb, var(--blau-voll) 45%, transparent) 32%,
+    var(--kontur) 78%);
+}
+#card-naechste .entry-item { position: relative; }
+#card-naechste .entry-item::before {
+  content: "";
+  position: absolute;
+  left: -21px; top: 50%;
+  transform: translateY(-50%);
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: var(--grund);
+  box-shadow: inset 0 0 0 2px var(--kontur-2);
+  transition: box-shadow var(--w-gleit) var(--kurve-weich);
+}
+/* Heute: der gefuellte Ring aus Bild 2 */
+#card-naechste .entry-item.today::before {
+  box-shadow: inset 0 0 0 4px var(--rot-voll), 0 0 0 5px var(--rot-fond);
+}
+#card-naechste .entry-item.soon::before {
+  box-shadow: inset 0 0 0 3px var(--gelb);
+}
+
+/* Sache und Wert stehen uebereinander, nicht nebeneinander. Ich hatte
+   im Markup <span> verwendet — die sind von Haus aus inline und
+   reihen sich deshalb auf einer Zeile auf. */
+.i-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+}
+.i-sache, .i-wert { display: block; }
+
+/* In schmalen Widgets ist der Wert wichtiger als die Marke daneben.
+   Sie darf schrumpfen, der Wert nicht. */
+.insel .i-rechts { min-width: 0; }
+.insel .marke { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Die Kapsel wird enger, wenn wenig Platz ist — lieber schmaler als
+   uebereinandergeschoben. */
+.insel { padding: 11px 14px 11px 11px; gap: 11px; }
+.i-mal { width: 38px; height: 38px; border-radius: 13px; }
+.i-wert { font-size: 16px; }
+.i-sache { font-size: 11.5px; }
+
+/* Sehr schmale Spalten: die Marke tritt zurueck, die Perlen bleiben */
+@container (max-width: 260px) {
+  .insel .marke { display: none; }
+}
+
+/* Streaks sind meist die schmalste Spalte. Dort traegt die Zahl die
+   Aussage und steht deshalb im Wert, nicht in einer Marke daneben. */
+#card-streaks .insel .marke { font-size: 11px; padding: 3px 8px; }
