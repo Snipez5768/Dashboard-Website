@@ -11585,3 +11585,91 @@ a.insel, button.insel { border: 0; font: inherit; color: inherit; text-align: le
 }
 #seite-dashboard #card-wetter .card-head > *:not(.i-mal),
 #seite-dashboard #card-screentime .card-head > *:not(.i-mal) { margin-left: auto; }
+
+/* ==========================================================
+   SCHRITT 1 — NUR DIE ANORDNUNG
+
+   Das Dashboard stand auf einem Raster aus 24 Spalten, in dem
+   19 Regeln jeder Karte einen festen Platz zuwiesen. Zweimal habe
+   ich versucht, das mit staerkeren Regeln zu ueberschreiben, und
+   zweimal ist es zusammengebrochen: die Karten landeten in je
+   einer der 24 Spalten.
+
+   Der Fehler war der Ansatz. Ich habe gegen das Raster
+   angeschrieben, statt es zu verlassen.
+
+   Aus dem Behaelter wird jetzt eine Flex-Spalte. Damit sind alle
+   19 Rasterplaetze und alle Spannweiten von selbst wirkungslos —
+   Flex kennt weder grid-area noch grid-column und ignoriert sie
+   stillschweigend. Keine einzige der alten Regeln muss angefasst
+   oder ueberstimmt werden.
+   ========================================================== */
+#seite-dashboard.aktiv { overflow-y: auto; overflow-x: hidden; }
+
+#seite-dashboard .widget-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  min-height: 0;
+}
+
+/* Jede Karte fuellt die Spalte und waechst mit ihrem Inhalt. Im
+   Raster hatte sie eine feste Reihenhoehe, an der alles darin in
+   Prozent rechnete. */
+#seite-dashboard .widget-grid > .card {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  flex: 0 0 auto;
+}
+
+/* Ab hier ist Platz fuer zwei Spalten nebeneinander. Eine dritte
+   kaeme nicht in Frage — dann waeren die Inseln wieder so schmal
+   wie im alten Raster. */
+@media (min-width: 1180px) {
+  #seite-dashboard .widget-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    max-width: 1120px;
+  }
+  #seite-dashboard .widget-grid > .card { width: calc(50% - 5px); }
+  #seite-dashboard #card-screentime,
+  #seite-dashboard #card-quick { width: 100%; }
+}
+
+/* Reihenfolge: oben, was heute noch etwas von dir will */
+#seite-dashboard #card-naechste   { order: 1; }
+#seite-dashboard #card-habits     { order: 2; }
+#seite-dashboard #card-streaks    { order: 3; }
+#seite-dashboard #card-kalorien   { order: 4; }
+#seite-dashboard #card-wetter     { order: 5; }
+#seite-dashboard #card-screentime { order: 6; }
+#seite-dashboard #card-quick      { order: 7; }
+
+/* Das Mehrfach-Widget entfaellt: Habits und Termine haben eigene
+   Widgets, die Reiter zeigten dieselben Daten doppelt. */
+#seite-dashboard #card-vorschlag { display: none; }
+
+/* Die Hoehenzwaenge, die aus der festen Reihenhoehe kamen */
+#seite-dashboard .card-body,
+#seite-dashboard .habit-list,
+#seite-dashboard .hb-liste,
+#seite-dashboard .streak-list,
+#seite-dashboard .entry-list,
+#seite-dashboard .naechste,
+#seite-dashboard .weather,
+#seite-dashboard .cal-body {
+  height: auto;
+  max-height: none;
+  min-height: 0;
+  overflow: visible;
+  flex: 0 0 auto;
+}
+#seite-dashboard .hb-zeile,
+#seite-dashboard .streak-row { height: auto; min-height: 64px; flex: 0 0 auto; }
+#seite-dashboard #card-screentime .st-chart { min-height: 180px; }
