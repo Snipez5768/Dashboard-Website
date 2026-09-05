@@ -5,112 +5,126 @@
    ========================================================== */
 
 :root {
-  /* ---------- FLÄCHEN ----------
-     Der Grund ist hellgrau, die Karten sitzen reinweiß darauf. Nur so
-     wirft eine weiße Fläche einen Schatten, den man sehen kann. */
-  --grund:      #EDEDEF;
-  --grund-tief: #E3E3E6;
-  --flaeche:    #FFFFFF;
-  --flaeche-2:  #F7F7F8;
-  --flaeche-3:  #EFEFF1;
+  color-scheme: light dark;
 
-  --text:    #0A0A0B;
-  --text-2:  #6B6B70;
-  --text-3:  #A1A1A8;
+  /* ---------- FLAECHEN ---------- */
+  --bg-page:               #EAEAEC;
+  --surface-card:          #FFFFFF;
+  --surface-sunken:        #E1E1E4;
+  --surface-dark:          #17171A;
+  --surface-dark-elevated: #1F1F23;
+
+  --text-primary: #17171A;
+  --text-inverse: #FFFFFF;
+  --text-muted:   #8A8A8E;
+  --text-faint-n: #A8A8AD;
 
   --kontur:   rgba(0, 0, 0, 0.07);
   --kontur-2: rgba(0, 0, 0, 0.13);
 
-  /* Das Gegenteil des Grundes. Trägt jede Auswahl und jede
-     Haupthandlung — nie eine Farbe, damit Farbe Bedeutung bleibt. */
-  --fest:      #0A0A0B;
-  --fest-text: #FFFFFF;
+  /* ---------- SIGNALE ----------
+     Je zwei Fassungen. Orange liegt auf Weiss bei 2,3:1 — als
+     Flaeche gut, als Text unlesbar. Deshalb traegt "-ink" den
+     dunkleren Ton fuer Schrift. */
+  --accent-active: #0A84FF;
+  --status-red:    #FF3B30;
+  --status-green:  #34C759;
+  --status-orange: #FF9500;
 
-  --schalter-spur:  #E3E3E6;
-  --schalter-knopf: #FFFFFF;
+  --red-ink:    #C81E14;
+  --green-ink:  #1E7A35;
+  --orange-ink: #B45309;
+  --blue-ink:   #0064D8;
 
-  /* ---------- AKZENTE ----------
-     Zwei Stufen, und der Unterschied ist wichtig: die Akzente stehen in
-     dieser App zu zwei Dritteln als Schrift da, nicht als Fläche. Apples
-     Signalgrün liegt auf Weiß bei 2,2:1 und wäre damit kaum zu lesen.
-     Deshalb trägt der Grundname den lesbaren Ton, und der volle
-     Signalton heißt ausdrücklich "-voll" und wird nur dort verlangt,
-     wo er eine Fläche füllt. Im Dunkeln fallen beide zusammen — auf
-     Schwarz ist der Signalton ohnehin schon kräftig genug. */
-  --rot:        #D70015;
-  --gruen:      #248A3D;
-  --blau:       #0064D8;
-  --rot-voll:   #FF3B30;
-  --gruen-voll: #34C759;
-  --blau-voll:  #007AFF;
+  --tint-red:    rgba(255,  59,  48, .12);
+  --tint-green:  rgba( 52, 199,  89, .14);
+  --tint-orange: rgba(255, 149,   0, .15);
+  --tint-blue:   rgba( 10, 132, 255, .12);
 
-  /* Gelb ist der Sonderfall: zu hell für Schrift auf Weiß und zu hell,
-     als dass Weiß darauf tragen würde. Daher drei Fassungen. */
-  --gelb:         #FFB800;
-  --gelb-schrift: #8A6100;
-  --gelb-tief:    #A87400;
-
-  /* Flächige Fassung derselben Töne, als Hintergrund für Abzeichen */
-  --rot-fond:   rgba(255,  59,  48, 0.11);
-  --gruen-fond: rgba( 52, 199,  89, 0.13);
-  --gelb-fond:  rgba(255, 184,   0, 0.15);
-  --blau-fond:  rgba(  0, 122, 255, 0.11);
-
-  /* ---------- AUFLAGEN ----------
-     Ein Schleier, der eine Fläche von ihrem Untergrund abhebt. Hell
-     legt sich Schwarz darüber, dunkel Weiß — dieselbe Absicht, das
-     umgekehrte Mittel. Fünf Stufen genügen für alle 277 Stellen, an
-     denen bisher ein fester Weißwert stand. */
+  /* ---------- AUFLAGEN UND MULDEN ----------
+     Ein Schleier ueber einer Flaeche. Hell legt sich Schwarz
+     darueber, dunkel Weiss — dieselbe Absicht, das umgekehrte
+     Mittel. */
   --auflage-1: rgba(0, 0, 0, 0.020);
   --auflage-2: rgba(0, 0, 0, 0.035);
   --auflage-3: rgba(0, 0, 0, 0.055);
   --auflage-4: rgba(0, 0, 0, 0.085);
   --auflage-5: rgba(0, 0, 0, 0.140);
-
-  /* Die Gegenrichtung: eine Mulde statt einer Erhebung. Hell genügt
-     ein Bruchteil des Schwarz, das dunkel nötig ist — auf Weiss
-     schlägt jedes Prozent doppelt durch. */
-  --senke-1: rgba(0, 0, 0, 0.045);
-  --senke-2: rgba(0, 0, 0, 0.075);
-
-  /* Vorhang hinter Fenstern und unter Verläufen */
-  --schleier: rgba(0, 0, 0, 0.34);
+  --senke-1:   rgba(0, 0, 0, 0.045);
+  --senke-2:   rgba(0, 0, 0, 0.075);
+  --schleier:  rgba(0, 0, 0, 0.34);
 
   /* ---------- TIEFE ----------
-     Hell arbeitet mit Schatten nach unten und einer Lichtkante oben. */
-  --heb-1: 0 1px 2px rgba(0,0,0,.05), 0 1px 1px rgba(0,0,0,.03);
-  --heb-2: 0 2px 4px rgba(0,0,0,.05), 0 4px 12px rgba(0,0,0,.05);
-  --heb-3: 0 2px 6px rgba(0,0,0,.05), 0 12px 32px rgba(0,0,0,.07);
-  --heb-4: 0 8px 20px rgba(0,0,0,.09), 0 24px 56px rgba(0,0,0,.10);
-  --lichtkante: inset 0 1px 0 rgba(255,255,255,.9);
-  --heb-fest: 0 2px 6px rgba(0,0,0,.22), 0 8px 20px rgba(0,0,0,.16);
-  --rille: inset 0 1px 2px rgba(0,0,0,.07), inset 0 0 0 1px rgba(0,0,0,.03);
+     Weich und diffus, nie eine harte Kontur. Dunkle Elemente
+     bekommen oben einen dezenten Glanz. */
+  --shadow-1: 0 1px 2px rgba(0,0,0,.04), 0 2px 6px rgba(0,0,0,.05);
+  --shadow-2: 0 2px 6px rgba(0,0,0,.05), 0 8px 22px rgba(0,0,0,.07);
+  --shadow-3: 0 4px 12px rgba(0,0,0,.06), 0 18px 44px rgba(0,0,0,.09);
+  --shadow-4: 0 8px 22px rgba(0,0,0,.09), 0 26px 60px rgba(0,0,0,.11);
+  --shadow-dark: 0 2px 8px rgba(0,0,0,.28), 0 10px 26px rgba(0,0,0,.20);
+  --sheen:  inset 0 1px 0 rgba(255,255,255,.10);
+  --sunken: inset 0 1px 2px rgba(0,0,0,.07);
 
-  /* ---------- DIE ALTEN NAMEN ----------
-     Sie bleiben bestehen und zeigen auf das neue System, damit die
-     bestehenden Verweise quer durch die Datei weitergelten. Neue
-     Regeln sollen die Namen oben benutzen. */
-  --bg:          var(--grund);
-  --bg-2:        var(--grund-tief);
-  --card:        var(--flaeche);
+  /* ---------- DIE ALTEN NAMEN ---------- */
+  --grund:      var(--bg-page);
+  --grund-tief: var(--surface-sunken);
+  --flaeche:    var(--surface-card);
+  --flaeche-2:  color-mix(in srgb, var(--surface-card) 92%, var(--bg-page));
+  --flaeche-3:  var(--surface-sunken);
+  --text:       var(--text-primary);
+  --text-2:     var(--text-muted);
+  --text-3:     var(--text-faint-n);
+  --fest:       var(--surface-dark);
+  --fest-text:  var(--text-inverse);
+
+  --rot:        var(--red-ink);
+  --gruen:      var(--green-ink);
+  --blau:       var(--blue-ink);
+  --rot-voll:   var(--status-red);
+  --gruen-voll: var(--status-green);
+  --blau-voll:  var(--accent-active);
+
+  /* Gelb ist zu Orange geworden: auf Weiss lag es bei 1,9:1 und
+     brauchte drei Abstufungen, um ueberhaupt als Schrift zu taugen. */
+  --gelb:         var(--status-orange);
+  --gelb-schrift: var(--orange-ink);
+  --gelb-tief:    var(--orange-ink);
+
+  --rot-fond:   var(--tint-red);
+  --gruen-fond: var(--tint-green);
+  --gelb-fond:  var(--tint-orange);
+  --blau-fond:  var(--tint-blue);
+
+  --heb-1: var(--shadow-1);
+  --heb-2: var(--shadow-2);
+  --heb-3: var(--shadow-3);
+  --heb-4: var(--shadow-4);
+  --heb-fest: var(--shadow-dark), var(--sheen);
+  --lichtkante: var(--sheen);
+  --rille: var(--sunken);
+
+  --bg:          var(--bg-page);
+  --bg-2:        var(--bg-page);
+  --card:        var(--surface-card);
   --card-hover:  var(--flaeche-2);
   --card-inset:  var(--auflage-2);
   --border:      var(--kontur);
   --border-2:    var(--kontur-2);
-  --blue:        var(--blau);
-  --blue-soft:   var(--blau);
-  --violet:      var(--blau);
-  --green:       var(--gruen);
-  --amber:       var(--gelb-schrift);
-  --red:         var(--rot);
-  --text-dim:    var(--text-2);
-  --text-faint:  var(--text-3);
+  --blue:        var(--accent-active);
+  --blue-soft:   var(--accent-active);
+  --violet:      var(--accent-active);
+  --green:       var(--green-ink);
+  --amber:       var(--orange-ink);
+  --red:         var(--red-ink);
+  --text-dim:    var(--text-muted);
+  --text-faint:  var(--text-faint-n);
 
   /* ---------- MASSE ---------- */
-  --r-card: 24px;
-  --r-el:   16px;
-  --r-pill: 999px;
-  --r-klein: 11px;
+  --r-pill:  999px;
+  --r-card:  26px;
+  --r-el:    16px;
+  --r-icon:  12px;
+  --r-klein: 12px;
 
   --sidebar-w: 236px;
   --sidebar-w-collapsed: 74px;
@@ -120,140 +134,116 @@
 
   /* ---------- BEWEGUNG ---------- */
   --w-schnell: 90ms;
-  --w-normal:  160ms;
-  --w-gleit:   260ms;
+  --w-normal:  170ms;
+  --w-gleit:   280ms;
   --kurve:       cubic-bezier(.32, .72, 0, 1);
   --kurve-weich: cubic-bezier(.4, 0, .2, 1);
+  --t-fast: 90ms;
+  --t-base: 170ms;
+  --t-glide: 280ms;
+  --ease: cubic-bezier(.32, .72, 0, 1);
+  --ease-soft: cubic-bezier(.4, 0, .2, 1);
 }
 
-/* Der dunkle Modus in zwei Fassungen, und beide werden gebraucht:
-   Die Medienabfrage greift, solange niemand von Hand gewählt hat —
-   dann steht am Wurzelelement nichts. Sobald von Hand gewählt wurde,
-   steht dort "hell" oder "dunkel". Das :not() sorgt dafür, dass eine
-   Wahl für Hell auch dann gilt, wenn das Gerät auf Dunkel steht. */
+/* Der dunkle Modus in zwei Fassungen: die Medienabfrage greift,
+   solange niemand von Hand gewaehlt hat; das :not() sorgt dafuer,
+   dass eine Wahl fuer Hell auch dann gilt, wenn das Geraet dunkel
+   steht. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-thema="hell"]) {
-  /* Echtes Schwarz. Die Tiefe kommt nicht aus Schatten — auf Schwarz
-     ist ein schwarzer Schatten unsichtbar —, sondern daraus, dass jede
-     Fläche etwas heller ist als ihr Untergrund, mit einer haardünnen
-     Lichtkante obenauf. */
-  --grund:      #000000;
-  --grund-tief: #08080A;
-  --flaeche:    #0E0E10;
-  --flaeche-2:  #161619;
-  --flaeche-3:  #1E1E22;
+  --bg-page:               #000000;
+  --surface-card:          #131316;
+  --surface-sunken:        #0A0A0C;
+  --surface-dark:          #FFFFFF;
+  --surface-dark-elevated: #F2F2F5;
 
-  --text:    #FAFAFC;
-  --text-2:  #A8A8B0;
-  --text-3:  #7E7E87;
+  --text-primary: #F7F7F9;
+  --text-inverse: #17171A;
+  --text-muted:   #9A9AA0;
+  --text-faint-n: #6E6E74;
 
-  --kontur:   var(--auflage-3);
-  --kontur-2: var(--auflage-4);
+  --kontur:   rgba(255, 255, 255, 0.09);
+  --kontur-2: rgba(255, 255, 255, 0.16);
 
-  --fest:      #FFFFFF;
-  --fest-text: #0A0A0B;
+  --accent-active: #0A84FF;
+  --status-red:    #FF453A;
+  --status-green:  #30D158;
+  --status-orange: #FF9F0A;
 
-  --schalter-spur:  #3A3A3E;
-  --schalter-knopf: #FFFFFF;
+  --red-ink:    #FF6961;
+  --green-ink:  #32D74B;
+  --orange-ink: #FFB340;
+  --blue-ink:   #409CFF;
 
-  /* Auf Schwarz trägt der Signalton schon von allein — lesbarer Ton
-     und voller Ton sind hier dasselbe. */
-  --rot:        #FF453A;
-  --gruen:      #30D158;
-  --blau:       #0A84FF;
-  --rot-voll:   #FF453A;
-  --gruen-voll: #30D158;
-  --blau-voll:  #0A84FF;
-
-  --gelb:         #FFD60A;
-  --gelb-schrift: #FFD60A;
-  --gelb-tief:    #A87400;
-
-  --rot-fond:   rgba(255,  69,  58, 0.16);
-  --gruen-fond: rgba( 48, 209,  88, 0.16);
-  --gelb-fond:  rgba(255, 214,  10, 0.15);
-  --blau-fond:  rgba( 10, 132, 255, 0.16);
+  --tint-red:    rgba(255,  69,  58, .18);
+  --tint-green:  rgba( 48, 209,  88, .18);
+  --tint-orange: rgba(255, 159,  10, .18);
+  --tint-blue:   rgba( 10, 132, 255, .20);
 
   --auflage-1: rgba(255, 255, 255, 0.022);
   --auflage-2: rgba(255, 255, 255, 0.042);
   --auflage-3: rgba(255, 255, 255, 0.070);
   --auflage-4: rgba(255, 255, 255, 0.120);
   --auflage-5: rgba(255, 255, 255, 0.260);
+  --senke-1:   rgba(0, 0, 0, 0.30);
+  --senke-2:   rgba(0, 0, 0, 0.42);
+  --schleier:  rgba(0, 0, 0, 0.68);
 
-  --senke-1: rgba(0, 0, 0, 0.26);
-  --senke-2: rgba(0, 0, 0, 0.36);
-
-  --schleier: rgba(0, 0, 0, 0.68);
-
-  --heb-1: 0 1px 2px rgba(0,0,0,.6);
-  --heb-2: 0 2px 8px rgba(0,0,0,.7);
-  --heb-3: 0 4px 16px rgba(0,0,0,.75), 0 16px 40px rgba(0,0,0,.55);
-  --heb-4: 0 8px 28px rgba(0,0,0,.8), 0 28px 64px rgba(0,0,0,.6);
-  --lichtkante: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  --heb-fest: 0 2px 10px rgba(255, 255, 255, 0.10);
-  --rille: inset 0 1px 2px rgba(0,0,0,.5);
+  --shadow-1: 0 1px 3px rgba(0,0,0,.6);
+  --shadow-2: 0 2px 10px rgba(0,0,0,.7);
+  --shadow-3: 0 6px 20px rgba(0,0,0,.75), 0 20px 48px rgba(0,0,0,.5);
+  --shadow-4: 0 10px 30px rgba(0,0,0,.8), 0 30px 70px rgba(0,0,0,.6);
+  --shadow-dark: 0 2px 12px rgba(255,255,255,.10);
+  --sheen:  inset 0 1px 0 rgba(255,255,255,.07);
+  --sunken: inset 0 1px 2px rgba(0,0,0,.5);
   }
 }
 :root[data-thema="dunkel"] {
-  /* Echtes Schwarz. Die Tiefe kommt nicht aus Schatten — auf Schwarz
-     ist ein schwarzer Schatten unsichtbar —, sondern daraus, dass jede
-     Fläche etwas heller ist als ihr Untergrund, mit einer haardünnen
-     Lichtkante obenauf. */
-  --grund:      #000000;
-  --grund-tief: #08080A;
-  --flaeche:    #0E0E10;
-  --flaeche-2:  #161619;
-  --flaeche-3:  #1E1E22;
+  --bg-page:               #000000;
+  --surface-card:          #131316;
+  --surface-sunken:        #0A0A0C;
+  --surface-dark:          #FFFFFF;
+  --surface-dark-elevated: #F2F2F5;
 
-  --text:    #FAFAFC;
-  --text-2:  #A8A8B0;
-  --text-3:  #7E7E87;
+  --text-primary: #F7F7F9;
+  --text-inverse: #17171A;
+  --text-muted:   #9A9AA0;
+  --text-faint-n: #6E6E74;
 
-  --kontur:   var(--auflage-3);
-  --kontur-2: var(--auflage-4);
+  --kontur:   rgba(255, 255, 255, 0.09);
+  --kontur-2: rgba(255, 255, 255, 0.16);
 
-  --fest:      #FFFFFF;
-  --fest-text: #0A0A0B;
+  --accent-active: #0A84FF;
+  --status-red:    #FF453A;
+  --status-green:  #30D158;
+  --status-orange: #FF9F0A;
 
-  --schalter-spur:  #3A3A3E;
-  --schalter-knopf: #FFFFFF;
+  --red-ink:    #FF6961;
+  --green-ink:  #32D74B;
+  --orange-ink: #FFB340;
+  --blue-ink:   #409CFF;
 
-  /* Auf Schwarz trägt der Signalton schon von allein — lesbarer Ton
-     und voller Ton sind hier dasselbe. */
-  --rot:        #FF453A;
-  --gruen:      #30D158;
-  --blau:       #0A84FF;
-  --rot-voll:   #FF453A;
-  --gruen-voll: #30D158;
-  --blau-voll:  #0A84FF;
-
-  --gelb:         #FFD60A;
-  --gelb-schrift: #FFD60A;
-  --gelb-tief:    #A87400;
-
-  --rot-fond:   rgba(255,  69,  58, 0.16);
-  --gruen-fond: rgba( 48, 209,  88, 0.16);
-  --gelb-fond:  rgba(255, 214,  10, 0.15);
-  --blau-fond:  rgba( 10, 132, 255, 0.16);
+  --tint-red:    rgba(255,  69,  58, .18);
+  --tint-green:  rgba( 48, 209,  88, .18);
+  --tint-orange: rgba(255, 159,  10, .18);
+  --tint-blue:   rgba( 10, 132, 255, .20);
 
   --auflage-1: rgba(255, 255, 255, 0.022);
   --auflage-2: rgba(255, 255, 255, 0.042);
   --auflage-3: rgba(255, 255, 255, 0.070);
   --auflage-4: rgba(255, 255, 255, 0.120);
   --auflage-5: rgba(255, 255, 255, 0.260);
+  --senke-1:   rgba(0, 0, 0, 0.30);
+  --senke-2:   rgba(0, 0, 0, 0.42);
+  --schleier:  rgba(0, 0, 0, 0.68);
 
-  --senke-1: rgba(0, 0, 0, 0.26);
-  --senke-2: rgba(0, 0, 0, 0.36);
-
-  --schleier: rgba(0, 0, 0, 0.68);
-
-  --heb-1: 0 1px 2px rgba(0,0,0,.6);
-  --heb-2: 0 2px 8px rgba(0,0,0,.7);
-  --heb-3: 0 4px 16px rgba(0,0,0,.75), 0 16px 40px rgba(0,0,0,.55);
-  --heb-4: 0 8px 28px rgba(0,0,0,.8), 0 28px 64px rgba(0,0,0,.6);
-  --lichtkante: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  --heb-fest: 0 2px 10px rgba(255, 255, 255, 0.10);
-  --rille: inset 0 1px 2px rgba(0,0,0,.5);
+  --shadow-1: 0 1px 3px rgba(0,0,0,.6);
+  --shadow-2: 0 2px 10px rgba(0,0,0,.7);
+  --shadow-3: 0 6px 20px rgba(0,0,0,.75), 0 20px 48px rgba(0,0,0,.5);
+  --shadow-4: 0 10px 30px rgba(0,0,0,.8), 0 30px 70px rgba(0,0,0,.6);
+  --shadow-dark: 0 2px 12px rgba(255,255,255,.10);
+  --sheen:  inset 0 1px 0 rgba(255,255,255,.07);
+  --sunken: inset 0 1px 2px rgba(0,0,0,.5);
 }
 
 * { box-sizing: border-box; }
@@ -1176,7 +1166,7 @@ html.tablet #card-kalorien { display: none; }
 .hb-zeile:hover { background: var(--auflage-2); }
 
 /* Der Knopf für heute */
-.hb-knopf {
+.hb-knopf {
   position: relative;
   width: var(--knopf);
   height: var(--knopf);
@@ -5071,7 +5061,7 @@ html.finger .kf-ablage { padding: 26px 16px; }
   grid-template-columns: repeat(7, 1fr);
   gap: 3px;
 }
-.hk-feld {
+.hk-feld {
   aspect-ratio: 1 / 1;
   border: none;
   border-radius: 4px;
@@ -9887,127 +9877,159 @@ html.tablet #weatherCityLabel { display: none; }
 }
 
 
+
+
 /* ==========================================================
    ==========================================================
    DIE FORMENSPRACHE
-   ==========================================================
 
-   Ab hier steht die neue Gestalt. Der Block liegt bewusst am Ende:
-   bei gleicher Stärke gewinnt die spätere Regel. Damit muss keine
-   der rund 2300 bestehenden Regeln angefasst werden — was hier
-   steht, sticht, was darüber steht.
+   Aus der Musterseite, eins zu eins. Der Block liegt am Ende:
+   bei gleicher Staerke gewinnt die spaetere Regel, damit muss
+   keine der bestehenden Regeln angefasst werden.
 
-   Die Grundform ist überall dieselbe: eine ruhige Fläche, und was
-   ausgewählt ist, trägt --fest — schwarz im Hellen, weiß im Dunkeln.
-   Farbe bleibt der Bedeutung vorbehalten und erscheint überwiegend
-   erst beim Annähern.
+   Grundsatz: Pillen ohne Ausnahme, weiche diffuse Schatten statt
+   Konturen, und was ausgewaehlt ist, traegt --surface-dark mit
+   weisser Schrift. Farbe bleibt der Bedeutung vorbehalten und
+   erscheint ueberwiegend erst beim Annaehern.
    ========================================================== */
 
 /* ----------------------------------------------------------
-   KARTEN UND BLÖCKE
-
-   Vorher lag hier "dunkles Glas": eine durchsichtige Fläche mit
-   backdrop-filter: brightness(0.6), die absichtlich abdunkelte, was
-   hinter ihr lag. Auf schwarzem Grund ergab das Tiefe. Auf hellem
-   Grund macht dieselbe Rechnung aus Weiß zwangsläufig Grau — die
-   Karte wäre dunkler als die Seite, auf der sie liegt. Deshalb
-   tragen Karten jetzt eine eigene Fläche statt einer Rechnung auf
-   dem Untergrund.
+   KNOEPFE — alle, quer durch die App
    ---------------------------------------------------------- */
-.card,
-.block {
-  background: var(--flaeche);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  border: 1px solid var(--kontur);
-  border-radius: var(--r-card);
-  box-shadow: var(--heb-3), var(--lichtkante);
-  transition: transform var(--w-gleit) var(--kurve),
-              box-shadow var(--w-gleit) var(--kurve-weich);
+.ghost-btn, .full-btn, .gk-knopf, .ko-knopf, .kp-knopf, .lp-knopf,
+.pj-knopf, .ps-knopf, .lf-knopf, .dv-knopf, .vw-knopf, .zeilen-btn,
+.kf-import-knopf, .kf-muster-knopf, .kf-prompt-knopf, .kf-wf-knopf,
+.stbtn {
+  border-radius: var(--r-pill);
+  border: none;
+  padding: 11px 20px;
+  background: var(--surface-card);
+  color: var(--text-primary);
+  font-weight: 600;
+  box-shadow: var(--shadow-1);
+  transition: transform var(--t-base) var(--ease),
+              box-shadow var(--t-base) var(--ease-soft),
+              background var(--t-base) var(--ease-soft),
+              color var(--t-base) var(--ease-soft);
 }
-.card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--heb-4), var(--lichtkante);
+.ghost-btn:hover, .full-btn:hover, .gk-knopf:hover, .ko-knopf:hover,
+.kp-knopf:hover, .lp-knopf:hover, .pj-knopf:hover, .ps-knopf:hover,
+.lf-knopf:hover, .dv-knopf:hover, .vw-knopf:hover, .zeilen-btn:hover,
+.kf-import-knopf:hover, .kf-muster-knopf:hover,
+.kf-prompt-knopf:hover, .kf-wf-knopf:hover, .stbtn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-2);
+  color: var(--text-primary);
 }
-.card-quick,
-.card-quick:hover {
-  background: none;
-  border-color: transparent;
-  box-shadow: none;
-  transform: none;
+.ghost-btn:active, .full-btn:active, .gk-knopf:active, .ko-knopf:active,
+.kp-knopf:active, .lp-knopf:active, .pj-knopf:active, .ps-knopf:active,
+.lf-knopf:active, .dv-knopf:active, .vw-knopf:active, .zeilen-btn:active,
+.kf-import-knopf:active, .kf-muster-knopf:active,
+.kf-prompt-knopf:active, .kf-wf-knopf:active, .stbtn:active {
+  transform: scale(.97);
+  box-shadow: var(--shadow-1);
+  transition-duration: var(--t-fast);
 }
 
-/* Die kleinen Knöpfe im Kartenkopf treten zurück, bis man sich
-   nähert. Wo es kein Annähern gibt, bleiben sie stehen — sonst
-   wären sie auf dem Telefon unerreichbar. */
-.card-head .icon-btn,
-.card-head .seg-toggle {
-  opacity: 0;
-  transition: opacity var(--w-normal) var(--kurve-weich);
+/* Die Haupthandlung: dunkle Pille, weisser Text, dezenter Glanz oben */
+.search-btn, .an-knopf,
+.kp-knopf.haupt, .lp-knopf.haupt, .ko-knopf.haupt, .stbtn.an {
+  background: var(--surface-dark);
+  color: var(--text-inverse);
+  border: none;
+  border-radius: var(--r-pill);
+  font-weight: 600;
+  box-shadow: var(--shadow-dark), var(--sheen);
 }
-.card:hover .card-head .icon-btn,
-.card:hover .card-head .seg-toggle,
-.card:focus-within .card-head .icon-btn,
-.card:focus-within .card-head .seg-toggle { opacity: 1; }
-@media (hover: none) and (pointer: coarse) {
-  .card-head .icon-btn,
-  .card-head .seg-toggle { opacity: 1; }
+.search-btn:hover, .an-knopf:hover,
+.kp-knopf.haupt:hover, .lp-knopf.haupt:hover, .ko-knopf.haupt:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0,0,0,.30), 0 14px 32px rgba(0,0,0,.22), var(--sheen);
+}
+
+/* Farbe sitzt im Ruhezustand nur in der Schrift */
+.k-loeschen, .knopf-gefahr, [data-gefahr] { color: var(--red-ink); }
+.k-loeschen:hover, .knopf-gefahr:hover, [data-gefahr]:hover {
+  background: var(--status-red); color: #fff;
+}
+
+/* Symbolknoepfe: kleinerer Radius, wie im Prompt */
+.icon-btn, .li-kopfknopf, .collapse-btn {
+  border-radius: var(--r-icon);
+  border: none;
+  background: var(--surface-card);
+  color: var(--text-muted);
+  box-shadow: var(--shadow-1);
+  transition: transform var(--t-base) var(--ease),
+              box-shadow var(--t-base) var(--ease-soft),
+              color var(--t-base) var(--ease-soft),
+              background var(--t-base) var(--ease-soft);
+}
+.icon-btn:hover, .li-kopfknopf:hover, .collapse-btn:hover {
+  color: var(--text-primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-2);
+}
+.icon-btn:active, .li-kopfknopf:active, .collapse-btn:active {
+  transform: scale(.92); transition-duration: var(--t-fast);
+}
+.icon-btn.active {
+  background: var(--surface-dark);
+  color: var(--text-inverse);
+  box-shadow: var(--shadow-dark), var(--sheen);
 }
 
 /* ----------------------------------------------------------
-   DIE SPUR MIT DER FESTEN PILLE
-   Reiter, Schalterleisten, Segmente — alle dieselbe Form.
+   SPUREN — Reiter, Segmente, Schalterleisten
+   Eine weisse Spur, darin eine dunkle gleitende Pille.
    ---------------------------------------------------------- */
-.tab-bar,
-.seg-toggle,
-.lern-reiter {
-  background: var(--flaeche-3);
-  border: 1px solid var(--kontur);
-  border-radius: var(--r-pill);
-  padding: 4px;
+.tab-bar, .seg-toggle, .lern-reiter {
+  padding: 5px;
   gap: 2px;
+  border: none;
+  border-radius: var(--r-pill);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-2);
+}
+/* Innerhalb einer weissen Karte waere eine weisse Spur unsichtbar —
+   dort dreht sie sich um und liegt eingelassen. */
+.card .tab-bar, .card .seg-toggle,
+.block .seg-toggle, .modal .seg-toggle, .kop .seg-toggle {
+  background: var(--surface-sunken);
+  box-shadow: var(--sunken);
 }
 .tab-indicator {
-  background: var(--fest);
-  box-shadow: var(--heb-fest);
+  top: 5px;
+  height: calc(100% - 10px);
   border-radius: var(--r-pill);
-  transition: transform var(--w-gleit) var(--kurve),
-              width var(--w-gleit) var(--kurve),
-              left var(--w-gleit) var(--kurve);
+  background: var(--surface-dark);
+  box-shadow: var(--shadow-dark), var(--sheen);
+  transition: transform var(--t-glide) var(--ease),
+              width var(--t-glide) var(--ease),
+              left var(--t-glide) var(--ease);
 }
-.tab,
-.seg-toggle button,
-.lr-tab,
-.kop-reiter button {
+.tab, .seg-toggle button, .lr-tab {
   border-radius: var(--r-pill);
-  color: var(--text-2);
-  background: none;
   border: none;
-  transition: color var(--w-normal) var(--kurve-weich),
-              background var(--w-normal) var(--kurve-weich),
-              transform var(--w-schnell) var(--kurve);
+  background: none;
+  color: var(--text-muted);
+  font-weight: 500;
+  transition: color var(--t-base) var(--ease-soft),
+              background var(--t-base) var(--ease-soft),
+              transform var(--t-fast) var(--ease);
 }
-.tab:hover,
-.seg-toggle button:hover,
-.lr-tab:hover,
-.kop-reiter button:hover { color: var(--text); }
-.tab:active,
-.seg-toggle button:active,
-.lr-tab:active,
-.kop-reiter button:active { transform: scale(.97); }
+.tab:hover, .seg-toggle button:hover, .lr-tab:hover { color: var(--text-primary); }
+.tab:active, .seg-toggle button:active, .lr-tab:active { transform: scale(.97); }
 
-/* Ausgewählt heißt: das Gegenteil des Grundes, nie eine Farbe */
-.tab.active,
-.tab[aria-selected="true"] { color: var(--fest-text); font-weight: 600; }
-.seg-toggle button.active,
-.seg-toggle button.an,
-.lr-tab.active,
-.lr-tab[aria-selected="true"],
-.kop-reiter button.active {
-  background: var(--fest);
-  color: var(--fest-text);
+.tab.active, .tab[aria-selected="true"], .tab.aktiv {
+  color: var(--text-inverse); font-weight: 600;
+}
+.seg-toggle button.active, .seg-toggle button.an, .seg-toggle button.aktiv,
+.lr-tab.active, .lr-tab.aktiv, .lr-tab[aria-selected="true"] {
+  background: var(--surface-dark);
+  color: var(--text-inverse);
   font-weight: 600;
-  box-shadow: var(--heb-fest);
+  box-shadow: var(--shadow-dark), var(--sheen);
 }
 
 /* ----------------------------------------------------------
@@ -10016,109 +10038,83 @@ html.tablet #weatherCityLabel { display: none; }
 .nav-link {
   border-radius: var(--r-el);
   border-color: transparent;
-  transition: background var(--w-normal) var(--kurve-weich),
-              color var(--w-normal) var(--kurve-weich),
-              transform var(--w-schnell) var(--kurve);
+  transition: background var(--t-base) var(--ease-soft),
+              color var(--t-base) var(--ease-soft),
+              transform var(--t-fast) var(--ease);
 }
-.nav-link:hover { background: var(--auflage-2); color: var(--text); }
+.nav-link:hover  { background: var(--auflage-2); color: var(--text-primary); }
 .nav-link:active { transform: scale(.98); }
 .nav-link.active {
-  background: var(--fest);
-  color: var(--fest-text);
+  background: var(--surface-dark);
+  color: var(--text-inverse);
   border-color: transparent;
   font-weight: 600;
-  box-shadow: var(--heb-fest);
+  box-shadow: var(--shadow-dark), var(--sheen);
 }
-.nav-link.active svg { color: var(--fest-text); animation: none; }
+.nav-link.active svg { color: var(--text-inverse); animation: none; }
+
+.kop-reiter {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--r-el);
+  padding: 8px 11px;
+  color: var(--text-muted);
+  transition: background var(--t-base) var(--ease-soft),
+              color var(--t-base) var(--ease-soft);
+}
+.kop-reiter:hover { background: var(--auflage-2); color: var(--text-primary); }
+.kop-reiter.aktiv {
+  background: var(--surface-dark);
+  color: var(--text-inverse);
+  border-color: transparent;
+  font-weight: 600;
+  box-shadow: var(--shadow-dark), var(--sheen);
+}
 
 /* ----------------------------------------------------------
-   KNÖPFE
-   Ruhezustand erhaben und farblos, Farbe erst beim Annähern.
+   KARTEN
+   Das alte "dunkle Glas" dunkelte ab, was hinter der Karte lag.
+   Auf hellem Grund haette dieselbe Rechnung die Karte dunkler
+   gemacht als die Seite. Karten tragen deshalb eine eigene
+   Flaeche statt einer Rechnung auf dem Untergrund.
    ---------------------------------------------------------- */
-.ghost-btn, .full-btn, .gk-knopf, .ko-knopf, .kp-knopf, .lp-knopf,
-.pj-knopf, .ps-knopf, .lf-knopf, .dv-knopf, .vw-knopf, .zeilen-btn,
-.kf-import-knopf, .kf-muster-knopf, .kf-prompt-knopf, .kf-wf-knopf {
-  border-radius: var(--r-pill);
-  border: 1px solid var(--kontur);
-  background: var(--flaeche);
-  color: var(--text);
-  box-shadow: var(--heb-1), var(--lichtkante);
-  transition: transform var(--w-normal) var(--kurve),
-              box-shadow var(--w-normal) var(--kurve-weich),
-              background var(--w-normal) var(--kurve-weich),
-              color var(--w-normal) var(--kurve-weich);
+.card, .block {
+  background: var(--surface-card);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: none;
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-3);
+  transition: transform var(--t-glide) var(--ease),
+              box-shadow var(--t-glide) var(--ease-soft);
 }
-.ghost-btn:hover, .full-btn:hover, .gk-knopf:hover, .ko-knopf:hover,
-.kp-knopf:hover, .lp-knopf:hover, .pj-knopf:hover, .ps-knopf:hover,
-.lf-knopf:hover, .dv-knopf:hover, .vw-knopf:hover, .zeilen-btn:hover,
-.kf-import-knopf:hover, .kf-muster-knopf:hover,
-.kf-prompt-knopf:hover, .kf-wf-knopf:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--heb-2), var(--lichtkante);
-  color: var(--text);
-  border-color: var(--kontur-2);
+.card:hover { transform: translateY(-2px); box-shadow: var(--shadow-4); }
+.card-quick, .card-quick:hover {
+  background: none; box-shadow: none; transform: none;
 }
-.ghost-btn:active, .full-btn:active, .gk-knopf:active, .ko-knopf:active,
-.kp-knopf:active, .lp-knopf:active, .pj-knopf:active, .ps-knopf:active,
-.lf-knopf:active, .dv-knopf:active, .vw-knopf:active, .zeilen-btn:active,
-.kf-import-knopf:active, .kf-muster-knopf:active,
-.kf-prompt-knopf:active, .kf-wf-knopf:active {
-  transform: scale(.97);
-  box-shadow: var(--heb-1);
-  transition-duration: var(--w-schnell);
+.modal, .pop, .kop {
+  border: none;
+  border-radius: var(--r-card);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-4);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
+.modal-overlay { background: var(--schleier); }
 
-/* Die Haupthandlung trägt --fest */
-.search-btn, .an-knopf, .kp-knopf.haupt, .lp-knopf.haupt, .ko-knopf.haupt {
-  background: var(--fest);
-  color: var(--fest-text);
+/* Kartentitel treten zurueck — der Inhalt traegt die Karte */
+.card-title { font-size: 13px; font-weight: 500; color: var(--text-muted); letter-spacing: 0; }
+.card-badge {
+  padding: 4px 11px;
   border: none;
   border-radius: var(--r-pill);
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+  font-family: var(--sans);
+  font-size: 11.5px;
   font-weight: 600;
-  box-shadow: var(--heb-fest);
-  transition: transform var(--w-normal) var(--kurve),
-              box-shadow var(--w-normal) var(--kurve-weich);
-}
-.search-btn:hover, .an-knopf:hover,
-.kp-knopf.haupt:hover, .lp-knopf.haupt:hover, .ko-knopf.haupt:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px color-mix(in srgb, var(--fest) 26%, transparent),
-              0 12px 28px color-mix(in srgb, var(--fest) 18%, transparent);
-}
-.search-btn:active, .an-knopf:active,
-.kp-knopf.haupt:active, .lp-knopf.haupt:active, .ko-knopf.haupt:active {
-  transform: scale(.97);
-  transition-duration: var(--w-schnell);
-}
-
-/* Symbolknöpfe: rund, ruhig, heben beim Annähern */
-.icon-btn, .li-kopfknopf, .collapse-btn {
-  border-radius: var(--r-pill);
-  border: 1px solid var(--kontur);
-  background: var(--flaeche);
-  color: var(--text-2);
-  box-shadow: var(--heb-1);
-  transition: transform var(--w-normal) var(--kurve),
-              box-shadow var(--w-normal) var(--kurve-weich),
-              color var(--w-normal) var(--kurve-weich),
-              background var(--w-normal) var(--kurve-weich);
-}
-.icon-btn:hover, .li-kopfknopf:hover, .collapse-btn:hover {
-  color: var(--text);
-  transform: translateY(-1px);
-  box-shadow: var(--heb-2);
-  background: var(--flaeche);
-  border-color: var(--kontur-2);
-}
-.icon-btn:active, .li-kopfknopf:active, .collapse-btn:active {
-  transform: scale(.92);
-  transition-duration: var(--w-schnell);
-}
-.icon-btn.active {
-  background: var(--fest);
-  color: var(--fest-text);
-  border-color: transparent;
-  box-shadow: var(--heb-fest);
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 /* ----------------------------------------------------------
@@ -10126,36 +10122,45 @@ html.tablet #weatherCityLabel { display: none; }
    ---------------------------------------------------------- */
 input[type="text"], input[type="password"], input[type="number"],
 input[type="search"], input[type="date"], input[type="time"],
-textarea, select {
-  border-radius: var(--r-el);
-  border: 1px solid var(--kontur);
-  background: var(--senke-1);
-  color: var(--text);
-  transition: border-color var(--w-normal) var(--kurve-weich),
-              box-shadow var(--w-normal) var(--kurve-weich),
-              background var(--w-normal) var(--kurve-weich);
+input[type="email"], textarea, select {
+  border-radius: var(--r-pill);
+  border: none;
+  background: var(--surface-card);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-1);
+  padding: 11px 16px;
+  transition: box-shadow var(--t-base) var(--ease-soft);
 }
+textarea { border-radius: var(--r-el); }
 input:focus, textarea:focus, select:focus {
   outline: none;
-  border-color: color-mix(in srgb, var(--blau) 55%, transparent);
-  box-shadow: 0 0 0 3px var(--blau-fond);
-  background: var(--flaeche);
+  box-shadow: var(--shadow-2), 0 0 0 3px var(--tint-blue);
 }
-::placeholder { color: var(--text-3); }
+::placeholder { color: var(--text-muted); }
+
+.search {
+  border-radius: var(--r-pill);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-1);
+  border: none;
+}
+.search:focus-within { box-shadow: var(--shadow-2), 0 0 0 3px var(--tint-blue); }
+.search input { background: none; box-shadow: none; padding: 12px 0; }
+.search input:focus { box-shadow: none; }
 
 /* ----------------------------------------------------------
    TASTATUR
-   Wer mit der Tastatur unterwegs ist, muss sehen können, wo er
-   steht. :focus-visible zeigt sich nur dort und stört die Maus
+   Wer mit der Tastatur unterwegs ist, muss sehen koennen, wo er
+   steht. :focus-visible zeigt sich nur dort und stoert die Maus
    nicht.
    ---------------------------------------------------------- */
 :focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px var(--blau-fond), 0 0 0 1.5px var(--blau);
+  box-shadow: 0 0 0 3px var(--tint-blue), 0 0 0 1.5px var(--accent-active);
 }
 
 /* ----------------------------------------------------------
-   ROLLBALKEN
+   KLEINKRAM
    ---------------------------------------------------------- */
 * { scrollbar-color: var(--kontur-2) transparent; scrollbar-width: thin; }
 ::-webkit-scrollbar { width: 10px; height: 10px; }
@@ -10166,1425 +10171,162 @@ input:focus, textarea:focus, select:focus {
   border: 3px solid transparent;
   background-clip: content-box;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: var(--text-3);
-  background-clip: content-box;
-}
+::selection { background: var(--tint-blue); color: var(--text-primary); }
 
-/* ----------------------------------------------------------
-   AUSWAHL UND FENSTER
-   ---------------------------------------------------------- */
-::selection {
-  background: color-mix(in srgb, var(--blau) 26%, transparent);
-  color: var(--text);
-}
-
-.modal, .pop, .kop {
-  border-radius: var(--r-card);
-  border: 1px solid var(--kontur);
-  background: var(--flaeche);
-  box-shadow: var(--heb-4), var(--lichtkante);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-.modal-overlay { background: var(--schleier); }
-
-
-/* ----------------------------------------------------------
-   NACHTRAG: DIE DEUTSCHE SCHWESTERKLASSE
-
-   Die App markiert Ausgewaehltes an manchen Stellen mit "active"
-   und an anderen mit "aktiv". Der erste Durchgang kannte nur die
-   englische Form — dadurch blieben die Bereichsknoepfe im
-   Kontopanel und die Planzeilen blau, waehrend alles daneben
-   schon neutral war.
-   ---------------------------------------------------------- */
-
-/* Die Bereichsliste im Kontopanel ist eine Navigation, keine Spur.
-   Der erste Entwurf hatte sie versehentlich als Schalterleiste
-   behandelt — daher hier die Richtigstellung. */
-.kop-reiter {
-  background: none;
-  border: 1px solid transparent;
-  border-radius: var(--r-el);
-  padding: 8px 11px;
-  color: var(--text-2);
-  transition: background var(--w-normal) var(--kurve-weich),
-              color var(--w-normal) var(--kurve-weich),
-              transform var(--w-schnell) var(--kurve);
-}
-.kop-reiter:hover { background: var(--auflage-2); color: var(--text); }
-.kop-reiter:active { transform: scale(.98); }
-.kop-reiter.aktiv {
-  background: var(--fest);
-  color: var(--fest-text);
-  border-color: transparent;
-  font-weight: 600;
-  box-shadow: var(--heb-fest);
-}
-
-/* Planzeilen und Segmente, die die deutsche Form benutzen */
-.pl-zeile.aktiv {
-  background: var(--fest);
-  color: var(--fest-text);
-}
-.seg-toggle button.aktiv,
-.lr-tab.aktiv,
-.tab.aktiv {
-  background: var(--fest);
-  color: var(--fest-text);
-  font-weight: 600;
-  box-shadow: var(--heb-fest);
-}
-
-/* Der Streifen im Wochenblick trug einen Blau-Violett-Verlauf.
-   Violett gibt es nicht mehr, und ein Verlauf ueber zwei Akzente
-   waere hier Zierde ohne Aussage. */
-.iv-teil.aktiv { background: var(--blau); }
-.iv-punkt.aktiv { background: var(--blau); }
-
-/* ----------------------------------------------------------
-   DIE SCHWEBENDE LEISTE AUF DEM HANDY
-
-   Bisher sass die Navigation als durchgehender Balken auf der
-   Unterkante — von Rand zu Rand, mit einer Trennlinie nach oben.
-   Jetzt schwebt sie als Pille ueber dem Inhalt, wie in Foto 4.
-
-   Alle zehn Seiten bleiben darin. Sie passen nicht nebeneinander,
-   also wischt man seitlich; ein angeschnittener Eintrag am Rand
-   sagt, dass es weitergeht. Die Alternative waere gewesen, sechs
-   Seiten hinter einem "Mehr" zu verstecken — das war ausdruecklich
-   nicht gewuenscht.
-   ---------------------------------------------------------- */
-@media (max-width: 760px), (max-width: 900px) and (max-height: 500px) {
-  .sidebar,
-  .sidebar.collapsed {
-    inset: auto 10px calc(10px + env(safe-area-inset-bottom, 0)) 10px;
-    width: auto;
-    min-width: 0;
-    max-width: none;
-    padding: 0;
-    border: 1px solid var(--kontur);
-    border-top: 1px solid var(--kontur);
-    border-radius: 26px;
-    background: var(--flaeche);
-    box-shadow: var(--heb-4), var(--lichtkante);
-    overflow: hidden;
-    z-index: 600;
-  }
-
-  .nav-scroll {
-    padding: 7px;
-    gap: 2px;
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scrollbar-width: none;
-    scroll-snap-type: x proximity;
-  }
-  .nav-scroll::-webkit-scrollbar { display: none; }
-
-  .nav-link,
-  .sidebar.collapsed .nav-link {
-    flex-shrink: 0;
-    min-width: 58px;
-    padding: 8px 7px;
-    gap: 3px;
-    border-radius: 18px;
-    font-size: 10px;
-    scroll-snap-align: center;
-  }
-  .nav-link svg,
-  .sidebar.collapsed .nav-link svg { width: 20px; height: 20px; }
-
-  .sidebar-foot {
-    border-left: 1px solid var(--kontur);
-    border-top: none;
-    padding: 7px;
-    display: flex;
-    gap: 2px;
-  }
-  .sidebar-foot .nav-link { min-width: 50px; }
-
-  /* Der weiche Rand sagt: hier geht es weiter. Er zeigt sich nur auf
-     der Seite, auf der wirklich noch etwas liegt — sonst wuerde er
-     ueber den ersten Eintrag waschen und Weiterlaufen behaupten, wo
-     Schluss ist. Die Klassen setzt script.js beim Rollen. */
-  .nav-scroll { position: relative; }
-  .sidebar::before,
-  .sidebar::after {
-    content: "";
-    position: absolute;
-    top: 7px;
-    bottom: 7px;
-    width: 24px;
-    pointer-events: none;
-    z-index: 2;
-    opacity: 0;
-    transition: opacity var(--w-normal) var(--kurve-weich);
-  }
-  .sidebar::before { left: 0;  background: linear-gradient(90deg,  var(--flaeche), transparent); }
-  .sidebar::after  { right: 0; background: linear-gradient(270deg, var(--flaeche), transparent); }
-  .sidebar.mehr-links::before  { opacity: 1; }
-  .sidebar.mehr-rechts::after  { opacity: 1; }
-
-  /* Die Leiste schwebt jetzt ueber dem Inhalt statt ihn zu begrenzen.
-     Ohne diesen Freiraum laege die letzte Karte darunter. */
-  .layout {
-    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0));
-  }
-}
-
-/* ----------------------------------------------------------
-   NACHTRAG ZUR SCHWEBENDEN LEISTE UND ZUM GELB
-
-   1. Unter 430 Pixeln versteckte eine aeltere Regel die
-      Beschriftungen unter den Symbolen. Das war sinnvoll, solange
-      alle zehn Punkte nebeneinander gequetscht werden mussten. Jetzt
-      wird gewischt, also ist Platz — und ein Symbol allein sagt bei
-      "Analyse" gegen "Automation" zu wenig.
-
-   2. Gelb wird in dieser App zu zwei Dritteln als Schrift benutzt.
-      Der Grundname traegt darum den dunklen, lesbaren Ton. Als
-      grosse Symbolflaeche wirkt der aber oliv statt sonnig. Wo Gelb
-      eine Form fuellt statt einen Satz zu schreiben, gilt deshalb
-      der volle Ton.
-   ---------------------------------------------------------- */
-@media (max-width: 430px) {
-  .nav-link span,
-  .sidebar.collapsed .nav-link span { display: block; }
-}
-
-/* Das Wettersymbol und die Tageshoechsttemperatur sind Formen,
-   keine Saetze. */
-.weather-icon { color: var(--gelb); }
-.wmm.max { color: var(--gelb-tief); }
-
-/* Handy und Rechner tragen im Diagramm Blau und Neutralgrau — die
-   Unterscheidung ist keine Bewertung und braucht keine Signalfarbe.
-   Der Punkt in der Legende muss dazu passen, sonst behauptet er eine
-   zweite Farbe, die es in der Kurve nicht gibt. */
-.legend-dot.pc {
-  background: #8E8E93;
-  box-shadow: 0 0 8px color-mix(in srgb, #8E8E93 60%, transparent);
-}
-
-/* ==========================================================
-   PHASE 4 — DIE MUSTERSEITE WIRKLICH NACHGEBAUT
-
-   Der erste Durchgang hat die neuen Farben ueber die alten Formen
-   gelegt. Das ist etwas anderes, als die Formen zu bauen, die auf
-   der Musterseite standen. Hier kommen sie nach.
-
-   Der wichtigste Unterschied steckt in Foto 1 und ich hatte ihn
-   umgedreht: dort ist die SPUR weiss und erhaben, und sie liegt auf
-   grauem Grund. Ich hatte sie grau und eingelassen gemacht. Damit
-   fehlte der Optik ihr ganzes Fundament — eine erhabene weisse
-   Flaeche, in der eine feste Pille sitzt.
-   ========================================================== */
-
-/* ----------------------------------------------------------
-   DIE SPUR — weiss, erhaben, mit Lichtkante
-   ---------------------------------------------------------- */
-.tab-bar,
-.seg-toggle,
-.lern-reiter {
-  padding: 5px;
-  gap: 2px;
-  border: none;
-  border-radius: var(--r-pill);
-  background: var(--flaeche);
-  box-shadow: var(--heb-2), var(--lichtkante);
-}
-
-/* Die Segmente darin tragen im Ruhezustand nichts — die Spur ist
-   schon die Flaeche. */
-.tab,
-.seg-toggle button,
-.lr-tab {
-  padding: 8px 16px;
-  border-radius: var(--r-pill);
-  background: none;
-  border: none;
-  color: var(--text-2);
-  font-weight: 500;
-}
-.tab:hover,
-.seg-toggle button:hover,
-.lr-tab:hover { color: var(--text); background: none; }
-
-/* ----------------------------------------------------------
-   DIE KARTEN — wie auf der Musterseite
-   Dort trug die Karte keine Kontur. Sie hebt sich allein ueber
-   Schatten und Lichtkante ab; eine Linie ringsum macht daraus
-   wieder einen Kasten statt einer schwebenden Flaeche.
-   ---------------------------------------------------------- */
-.card,
-.block {
-  border: none;
-  padding: 20px clamp(16px, 1.4vw, 24px) 22px;
-  border-radius: var(--r-card);
-  box-shadow: var(--heb-3), var(--lichtkante);
-}
-
-/* Der Titel tritt zurueck, der Inhalt traegt die Karte. Genau das
-   unterscheidet ein Apple-Widget von einem Kasten mit Ueberschrift. */
-.card-title,
-.block-kopf > :first-child {
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: -0.005em;
-  color: var(--text-2);
-}
-
-/* Das Abzeichen traegt Bedeutung und darf deshalb Farbe haben —
-   als ruhige Flaeche, nicht als Umrandung. */
-.card-badge {
-  padding: 4px 10px;
-  border: none;
-  border-radius: var(--r-pill);
-  background: var(--flaeche-3);
-  color: var(--text-2);
-  font-family: var(--sans);
-  font-size: 11.5px;
-  font-weight: 600;
-  letter-spacing: 0;
-  text-transform: none;
-}
-.card-badge.gut  { background: var(--gruen-fond); color: var(--gruen); }
-.card-badge.warn { background: var(--gelb-fond);  color: var(--gelb-schrift); }
-.card-badge.rot  { background: var(--rot-fond);   color: var(--rot); }
-
-/* Grosse Zahlen sind die Hauptsache im Widget. Tabellenziffern,
-   damit sie beim Hochzaehlen nicht wackeln. */
-.block-zahl {
-  font-family: var(--sans);
-  font-size: 13px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-2);
-}
-.cal-value,
-.weather-temp,
-.st-gross,
-.kal-gross {
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.03em;
-  font-weight: 700;
-}
-
-/* ----------------------------------------------------------
-   RUNDE SYMBOLFELDER — die Blaetterleiste aus Foto 1
-   Ein Feld im Ruhezustand hellgrau, beim Annaehern angehoben,
-   ausgewaehlt fest. Gilt fuer die kleinen Auswahlfelder quer
-   durch die App.
-   ---------------------------------------------------------- */
-.kal-tag,
-.rad-wert,
-.wtag {
-  border-radius: 14px;
-  transition: background var(--w-normal) var(--kurve-weich),
-              color var(--w-normal) var(--kurve-weich),
-              transform var(--w-normal) var(--kurve),
-              box-shadow var(--w-normal) var(--kurve-weich);
-}
-.kal-tag:hover,
-.rad-wert:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--heb-1);
-}
+/* Der gewaehlte Tag im Kalender traegt Blau — dort ist das die
+   vertraute Konvention, und es ist der einzige Ort, an dem eine
+   Auswahl farbig statt dunkel ist. */
 .kal-tag.gewaehlt {
-  background: var(--fest);
-  color: var(--fest-text);
-  box-shadow: var(--heb-fest);
+  background: var(--accent-active);
+  color: #fff;
   font-weight: 700;
+  box-shadow: 0 2px 8px var(--tint-blue);
 }
 
-/* ----------------------------------------------------------
-   DER ABHAK-KNOPF
-   Ohne Leuchten, ohne Ring der davonlaeuft. Er sinkt beim Druecken
-   ein und fuellt sich — mehr braucht es nicht, und Gruen sagt hier
-   ohnehin schon alles.
-   ---------------------------------------------------------- */
-.hb-zeile.erledigt .hb-knopf {
-  background: var(--gruen-voll);
-  box-shadow: inset 0 0 0 2px var(--gruen-voll);
-}
-.hb-knopf.hb-pop { animation: none; }
-.hb-knopf.hb-pop::after { content: none; }
-
-/* ----------------------------------------------------------
-   DIE SPUR RICHTET SICH NACH IHREM UNTERGRUND
-
-   In Foto 1 ist die Spur weiss und erhaben — das funktioniert dort,
-   weil sie auf grauem Grund liegt. Innerhalb einer weissen Karte
-   waere dieselbe Spur weiss auf weiss und damit unsichtbar. Sie
-   dreht sich deshalb um: auf der Seite erhaben und hell, in der
-   Karte eingelassen und etwas dunkler. Die feste Pille darin bleibt
-   in beiden Faellen dieselbe.
-   ---------------------------------------------------------- */
-.card .tab-bar,
-.card .seg-toggle,
-.block .seg-toggle,
-.modal .seg-toggle,
-.kop .seg-toggle {
-  background: var(--flaeche-3);
-  box-shadow: var(--rille);
-}
-
-/* Die gleitende Pille sitzt hinter den Beschriftungen und traegt
-   die Auswahl. Sie muss die Hoehe der Spur ausfuellen, sonst sitzt
-   sie als schmaler Streifen mittendrin. */
-.tab-indicator {
-  top: 5px;
-  height: calc(100% - 10px);
-  background: var(--fest);
-  box-shadow: var(--heb-fest);
+/* Abzeichen und Marken */
+.marke, .chip {
   border-radius: var(--r-pill);
-}
-
-/* Im Kartenkopf ist weniger Platz als auf der Musterseite. Dort
-   standen drei Segmente auf voller Breite, hier teilen sich vier
-   die Kopfzeile eines Widgets. Die grosszuegige Polsterung liess
-   den letzten Reiter aus der Karte laufen. */
-.card-head .tab-bar { padding: 3px; gap: 0; width: 100%; }
-.card-head .tab {
-  flex: 1;
-  min-width: 0;
-  padding: 6px 4px;
-  font-size: 10.5px;
-  letter-spacing: -0.01em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.card-head .tab-indicator { top: 3px; height: calc(100% - 6px); }
-
-/* ==========================================================
-   PHASE 5 — DIE WIDGETS SELBST
-
-   Bisher habe ich den Widgets neue Farben und neue Raender gegeben.
-   Das ist etwas anderes, als sie so zu bauen, wie sie auf der
-   Musterseite standen. Dort war der Unterschied nicht die Farbe,
-   sondern die Haltung: der Inhalt traegt die Karte, nicht die
-   Verzierung.
-
-   Konkret heisst das
-     grosse Zahlen, die man von weitem liest, mit Tabellenziffern
-       damit sie beim Hochzaehlen nicht wackeln
-     ruhige Nebenzeilen statt gleichlauter Beschriftungen
-     Balken als klare Form: eine Mulde, darin eine volle Farbe
-     Zeilen mit genug Luft, dass man sie einzeln erfasst
-     nichts, was atmet, pulsiert oder wandert, ohne etwas zu sagen
-   ========================================================== */
-
-/* ----------------------------------------------------------
-   ZAHLEN
-   Sie sind die Hauptsache. Tabellenziffern sind hier keine
-   Feinheit: ohne sie springt die Breite jeder Ziffer, und eine
-   hochzaehlende Zahl zappelt.
-   ---------------------------------------------------------- */
-.cal-value,
-.weather-temp,
-.hero-name,
-.wi-zaehler {
-  font-family: var(--sans);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  font-variant-numeric: tabular-nums;
-}
-.cal-value { animation: none; }
-
-/* Nebenzeilen treten zurueck, statt mitzureden */
-.cal-sub,
-.weather-desc,
-.block-unter {
-  font-family: var(--sans);
-  color: var(--text-2);
-  font-size: 13px;
-}
-.cal-slash { opacity: .5; }
-
-/* ----------------------------------------------------------
-   BALKEN UND SPUREN
-   Eine Mulde, darin eine volle Farbe. Runde Enden, damit nichts
-   abgehackt wirkt.
-   ---------------------------------------------------------- */
-.hb-tick {
-  border-radius: var(--r-pill);
-  background: var(--senke-1);
-}
-.hb-spur { gap: 3px; }
-
-/* ----------------------------------------------------------
-   ZEILEN IN LISTEN
-   Die Termine trugen jede eine eigene Kontur — acht Kaesten
-   untereinander, jeder mit Rahmen. Jetzt tragen sie nur eine
-   ruhige Flaeche, und die Trennung entsteht aus dem Abstand.
-   ---------------------------------------------------------- */
-.entry-item {
-  border: none;
-  background: var(--flaeche-2);
-  border-radius: var(--r-el);
-  transition: background var(--w-normal) var(--kurve-weich),
-              transform var(--w-normal) var(--kurve),
-              box-shadow var(--w-normal) var(--kurve-weich);
-}
-.entry-item:hover {
-  background: var(--flaeche);
-  transform: translateX(2px);
-  box-shadow: var(--heb-1);
-}
-
-.streak-row,
-.hb-zeile {
-  border-radius: var(--r-el);
-  border-color: transparent;
-  transition: background var(--w-normal) var(--kurve-weich);
-}
-.streak-row:hover,
-.hb-zeile:hover { background: var(--auflage-2); }
-
-/* ----------------------------------------------------------
-   DER ABHAK-KNOPF
-
-   Er soll sagen "angekommen", mehr nicht. Vorher lief ein Ring
-   nach aussen davon und der Knopf leuchtete auf — das ist eine
-   Ansage fuer etwas, das man zwanzig Mal am Tag tut.
-
-   Jetzt: einmal kurz eindruecken und wieder aufgehen. Drei
-   Zehntelsekunden, kein Leuchten, kein Ring.
-   ---------------------------------------------------------- */
-.hb-knopf.hb-pop {
-  animation: hb-quittung 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-@keyframes hb-quittung {
-  0%   { transform: scale(1); }
-  38%  { transform: scale(0.86); }
-  100% { transform: scale(1); }
-}
-.hb-knopf.hb-pop::after { content: none; }
-
-/* ----------------------------------------------------------
-   RUHE
-
-   Ein Dashboard, auf dem staendig etwas atmet, laesst sich nicht
-   ueberfliegen — das Auge folgt jeder Bewegung, auch der
-   bedeutungslosen. Bewegung bleibt dort, wo sie etwas meldet.
-   ---------------------------------------------------------- */
-.card-title,
-.card-badge,
-.hero-greet,
-.hero-name,
-.hero-chip,
-.search,
-.weather-icon,
-.weather-temp,
-.weather-desc,
-.cal-value,
-.sidebar,
-.sidebar-head,
-.sidebar-profile,
-.nav-group,
-.sidebar-foot,
-.brand-mark,
-.nav-link.active svg { animation: none; }
-
-/* Das Ladelicht, das dauerhaft die Bildschirmzeit-Kurve entlanglief */
-.st-lauflicht { display: none; }
-
-/* ----------------------------------------------------------
-   DAS VORSCHLAGS-WIDGET
-
-   Der Text war auf bis zu 24 Pixel eingestellt und durfte drei
-   Zeilen laufen, dazu drei Zeilen Unterzeile, ein Symbol und eine
-   Fusszeile — in einer Karte, die diese Hoehe nicht hat. Das Ende
-   wurde abgeschnitten, mitten im Wort. Ein Widget, das seinen
-   eigenen Satz nicht zu Ende bringt, sagt weniger als eines, das
-   kuerzer formuliert.
-
-   Also: kleinere Schrift, zwei Zeilen statt drei, und das Symbol
-   nur so gross wie noetig.
-   ---------------------------------------------------------- */
-.vorschlag-text {
-  font-size: clamp(15px, 1.25vw, 19px);
-  line-height: 1.25;
-  -webkit-line-clamp: 2;
-}
-.vorschlag-sub {
-  margin-top: 5px;
-  font-size: 12.5px;
-  line-height: 1.35;
-  color: var(--text-2);
-  -webkit-line-clamp: 2;
-}
-.vorschlag-icon {
-  width: 34px;
-  height: 34px;
-  border: none;
-  border-radius: 11px;
-  background: var(--flaeche-3);
-  color: var(--text-2);
-  margin-bottom: clamp(5px, 1.4vh, 11px);
-}
-.vorschlag-foot { margin-top: clamp(6px, 1.4vh, 12px); }
-
-/* ----------------------------------------------------------
-   KALORIEN UND WETTER — die Zahl traegt die Karte
-
-   Auf der Musterseite stand die Zahl gross und allein, mit einer
-   ruhigen Zeile darunter. Hier war sie in Monospace gesetzt und
-   von gleich lauten Nebenzeilen umgeben.
-   ---------------------------------------------------------- */
-.cal-value { font-size: clamp(26px, 24cqw, 46px); line-height: 1; }
-.cal-sub   { font-size: clamp(11px, 7.5cqw, 13px); margin-top: 5px; }
-.cal-empty { color: var(--text-2); font-size: 13px; }
-
-.weather-desc { color: var(--text-2); }
-
-/* Die Min-/Max-Zeile war eine eigene kleine Leiste mit Konturen.
-   Zwei Zahlen brauchen keinen Rahmen. */
-.wmm {
-  border: none;
-  background: var(--flaeche-3);
-  border-radius: var(--r-pill);
-  font-variant-numeric: tabular-nums;
-}
-
-/* ----------------------------------------------------------
-   STREAKS
-   Die Zahl ist die Aussage, die Flamme das Beiwerk — bisher war
-   es umgekehrt gewichtet.
-   ---------------------------------------------------------- */
-.streak-row .sr-tage,
-.streak-row .sr-zahl {
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
-/* ==========================================================
-   PHASE 6 — WENIGER PRO KARTE
-
-   Die Musterkarten trugen drei bis vier Dinge, diese hier acht bis
-   zwoelf. Die Luft dazwischen laesst sich nicht mit Abstaenden
-   herbeireden — der Platz ist schlicht vergeben.
-
-   Also zeigt jede Karte nur noch ihre Kernaussage, und ein Klick
-   auf sie fuehrt zur vollen Seite. Verloren geht nichts: es rueckt
-   eine Ebene tiefer.
-   ========================================================== */
-
-/* Die Karte fuehrt weiter — das muss man ihr ansehen und fuehlen. */
-.karte-fuehrt { cursor: pointer; }
-.karte-fuehrt:focus-visible {
-  outline: none;
-  box-shadow: var(--heb-3), var(--lichtkante),
-              0 0 0 3px var(--blau-fond), 0 0 0 1.5px var(--blau);
-}
-
-/* "Details anzeigen" sass mitten im Kalorien-Widget und tat genau
-   das, was jetzt ein Klick auf die Karte tut. Zwei Wege zum selben
-   Ziel, einer davon nimmt Platz weg. */
-#calDetailsBtn { display: none; }
-
-/* Leerzustaende sind Saetze, keine Bauwerke. Sie standen bisher in
-   eigenen Kaesten mit Kontur und Hintergrund und wirkten dadurch
-   wichtiger als die Karten mit Inhalt. */
-.cal-empty,
-.naechste-empty,
-.streak-leer {
-  border: none;
-  background: none;
-  padding: 0;
-  color: var(--text-3);
-  font-size: 13px;
-  font-weight: 500;
-}
-
-/* Der Hinweis auf den naechsten Schritt gehoert unter den
-   Leerzustand, nicht als Knopf mitten hinein. */
-.naechste-empty::after,
-.cal-empty::after {
-  content: "Tippen zum Öffnen";
-  display: block;
-  margin-top: 6px;
-  font-size: 11.5px;
-  color: var(--text-3);
-  opacity: 0;
-  transition: opacity var(--w-normal) var(--kurve-weich);
-}
-.karte-fuehrt:hover .naechste-empty::after,
-.karte-fuehrt:hover .cal-empty::after { opacity: 1; }
-@media (hover: none) and (pointer: coarse) {
-  .naechste-empty::after, .cal-empty::after { opacity: 1; }
-}
-
-/* Die Legende der Bildschirmzeit wiederholte im Kopf, was die Kurve
-   ohnehin zeigt. Sie darf beim Annaehern erscheinen wie die
-   Werkzeuge daneben. */
-.card-head .legend {
-  opacity: 0;
-  transition: opacity var(--w-normal) var(--kurve-weich);
-}
-.card:hover .card-head .legend,
-.card:focus-within .card-head .legend { opacity: 1; }
-@media (hover: none) and (pointer: coarse) {
-  .card-head .legend { opacity: 1; }
-}
-
-/* Mehr Luft zwischen Kopf und Aussage, weniger Kleinteiliges darin */
-.card-head { margin-bottom: 14px; gap: 8px; }
-.card-body { gap: 10px; }
-
-
-/* ==========================================================
-   PHASE 7 — DIE WIDGETS ALS INSELN
-
-   Bild 1 ist keine Formsprache fuer Knoepfe, sondern eine
-   Struktur. Es gibt dort keine einzige Karte, die einen Bereich
-   einrahmt und ihn ueberschreibt — es gibt nur Kapseln, und jede
-   sagt fuer sich genau eine Sache.
-
-   Genau daran sind meine ersten Durchgaenge gescheitert: ich habe
-   Farben und Abstaende an Kaesten nachgezogen, deren Grundform
-   eine andere war. Ein Titel "Habits" ueber drei Zeilen, die
-   schon "Lesen", "Sport" und "Wasser" heissen, fuegt nichts hinzu.
-   Er kostet nur die Hoehe, die den Zeilen darunter fehlt.
-
-   Daraus folgen zwei Faelle:
-
-     Ein Widget mit EINER Aussage wird selbst zur Insel.
-       Kalorien, Wetter, Bildschirmzeit, Tipp.
-
-     Ein Widget mit einer LISTE wird zur unsichtbaren Gruppe,
-     und seine Zeilen werden Inseln.
-       Habits, Streaks, Naechste Termine.
-
-   Das Raster mit deinen Kartenplaetzen bleibt unangetastet.
-   ========================================================== */
-
-/* ----------------------------------------------------------
-   FALL 1 — das Widget ist die Insel
-   ---------------------------------------------------------- */
-#card-kalorien,
-#card-wetter,
-#card-screentime,
-#card-vorschlag {
-  border-radius: 26px;
-  padding: 15px 18px 17px;
-  background: var(--flaeche);
-  box-shadow: var(--heb-2), var(--lichtkante);
-}
-
-/* ----------------------------------------------------------
-   FALL 2 — das Widget ist nur die Gruppe
-
-   Die Karte verschwindet: kein Grund, kein Schatten, keine
-   Polsterung. Uebrig bleiben ihre Zeilen, und die tragen sich
-   ab jetzt selbst.
-   ---------------------------------------------------------- */
-#card-habits,
-#card-streaks,
-#card-naechste {
-  background: none;
-  box-shadow: none;
-  border: none;
-  padding: 0;
-  overflow: visible;
-}
-#card-habits:hover,
-#card-streaks:hover,
-#card-naechste:hover { transform: none; box-shadow: none; }
-
-/* Der Titel wird zur leisen Beschriftung darueber. Er verschwindet
-   nicht ganz: anders als in Bild 1 ist das hier eine
-   Uebersichtsseite, und ohne jede Beschriftung muesste man die
-   Gruppen jedes Mal neu erschliessen. */
-#card-habits > .card-head,
-#card-streaks > .card-head,
-#card-naechste > .card-head {
-  margin: 0 0 8px 6px;
-  gap: 8px;
-}
-#card-habits .card-title,
-#card-streaks .card-title,
-#card-naechste .card-title {
-  font-size: 11px;
   font-weight: 600;
-  letter-spacing: .07em;
-  text-transform: uppercase;
-  color: var(--text-3);
+  background: var(--surface-sunken);
+  color: var(--text-muted);
 }
+.marke.gruen { background: var(--tint-green);  color: var(--green-ink); }
+.marke.rot   { background: var(--tint-red);    color: var(--red-ink); }
+.marke.gelb  { background: var(--tint-orange); color: var(--orange-ink); }
+.marke.blau  { background: var(--tint-blue);   color: var(--blue-ink); }
 
-/* Die Liste darin wird ein Stapel mit Luft dazwischen */
-#card-habits .card-body,
-#card-streaks .card-body,
-#card-naechste .card-body,
-#card-habits .habit-list,
-#card-streaks .streak-list,
-#card-naechste .entry-list {
-  gap: 7px;
-  padding: 0;
-  background: none;
-  border: none;
-}
-
-/* ----------------------------------------------------------
-   DIE ZEILEN WERDEN INSELN
-   ---------------------------------------------------------- */
-#card-habits .hb-zeile,
-#card-streaks .streak-row,
-#card-naechste .entry-item {
-  border-radius: 22px;
-  padding: 11px 15px;
-  background: var(--flaeche);
-  border: none;
-  box-shadow: var(--heb-1), var(--lichtkante);
-  transition: transform var(--w-normal) var(--kurve),
-              box-shadow var(--w-normal) var(--kurve-weich);
-}
-#card-habits .hb-zeile:hover,
-#card-streaks .streak-row:hover,
-#card-naechste .entry-item:hover {
-  transform: translateY(-1px);
-  background: var(--flaeche);
-  box-shadow: var(--heb-2), var(--lichtkante);
-}
-#card-naechste .entry-item:hover { transform: translateY(-1px); }
-
-/* ----------------------------------------------------------
-   DAS SYMBOLFELD
-
-   In Bild 1 traegt nur das Symbolfeld Farbe, nie die ganze
-   Kapsel. So bleibt Rot ein Signal statt Dekoration.
-   ---------------------------------------------------------- */
-.entry-accent,
-.sr-flamme,
-.hb-marke {
-  border-radius: 13px;
-}
-#card-naechste .entry-accent {
-  width: 38px;
-  height: 38px;
-  flex-shrink: 0;
-  border-radius: 13px;
-  display: grid;
-  place-items: center;
-}
-
-/* ----------------------------------------------------------
-   RUHIGERE INNENRAEUME
-
-   Die Insel ist enger als die alte Karte. Was darin stand, muss
-   entsprechend zusammenruecken, sonst platzt sie.
-   ---------------------------------------------------------- */
-#card-kalorien .card-head,
-#card-wetter .card-head,
-#card-screentime .card-head,
-#card-vorschlag .card-head { margin-bottom: 10px; }
-
-#card-kalorien .card-title,
-#card-wetter .card-title,
-#card-screentime .card-title,
-#card-vorschlag .card-title {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text-2);
-  letter-spacing: 0;
-  text-transform: none;
-}
-
-/* Auf dem Dashboard sind die Karten jetzt Inseln — der Schnellzugriff
-   war noch nie eine Karte und bleibt es auch nicht. */
-#card-quick, #card-quick:hover {
-  background: none;
-  box-shadow: none;
-  border: none;
-  padding: 0;
-}
-
-/* Der Leerzustand einer Gruppe ohne Karte hatte keinen Kasten mehr,
-   an dem er sich ausrichten konnte — er klebte in der Ecke und brach
-   mitten im Satz um. Er bekommt jetzt eine eigene, ruhige Insel. */
-#card-naechste .naechste-empty,
-#card-habits .hb-leer,
-#card-streaks .streak-leer {
-  position: static;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 64px;
-  padding: 14px 18px;
-  border-radius: 22px;
-  background: var(--flaeche);
-  box-shadow: var(--heb-1), var(--lichtkante);
-  color: var(--text-3);
-  font-size: 13px;
-  text-align: center;
-  white-space: normal;
-}
-
-/* Ohne Karte darf die Liste den Platz der Gruppe fuellen, statt sich
-   in der Mitte zu sammeln. */
-#card-naechste .naechste,
-#card-naechste .entry-list,
-#card-habits .habit-list,
-#card-streaks .streak-list {
-  justify-content: flex-start;
-  align-content: flex-start;
-}
-
-/* Die Insel ist enger als die Karte: der Inhalt einer Zeile darf
-   nicht mehr an den alten Kartenrand rechnen. */
-#card-habits .hb-zeile { gap: 11px; }
-#card-streaks .streak-row { gap: 11px; padding: 12px 15px; }
+/* Balken: eine Mulde, darin volle Farbe */
+.balken, .hb-spur { border-radius: var(--r-pill); }
+.hb-tick { border-radius: var(--r-pill); background: var(--senke-1); }
 
 
 /* ==========================================================
-   PHASE 8 — DIE BAUSTEINE AUS DER DEMO, JETZT ECHT
+   DIE INSEL — der Baustein der Widgets
 
-   Die Durchgaenge davor haben die alten Bausteine mit CSS
-   ueberschrieben. Das konnte nie ganz passen, weil das Geruest
-   darunter ein anderes war: eine Habit-Zeile war ein Knopf mit
-   Spur und Wochenstand, keine Kapsel mit Malzeichen, Sache und
-   Wert.
-
-   Jetzt liefert script.js den Aufbau aus der Demo, und hier steht
-   die Gestaltung dazu — dieselben Werte wie auf der Musterseite.
-   ========================================================== */
-/* ==========================================================
-   DIE INSEL — der einzige Baustein
-
-   Bild 1 zeigt keine Karten mit Ueberschrift. Es zeigt Kapseln:
-   jede eine abgeschlossene Aussage aus Symbol, Sache und Wert.
-   Was nichts sagt, steht nicht drin — kein Rahmen, keine
-   Bereichsueberschrift, kein Fuellwerk.
-
-   Runde: aussen 26 Pixel, innen 14. Genau dieser Abstand liegt in
-   Bild 1 zwischen Kapsel und Symbolfeld, und er sorgt dafuer, dass
-   die Ecken parallel laufen statt sich zu schneiden.
+   Eine Kapsel, die genau eine Aussage traegt: Malzeichen, Sache,
+   Wert. Werte wie auf der Musterseite.
    ========================================================== */
 .insel {
   display: flex;
   align-items: center;
-  gap: 13px;
-  padding: 13px 18px 13px 13px;
-  border-radius: 26px;
-  background: var(--flaeche);
-  box-shadow: var(--heb-2), var(--lichtkante);
-  min-width: 0;
-  transition: transform var(--w-normal) var(--kurve), box-shadow var(--w-normal) var(--kurve-weich);
+  gap: 12px;
+  width: 100%;
+  min-height: 60px;
+  padding: 11px 16px 11px 11px;
+  border-radius: 22px;
+  border: none;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-2);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform var(--t-base) var(--ease),
+              box-shadow var(--t-base) var(--ease-soft);
 }
-a.insel, button.insel { border: 0; font: inherit; color: inherit; text-align: left; cursor: pointer; width: 100%; }
-.insel:hover { transform: translateY(-1px); box-shadow: var(--heb-3), var(--lichtkante); }
-.insel:active { transform: scale(.985); transition-duration: var(--w-schnell); }
+.insel:hover  { transform: translateY(-1px); box-shadow: var(--shadow-3); }
+.insel:active { transform: scale(.985); transition-duration: var(--t-fast); }
 
-/* Das Symbolfeld traegt die Farbe der Insel — als einzige Flaeche.
-   So bleibt Farbe Bedeutung und ueberzieht nicht die ganze Kapsel. */
+/* Das Malzeichen traegt als einzige Flaeche Farbe */
 .i-mal {
-  width: 42px; height: 42px; flex-shrink: 0;
-  border-radius: 14px;
+  width: 36px; height: 36px;
+  flex-shrink: 0;
+  border-radius: var(--r-icon);
   display: grid; place-items: center;
-  background: var(--flaeche-3);
-  color: var(--text-2);
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+  font-size: 15px; font-weight: 700; letter-spacing: -.02em;
 }
-.i-mal svg { width: 21px; height: 21px; }
-.i-mal.gruen { background: var(--gruen-fond); color: var(--gruen); }
-.i-mal.rot   { background: var(--rot-fond);   color: var(--rot); }
-.i-mal.gelb  { background: var(--gelb-fond);  color: var(--gelb-schrift); }
-.i-mal.blau  { background: var(--blau-fond);  color: var(--blau); }
-.i-mal.fest  { background: var(--fest);       color: var(--fest-text); }
+.i-mal svg { width: 19px; height: 19px; }
+.i-mal.gruen { background: var(--tint-green);  color: var(--green-ink); }
+.i-mal.rot   { background: var(--tint-red);    color: var(--red-ink); }
+.i-mal.gelb  { background: var(--tint-orange); color: var(--orange-ink); }
+.i-mal.blau  { background: var(--tint-blue);   color: var(--blue-ink); }
 
-.i-text { min-width: 0; flex: 1; }
-.i-sache { font-size: 12px; font-weight: 500; color: var(--text-2); letter-spacing: .005em;
+.i-text  { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 1px; }
+.i-sache { display: block; font-size: 11.5px; font-weight: 500; color: var(--text-muted);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.i-wert { font-size: 19px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15;
-  font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.i-wert small { font-size: 12.5px; font-weight: 500; color: var(--text-3); letter-spacing: 0; }
+.i-wert  { display: block; font-size: 16px; font-weight: 700; letter-spacing: -.025em;
+  line-height: 1.15; font-variant-numeric: tabular-nums;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.i-wert small { font-size: 12px; font-weight: 500; color: var(--text-muted); letter-spacing: 0; }
 .i-rechts { margin-left: auto; flex-shrink: 0; display: flex; align-items: center; gap: 9px; }
 
-/* Grosse Insel: dieselbe Kapsel, nur mit der Zahl als Hauptsache */
-.insel.gross { flex-direction: column; align-items: stretch; gap: 11px; padding: 17px 18px 18px; }
-.insel.gross .i-zeile { display: flex; align-items: center; gap: 11px; }
-.insel.gross .i-zahl { font-size: 34px; font-weight: 700; letter-spacing: -0.035em; line-height: 1;
-  font-variant-numeric: tabular-nums; }
-.insel.gross .i-zahl small { font-size: 15px; font-weight: 500; color: var(--text-3); letter-spacing: -0.01em; }
-.insel.gross .i-unter { font-size: 12.5px; color: var(--text-2); }
-
-/* Marke: ein Wert, der fuer sich steht */
-.marke { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: var(--r-pill);
-  font-size: 11.5px; font-weight: 600; background: var(--flaeche-3); color: var(--text-2); }
-.marke.gruen { background: var(--gruen-fond); color: var(--gruen); }
-.marke.rot   { background: var(--rot-fond);   color: var(--rot); }
-.marke.gelb  { background: var(--gelb-fond);  color: var(--gelb-schrift); }
-.marke.blau  { background: var(--blau-fond);  color: var(--blau); }
-.punkt { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-
-/* Balken: eine Mulde, darin volle Farbe */
-.balken { height: 7px; border-radius: var(--r-pill); background: var(--senke-1); overflow: hidden; }
-.balken i { display: block; height: 100%; border-radius: var(--r-pill); }
-
-/* Perlen: der Verlauf einer Woche in wenigen Zeichen */
-.perlen { display: flex; gap: 4px; }
-.perle { width: 8px; height: 8px; border-radius: 50%; background: var(--senke-1); }
-.perle.voll { background: var(--gruen-voll); }
-
-.ring { width: 64px; height: 64px; flex-shrink: 0; }
-.ring circle { fill: none; stroke-linecap: round; }
-.ring .bahn { stroke: var(--senke-1); }
-
-
-/* Die Perlen: eine Woche in sieben Zeichen. Heute traegt einen Ring,
-   damit man den aktuellen Tag findet, ohne zu zaehlen. */
-.perlen { display: flex; gap: 4px; align-items: center; }
-.perle { width: 8px; height: 8px; border-radius: 50%; background: var(--senke-1); flex-shrink: 0; }
-.perle.voll { background: var(--gruen-voll); }
+/* Perlen: eine Woche in sieben Zeichen */
+.perlen { display: flex; gap: 3px; align-items: center; }
+.perle  { width: 8px; height: 8px; border-radius: 50%;
+  background: var(--senke-1); flex-shrink: 0; }
+.perle.voll  { background: var(--status-green); }
 .perle.heute { box-shadow: 0 0 0 2px var(--kontur-2); }
-.perle.voll.heute { box-shadow: 0 0 0 2px color-mix(in srgb, var(--gruen-voll) 45%, transparent); }
+.perle.voll.heute { box-shadow: 0 0 0 2px color-mix(in srgb, var(--status-green) 45%, transparent); }
 
-/* Das Malzeichen mit einem Buchstaben statt einem Symbol */
-.i-mal { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; }
-.i-mal svg { width: 20px; height: 20px; }
-
-/* Der Abhak-Knopf sitzt jetzt rechts in der Kapsel */
-.insel .hb-knopf {
-  --knopf: 28px;
-  width: 28px; height: 28px;
+/* Der Abhak-Knopf */
+.hb-knopf {
+  width: 28px; height: 28px; flex-shrink: 0;
   border-radius: 50%;
-  box-shadow: inset 0 0 0 2px var(--kontur-2);
-  background: transparent;
-  color: #fff;
   display: grid; place-items: center;
-  flex-shrink: 0;
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--kontur-2);
+  color: #fff;
+  transition: background var(--t-base) var(--ease-soft),
+              box-shadow var(--t-base) var(--ease-soft);
 }
-.insel .hb-knopf svg { width: 62%; height: 62%; opacity: 0; transform: scale(.4);
+.hb-knopf svg { width: 60%; height: 60%; opacity: 0; transform: scale(.4);
   transition: opacity .16s ease, transform .24s cubic-bezier(.34,1.6,.64,1); }
-.insel.erledigt .hb-knopf { background: var(--gruen-voll); box-shadow: inset 0 0 0 2px var(--gruen-voll); }
-.insel.erledigt .hb-knopf svg { opacity: 1; transform: none; }
+.erledigt .hb-knopf {
+  background: var(--status-green);
+  box-shadow: inset 0 0 0 2px var(--status-green);
+}
+.erledigt .hb-knopf svg { opacity: 1; transform: none; }
 
-/* Die Streak-Flamme sitzt im Malzeichen */
-.i-mal.sr-flamme svg { width: 20px; height: 20px; }
+/* Kleine Rueckmeldung: einmal eindruecken, kein Leuchten, kein Ring */
+.hb-knopf.hb-pop { animation: hb-quittung .32s cubic-bezier(.34,1.56,.64,1); }
+.hb-knopf.hb-pop::after { content: none; }
+@keyframes hb-quittung {
+  0%   { transform: scale(1); }
+  38%  { transform: scale(.86); }
+  100% { transform: scale(1); }
+}
 
-/* Der Weiter-Pfeil am Ende einer Termin-Insel */
+/* Der Weiter-Pfeil in einer Termin-Insel */
 .entry-go {
   width: 28px; height: 28px; flex-shrink: 0;
   border: none; background: none; border-radius: 50%;
-  color: var(--text-3);
+  color: var(--text-muted);
   display: grid; place-items: center; cursor: pointer;
-  transition: background var(--w-normal) var(--kurve-weich), color var(--w-normal) var(--kurve-weich);
+  transition: background var(--t-base) var(--ease-soft),
+              color var(--t-base) var(--ease-soft);
 }
-.entry-go:hover { background: var(--flaeche-3); color: var(--text); }
+.entry-go:hover { background: var(--surface-sunken); color: var(--text-primary); }
 .entry-go svg { width: 16px; height: 16px; }
 
-/* ==========================================================
-   DER STRAHL — Bild 2
-
-   Er laeuft hinter den Termin-Inseln entlang. Kraeftig oben, wo
-   das Naechste steht, und nach unten verlaufend: was weiter weg
-   liegt, draengt weniger.
-
-   Der Punkt sitzt in der Polsterung links, nicht in der Kapsel —
-   sonst muesste jede Kapsel Platz dafuer freihalten.
-   ========================================================== */
-#card-naechste .entry-list {
-  position: relative;
-  padding-left: 26px;
-}
+/* Der Zeitstrahl: Punkt in der Polsterung links, nicht in der Kapsel */
+#card-naechste .entry-list { position: relative; padding-left: 26px; }
 #card-naechste .entry-list::before {
   content: "";
-  position: absolute;
-  left: 5px; top: 16px; bottom: 16px;
+  position: absolute; left: 5px; top: 16px; bottom: 16px;
   width: 2px; border-radius: 2px;
   background: linear-gradient(180deg,
-    var(--blau-voll) 0%,
-    color-mix(in srgb, var(--blau-voll) 45%, transparent) 32%,
-    var(--kontur) 78%);
+    var(--accent-active) 0%,
+    color-mix(in srgb, var(--accent-active) 40%, transparent) 34%,
+    var(--surface-sunken) 80%);
 }
 #card-naechste .entry-item { position: relative; }
 #card-naechste .entry-item::before {
   content: "";
-  position: absolute;
-  left: -21px; top: 50%;
+  position: absolute; left: -21px; top: 50%;
   transform: translateY(-50%);
-  width: 12px; height: 12px;
-  border-radius: 50%;
-  background: var(--grund);
-  box-shadow: inset 0 0 0 2px var(--kontur-2);
-  transition: box-shadow var(--w-gleit) var(--kurve-weich);
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--bg-page);
+  box-shadow: inset 0 0 0 2px var(--surface-sunken);
 }
-/* Heute: der gefuellte Ring aus Bild 2 */
 #card-naechste .entry-item.today::before {
-  box-shadow: inset 0 0 0 4px var(--rot-voll), 0 0 0 5px var(--rot-fond);
+  box-shadow: inset 0 0 0 4px var(--status-red), 0 0 0 5px var(--tint-red);
 }
 #card-naechste .entry-item.soon::before {
-  box-shadow: inset 0 0 0 3px var(--gelb);
+  box-shadow: inset 0 0 0 3px var(--status-orange);
 }
 
-/* Sache und Wert stehen uebereinander, nicht nebeneinander. Ich hatte
-   im Markup <span> verwendet — die sind von Haus aus inline und
-   reihen sich deshalb auf einer Zeile auf. */
-.i-text {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 1px;
-}
-.i-sache, .i-wert { display: block; }
-
-/* In schmalen Widgets ist der Wert wichtiger als die Marke daneben.
-   Sie darf schrumpfen, der Wert nicht. */
-.insel .i-rechts { min-width: 0; }
-.insel .marke { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-/* Die Kapsel wird enger, wenn wenig Platz ist — lieber schmaler als
-   uebereinandergeschoben. */
-.insel { padding: 11px 14px 11px 11px; gap: 11px; }
-.i-mal { width: 38px; height: 38px; border-radius: 13px; }
-.i-wert { font-size: 16px; }
-.i-sache { font-size: 11.5px; }
-
-/* Sehr schmale Spalten: die Marke tritt zurueck, die Perlen bleiben */
-@container (max-width: 260px) {
-  .insel .marke { display: none; }
-}
-
-/* Streaks sind meist die schmalste Spalte. Dort traegt die Zahl die
-   Aussage und steht deshalb im Wert, nicht in einer Marke daneben. */
-#card-streaks .insel .marke { font-size: 11px; padding: 3px 8px; }
-
-/* ==========================================================
-   PHASE 9 — DIE VIER VERBLIEBENEN WIDGETS
-
-   Habits, Streaks und Termine waren schon Inseln. Kalorien,
-   Wetter, Bildschirmzeit und Tipp hatte ich nur umgefaerbt —
-   ihnen fehlte der Aufbau aus der Demo. Genau die vier sahen
-   deshalb weiter aus wie vorher, nur heller.
-
-   Sie bekommen jetzt dasselbe wie die anderen: das Malzeichen
-   oben links, den Titel als leise Zeile daneben, die Zahl gross.
-   ========================================================== */
-
-#card-kalorien .card-head,
-#card-wetter .card-head,
-#card-screentime .card-head {
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-/* Der Titel steht neben dem Malzeichen und traegt nicht mehr die
-   Karte — das tut jetzt die Zahl darunter. */
-#card-kalorien .card-title,
-#card-wetter .card-title,
-#card-screentime .card-title {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text-2);
-  margin-right: auto;
-}
-
-/* Das Abzeichen wird zur Marke wie in den anderen Inseln */
-#card-kalorien .card-badge,
-#card-wetter .card-badge,
-#card-screentime .card-badge {
-  margin-left: 0;
-  padding: 4px 10px;
-  border: none;
-  border-radius: var(--r-pill);
-  background: var(--flaeche-3);
-  color: var(--text-2);
-  font-family: var(--sans);
-  font-size: 11.5px;
-  font-weight: 600;
-  letter-spacing: 0;
-  text-transform: none;
-}
-
-/* Die Zahl ist die Hauptsache — dieselben Werte wie in der Demo */
-#card-kalorien .cal-value,
-#card-wetter .weather-temp {
-  font-size: clamp(28px, 22cqw, 40px);
-  font-weight: 700;
-  letter-spacing: -0.035em;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-#card-kalorien .cal-sub,
-#card-wetter .weather-desc {
-  font-size: 12.5px;
-  color: var(--text-2);
-}
-
-/* In schmalen Widgets nimmt das Malzeichen sonst zu viel Platz */
-@media (max-width: 900px) {
-  #card-kalorien .i-mal,
-  #card-wetter .i-mal,
-  #card-screentime .i-mal { width: 32px; height: 32px; border-radius: 11px; }
-  #card-kalorien .i-mal svg,
-  #card-wetter .i-mal svg,
-  #card-screentime .i-mal svg { width: 17px; height: 17px; }
-}
-
-/* ----------------------------------------------------------
-   DER TIPP
-
-   Er war ein Absatz mit Symbol darueber und Fusszeile darunter.
-   Als Insel ist er eine Zeile: Malzeichen, Zusammenhang, Sache,
-   und rechts der Pfeil, der sagt wohin es geht.
-   ---------------------------------------------------------- */
-#card-vorschlag .tab-panel[data-panel="vorschlag"] {
-  flex-direction: row;
-  align-items: center;
-  gap: 12px;
-}
-#card-vorschlag .vorschlag-icon {
-  width: 38px; height: 38px;
-  margin: 0;
-  border: none;
-  border-radius: 13px;
-  background: var(--gelb-fond);
-  color: var(--gelb-schrift);
-  flex-shrink: 0;
-}
-#card-vorschlag .vorschlag-mitte { min-width: 0; flex: 1; }
-#card-vorschlag .vorschlag-text {
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: -0.025em;
-  line-height: 1.2;
-  -webkit-line-clamp: 2;
-  order: 2;
-}
-#card-vorschlag .vorschlag-sub {
-  margin: 0 0 2px;
-  font-size: 11.5px;
-  font-weight: 500;
-  color: var(--text-2);
-  -webkit-line-clamp: 1;
-  order: 1;
-}
-
-/* In der Demo hatten die Inseln volle Breite. Im Raster teilen sich
-   drei bis vier eine Reihe, und dann reicht der Platz nicht fuer
-   Malzeichen, Titel und Abzeichen nebeneinander.
-
-   Es weicht das Abzeichen, nicht der Titel: "Heute" oder "Berlin"
-   sagt weniger als "Kalorien" oder "Wetter". Das Malzeichen bleibt,
-   es ist das, woran man die Insel von weitem erkennt. */
-@container (max-width: 300px) {
-  #card-kalorien .card-badge,
-  #card-wetter .card-badge,
-  #card-screentime .card-badge { display: none; }
-}
-@container (max-width: 210px) {
-  #card-kalorien .card-title,
-  #card-wetter .card-title,
-  #card-screentime .card-title { display: none; }
-}
-
-/* Der Titel darf schrumpfen und abschneiden, statt das Malzeichen
-   zusammenzuquetschen. */
-#card-kalorien .card-title,
-#card-wetter .card-title,
-#card-screentime .card-title {
-  min-width: 0;
-  flex: 1 1 auto;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-#card-kalorien .i-mal,
-#card-wetter .i-mal,
-#card-screentime .i-mal { flex-shrink: 0; }
-
-/* Die Container-Abfrage darueber greift nicht zuverlaessig — der
-   Bezugsrahmen liegt nicht auf der Karte. Statt sie zu erzwingen,
-   entscheide ich die Sache inhaltlich:
-
-   "Heute" auf einem Widget, das ohnehin nur heute zeigt, sagt
-   nichts. Es kostete aber genau die Breite, die dem Titel fehlte —
-   deshalb stand da "W" statt "Wetter". Weg damit.
-
-   Der Ort beim Wetter wandert nicht mit: er steht in der Insel
-   selbst schon bei den Werten. */
-#card-kalorien .card-badge,
-#card-screentime .card-badge,
-#card-wetter .card-badge { display: none; }
-
-#card-kalorien .card-title,
-#card-wetter .card-title,
-#card-screentime .card-title {
-  font-size: 12px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Der Tipp: ich hatte die Zeile auf ein Element "vorschlag-mitte"
-   gestellt, das es im Markup gar nicht gibt — Symbol, Text, Unterzeile
-   und Fusszeile sind Geschwister. Mit flex-direction: row reihten sie
-   sich dadurch alle vier nebeneinander auf und zerfielen.
-
-   Ein Raster ordnet sie richtig, ohne das Markup anzufassen:
-   Malzeichen links ueber beide Textzeilen, Fusszeile darunter. */
-#card-vorschlag .tab-panel[data-panel="vorschlag"] {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  grid-template-areas:
-    "mal  sub"
-    "mal  text"
-    "foot foot";
-  align-content: center;
-  align-items: center;
-  gap: 1px 12px;
-  flex-direction: initial;
-}
-#card-vorschlag .vorschlag-icon { grid-area: mal; align-self: center; }
-#card-vorschlag .vorschlag-sub  { grid-area: sub;  margin: 0; }
-#card-vorschlag .vorschlag-text { grid-area: text; }
-#card-vorschlag .vorschlag-foot { grid-area: foot; margin-top: 10px; }
-
-/* ==========================================================
-   PHASE 10 — KEINE KAESTEN, KEINE UEBERSCHRIFTEN
-
-   Bisher hielt ich an einem Rest der alten Ordnung fest: Kalorien,
-   Wetter und Bildschirmzeit waren zwar Kapseln, aber sie waren
-   Kapseln MIT Ueberschrift — und Habits, Streaks und Termine hatten
-   ueber ihrem Stapel noch eine Gruppenzeile stehen.
-
-   Beides faellt weg. Kein Widget hat mehr einen Rahmen um sich, und
-   keins traegt mehr einen Titel. Was uebrig bleibt, sind Inseln, die
-   frei auf dem Grund liegen.
-
-   Damit trage ich auch meine eigene Begruendung von vorhin zu Grabe:
-   ich hatte die Gruppenzeile behalten mit dem Argument, das hier sei
-   eine Uebersichtsseite und man muesse die Gruppen sonst jedes Mal
-   neu erschliessen. Das stimmt nicht — "Sport" mit einem Haken und
-   sieben Perlen erklaert sich, und "18°" mit einer Regenwolke auch.
-   ========================================================== */
-
-/* ----------------------------------------------------------
-   1. Kein Widget ist mehr ein Kasten
-   ---------------------------------------------------------- */
-#seite-dashboard .card,
-#seite-dashboard .card:hover {
-  background: none;
-  box-shadow: none;
-  border: none;
-  padding: 0;
-  overflow: visible;
-  transform: none;
-}
-
-/* ----------------------------------------------------------
-   2. Keine Ueberschriften
-
-   Die Reiterleiste des Mehrfach-Widgets bleibt — sie ist keine
-   Ueberschrift, sondern die Bedienung. Ohne sie kaeme man an
-   Termine, Schule und Tipp nicht mehr heran.
-   ---------------------------------------------------------- */
-#seite-dashboard .card-title,
-#seite-dashboard .card-badge,
-#seite-dashboard .card-head .i-mal { display: none; }
-
-#seite-dashboard .card-head { margin: 0 0 8px; padding: 0; gap: 6px; }
-#seite-dashboard .card-head:empty { display: none; }
-
-/* Kartenkoepfe, in denen nur noch Bedienelemente stehen, ruecken
-   nach rechts — links stand vorher der Titel. */
-#card-wetter .card-head,
-#card-screentime .card-head { justify-content: flex-end; }
-
-/* ----------------------------------------------------------
-   3. Der Inhalt wird selbst zur Insel
-
-   Solange das Widget ein Kasten war, trug der Kasten die Kapselform.
-   Jetzt muss der Inhalt sie selbst tragen.
-   ---------------------------------------------------------- */
-#card-kalorien .cal-body,
-#card-wetter .weather,
-#card-screentime .st-chart,
-#card-vorschlag .tab-panel[data-panel="vorschlag"] {
-  border-radius: 26px;
-  background: var(--flaeche);
-  box-shadow: var(--heb-2), var(--lichtkante);
-  padding: 16px 18px;
-  transition: transform var(--w-normal) var(--kurve),
-              box-shadow var(--w-normal) var(--kurve-weich);
-}
-#card-kalorien:hover .cal-body,
-#card-wetter:hover .weather,
-#card-screentime:hover .st-chart {
-  transform: translateY(-1px);
-  box-shadow: var(--heb-3), var(--lichtkante);
-}
-
-/* Die Listen-Widgets brauchen das nicht — ihre Zeilen sind schon
-   einzelne Inseln. */
-#card-habits .habit-list,
-#card-streaks .streak-list,
-#card-naechste .entry-list {
-  background: none;
-  box-shadow: none;
-  padding: 0;
-}
-#card-naechste .entry-list { padding-left: 26px; }
-
-/* Das Diagramm der Bildschirmzeit steht jetzt in einer Kapsel und
-   braucht innen Luft, damit die Kurve nicht am Rand klebt. */
-#card-screentime .st-chart { padding: 14px 16px 8px; }
-
-/* Nachtrag: das Malzeichen bleibt.
-
-   Ich hatte es mit versteckt, weil es in der Kopfzeile stand — aber
-   ein Symbol ist keine Ueberschrift. In Bild 1 traegt jede Kapsel
-   eins, und ohne es sind Kalorien, Wetter und Bildschirmzeit drei
-   namenlose weisse Flaechen.
-
-   Und die Kapsel ist bei diesen dreien keine zusaetzliche Box um das
-   Widget, sondern das Widget selbst. Deshalb traegt die Karte die
-   Kapselform wieder und nicht ihr Inhalt — sonst saessen Symbol und
-   Zahl in zwei getrennten Flaechen uebereinander. */
-#seite-dashboard #card-kalorien .card-head .i-mal,
-#seite-dashboard #card-wetter .card-head .i-mal,
-#seite-dashboard #card-screentime .card-head .i-mal { display: grid; }
-
-#seite-dashboard #card-kalorien,
-#seite-dashboard #card-wetter,
-#seite-dashboard #card-screentime,
-#seite-dashboard #card-vorschlag {
-  border-radius: 26px;
-  padding: 14px 16px 16px;
-  background: var(--flaeche);
-  box-shadow: var(--heb-2), var(--lichtkante);
-  overflow: hidden;
-}
-#seite-dashboard #card-kalorien:hover,
-#seite-dashboard #card-wetter:hover,
-#seite-dashboard #card-screentime:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--heb-3), var(--lichtkante);
-}
-
-/* Der Inhalt traegt sie dann nicht noch einmal */
-#card-kalorien .cal-body,
-#card-wetter .weather,
-#card-screentime .st-chart,
-#card-vorschlag .tab-panel[data-panel="vorschlag"] {
-  background: none;
-  box-shadow: none;
-  padding: 0;
-}
-#card-screentime .st-chart { padding: 4px 0 0; }
-
-/* Die Kopfzeile ist jetzt nur noch Symbol und Bedienung */
-#seite-dashboard #card-kalorien .card-head,
-#seite-dashboard #card-wetter .card-head,
-#seite-dashboard #card-screentime .card-head {
-  justify-content: flex-start;
-  margin-bottom: 10px;
-}
-#seite-dashboard #card-wetter .card-head > *:not(.i-mal),
-#seite-dashboard #card-screentime .card-head > *:not(.i-mal) { margin-left: auto; }
 
 /* ==========================================================
    SCHRITT 1 — NUR DIE ANORDNUNG
@@ -12034,3 +10776,12 @@ a.insel, button.insel { border: 0; font: inherit; color: inherit; text-align: le
    dem Raster, spaeter kommende Kacheln in fruehere Luecken zu
    setzen. */
 #seite-dashboard .widget-grid { grid-auto-flow: row dense; }
+
+/* Die Originalregel heisst ".hb-zeile.erledigt .hb-knopf" und wiegt
+   damit schwerer als mein ".erledigt .hb-knopf". Gleiche Staerke
+   statt !important. Gruen, weil Erledigtes in dieser App gruen ist. */
+.hb-zeile.erledigt .hb-knopf,
+.insel.erledigt .hb-knopf {
+  background: var(--status-green);
+  box-shadow: inset 0 0 0 2px var(--status-green);
+}
