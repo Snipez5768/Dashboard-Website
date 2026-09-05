@@ -1327,7 +1327,10 @@
   }
 
   /* Wie viele Einträge sollen höchstens erscheinen */
-  const NAECHSTE_LIMIT = 5;
+  /* Vier Eintraege. Mehr passen nicht in die Kachel, ohne dass die
+     Zeilen so flach werden, dass man sie nicht mehr auseinanderhaelt.
+     Alles Weitere steht im Kalender. */
+  const NAECHSTE_LIMIT = 4;
 
   /* Termine und Klausuren in einer Liste, nach Datum sortiert.
      Vergangenes fällt raus, angezeigt wird nur, was noch kommt. */

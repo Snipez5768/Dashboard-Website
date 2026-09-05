@@ -11949,3 +11949,88 @@ a.insel, button.insel { border: 0; font: inherit; color: inherit; text-align: le
   #seite-dashboard #card-wetter,
   #seite-dashboard #card-kalorien   { grid-area: auto / span 1; }
 }
+
+/* ==========================================================
+   SCHRITT 4 — QUERFORMAT UND EIGENE SPALTEN
+
+   Die quadratischen Kacheln waren falsch: ein Habit ist ein Name
+   mit einem Verlauf daneben, das ist ein Querformat. Und sie sollen
+   untereinander stehen, nicht ueber die Flaeche verteilt.
+
+   Also bekommen Habits und Streaks je eine eigene Spalte, in der
+   sie sich stapeln. Eine feste Spaltenangabe ohne Reihenangabe
+   genuegt dafuer: das Raster setzt sie dann automatisch
+   untereinander.
+
+   Sechs Reihen statt vier — nur so ist Platz fuer sechs gestapelte
+   Habits, ohne dass die Kacheln quadratisch werden.
+   ========================================================== */
+
+#seite-dashboard .widget-grid {
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-rows: repeat(6, minmax(0, 1fr));
+}
+
+/* Habits stapeln sich in den Spalten 1–2, Streaks in 3–4.
+   Keine Reihenangabe: die vergibt das Raster von selbst. */
+#seite-dashboard .hb-zeile   { grid-column: 1 / 3; grid-row: auto; }
+#seite-dashboard .streak-row { grid-column: 3 / 5; grid-row: auto; }
+
+/* Rechts die vier grossen Kacheln */
+#seite-dashboard #card-screentime { grid-area: 1 / 5 / 3 / 9; }
+#seite-dashboard #card-naechste   { grid-area: 3 / 5 / 6 / 9; }
+#seite-dashboard #card-wetter     { grid-area: 6 / 5 / 7 / 7; }
+#seite-dashboard #card-kalorien   { grid-area: 6 / 7 / 7 / 9; }
+
+/* ---- Die Querformat-Kachel ----
+   Wieder eine Zeile statt hochkant: doppelt so breit wie hoch, da
+   ist fuer Malzeichen, Text und Haken nebeneinander Platz. */
+#seite-dashboard .hb-zeile,
+#seite-dashboard .streak-row {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 10px 14px 10px 10px;
+  border-radius: 20px;
+}
+#seite-dashboard .hb-zeile .i-mal,
+#seite-dashboard .streak-row .i-mal { width: 34px; height: 34px; border-radius: 12px; font-size: 15px; }
+#seite-dashboard .hb-zeile .i-text,
+#seite-dashboard .streak-row .i-text { width: auto; flex: 1; }
+#seite-dashboard .hb-zeile .i-wert,
+#seite-dashboard .streak-row .i-wert { font-size: 15px; }
+#seite-dashboard .hb-zeile .i-sache,
+#seite-dashboard .streak-row .i-sache { font-size: 10.5px; }
+#seite-dashboard .hb-zeile .i-rechts,
+#seite-dashboard .streak-row .i-rechts {
+  margin-left: auto;
+  width: auto;
+  justify-content: flex-end;
+  gap: 8px;
+}
+#seite-dashboard .hb-zeile .perle { width: 7px; height: 7px; }
+#seite-dashboard .hb-zeile .hb-knopf { width: 26px; height: 26px; }
+
+/* ---- Handy ---- */
+@media (max-width: 900px) {
+  #seite-dashboard .widget-grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    grid-auto-rows: minmax(64px, auto);
+  }
+  #seite-dashboard .hb-zeile,
+  #seite-dashboard .streak-row { grid-column: auto; }
+  #seite-dashboard #card-screentime,
+  #seite-dashboard #card-naechste,
+  #seite-dashboard #card-wetter,
+  #seite-dashboard #card-kalorien { grid-area: auto; }
+  #seite-dashboard #card-screentime { min-height: 190px; }
+}
+
+/* Das Raster setzt in DOM-Reihenfolge und springt nicht zurueck:
+   die Streaks stehen im HTML vor den Habits, belegten die Reihen 1
+   bis 5 und die Habits begannen erst in Reihe 3. "dense" erlaubt
+   dem Raster, spaeter kommende Kacheln in fruehere Luecken zu
+   setzen. */
+#seite-dashboard .widget-grid { grid-auto-flow: row dense; }
