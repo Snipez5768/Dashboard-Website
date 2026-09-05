@@ -11442,3 +11442,146 @@ a.insel, button.insel { border: 0; font: inherit; color: inherit; text-align: le
 #card-vorschlag .vorschlag-sub  { grid-area: sub;  margin: 0; }
 #card-vorschlag .vorschlag-text { grid-area: text; }
 #card-vorschlag .vorschlag-foot { grid-area: foot; margin-top: 10px; }
+
+/* ==========================================================
+   PHASE 10 — KEINE KAESTEN, KEINE UEBERSCHRIFTEN
+
+   Bisher hielt ich an einem Rest der alten Ordnung fest: Kalorien,
+   Wetter und Bildschirmzeit waren zwar Kapseln, aber sie waren
+   Kapseln MIT Ueberschrift — und Habits, Streaks und Termine hatten
+   ueber ihrem Stapel noch eine Gruppenzeile stehen.
+
+   Beides faellt weg. Kein Widget hat mehr einen Rahmen um sich, und
+   keins traegt mehr einen Titel. Was uebrig bleibt, sind Inseln, die
+   frei auf dem Grund liegen.
+
+   Damit trage ich auch meine eigene Begruendung von vorhin zu Grabe:
+   ich hatte die Gruppenzeile behalten mit dem Argument, das hier sei
+   eine Uebersichtsseite und man muesse die Gruppen sonst jedes Mal
+   neu erschliessen. Das stimmt nicht — "Sport" mit einem Haken und
+   sieben Perlen erklaert sich, und "18°" mit einer Regenwolke auch.
+   ========================================================== */
+
+/* ----------------------------------------------------------
+   1. Kein Widget ist mehr ein Kasten
+   ---------------------------------------------------------- */
+#seite-dashboard .card,
+#seite-dashboard .card:hover {
+  background: none;
+  box-shadow: none;
+  border: none;
+  padding: 0;
+  overflow: visible;
+  transform: none;
+}
+
+/* ----------------------------------------------------------
+   2. Keine Ueberschriften
+
+   Die Reiterleiste des Mehrfach-Widgets bleibt — sie ist keine
+   Ueberschrift, sondern die Bedienung. Ohne sie kaeme man an
+   Termine, Schule und Tipp nicht mehr heran.
+   ---------------------------------------------------------- */
+#seite-dashboard .card-title,
+#seite-dashboard .card-badge,
+#seite-dashboard .card-head .i-mal { display: none; }
+
+#seite-dashboard .card-head { margin: 0 0 8px; padding: 0; gap: 6px; }
+#seite-dashboard .card-head:empty { display: none; }
+
+/* Kartenkoepfe, in denen nur noch Bedienelemente stehen, ruecken
+   nach rechts — links stand vorher der Titel. */
+#card-wetter .card-head,
+#card-screentime .card-head { justify-content: flex-end; }
+
+/* ----------------------------------------------------------
+   3. Der Inhalt wird selbst zur Insel
+
+   Solange das Widget ein Kasten war, trug der Kasten die Kapselform.
+   Jetzt muss der Inhalt sie selbst tragen.
+   ---------------------------------------------------------- */
+#card-kalorien .cal-body,
+#card-wetter .weather,
+#card-screentime .st-chart,
+#card-vorschlag .tab-panel[data-panel="vorschlag"] {
+  border-radius: 26px;
+  background: var(--flaeche);
+  box-shadow: var(--heb-2), var(--lichtkante);
+  padding: 16px 18px;
+  transition: transform var(--w-normal) var(--kurve),
+              box-shadow var(--w-normal) var(--kurve-weich);
+}
+#card-kalorien:hover .cal-body,
+#card-wetter:hover .weather,
+#card-screentime:hover .st-chart {
+  transform: translateY(-1px);
+  box-shadow: var(--heb-3), var(--lichtkante);
+}
+
+/* Die Listen-Widgets brauchen das nicht — ihre Zeilen sind schon
+   einzelne Inseln. */
+#card-habits .habit-list,
+#card-streaks .streak-list,
+#card-naechste .entry-list {
+  background: none;
+  box-shadow: none;
+  padding: 0;
+}
+#card-naechste .entry-list { padding-left: 26px; }
+
+/* Das Diagramm der Bildschirmzeit steht jetzt in einer Kapsel und
+   braucht innen Luft, damit die Kurve nicht am Rand klebt. */
+#card-screentime .st-chart { padding: 14px 16px 8px; }
+
+/* Nachtrag: das Malzeichen bleibt.
+
+   Ich hatte es mit versteckt, weil es in der Kopfzeile stand — aber
+   ein Symbol ist keine Ueberschrift. In Bild 1 traegt jede Kapsel
+   eins, und ohne es sind Kalorien, Wetter und Bildschirmzeit drei
+   namenlose weisse Flaechen.
+
+   Und die Kapsel ist bei diesen dreien keine zusaetzliche Box um das
+   Widget, sondern das Widget selbst. Deshalb traegt die Karte die
+   Kapselform wieder und nicht ihr Inhalt — sonst saessen Symbol und
+   Zahl in zwei getrennten Flaechen uebereinander. */
+#seite-dashboard #card-kalorien .card-head .i-mal,
+#seite-dashboard #card-wetter .card-head .i-mal,
+#seite-dashboard #card-screentime .card-head .i-mal { display: grid; }
+
+#seite-dashboard #card-kalorien,
+#seite-dashboard #card-wetter,
+#seite-dashboard #card-screentime,
+#seite-dashboard #card-vorschlag {
+  border-radius: 26px;
+  padding: 14px 16px 16px;
+  background: var(--flaeche);
+  box-shadow: var(--heb-2), var(--lichtkante);
+  overflow: hidden;
+}
+#seite-dashboard #card-kalorien:hover,
+#seite-dashboard #card-wetter:hover,
+#seite-dashboard #card-screentime:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--heb-3), var(--lichtkante);
+}
+
+/* Der Inhalt traegt sie dann nicht noch einmal */
+#card-kalorien .cal-body,
+#card-wetter .weather,
+#card-screentime .st-chart,
+#card-vorschlag .tab-panel[data-panel="vorschlag"] {
+  background: none;
+  box-shadow: none;
+  padding: 0;
+}
+#card-screentime .st-chart { padding: 4px 0 0; }
+
+/* Die Kopfzeile ist jetzt nur noch Symbol und Bedienung */
+#seite-dashboard #card-kalorien .card-head,
+#seite-dashboard #card-wetter .card-head,
+#seite-dashboard #card-screentime .card-head {
+  justify-content: flex-start;
+  margin-bottom: 10px;
+}
+#seite-dashboard #card-wetter .card-head > *:not(.i-mal),
+#seite-dashboard #card-screentime .card-head > *:not(.i-mal) { margin-left: auto; }
