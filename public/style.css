@@ -10557,3 +10557,206 @@ input:focus, textarea:focus, select:focus {
   text-overflow: ellipsis;
 }
 .card-head .tab-indicator { top: 3px; height: calc(100% - 6px); }
+
+/* ==========================================================
+   PHASE 5 — DIE WIDGETS SELBST
+
+   Bisher habe ich den Widgets neue Farben und neue Raender gegeben.
+   Das ist etwas anderes, als sie so zu bauen, wie sie auf der
+   Musterseite standen. Dort war der Unterschied nicht die Farbe,
+   sondern die Haltung: der Inhalt traegt die Karte, nicht die
+   Verzierung.
+
+   Konkret heisst das
+     grosse Zahlen, die man von weitem liest, mit Tabellenziffern
+       damit sie beim Hochzaehlen nicht wackeln
+     ruhige Nebenzeilen statt gleichlauter Beschriftungen
+     Balken als klare Form: eine Mulde, darin eine volle Farbe
+     Zeilen mit genug Luft, dass man sie einzeln erfasst
+     nichts, was atmet, pulsiert oder wandert, ohne etwas zu sagen
+   ========================================================== */
+
+/* ----------------------------------------------------------
+   ZAHLEN
+   Sie sind die Hauptsache. Tabellenziffern sind hier keine
+   Feinheit: ohne sie springt die Breite jeder Ziffer, und eine
+   hochzaehlende Zahl zappelt.
+   ---------------------------------------------------------- */
+.cal-value,
+.weather-temp,
+.hero-name,
+.wi-zaehler {
+  font-family: var(--sans);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+.cal-value { animation: none; }
+
+/* Nebenzeilen treten zurueck, statt mitzureden */
+.cal-sub,
+.weather-desc,
+.block-unter {
+  font-family: var(--sans);
+  color: var(--text-2);
+  font-size: 13px;
+}
+.cal-slash { opacity: .5; }
+
+/* ----------------------------------------------------------
+   BALKEN UND SPUREN
+   Eine Mulde, darin eine volle Farbe. Runde Enden, damit nichts
+   abgehackt wirkt.
+   ---------------------------------------------------------- */
+.hb-tick {
+  border-radius: var(--r-pill);
+  background: var(--senke-1);
+}
+.hb-spur { gap: 3px; }
+
+/* ----------------------------------------------------------
+   ZEILEN IN LISTEN
+   Die Termine trugen jede eine eigene Kontur — acht Kaesten
+   untereinander, jeder mit Rahmen. Jetzt tragen sie nur eine
+   ruhige Flaeche, und die Trennung entsteht aus dem Abstand.
+   ---------------------------------------------------------- */
+.entry-item {
+  border: none;
+  background: var(--flaeche-2);
+  border-radius: var(--r-el);
+  transition: background var(--w-normal) var(--kurve-weich),
+              transform var(--w-normal) var(--kurve),
+              box-shadow var(--w-normal) var(--kurve-weich);
+}
+.entry-item:hover {
+  background: var(--flaeche);
+  transform: translateX(2px);
+  box-shadow: var(--heb-1);
+}
+
+.streak-row,
+.hb-zeile {
+  border-radius: var(--r-el);
+  border-color: transparent;
+  transition: background var(--w-normal) var(--kurve-weich);
+}
+.streak-row:hover,
+.hb-zeile:hover { background: var(--auflage-2); }
+
+/* ----------------------------------------------------------
+   DER ABHAK-KNOPF
+
+   Er soll sagen "angekommen", mehr nicht. Vorher lief ein Ring
+   nach aussen davon und der Knopf leuchtete auf — das ist eine
+   Ansage fuer etwas, das man zwanzig Mal am Tag tut.
+
+   Jetzt: einmal kurz eindruecken und wieder aufgehen. Drei
+   Zehntelsekunden, kein Leuchten, kein Ring.
+   ---------------------------------------------------------- */
+.hb-knopf.hb-pop {
+  animation: hb-quittung 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes hb-quittung {
+  0%   { transform: scale(1); }
+  38%  { transform: scale(0.86); }
+  100% { transform: scale(1); }
+}
+.hb-knopf.hb-pop::after { content: none; }
+
+/* ----------------------------------------------------------
+   RUHE
+
+   Ein Dashboard, auf dem staendig etwas atmet, laesst sich nicht
+   ueberfliegen — das Auge folgt jeder Bewegung, auch der
+   bedeutungslosen. Bewegung bleibt dort, wo sie etwas meldet.
+   ---------------------------------------------------------- */
+.card-title,
+.card-badge,
+.hero-greet,
+.hero-name,
+.hero-chip,
+.search,
+.weather-icon,
+.weather-temp,
+.weather-desc,
+.cal-value,
+.sidebar,
+.sidebar-head,
+.sidebar-profile,
+.nav-group,
+.sidebar-foot,
+.brand-mark,
+.nav-link.active svg { animation: none; }
+
+/* Das Ladelicht, das dauerhaft die Bildschirmzeit-Kurve entlanglief */
+.st-lauflicht { display: none; }
+
+/* ----------------------------------------------------------
+   DAS VORSCHLAGS-WIDGET
+
+   Der Text war auf bis zu 24 Pixel eingestellt und durfte drei
+   Zeilen laufen, dazu drei Zeilen Unterzeile, ein Symbol und eine
+   Fusszeile — in einer Karte, die diese Hoehe nicht hat. Das Ende
+   wurde abgeschnitten, mitten im Wort. Ein Widget, das seinen
+   eigenen Satz nicht zu Ende bringt, sagt weniger als eines, das
+   kuerzer formuliert.
+
+   Also: kleinere Schrift, zwei Zeilen statt drei, und das Symbol
+   nur so gross wie noetig.
+   ---------------------------------------------------------- */
+.vorschlag-text {
+  font-size: clamp(15px, 1.25vw, 19px);
+  line-height: 1.25;
+  -webkit-line-clamp: 2;
+}
+.vorschlag-sub {
+  margin-top: 5px;
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: var(--text-2);
+  -webkit-line-clamp: 2;
+}
+.vorschlag-icon {
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 11px;
+  background: var(--flaeche-3);
+  color: var(--text-2);
+  margin-bottom: clamp(5px, 1.4vh, 11px);
+}
+.vorschlag-foot { margin-top: clamp(6px, 1.4vh, 12px); }
+
+/* ----------------------------------------------------------
+   KALORIEN UND WETTER — die Zahl traegt die Karte
+
+   Auf der Musterseite stand die Zahl gross und allein, mit einer
+   ruhigen Zeile darunter. Hier war sie in Monospace gesetzt und
+   von gleich lauten Nebenzeilen umgeben.
+   ---------------------------------------------------------- */
+.cal-value { font-size: clamp(26px, 24cqw, 46px); line-height: 1; }
+.cal-sub   { font-size: clamp(11px, 7.5cqw, 13px); margin-top: 5px; }
+.cal-empty { color: var(--text-2); font-size: 13px; }
+
+.weather-desc { color: var(--text-2); }
+
+/* Die Min-/Max-Zeile war eine eigene kleine Leiste mit Konturen.
+   Zwei Zahlen brauchen keinen Rahmen. */
+.wmm {
+  border: none;
+  background: var(--flaeche-3);
+  border-radius: var(--r-pill);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ----------------------------------------------------------
+   STREAKS
+   Die Zahl ist die Aussage, die Flamme das Beiwerk — bisher war
+   es umgekehrt gewichtet.
+   ---------------------------------------------------------- */
+.streak-row .sr-tage,
+.streak-row .sr-zahl {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
