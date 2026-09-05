@@ -10834,3 +10834,206 @@ input:focus, textarea:focus, select:focus {
 /* Mehr Luft zwischen Kopf und Aussage, weniger Kleinteiliges darin */
 .card-head { margin-bottom: 14px; gap: 8px; }
 .card-body { gap: 10px; }
+
+
+/* ==========================================================
+   PHASE 7 — DIE WIDGETS ALS INSELN
+
+   Bild 1 ist keine Formsprache fuer Knoepfe, sondern eine
+   Struktur. Es gibt dort keine einzige Karte, die einen Bereich
+   einrahmt und ihn ueberschreibt — es gibt nur Kapseln, und jede
+   sagt fuer sich genau eine Sache.
+
+   Genau daran sind meine ersten Durchgaenge gescheitert: ich habe
+   Farben und Abstaende an Kaesten nachgezogen, deren Grundform
+   eine andere war. Ein Titel "Habits" ueber drei Zeilen, die
+   schon "Lesen", "Sport" und "Wasser" heissen, fuegt nichts hinzu.
+   Er kostet nur die Hoehe, die den Zeilen darunter fehlt.
+
+   Daraus folgen zwei Faelle:
+
+     Ein Widget mit EINER Aussage wird selbst zur Insel.
+       Kalorien, Wetter, Bildschirmzeit, Tipp.
+
+     Ein Widget mit einer LISTE wird zur unsichtbaren Gruppe,
+     und seine Zeilen werden Inseln.
+       Habits, Streaks, Naechste Termine.
+
+   Das Raster mit deinen Kartenplaetzen bleibt unangetastet.
+   ========================================================== */
+
+/* ----------------------------------------------------------
+   FALL 1 — das Widget ist die Insel
+   ---------------------------------------------------------- */
+#card-kalorien,
+#card-wetter,
+#card-screentime,
+#card-vorschlag {
+  border-radius: 26px;
+  padding: 15px 18px 17px;
+  background: var(--flaeche);
+  box-shadow: var(--heb-2), var(--lichtkante);
+}
+
+/* ----------------------------------------------------------
+   FALL 2 — das Widget ist nur die Gruppe
+
+   Die Karte verschwindet: kein Grund, kein Schatten, keine
+   Polsterung. Uebrig bleiben ihre Zeilen, und die tragen sich
+   ab jetzt selbst.
+   ---------------------------------------------------------- */
+#card-habits,
+#card-streaks,
+#card-naechste {
+  background: none;
+  box-shadow: none;
+  border: none;
+  padding: 0;
+  overflow: visible;
+}
+#card-habits:hover,
+#card-streaks:hover,
+#card-naechste:hover { transform: none; box-shadow: none; }
+
+/* Der Titel wird zur leisen Beschriftung darueber. Er verschwindet
+   nicht ganz: anders als in Bild 1 ist das hier eine
+   Uebersichtsseite, und ohne jede Beschriftung muesste man die
+   Gruppen jedes Mal neu erschliessen. */
+#card-habits > .card-head,
+#card-streaks > .card-head,
+#card-naechste > .card-head {
+  margin: 0 0 8px 6px;
+  gap: 8px;
+}
+#card-habits .card-title,
+#card-streaks .card-title,
+#card-naechste .card-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+/* Die Liste darin wird ein Stapel mit Luft dazwischen */
+#card-habits .card-body,
+#card-streaks .card-body,
+#card-naechste .card-body,
+#card-habits .habit-list,
+#card-streaks .streak-list,
+#card-naechste .entry-list {
+  gap: 7px;
+  padding: 0;
+  background: none;
+  border: none;
+}
+
+/* ----------------------------------------------------------
+   DIE ZEILEN WERDEN INSELN
+   ---------------------------------------------------------- */
+#card-habits .hb-zeile,
+#card-streaks .streak-row,
+#card-naechste .entry-item {
+  border-radius: 22px;
+  padding: 11px 15px;
+  background: var(--flaeche);
+  border: none;
+  box-shadow: var(--heb-1), var(--lichtkante);
+  transition: transform var(--w-normal) var(--kurve),
+              box-shadow var(--w-normal) var(--kurve-weich);
+}
+#card-habits .hb-zeile:hover,
+#card-streaks .streak-row:hover,
+#card-naechste .entry-item:hover {
+  transform: translateY(-1px);
+  background: var(--flaeche);
+  box-shadow: var(--heb-2), var(--lichtkante);
+}
+#card-naechste .entry-item:hover { transform: translateY(-1px); }
+
+/* ----------------------------------------------------------
+   DAS SYMBOLFELD
+
+   In Bild 1 traegt nur das Symbolfeld Farbe, nie die ganze
+   Kapsel. So bleibt Rot ein Signal statt Dekoration.
+   ---------------------------------------------------------- */
+.entry-accent,
+.sr-flamme,
+.hb-marke {
+  border-radius: 13px;
+}
+#card-naechste .entry-accent {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+}
+
+/* ----------------------------------------------------------
+   RUHIGERE INNENRAEUME
+
+   Die Insel ist enger als die alte Karte. Was darin stand, muss
+   entsprechend zusammenruecken, sonst platzt sie.
+   ---------------------------------------------------------- */
+#card-kalorien .card-head,
+#card-wetter .card-head,
+#card-screentime .card-head,
+#card-vorschlag .card-head { margin-bottom: 10px; }
+
+#card-kalorien .card-title,
+#card-wetter .card-title,
+#card-screentime .card-title,
+#card-vorschlag .card-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-2);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Auf dem Dashboard sind die Karten jetzt Inseln — der Schnellzugriff
+   war noch nie eine Karte und bleibt es auch nicht. */
+#card-quick, #card-quick:hover {
+  background: none;
+  box-shadow: none;
+  border: none;
+  padding: 0;
+}
+
+/* Der Leerzustand einer Gruppe ohne Karte hatte keinen Kasten mehr,
+   an dem er sich ausrichten konnte — er klebte in der Ecke und brach
+   mitten im Satz um. Er bekommt jetzt eine eigene, ruhige Insel. */
+#card-naechste .naechste-empty,
+#card-habits .hb-leer,
+#card-streaks .streak-leer {
+  position: static;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 64px;
+  padding: 14px 18px;
+  border-radius: 22px;
+  background: var(--flaeche);
+  box-shadow: var(--heb-1), var(--lichtkante);
+  color: var(--text-3);
+  font-size: 13px;
+  text-align: center;
+  white-space: normal;
+}
+
+/* Ohne Karte darf die Liste den Platz der Gruppe fuellen, statt sich
+   in der Mitte zu sammeln. */
+#card-naechste .naechste,
+#card-naechste .entry-list,
+#card-habits .habit-list,
+#card-streaks .streak-list {
+  justify-content: flex-start;
+  align-content: flex-start;
+}
+
+/* Die Insel ist enger als die Karte: der Inhalt einer Zeile darf
+   nicht mehr an den alten Kartenrand rechnen. */
+#card-habits .hb-zeile { gap: 11px; }
+#card-streaks .streak-row { gap: 11px; padding: 12px 15px; }
