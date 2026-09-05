@@ -5,43 +5,261 @@
    ========================================================== */
 
 :root {
-  --bg: #070a12;
-  --bg-2: #0a0e1a;
+  /* ---------- FLÄCHEN ----------
+     Der Grund ist hellgrau, die Karten sitzen reinweiß darauf. Nur so
+     wirft eine weiße Fläche einen Schatten, den man sehen kann. */
+  --grund:      #EDEDEF;
+  --grund-tief: #E3E3E6;
+  --flaeche:    #FFFFFF;
+  --flaeche-2:  #F7F7F8;
+  --flaeche-3:  #EFEFF1;
 
-  --card: rgba(21, 27, 44, 0.55);
-  --card-hover: rgba(26, 33, 53, 0.68);
-  --card-inset: rgba(255, 255, 255, 0.03);
+  --text:    #0A0A0B;
+  --text-2:  #6B6B70;
+  --text-3:  #A1A1A8;
 
-  --border: rgba(125, 155, 220, 0.13);
-  --border-2: rgba(125, 155, 220, 0.26);
+  --kontur:   rgba(0, 0, 0, 0.07);
+  --kontur-2: rgba(0, 0, 0, 0.13);
 
-  --blue: #5b8cff;
-  --blue-soft: #7ba3ff;
-  --violet: #a78bfa;
-  --green: #34d399;
-  --amber: #f5a94e;
-  --red: #fb7185;
+  /* Das Gegenteil des Grundes. Trägt jede Auswahl und jede
+     Haupthandlung — nie eine Farbe, damit Farbe Bedeutung bleibt. */
+  --fest:      #0A0A0B;
+  --fest-text: #FFFFFF;
 
-  --text: #e9eef8;
-  --text-dim: #8c97b0;
-  --text-faint: #5c6683;
+  --schalter-spur:  #E3E3E6;
+  --schalter-knopf: #FFFFFF;
 
-  --r-card: 18px;
-  --r-el: 12px;
+  /* ---------- AKZENTE ----------
+     Zwei Stufen, und der Unterschied ist wichtig: die Akzente stehen in
+     dieser App zu zwei Dritteln als Schrift da, nicht als Fläche. Apples
+     Signalgrün liegt auf Weiß bei 2,2:1 und wäre damit kaum zu lesen.
+     Deshalb trägt der Grundname den lesbaren Ton, und der volle
+     Signalton heißt ausdrücklich "-voll" und wird nur dort verlangt,
+     wo er eine Fläche füllt. Im Dunkeln fallen beide zusammen — auf
+     Schwarz ist der Signalton ohnehin schon kräftig genug. */
+  --rot:        #D70015;
+  --gruen:      #248A3D;
+  --blau:       #0064D8;
+  --rot-voll:   #FF3B30;
+  --gruen-voll: #34C759;
+  --blau-voll:  #007AFF;
+
+  /* Gelb ist der Sonderfall: zu hell für Schrift auf Weiß und zu hell,
+     als dass Weiß darauf tragen würde. Daher drei Fassungen. */
+  --gelb:         #FFB800;
+  --gelb-schrift: #8A6100;
+  --gelb-tief:    #A87400;
+
+  /* Flächige Fassung derselben Töne, als Hintergrund für Abzeichen */
+  --rot-fond:   rgba(255,  59,  48, 0.11);
+  --gruen-fond: rgba( 52, 199,  89, 0.13);
+  --gelb-fond:  rgba(255, 184,   0, 0.15);
+  --blau-fond:  rgba(  0, 122, 255, 0.11);
+
+  /* ---------- AUFLAGEN ----------
+     Ein Schleier, der eine Fläche von ihrem Untergrund abhebt. Hell
+     legt sich Schwarz darüber, dunkel Weiß — dieselbe Absicht, das
+     umgekehrte Mittel. Fünf Stufen genügen für alle 277 Stellen, an
+     denen bisher ein fester Weißwert stand. */
+  --auflage-1: rgba(0, 0, 0, 0.020);
+  --auflage-2: rgba(0, 0, 0, 0.035);
+  --auflage-3: rgba(0, 0, 0, 0.055);
+  --auflage-4: rgba(0, 0, 0, 0.085);
+  --auflage-5: rgba(0, 0, 0, 0.140);
+
+  /* Die Gegenrichtung: eine Mulde statt einer Erhebung. Hell genügt
+     ein Bruchteil des Schwarz, das dunkel nötig ist — auf Weiss
+     schlägt jedes Prozent doppelt durch. */
+  --senke-1: rgba(0, 0, 0, 0.045);
+  --senke-2: rgba(0, 0, 0, 0.075);
+
+  /* Vorhang hinter Fenstern und unter Verläufen */
+  --schleier: rgba(0, 0, 0, 0.34);
+
+  /* ---------- TIEFE ----------
+     Hell arbeitet mit Schatten nach unten und einer Lichtkante oben. */
+  --heb-1: 0 1px 2px rgba(0,0,0,.05), 0 1px 1px rgba(0,0,0,.03);
+  --heb-2: 0 2px 4px rgba(0,0,0,.05), 0 4px 12px rgba(0,0,0,.05);
+  --heb-3: 0 2px 6px rgba(0,0,0,.05), 0 12px 32px rgba(0,0,0,.07);
+  --heb-4: 0 8px 20px rgba(0,0,0,.09), 0 24px 56px rgba(0,0,0,.10);
+  --lichtkante: inset 0 1px 0 rgba(255,255,255,.9);
+  --heb-fest: 0 2px 6px rgba(0,0,0,.22), 0 8px 20px rgba(0,0,0,.16);
+  --rille: inset 0 1px 2px rgba(0,0,0,.07), inset 0 0 0 1px rgba(0,0,0,.03);
+
+  /* ---------- DIE ALTEN NAMEN ----------
+     Sie bleiben bestehen und zeigen auf das neue System, damit die
+     bestehenden Verweise quer durch die Datei weitergelten. Neue
+     Regeln sollen die Namen oben benutzen. */
+  --bg:          var(--grund);
+  --bg-2:        var(--grund-tief);
+  --card:        var(--flaeche);
+  --card-hover:  var(--flaeche-2);
+  --card-inset:  var(--auflage-2);
+  --border:      var(--kontur);
+  --border-2:    var(--kontur-2);
+  --blue:        var(--blau);
+  --blue-soft:   var(--blau);
+  --violet:      var(--blau);
+  --green:       var(--gruen);
+  --amber:       var(--gelb-schrift);
+  --red:         var(--rot);
+  --text-dim:    var(--text-2);
+  --text-faint:  var(--text-3);
+
+  /* ---------- MASSE ---------- */
+  --r-card: 24px;
+  --r-el:   16px;
   --r-pill: 999px;
+  --r-klein: 11px;
 
   --sidebar-w: 236px;
   --sidebar-w-collapsed: 74px;
 
+  --mono: 'Inter', ui-monospace, 'Consolas', monospace;
+  --sans: 'Inter', -apple-system, 'Segoe UI', system-ui, sans-serif;
 
-  --mono: 'JetBrains Mono', 'Consolas', monospace;
-  --sans: 'Space Grotesk', 'Segoe UI', sans-serif;
+  /* ---------- BEWEGUNG ---------- */
+  --w-schnell: 90ms;
+  --w-normal:  160ms;
+  --w-gleit:   260ms;
+  --kurve:       cubic-bezier(.32, .72, 0, 1);
+  --kurve-weich: cubic-bezier(.4, 0, .2, 1);
+}
+
+/* Der dunkle Modus in zwei Fassungen, und beide werden gebraucht:
+   Die Medienabfrage greift, solange niemand von Hand gewählt hat —
+   dann steht am Wurzelelement nichts. Sobald von Hand gewählt wurde,
+   steht dort "hell" oder "dunkel". Das :not() sorgt dafür, dass eine
+   Wahl für Hell auch dann gilt, wenn das Gerät auf Dunkel steht. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-thema="hell"]) {
+  /* Echtes Schwarz. Die Tiefe kommt nicht aus Schatten — auf Schwarz
+     ist ein schwarzer Schatten unsichtbar —, sondern daraus, dass jede
+     Fläche etwas heller ist als ihr Untergrund, mit einer haardünnen
+     Lichtkante obenauf. */
+  --grund:      #000000;
+  --grund-tief: #08080A;
+  --flaeche:    #0E0E10;
+  --flaeche-2:  #161619;
+  --flaeche-3:  #1E1E22;
+
+  --text:    #FAFAFC;
+  --text-2:  #A8A8B0;
+  --text-3:  #7E7E87;
+
+  --kontur:   var(--auflage-3);
+  --kontur-2: var(--auflage-4);
+
+  --fest:      #FFFFFF;
+  --fest-text: #0A0A0B;
+
+  --schalter-spur:  #3A3A3E;
+  --schalter-knopf: #FFFFFF;
+
+  /* Auf Schwarz trägt der Signalton schon von allein — lesbarer Ton
+     und voller Ton sind hier dasselbe. */
+  --rot:        #FF453A;
+  --gruen:      #30D158;
+  --blau:       #0A84FF;
+  --rot-voll:   #FF453A;
+  --gruen-voll: #30D158;
+  --blau-voll:  #0A84FF;
+
+  --gelb:         #FFD60A;
+  --gelb-schrift: #FFD60A;
+  --gelb-tief:    #A87400;
+
+  --rot-fond:   rgba(255,  69,  58, 0.16);
+  --gruen-fond: rgba( 48, 209,  88, 0.16);
+  --gelb-fond:  rgba(255, 214,  10, 0.15);
+  --blau-fond:  rgba( 10, 132, 255, 0.16);
+
+  --auflage-1: rgba(255, 255, 255, 0.022);
+  --auflage-2: rgba(255, 255, 255, 0.042);
+  --auflage-3: rgba(255, 255, 255, 0.070);
+  --auflage-4: rgba(255, 255, 255, 0.120);
+  --auflage-5: rgba(255, 255, 255, 0.260);
+
+  --senke-1: rgba(0, 0, 0, 0.26);
+  --senke-2: rgba(0, 0, 0, 0.36);
+
+  --schleier: rgba(0, 0, 0, 0.68);
+
+  --heb-1: 0 1px 2px rgba(0,0,0,.6);
+  --heb-2: 0 2px 8px rgba(0,0,0,.7);
+  --heb-3: 0 4px 16px rgba(0,0,0,.75), 0 16px 40px rgba(0,0,0,.55);
+  --heb-4: 0 8px 28px rgba(0,0,0,.8), 0 28px 64px rgba(0,0,0,.6);
+  --lichtkante: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --heb-fest: 0 2px 10px rgba(255, 255, 255, 0.10);
+  --rille: inset 0 1px 2px rgba(0,0,0,.5);
+  }
+}
+:root[data-thema="dunkel"] {
+  /* Echtes Schwarz. Die Tiefe kommt nicht aus Schatten — auf Schwarz
+     ist ein schwarzer Schatten unsichtbar —, sondern daraus, dass jede
+     Fläche etwas heller ist als ihr Untergrund, mit einer haardünnen
+     Lichtkante obenauf. */
+  --grund:      #000000;
+  --grund-tief: #08080A;
+  --flaeche:    #0E0E10;
+  --flaeche-2:  #161619;
+  --flaeche-3:  #1E1E22;
+
+  --text:    #FAFAFC;
+  --text-2:  #A8A8B0;
+  --text-3:  #7E7E87;
+
+  --kontur:   var(--auflage-3);
+  --kontur-2: var(--auflage-4);
+
+  --fest:      #FFFFFF;
+  --fest-text: #0A0A0B;
+
+  --schalter-spur:  #3A3A3E;
+  --schalter-knopf: #FFFFFF;
+
+  /* Auf Schwarz trägt der Signalton schon von allein — lesbarer Ton
+     und voller Ton sind hier dasselbe. */
+  --rot:        #FF453A;
+  --gruen:      #30D158;
+  --blau:       #0A84FF;
+  --rot-voll:   #FF453A;
+  --gruen-voll: #30D158;
+  --blau-voll:  #0A84FF;
+
+  --gelb:         #FFD60A;
+  --gelb-schrift: #FFD60A;
+  --gelb-tief:    #A87400;
+
+  --rot-fond:   rgba(255,  69,  58, 0.16);
+  --gruen-fond: rgba( 48, 209,  88, 0.16);
+  --gelb-fond:  rgba(255, 214,  10, 0.15);
+  --blau-fond:  rgba( 10, 132, 255, 0.16);
+
+  --auflage-1: rgba(255, 255, 255, 0.022);
+  --auflage-2: rgba(255, 255, 255, 0.042);
+  --auflage-3: rgba(255, 255, 255, 0.070);
+  --auflage-4: rgba(255, 255, 255, 0.120);
+  --auflage-5: rgba(255, 255, 255, 0.260);
+
+  --senke-1: rgba(0, 0, 0, 0.26);
+  --senke-2: rgba(0, 0, 0, 0.36);
+
+  --schleier: rgba(0, 0, 0, 0.68);
+
+  --heb-1: 0 1px 2px rgba(0,0,0,.6);
+  --heb-2: 0 2px 8px rgba(0,0,0,.7);
+  --heb-3: 0 4px 16px rgba(0,0,0,.75), 0 16px 40px rgba(0,0,0,.55);
+  --heb-4: 0 8px 28px rgba(0,0,0,.8), 0 28px 64px rgba(0,0,0,.6);
+  --lichtkante: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --heb-fest: 0 2px 10px rgba(255, 255, 255, 0.10);
+  --rille: inset 0 1px 2px rgba(0,0,0,.5);
 }
 
 * { box-sizing: border-box; }
 
 html {
-  color-scheme: dark;
+  color-scheme: light dark;
   scroll-behavior: smooth;
 }
 
@@ -70,14 +288,14 @@ body { background: transparent; }
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background:
-    radial-gradient(1100px 620px at 22% -12%, rgba(91, 140, 255, 0.16), transparent 62%),
-    radial-gradient(900px 560px at 88% -6%, rgba(167, 139, 250, 0.12), transparent 60%),
-    radial-gradient(800px 620px at 50% 108%, rgba(52, 211, 153, 0.07), transparent 62%),
-    linear-gradient(180deg, var(--bg-2), var(--bg) 46%);
+  /* Ohne Farbe. Drei farbige Lichtkegel standen hier einmal; auf
+     hellem Grund wurden sie zu genau dem Blaustich, der nicht sein
+     soll. Der Grund traegt jetzt nur sich selbst — schwarz im
+     Dunkeln, hellgrau im Hellen. */
+  background: var(--grund);
 }
 
-::selection { background: var(--blue); color: #05070d; }
+::selection { background: var(--blue); color: #fff; }
 
 input, button, select, textarea {
   font-family: var(--sans);
@@ -96,12 +314,12 @@ button { cursor: pointer; }
   flex-shrink: 0;
   border-radius: 9px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--auflage-2);
   color: var(--text-dim);
   transition: 0.16s ease;
 }
-.icon-btn:hover { color: var(--text); border-color: var(--border-2); background: rgba(255,255,255,0.07); }
-.icon-btn.active { color: var(--blue); border-color: rgba(91,140,255,0.45); background: rgba(91,140,255,0.14); }
+.icon-btn:hover { color: var(--text); border-color: var(--border-2); background: var(--auflage-3); }
+.icon-btn.active { color: var(--blue); border-color: color-mix(in srgb, var(--blau) 45%, transparent); background: color-mix(in srgb, var(--blau) 14%, transparent); }
 .icon-btn svg { width: 15px; height: 15px; }
 
 .ghost-btn {
@@ -110,12 +328,12 @@ button { cursor: pointer; }
   padding: 8px 20px;
   border-radius: var(--r-pill);
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--auflage-2);
   color: var(--text-dim);
   font-size: 12px;
   transition: 0.16s ease;
 }
-.ghost-btn:hover { color: var(--text); border-color: var(--border-2); background: rgba(255,255,255,0.07); }
+.ghost-btn:hover { color: var(--text); border-color: var(--border-2); background: var(--auflage-3); }
 
 .muted-line {
   font-size: 12.5px;
@@ -151,8 +369,8 @@ button { cursor: pointer; }
   display: flex;
   flex-direction: column;
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.012) 30%, transparent),
-    rgba(9, 12, 22, 0.6);
+    linear-gradient(180deg, var(--auflage-3), var(--auflage-1) 30%, transparent),
+    color-mix(in srgb, var(--flaeche) 60%, transparent);
   backdrop-filter: blur(40px) saturate(200%);
   -webkit-backdrop-filter: blur(40px) saturate(200%);
   border-right: 1px solid var(--border);
@@ -184,7 +402,7 @@ button { cursor: pointer; }
   border-radius: 7px;
   flex-shrink: 0;
   background: linear-gradient(135deg, var(--blue), var(--violet));
-  box-shadow: 0 0 16px rgba(91, 140, 255, 0.45);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--blau) 45%, transparent);
 }
 .brand-name {
   font-size: 15px;
@@ -198,7 +416,7 @@ button { cursor: pointer; }
   display: flex; align-items: center; justify-content: center;
   border-radius: 50%;
   border: 1px solid var(--border);
-  background: rgba(255,255,255,0.04);
+  background: var(--auflage-2);
   color: var(--text-dim);
   transition: 0.16s ease;
 }
@@ -215,7 +433,7 @@ button { cursor: pointer; }
   margin: 0 12px 6px;
   padding: 11px 12px;
   border-radius: var(--r-el);
-  background: rgba(255,255,255,0.035);
+  background: var(--auflage-2);
   border: 1px solid var(--border);
   overflow: hidden;
 }
@@ -225,7 +443,7 @@ button { cursor: pointer; }
   border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
   background: linear-gradient(135deg, var(--blue), var(--violet));
-  color: #06090f;
+  color: #fff;
   font-family: var(--mono);
   font-weight: 700;
   font-size: 11.5px;
@@ -292,11 +510,11 @@ button { cursor: pointer; }
 }
 .nav-link svg { width: 17px; height: 17px; flex-shrink: 0; }
 .nav-link span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.nav-link:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+.nav-link:hover { color: var(--text); background: var(--auflage-2); }
 .nav-link.active {
   color: var(--text);
-  background: rgba(91, 140, 255, 0.14);
-  border-color: rgba(91, 140, 255, 0.3);
+  background: color-mix(in srgb, var(--blau) 14%, transparent);
+  border-color: color-mix(in srgb, var(--blau) 30%, transparent);
 }
 .nav-link.active svg { color: var(--blue); }
 .sidebar.collapsed .nav-link { justify-content: center; padding: 10px; }
@@ -363,7 +581,7 @@ button { cursor: pointer; }
   padding: 8px 15px;
   border-radius: var(--r-pill);
   border: 1px solid var(--border);
-  background: rgba(255,255,255,0.035);
+  background: var(--auflage-2);
   font-family: var(--mono);
   font-size: 12px;
   color: var(--text-dim);
@@ -378,7 +596,7 @@ button { cursor: pointer; }
 }
 @keyframes breathe {
   0%, 100% { transform: scale(1);    opacity: 0.7; box-shadow: 0 0 6px var(--green); }
-  50%      { transform: scale(1.45); opacity: 1;   box-shadow: 0 0 14px var(--green), 0 0 24px rgba(52, 211, 153, 0.35); }
+  50%      { transform: scale(1.45); opacity: 1;   box-shadow: 0 0 14px var(--green), 0 0 24px color-mix(in srgb, var(--gruen) 35%, transparent); }
 }
 #heroClock { color: var(--text); font-weight: 600; }
 .chip-sep { color: var(--text-faint); }
@@ -391,13 +609,13 @@ button { cursor: pointer; }
   padding: 6px 6px 6px 16px;
   border-radius: var(--r-pill);
   border: 1px solid var(--border);
-  background: rgba(255,255,255,0.035);
+  background: var(--auflage-2);
   backdrop-filter: blur(12px);
   transition: 0.18s ease;
 }
 .search:focus-within {
-  border-color: rgba(91,140,255,0.5);
-  box-shadow: 0 0 0 4px rgba(91,140,255,0.09);
+  border-color: color-mix(in srgb, var(--blau) 50%, transparent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--blau) 9%, transparent);
 }
 .search-icon { width: 17px; height: 17px; color: var(--text-faint); flex-shrink: 0; }
 .search-input {
@@ -415,7 +633,7 @@ button { cursor: pointer; }
   padding: 10px 22px;
   border: none;
   border-radius: var(--r-pill);
-  background: linear-gradient(135deg, var(--blue), #4a6fe8);
+  background: linear-gradient(135deg, var(--blue), var(--blau));
   color: #ffffff;
   font-size: 13px;
   font-weight: 600;
@@ -441,14 +659,14 @@ button { cursor: pointer; }
      brightness(0.6) dimmt den Hintergrund hinter der Karte — dadurch
      hebt sich jedes Widget ab, egal was darunter liegt. */
   background: linear-gradient(152deg,
-      rgba(5, 8, 15, 0.24) 0%,
-      rgba(3, 5, 11, 0.32) 55%,
-      rgba(5, 8, 15, 0.27) 100%);
+      color-mix(in srgb, var(--flaeche) 24%, transparent) 0%,
+      color-mix(in srgb, var(--flaeche) 32%, transparent) 55%,
+      color-mix(in srgb, var(--flaeche) 27%, transparent) 100%);
   backdrop-filter: blur(26px) saturate(140%) brightness(0.6);
   -webkit-backdrop-filter: blur(26px) saturate(140%) brightness(0.6);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.07),      /* feine Lichtkante oben */
-    inset 0 -1px 0 rgba(255, 255, 255, 0.02),
+    inset 0 1px 0 var(--auflage-3),      /* feine Lichtkante oben */
+    inset 0 -1px 0 var(--auflage-1),
     0 18px 44px rgba(0, 0, 0, 0.5),
     0 2px 8px rgba(0, 0, 0, 0.3);
   scroll-margin-top: 18px;
@@ -464,11 +682,11 @@ button { cursor: pointer; }
   border-radius: inherit;
   pointer-events: none;
   background: linear-gradient(150deg,
-    rgba(255, 255, 255, 0.15) 0%,
-    rgba(255, 255, 255, 0.05) 30%,
-    rgba(255, 255, 255, 0.02) 55%,
-    rgba(255, 255, 255, 0.055) 78%,
-    rgba(255, 255, 255, 0.12) 100%);
+    var(--auflage-4) 0%,
+    var(--auflage-2) 30%,
+    var(--auflage-1) 55%,
+    var(--auflage-3) 78%,
+    var(--auflage-4) 100%);
   /* Nur der 1px-Rahmen bleibt sichtbar, die Fläche wird ausgestanzt */
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
@@ -477,8 +695,8 @@ button { cursor: pointer; }
 }
 .card:hover {
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.03),
+    inset 0 1px 0 var(--auflage-4),
+    inset 0 -1px 0 var(--auflage-2),
     0 22px 52px rgba(0, 0, 0, 0.55),
     0 3px 10px rgba(0, 0, 0, 0.34);
 }
@@ -509,7 +727,7 @@ button { cursor: pointer; }
   text-overflow: ellipsis;
   padding: 3px 10px;
   border-radius: var(--r-pill);
-  background: rgba(255,255,255,0.05);
+  background: var(--auflage-2);
   border: 1px solid var(--border);
   font-family: var(--mono);
   font-size: 9.5px;
@@ -705,14 +923,14 @@ html.tablet #card-kalorien { display: none; }
 .cal-gauge { width: 100%; height: 100%; display: block; }
 
 .cal-tick {
-  stroke: rgba(255, 255, 255, 0.09);
+  stroke: var(--auflage-3);
   stroke-width: 3.4;
   stroke-linecap: round;
   transition: stroke 0.3s ease, opacity 0.3s ease;
 }
 .cal-tick.on {
   stroke: url(#calTickGrad);
-  filter: drop-shadow(0 0 3px rgba(52, 211, 153, 0.5));
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--gruen) 50%, transparent));
 }
 .cal-tick.over { stroke: var(--red); }
 
@@ -770,7 +988,7 @@ html.tablet #card-kalorien { display: none; }
   padding: 3px;
   border-radius: var(--r-pill);
   border: 1px solid var(--border);
-  background: rgba(255,255,255,0.03);
+  background: var(--auflage-2);
 }
 .stbtn {
   padding: 5px 13px;
@@ -784,7 +1002,7 @@ html.tablet #card-kalorien { display: none; }
 }
 .stbtn:hover { color: var(--text-dim); }
 .stbtn.active {
-  background: rgba(91,140,255,0.18);
+  background: color-mix(in srgb, var(--blau) 18%, transparent);
   color: var(--blue-soft);
 }
 
@@ -805,7 +1023,7 @@ html.tablet #card-kalorien { display: none; }
   padding: 4px 10px;
   border-radius: var(--r-pill);
   border: 1px solid transparent;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--auflage-2);
   color: var(--text-dim);
   font-size: 11.5px;
   white-space: nowrap;
@@ -823,8 +1041,8 @@ html.tablet #card-kalorien { display: none; }
   border-radius: 50%;
   flex-shrink: 0;
 }
-.legend-dot.phone { background: var(--blue); box-shadow: 0 0 8px rgba(91, 140, 255, 0.6); }
-.legend-dot.pc { background: var(--violet); box-shadow: 0 0 8px rgba(167, 139, 250, 0.6); }
+.legend-dot.phone { background: var(--blue); box-shadow: 0 0 8px color-mix(in srgb, var(--blau) 60%, transparent); }
+.legend-dot.pc { background: var(--violet); box-shadow: 0 0 8px color-mix(in srgb, var(--blau) 60%, transparent); }
 
 /* ---------- Flächendiagramm: füllt die Karte komplett ---------- */
 .st-chart {
@@ -842,7 +1060,7 @@ html.tablet #card-kalorien { display: none; }
   overflow: visible;
 }
 
-.st-grid { stroke: rgba(255, 255, 255, 0.055); stroke-width: 1; }
+.st-grid { stroke: var(--auflage-3); stroke-width: 1; }
 .st-area { stroke: none; }
 .st-line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
 .st-line.phone { stroke: var(--blue); }
@@ -850,8 +1068,8 @@ html.tablet #card-kalorien { display: none; }
 .st-area, .st-line { transition: opacity 0.16s ease; }
 
 /* Führungslinie und Punkte beim Überfahren */
-.st-guide { stroke: rgba(255, 255, 255, 0.28); stroke-width: 1; stroke-dasharray: 3 3; opacity: 0; }
-.st-dot { opacity: 0; stroke: #0a0e1a; stroke-width: 2; }
+.st-guide { stroke: var(--auflage-5); stroke-width: 1; stroke-dasharray: 3 3; opacity: 0; }
+.st-dot { opacity: 0; stroke: var(--grund); stroke-width: 2; }
 .st-dot.phone { fill: var(--blue); }
 .st-dot.pc { fill: var(--violet); }
 .st-chart.aktiv .st-guide,
@@ -885,7 +1103,7 @@ html.tablet #card-kalorien { display: none; }
   padding: 6px 11px;
   border-radius: 9px;
   border: 1px solid var(--border-2);
-  background: #10162a;
+  background: var(--flaeche-2);
   color: var(--text);
   font-family: var(--mono);
   font-size: 11px;
@@ -955,7 +1173,7 @@ html.tablet #card-kalorien { display: none; }
   cursor: pointer;
   transition: background 0.18s ease;
 }
-.hb-zeile:hover { background: rgba(255, 255, 255, 0.035); }
+.hb-zeile:hover { background: var(--auflage-2); }
 
 /* Der Knopf für heute */
 .hb-knopf {
@@ -966,13 +1184,13 @@ html.tablet #card-kalorien { display: none; }
   border-radius: 50%;
   display: grid;
   place-items: center;
-  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 0 0 2px var(--auflage-4);
   background: transparent;
-  color: #140a22;
+  color: #fff;
   transition: background 0.22s cubic-bezier(0.34, 1.4, 0.64, 1),
               box-shadow 0.22s ease, transform 0.18s cubic-bezier(0.34, 1.5, 0.64, 1);
 }
-.hb-zeile:hover .hb-knopf { box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.3); }
+.hb-zeile:hover .hb-knopf { box-shadow: inset 0 0 0 2px var(--auflage-5); }
 .hb-knopf svg {
   width: 62%;
   height: 62%;
@@ -981,8 +1199,8 @@ html.tablet #card-kalorien { display: none; }
   transition: opacity 0.16s ease, transform 0.24s cubic-bezier(0.34, 1.6, 0.64, 1);
 }
 .hb-zeile.erledigt .hb-knopf {
-  background: #a855f7;
-  box-shadow: inset 0 0 0 2px #a855f7, 0 0 14px rgba(168, 85, 247, 0.4);
+  background: var(--blau);
+  box-shadow: inset 0 0 0 2px var(--blau), 0 0 14px color-mix(in srgb, var(--blau) 40%, transparent);
 }
 .hb-zeile.erledigt .hb-knopf svg { opacity: 1; transform: none; }
 .hb-zeile:active .hb-knopf { transform: scale(0.9); }
@@ -997,16 +1215,16 @@ html.tablet #card-kalorien { display: none; }
   animation: knopf-ring 0.55s ease-out forwards;
 }
 @keyframes knopf-ring {
-  from { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.5); }
-  to   { box-shadow: 0 0 0 11px rgba(168, 85, 247, 0); }
+  from { box-shadow: 0 0 0 0 color-mix(in srgb, var(--blau) 50%, transparent); }
+  to   { box-shadow: 0 0 0 11px color-mix(in srgb, var(--blau) 0%, transparent); }
 }
 /* Derselbe Empfang am Habit-Knopf, wenn das Licht zurückkommt */
 .hb-knopf.hb-pop { animation: knopf-ankunft 1.4s cubic-bezier(0.3, 0, 0.3, 1) both; }
 @keyframes knopf-ankunft {
-  0%   { filter: drop-shadow(0 0 0 rgba(168, 85, 247, 0)); }
-  55%  { filter: drop-shadow(0 0 5px rgba(168, 85, 247, 0.8)); }
-  88%  { filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.95)); }
-  100% { filter: drop-shadow(0 0 0 rgba(168, 85, 247, 0)); }
+  0%   { filter: drop-shadow(0 0 0 color-mix(in srgb, var(--blau) 0%, transparent)); }
+  55%  { filter: drop-shadow(0 0 5px color-mix(in srgb, var(--blau) 80%, transparent)); }
+  88%  { filter: drop-shadow(0 0 20px color-mix(in srgb, var(--blau) 95%, transparent)); }
+  100% { filter: drop-shadow(0 0 0 color-mix(in srgb, var(--blau) 0%, transparent)); }
 }
 
 /* Name über der Spur */
@@ -1037,15 +1255,15 @@ html.tablet #card-kalorien { display: none; }
 }
 .hb-tick {
   border-radius: 2px;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--auflage-3);
   transition: background 0.22s ease;
 }
-.hb-tick.voll { background: var(--ton, #a855f7); }
+.hb-tick.voll { background: var(--ton, var(--blau)); }
 
 /* Heute steht am rechten Ende und bekommt das Dreieck darüber */
 .hb-tick.heute {
   position: relative;
-  box-shadow: inset 0 0 0 1px rgba(91, 140, 255, 0.55);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--blau) 55%, transparent);
 }
 .hb-tick.heute::before {
   content: "";
@@ -1108,7 +1326,7 @@ html.tablet #card-kalorien { display: none; }
   padding: 12px 14px;
   border-radius: var(--r-el);
   border: 1px solid var(--border);
-  background: rgba(255,255,255,0.03);
+  background: var(--auflage-2);
 }
 .entry-accent {
   width: 3px;
@@ -1136,16 +1354,16 @@ html.tablet #card-kalorien { display: none; }
 .entry-badge {
   padding: 4px 10px;
   border-radius: var(--r-pill);
-  background: rgba(245,169,78,0.12);
-  border: 1px solid rgba(245,169,78,0.28);
+  background: color-mix(in srgb, var(--gelb) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gelb) 28%, transparent);
   color: var(--amber);
   font-family: var(--mono);
   font-size: 9.5px;
   white-space: nowrap;
 }
 .entry-item.today .entry-badge {
-  background: rgba(251,113,133,0.12);
-  border-color: rgba(251,113,133,0.3);
+  background: color-mix(in srgb, var(--rot) 12%, transparent);
+  border-color: color-mix(in srgb, var(--rot) 30%, transparent);
   color: var(--red);
 }
 .entry-del {
@@ -1160,7 +1378,7 @@ html.tablet #card-kalorien { display: none; }
   line-height: 1;
   transition: 0.16s ease;
 }
-.entry-del:hover { color: var(--red); background: rgba(251,113,133,0.12); }
+.entry-del:hover { color: var(--red); background: color-mix(in srgb, var(--rot) 12%, transparent); }
 
 /* ==========================================================
    SCHNELLZUGRIFF (kompakt, ganz unten)
@@ -1191,7 +1409,7 @@ html.tablet #card-kalorien { display: none; }
   flex-shrink: 0;
   border-radius: var(--r-el);
   border: 1px solid var(--border);
-  background: rgba(255,255,255,0.03);
+  background: var(--auflage-2);
   color: var(--text-dim);
   text-decoration: none;
   transition: 0.16s ease;
@@ -1199,12 +1417,12 @@ html.tablet #card-kalorien { display: none; }
 .quick-tile:hover {
   color: var(--text);
   border-color: var(--border-2);
-  background: rgba(255,255,255,0.07);
+  background: var(--auflage-3);
   transform: translateY(-2px);
 }
 .quick-tile svg { width: 18px; height: 18px; }
 .quick-tile.add-tile { border-style: dashed; color: var(--text-faint); }
-.quick-tile.add-tile:hover { color: var(--blue); border-color: rgba(91,140,255,0.5); }
+.quick-tile.add-tile:hover { color: var(--blue); border-color: color-mix(in srgb, var(--blau) 50%, transparent); }
 
 /* ==========================================================
    TOASTS
@@ -1227,12 +1445,12 @@ html.tablet #card-kalorien { display: none; }
 .toast {
   padding: 17px 21px;
   border-radius: 20px;
-  background: rgba(16, 21, 36, 0.38);
+  background: color-mix(in srgb, var(--flaeche) 38%, transparent);
   backdrop-filter: blur(42px) saturate(180%);
   -webkit-backdrop-filter: blur(42px) saturate(180%);
   /* Erst der umlaufende Rand, dann der farbige Streifen — sonst
      ueberschreibt die Kurzschreibweise ihn wieder. */
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  border: 1px solid var(--auflage-3);
   border-left: 4px solid var(--blue);
   box-shadow:
     0 14px 38px rgba(0, 0, 0, 0.46),
@@ -1258,7 +1476,7 @@ html.tablet #card-kalorien { display: none; }
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: rgba(4, 6, 12, 0.5);
+  background: color-mix(in srgb, var(--flaeche) 50%, transparent);
   backdrop-filter: blur(10px) saturate(120%);
   -webkit-backdrop-filter: blur(10px) saturate(120%);
 }
@@ -1270,10 +1488,10 @@ html.tablet #card-kalorien { display: none; }
   overflow-y: auto;
   padding: 22px 22px 26px;
   border-radius: 26px;
-  background: rgba(16, 21, 36, 0.41);
+  background: color-mix(in srgb, var(--flaeche) 41%, transparent);
   backdrop-filter: blur(56px) saturate(180%);
   -webkit-backdrop-filter: blur(56px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  border: 1px solid var(--auflage-3);
   box-shadow:
     0 30px 74px rgba(0, 0, 0, 0.56),
     0 2px 10px rgba(0, 0, 0, 0.26);
@@ -1305,11 +1523,11 @@ html.tablet #card-kalorien { display: none; }
   padding: 10px 13px;
   border-radius: var(--r-el);
   border: 1px solid var(--border);
-  background: rgba(255,255,255,0.04);
+  background: var(--auflage-2);
   outline: none;
   transition: 0.16s ease;
 }
-.modal input:focus { border-color: rgba(91,140,255,0.5); }
+.modal input:focus { border-color: color-mix(in srgb, var(--blau) 50%, transparent); }
 .modal input::placeholder { color: var(--text-faint); }
 
 .row {
@@ -1322,14 +1540,14 @@ html.tablet #card-kalorien { display: none; }
   flex-shrink: 0;
   padding: 10px 15px;
   border-radius: var(--r-el);
-  border: 1px solid rgba(91,140,255,0.34);
-  background: rgba(91,140,255,0.13);
+  border: 1px solid color-mix(in srgb, var(--blau) 34%, transparent);
+  background: color-mix(in srgb, var(--blau) 13%, transparent);
   color: var(--blue-soft);
   font-size: 12px;
   white-space: nowrap;
   transition: 0.16s ease;
 }
-.row button:hover { background: rgba(91,140,255,0.22); }
+.row button:hover { background: color-mix(in srgb, var(--blau) 22%, transparent); }
 
 .full-btn {
   width: 100%;
@@ -1342,7 +1560,7 @@ html.tablet #card-kalorien { display: none; }
   font-size: 12.5px;
   transition: 0.16s ease;
 }
-.full-btn:hover { color: var(--blue-soft); border-color: rgba(91,140,255,0.5); background: rgba(91,140,255,0.07); }
+.full-btn:hover { color: var(--blue-soft); border-color: color-mix(in srgb, var(--blau) 50%, transparent); background: color-mix(in srgb, var(--blau) 7%, transparent); }
 
 .link-edit-list {
   list-style: none;
@@ -1359,7 +1577,7 @@ html.tablet #card-kalorien { display: none; }
   padding: 9px 12px;
   border-radius: var(--r-el);
   border: 1px solid var(--border);
-  background: rgba(255,255,255,0.03);
+  background: var(--auflage-2);
   font-size: 12px;
 }
 .link-edit-item span {
@@ -1430,8 +1648,8 @@ html.tablet #card-kalorien { display: none; }
 /* Scrollbar */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 8px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+::-webkit-scrollbar-thumb { background: var(--auflage-4); border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: var(--auflage-5); }
 
 /* ==========================================================
    STREAKS (gleiche Kartengröße wie Habits; wandert später
@@ -1466,14 +1684,14 @@ html.tablet #card-kalorien { display: none; }
   padding: 0 9px;
   border: 1px solid transparent;
   border-radius: 9px;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--auflage-2);
   font-family: inherit;
   color: var(--text-dim);
   text-align: left;
   cursor: pointer;
   transition: background 0.2s ease, border-color 0.2s ease, transform 0.14s ease;
 }
-.streak-row:hover { background: rgba(255, 255, 255, 0.07); }
+.streak-row:hover { background: var(--auflage-3); }
 .streak-row:active { transform: scale(0.985); }
 
 .sr-name {
@@ -1513,7 +1731,7 @@ html.tablet #card-kalorien { display: none; }
   aspect-ratio: 1 / 1;
   display: flex;
   color: #5b6473;
-  --kern: rgba(255, 255, 255, 0.2);
+  --kern: var(--auflage-5);
   transition: color 0.3s ease;
 }
 .sr-flamme svg { width: 100%; height: 100%; }
@@ -1528,7 +1746,7 @@ html.tablet #card-kalorien { display: none; }
 .streak-row.stufe-5 .sr-flamme { color: #38bdf8; --kern: #c9edff; }
 
 .streak-row.erledigt .sr-flamme svg { filter: drop-shadow(0 0 5px currentColor); }
-.streak-row.erledigt { border-color: rgba(255, 255, 255, 0.09); }
+.streak-row.erledigt { border-color: var(--auflage-3); }
 .streak-row.offen { opacity: 0.72; }
 
 /* Neigt sich der Tag dem Ende und die Serie ist noch offen: rotes
@@ -1556,8 +1774,8 @@ html.tablet #card-kalorien { display: none; }
   animation: warn-puls 1.9s ease-in-out infinite;
 }
 @keyframes warn-puls {
-  0%, 100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(251, 113, 133, 0.5); }
-  50%      { transform: scale(1.12); box-shadow: 0 0 0 4px rgba(251, 113, 133, 0); }
+  0%, 100% { transform: scale(1);    box-shadow: 0 0 0 0 color-mix(in srgb, var(--rot) 50%, transparent); }
+  50%      { transform: scale(1.12); box-shadow: 0 0 0 4px color-mix(in srgb, var(--rot) 0%, transparent); }
 }
 /* Die offene Flamme glimmt dabei leicht rötlich, damit die Zeile auffällt */
 .streak-row.dringend .sr-flamme { color: #8a6472; }
@@ -1577,13 +1795,13 @@ html.tablet #card-kalorien { display: none; }
   border-radius: 12px;
   margin-bottom: clamp(6px, 2vh, 16px);
   border: 1px solid var(--border-2);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--auflage-2);
   color: var(--blue-soft);
 }
 .vorschlag-icon svg { width: 20px; height: 20px; }
-.vorschlag-icon.warn { color: var(--amber); border-color: rgba(245,169,78,0.32); background: rgba(245,169,78,0.12); }
-.vorschlag-icon.good { color: var(--green); border-color: rgba(52,211,153,0.32); background: rgba(52,211,153,0.12); }
-.vorschlag-icon.alert { color: var(--red); border-color: rgba(251,113,133,0.32); background: rgba(251,113,133,0.12); }
+.vorschlag-icon.warn { color: var(--amber); border-color: color-mix(in srgb, var(--gelb) 32%, transparent); background: color-mix(in srgb, var(--gelb) 12%, transparent); }
+.vorschlag-icon.good { color: var(--green); border-color: color-mix(in srgb, var(--gruen) 32%, transparent); background: color-mix(in srgb, var(--gruen) 12%, transparent); }
+.vorschlag-icon.alert { color: var(--red); border-color: color-mix(in srgb, var(--rot) 32%, transparent); background: color-mix(in srgb, var(--rot) 12%, transparent); }
 
 .vorschlag-text {
   font-size: clamp(18px, 1.7vw, 24px);
@@ -1615,7 +1833,7 @@ html.tablet #card-kalorien { display: none; }
 .vorschlag-dots i {
   width: 5px; height: 5px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.14);
+  background: var(--auflage-4);
   transition: 0.16s ease;
 }
 .vorschlag-dots i.on { background: var(--blue); width: 16px; border-radius: var(--r-pill); }
@@ -1631,7 +1849,7 @@ html.tablet #card-kalorien { display: none; }
   padding: 3px;
   border-radius: var(--r-pill);
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--auflage-2);
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -1651,7 +1869,7 @@ html.tablet #card-kalorien { display: none; }
 }
 .tab:hover { color: var(--text-dim); }
 .tab.active {
-  background: rgba(91, 140, 255, 0.18);
+  background: color-mix(in srgb, var(--blau) 18%, transparent);
   color: var(--blue-soft);
   font-weight: 600;
 }
@@ -1701,7 +1919,7 @@ html.tablet #card-kalorien { display: none; }
   height: calc(100% - 6px);
   width: 0;
   border-radius: var(--r-pill);
-  background: rgba(91, 140, 255, 0.18);
+  background: color-mix(in srgb, var(--blau) 18%, transparent);
   pointer-events: none;
   z-index: 0;
 }
@@ -1805,8 +2023,8 @@ body.geladen .hero { animation: none; }
    allein auf dem Kopf und ist bewusst schwach. */
 .st-lauflicht.phone { stroke: #b3ccff; }
 .st-lauflicht.pc    { stroke: #cebbfa; animation-delay: -8s; }
-.st-lauflicht.kopf.phone { filter: drop-shadow(0 0 5px rgba(91, 140, 255, 0.6)); }
-.st-lauflicht.kopf.pc    { filter: drop-shadow(0 0 5px rgba(167, 139, 250, 0.6)); }
+.st-lauflicht.kopf.phone { filter: drop-shadow(0 0 5px color-mix(in srgb, var(--blau) 60%, transparent)); }
+.st-lauflicht.kopf.pc    { filter: drop-shadow(0 0 5px color-mix(in srgb, var(--blau) 60%, transparent)); }
 .st-lauflicht.schweif    { filter: none; }
 @keyframes linie-laufen {
   from { stroke-dashoffset: var(--lauf-start, 0); }
@@ -1953,7 +2171,7 @@ body.aufbau .quick-tile { animation: kachel-rein 0.4s cubic-bezier(0.34, 1.5, 0.
   padding: 0.6cqh 6cqw;
   border-radius: var(--r-pill);
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--auflage-2);
   font-family: var(--mono);
   font-size: min(9.5cqw, 7cqh);
   font-weight: 600;
@@ -2070,11 +2288,11 @@ body.aufbau .quick-tile { animation: kachel-rein 0.4s cubic-bezier(0.34, 1.5, 0.
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+  scrollbar-color: var(--auflage-4) transparent;
 }
 .weather-woche::-webkit-scrollbar { width: 4px; }
 .weather-woche::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.16);
+  background: var(--auflage-4);
   border-radius: 4px;
 }
 .wtag {
@@ -2104,8 +2322,8 @@ body.aufbau .wtag { animation: eintrag-rein 0.4s cubic-bezier(0.4, 0, 0.2, 1) bo
 .wtag:nth-child(6) { animation-delay: 0.20s; }
 .wtag:nth-child(7) { animation-delay: 0.24s; }
 .wtag.heute {
-  background: rgba(91, 140, 255, 0.1);
-  border-color: rgba(91, 140, 255, 0.28);
+  background: color-mix(in srgb, var(--blau) 10%, transparent);
+  border-color: color-mix(in srgb, var(--blau) 28%, transparent);
   color: var(--text);
 }
 .wtag-name {
@@ -2325,8 +2543,8 @@ body.aufbau .habit-list .hb-zeile { animation: zeile-rein 0.42s cubic-bezier(0.3
 /* Das Markierungszeichen der Seitenleiste glimmt langsam */
 .brand-mark { animation: marke-glimmen 5s ease-in-out infinite; }
 @keyframes marke-glimmen {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(91, 140, 255, 0.0); }
-  50%      { box-shadow: 0 0 14px 2px rgba(91, 140, 255, 0.45); }
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--blau) 0%, transparent); }
+  50%      { box-shadow: 0 0 14px 2px color-mix(in srgb, var(--blau) 45%, transparent); }
 }
 
 /* Der aktive Navigationspunkt zeigt einen ruhigen Puls */
@@ -2420,8 +2638,8 @@ html.finger .naechste-mehr { padding: 11px 0 9px; font-size: 11.5px; }
 .entry-item.klausur .entry-accent { background: var(--red); }
 .entry-item.klausur .entry-badge {
   color: var(--red);
-  border-color: rgba(251, 113, 133, 0.32);
-  background: rgba(251, 113, 133, 0.1);
+  border-color: color-mix(in srgb, var(--rot) 32%, transparent);
+  background: color-mix(in srgb, var(--rot) 10%, transparent);
 }
 
 .naechste-empty {
@@ -2450,9 +2668,9 @@ html.finger .naechste-mehr { padding: 11px 0 9px; font-size: 11.5px; }
   height: 100%;
   border-radius: 10px;
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02) 40%, transparent 70%),
+    linear-gradient(180deg, var(--auflage-3), var(--auflage-1) 40%, transparent 70%),
     repeating-linear-gradient(180deg,
-      rgba(255,255,255,0.05) 0 10px,
+      var(--auflage-2) 0 10px,
       transparent 10px 34px);
 }
 
@@ -2491,11 +2709,11 @@ html.finger .naechste-mehr { padding: 11px 0 9px; font-size: 11.5px; }
   border-radius: var(--r-card);
   border: 1px solid transparent;
   background: linear-gradient(152deg,
-    rgba(5, 8, 15, 0.24) 0%, rgba(3, 5, 11, 0.32) 55%, rgba(5, 8, 15, 0.27) 100%);
+    color-mix(in srgb, var(--flaeche) 24%, transparent) 0%, color-mix(in srgb, var(--flaeche) 32%, transparent) 55%, color-mix(in srgb, var(--flaeche) 27%, transparent) 100%);
   backdrop-filter: blur(26px) saturate(140%) brightness(0.6);
   -webkit-backdrop-filter: blur(26px) saturate(140%) brightness(0.6);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    inset 0 1px 0 var(--auflage-3),
     0 18px 44px rgba(0, 0, 0, 0.5);
   flex-shrink: 0;
 }
@@ -2588,12 +2806,12 @@ html.finger .block-kopf.klappbar { padding: 9px 0; margin-bottom: 5px; }
   padding: 11px 14px;
   border-radius: 10px;
   border: 1px solid transparent;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--auflage-2);
   transition: background 0.16s ease, border-color 0.16s ease;
 }
-.voll-zeile:hover { background: rgba(255, 255, 255, 0.06); }
-.voll-zeile.heute { border-color: rgba(251, 113, 133, 0.35); background: rgba(251, 113, 133, 0.08); }
-.voll-zeile.bald  { border-color: rgba(245, 169, 78, 0.28); }
+.voll-zeile:hover { background: var(--auflage-3); }
+.voll-zeile.heute { border-color: color-mix(in srgb, var(--rot) 35%, transparent); background: color-mix(in srgb, var(--rot) 8%, transparent); }
+.voll-zeile.bald  { border-color: color-mix(in srgb, var(--gelb) 28%, transparent); }
 .vz-punkt { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); flex-shrink: 0; }
 .vz-punkt.klausur { background: var(--red); }
 .vz-punkt.erledigt { background: var(--green); }
@@ -2631,7 +2849,7 @@ html.finger .block-kopf.klappbar { padding: 9px 0; margin-bottom: 5px; }
   font-size: 13px;
   transition: 0.16s ease;
 }
-.vz-del:hover { background: rgba(251, 113, 133, 0.16); color: var(--red); }
+.vz-del:hover { background: color-mix(in srgb, var(--rot) 16%, transparent); color: var(--red); }
 
 /* ---------- Formular in voller Breite ---------- */
 .zeilen-form { display: flex; gap: 10px; margin-bottom: 14px; }
@@ -2642,23 +2860,23 @@ html.finger .block-kopf.klappbar { padding: 9px 0; margin-bottom: 5px; }
   padding: 0 14px;
   border-radius: 11px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--auflage-2);
   color: var(--text);
   font-size: 14px;
 }
-.zeilen-input:focus { outline: none; border-color: var(--border-2); background: rgba(255, 255, 255, 0.07); }
+.zeilen-input:focus { outline: none; border-color: var(--border-2); background: var(--auflage-3); }
 .zeilen-btn {
   height: 42px;
   padding: 0 18px;
   border-radius: 11px;
   border: 1px solid var(--border-2);
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--auflage-3);
   color: var(--text);
   font-size: 13.5px;
   font-weight: 500;
   transition: 0.16s ease;
 }
-.zeilen-btn:hover { background: rgba(255, 255, 255, 0.12); }
+.zeilen-btn:hover { background: var(--auflage-4); }
 
 /* ---------- Kennzahlen ---------- */
 .kennzahl-reihe {
@@ -2669,7 +2887,7 @@ html.finger .block-kopf.klappbar { padding: 9px 0; margin-bottom: 5px; }
 .kennzahl {
   padding: 14px 16px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.035);
+  background: var(--auflage-2);
 }
 .kz-label { font-size: 12px; color: var(--text-faint); }
 .kz-wert {
@@ -2704,12 +2922,12 @@ html.finger .block-kopf.klappbar { padding: 9px 0; margin-bottom: 5px; }
   max-height: 26px;
   border: none;
   border-radius: 5px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--auflage-2);
   padding: 0;
   transition: transform 0.14s ease, background 0.2s ease;
 }
-.matrix-feld.done { background: var(--violet); box-shadow: 0 0 8px rgba(167, 139, 250, 0.3); }
-.matrix-feld.heute { box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.35); }
+.matrix-feld.done { background: var(--violet); box-shadow: 0 0 8px color-mix(in srgb, var(--blau) 30%, transparent); }
+.matrix-feld.heute { box-shadow: 0 0 0 1.5px var(--auflage-5); }
 button.matrix-feld { cursor: pointer; }
 button.matrix-feld:hover { transform: scale(1.12); }
 
@@ -2726,9 +2944,9 @@ button.matrix-feld:hover { transform: scale(1.12); }
   padding: 13px 15px;
   border-radius: 12px;
   border: 1px solid transparent;
-  background: rgba(255, 255, 255, 0.035);
+  background: var(--auflage-2);
 }
-.streak-kachel.erledigt { border-color: rgba(255, 255, 255, 0.1); }
+.streak-kachel.erledigt { border-color: var(--auflage-4); }
 .sk-name { flex: 1; min-width: 0; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sk-zahl { font-family: var(--mono); font-size: 20px; font-weight: 700; }
 .sk-flamme { width: 24px; height: 24px; flex-shrink: 0; color: #5b6473; --kern: #8a93a3; }
@@ -2762,7 +2980,7 @@ button.matrix-feld:hover { transform: scale(1.12); }
 .balken-tafel { display: flex; flex-direction: column; gap: 9px; }
 .bt-zeile { display: flex; align-items: center; gap: 12px; }
 .bt-name { width: 110px; flex-shrink: 0; font-size: 13px; color: var(--text-dim); }
-.bt-spur { flex: 1; height: 9px; border-radius: 5px; background: rgba(255, 255, 255, 0.05); overflow: hidden; }
+.bt-spur { flex: 1; height: 9px; border-radius: 5px; background: var(--auflage-2); overflow: hidden; }
 .bt-fuellung {
   height: 100%;
   border-radius: 5px;
@@ -2789,10 +3007,10 @@ button.matrix-feld:hover { transform: scale(1.12); }
   overflow-y: auto;
   padding: 6px;
   border-radius: 20px;
-  background: rgba(16, 21, 36, 0.42);
+  background: color-mix(in srgb, var(--flaeche) 42%, transparent);
   backdrop-filter: blur(48px) saturate(180%);
   -webkit-backdrop-filter: blur(48px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  border: 1px solid var(--auflage-3);
   box-shadow:
     0 22px 54px rgba(0, 0, 0, 0.55),
     0 2px 10px rgba(0, 0, 0, 0.26);
@@ -2811,8 +3029,8 @@ button.matrix-feld:hover { transform: scale(1.12); }
   cursor: pointer;
 }
 .slash-eintrag + .slash-eintrag { margin-top: 2px; }
-.slash-eintrag.gewaehlt { background: rgba(91, 140, 255, 0.16); }
-.slash-eintrag:hover { background: rgba(255, 255, 255, 0.06); }
+.slash-eintrag.gewaehlt { background: color-mix(in srgb, var(--blau) 16%, transparent); }
+.slash-eintrag:hover { background: var(--auflage-3); }
 .slash-icon { width: 17px; height: 17px; flex-shrink: 0; color: var(--text-dim); }
 .slash-icon svg { width: 100%; height: 100%; }
 .slash-eintrag.gewaehlt .slash-icon { color: var(--blue); }
@@ -2885,7 +3103,7 @@ button.matrix-feld:hover { transform: scale(1.12); }
 .kp-art {
   padding: 3px 9px;
   border-radius: var(--r-pill);
-  background: rgba(91, 140, 255, 0.18);
+  background: color-mix(in srgb, var(--blau) 18%, transparent);
   color: var(--blue-soft);
   font-size: 10.5px;
   letter-spacing: 0.05em;
@@ -2906,15 +3124,15 @@ button.matrix-feld:hover { transform: scale(1.12); }
   padding: 6px 11px;
   margin-left: -11px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--auflage-2);
   outline: 1px solid transparent;
   cursor: text;
   transition: 0.16s ease;
 }
-.kp-titel.tippbar:hover { background: rgba(255, 255, 255, 0.08); }
+.kp-titel.tippbar:hover { background: var(--auflage-3); }
 .kp-titel.tippbar:focus {
   outline-color: color-mix(in srgb, var(--blue) 55%, transparent);
-  background: rgba(0, 0, 0, 0.24);
+  background: var(--senke-1);
 }
 .kp-titel.tippbar:empty::before {
   content: attr(data-leer);
@@ -2928,31 +3146,31 @@ button.matrix-feld:hover { transform: scale(1.12); }
   padding: 8px 13px;
   border-radius: 11px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--auflage-2);
   color: var(--text-dim);
   font-size: 13px;
   transition: 0.16s ease;
 }
 .kp-knopf svg { width: 15px; height: 15px; flex-shrink: 0; }
-.kp-knopf:hover { background: rgba(255, 255, 255, 0.1); color: var(--text); }
+.kp-knopf:hover { background: var(--auflage-4); color: var(--text); }
 .kp-knopf.gesetzt {
-  border-color: rgba(91, 140, 255, 0.4);
-  background: rgba(91, 140, 255, 0.14);
+  border-color: color-mix(in srgb, var(--blau) 40%, transparent);
+  background: color-mix(in srgb, var(--blau) 14%, transparent);
   color: var(--text);
 }
-.kp-knopf.offen { border-color: var(--blue); background: rgba(91, 140, 255, 0.2); color: var(--text); }
+.kp-knopf.offen { border-color: var(--blue); background: color-mix(in srgb, var(--blau) 20%, transparent); color: var(--text); }
 .kp-anlegen {
   padding: 9px 22px;
   border-radius: 10px;
-  border: 1px solid rgba(52, 211, 153, 0.4);
-  background: rgba(52, 211, 153, 0.16);
+  border: 1px solid color-mix(in srgb, var(--gruen) 40%, transparent);
+  background: color-mix(in srgb, var(--gruen) 16%, transparent);
   color: var(--green);
   font-size: 12.5px;
   font-weight: 500;
   transition: 0.16s ease;
 }
 .kp-anlegen { font-size: 13.5px; }
-.kp-anlegen:hover { background: rgba(52, 211, 153, 0.26); }
+.kp-anlegen:hover { background: color-mix(in srgb, var(--gruen) 26%, transparent); }
 .kp-anlegen:disabled { opacity: 0.4; cursor: not-allowed; }
 .kp-weg {
   width: 26px; height: 26px;
@@ -2961,7 +3179,7 @@ button.matrix-feld:hover { transform: scale(1.12); }
   font-size: 12px;
   transition: 0.16s ease;
 }
-.kp-weg:hover { background: rgba(251, 113, 133, 0.16); color: var(--red); }
+.kp-weg:hover { background: color-mix(in srgb, var(--rot) 16%, transparent); color: var(--red); }
 
 /* ---------- Ausklappende Fenster ---------- */
 .pop {
@@ -2973,10 +3191,10 @@ button.matrix-feld:hover { transform: scale(1.12); }
   z-index: 540;
   padding: 12px;
   border-radius: 22px;
-  background: rgba(16, 21, 36, 0.44);
+  background: color-mix(in srgb, var(--flaeche) 44%, transparent);
   backdrop-filter: blur(50px) saturate(180%);
   -webkit-backdrop-filter: blur(50px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  border: 1px solid var(--auflage-3);
   box-shadow:
     0 24px 60px rgba(0, 0, 0, 0.58),
     0 2px 10px rgba(0, 0, 0, 0.26);
@@ -2999,11 +3217,11 @@ button.matrix-feld:hover { transform: scale(1.12); }
   display: flex; align-items: center; justify-content: center;
   border: 1px solid var(--border);
   border-radius: 9px;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--auflage-2);
   color: var(--text-dim);
   transition: 0.16s ease;
 }
-.kal-pfeil:hover { background: rgba(255, 255, 255, 0.1); color: var(--text); }
+.kal-pfeil:hover { background: var(--auflage-4); color: var(--text); }
 .kal-pfeil svg { width: 13px; height: 13px; }
 .kal-wochentage, .kal-gitter {
   display: grid;
@@ -3028,10 +3246,10 @@ button.matrix-feld:hover { transform: scale(1.12); }
   font-size: 12px;
   transition: 0.14s ease;
 }
-.kal-tag:hover { background: rgba(255, 255, 255, 0.08); color: var(--text); }
+.kal-tag:hover { background: var(--auflage-3); color: var(--text); }
 .kal-tag.fremd { opacity: 0.28; }
-.kal-tag.heute { border-color: rgba(255, 255, 255, 0.28); }
-.kal-tag.gewaehlt { background: var(--blue); color: #05070d; font-weight: 700; }
+.kal-tag.heute { border-color: var(--auflage-5); }
+.kal-tag.gewaehlt { background: var(--blue); color: #fff; font-weight: 700; }
 
 /* Bei gewaehltem Fach: Tage mit diesem Kurs treten hervor, die anderen
    zurueck. Klicken kann man beide. */
@@ -3058,7 +3276,7 @@ button.matrix-feld:hover { transform: scale(1.12); }
 .kal-tag.gewaehlt.ohne-fach {
   opacity: 1;
   background: var(--blue);
-  color: #05070d;
+  color: #fff;
   border-color: transparent;
 }
 .kal-tag.gewaehlt::after { display: none; }
@@ -3099,7 +3317,7 @@ button.matrix-feld:hover { transform: scale(1.12); }
   height: 34px;
   transform: translateY(-50%);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--auflage-3);
   pointer-events: none;
 }
 /* Kein Scrollen mehr: das Band wird verschoben. Dadurch bewegt eine
@@ -3145,15 +3363,15 @@ button.matrix-feld:hover { transform: scale(1.12); }
   padding: 7px 0;
   border-radius: 10px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--auflage-2);
   color: var(--text-dim);
   font-size: 12.5px;
   transition: 0.16s ease;
 }
-.zeit-fuss button:hover { background: rgba(255, 255, 255, 0.11); color: var(--text); }
+.zeit-fuss button:hover { background: var(--auflage-4); color: var(--text); }
 .zeit-fuss button.haupt {
-  border-color: rgba(91, 140, 255, 0.45);
-  background: rgba(91, 140, 255, 0.18);
+  border-color: color-mix(in srgb, var(--blau) 45%, transparent);
+  background: color-mix(in srgb, var(--blau) 18%, transparent);
   color: var(--text);
 }
 
@@ -3208,22 +3426,22 @@ button.matrix-feld:hover { transform: scale(1.12); }
   display: flex; align-items: center; justify-content: center;
   border: 1px solid var(--border);
   border-radius: 9px;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--auflage-2);
   color: var(--text-dim);
   transition: 0.16s ease;
 }
-.monat-pfeil:hover { background: rgba(255, 255, 255, 0.1); color: var(--text); }
+.monat-pfeil:hover { background: var(--auflage-4); color: var(--text); }
 .monat-pfeil svg { width: 14px; height: 14px; }
 .monat-heute {
   padding: 6px 13px;
   border: 1px solid var(--border-2);
   border-radius: 9px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--auflage-2);
   color: var(--text-dim);
   font-size: 12.5px;
   transition: 0.16s ease;
 }
-.monat-heute:hover { background: rgba(255, 255, 255, 0.11); color: var(--text); }
+.monat-heute:hover { background: var(--auflage-4); color: var(--text); }
 
 .monat-wochentage {
   display: grid;
@@ -3253,16 +3471,16 @@ button.matrix-feld:hover { transform: scale(1.12); }
   padding: 7px 7px 8px;
   border: 1px solid transparent;
   border-radius: 11px;
-  background: rgba(255, 255, 255, 0.028);
+  background: var(--auflage-1);
   text-align: left;
   transition: background 0.16s ease, border-color 0.16s ease;
   overflow: hidden;
 }
-.monat-tag:hover { background: rgba(255, 255, 255, 0.06); }
+.monat-tag:hover { background: var(--auflage-3); }
 .monat-tag.fremd { opacity: 0.34; }
-.monat-tag.wochenende { background: rgba(255, 255, 255, 0.014); }
-.monat-tag.heute { border-color: rgba(91, 140, 255, 0.5); background: rgba(91, 140, 255, 0.09); }
-.monat-tag.gewaehlt { border-color: rgba(255, 255, 255, 0.4); }
+.monat-tag.wochenende { background: var(--auflage-1); }
+.monat-tag.heute { border-color: color-mix(in srgb, var(--blau) 50%, transparent); background: color-mix(in srgb, var(--blau) 9%, transparent); }
+.monat-tag.gewaehlt { border-color: var(--auflage-5); }
 
 .mt-zahl {
   font-family: var(--mono);
@@ -3280,7 +3498,7 @@ button.matrix-feld:hover { transform: scale(1.12); }
   justify-content: center;
   border-radius: 50%;
   background: var(--blue);
-  color: #05070d;
+  color: #fff;
 }
 
 /* Ein Eintrag im Tagesfeld */
@@ -3290,7 +3508,7 @@ button.matrix-feld:hover { transform: scale(1.12); }
   gap: 5px;
   padding: 3px 6px;
   border-radius: 6px;
-  background: rgba(91, 140, 255, 0.18);
+  background: color-mix(in srgb, var(--blau) 18%, transparent);
   font-size: 11px;
   color: var(--text);
   overflow: hidden;
@@ -3298,8 +3516,8 @@ button.matrix-feld:hover { transform: scale(1.12); }
   white-space: nowrap;
   flex-shrink: 0;
 }
-.mt-chip.klausur { background: rgba(251, 113, 133, 0.2); }
-.mt-chip.hausaufgabe { background: rgba(168, 85, 247, 0.18); }
+.mt-chip.klausur { background: color-mix(in srgb, var(--rot) 20%, transparent); }
+.mt-chip.hausaufgabe { background: color-mix(in srgb, var(--blau) 18%, transparent); }
 .mt-punkt {
   width: 5px; height: 5px;
   border-radius: 50%;
@@ -3307,7 +3525,7 @@ button.matrix-feld:hover { transform: scale(1.12); }
   flex-shrink: 0;
 }
 .mt-chip.klausur .mt-punkt { background: var(--red); }
-.mt-chip.hausaufgabe .mt-punkt { background: #a855f7; }
+.mt-chip.hausaufgabe .mt-punkt { background: var(--blau); }
 .mt-zeit { font-family: var(--mono); font-size: 9.5px; color: var(--text-faint); flex-shrink: 0; }
 .mt-mehr { font-size: 10px; color: var(--text-faint); padding-left: 2px; }
 
@@ -3327,17 +3545,17 @@ button.matrix-feld:hover { transform: scale(1.12); }
    Feld ueber zwei Zeilen - deshalb liegen leere Felder und Kurse
    als getrennte Kinder im selben Gitter.
    ========================================================== */
-.ton-gruen   { --ton: #34d399; }
+.ton-gruen   { --ton: var(--gruen); }
 .ton-hellgruen { --ton: #a3e635; }
 .ton-cyan    { --ton: #22d3ee; }
-.ton-rot     { --ton: #fb7185; }
-.ton-blau    { --ton: #5b8cff; }
+.ton-rot     { --ton: var(--rot); }
+.ton-blau    { --ton: var(--blau); }
 .ton-pink    { --ton: #f472b6; }
-.ton-violett { --ton: #a78bfa; }
+.ton-violett { --ton: var(--blau); }
 .ton-gelb    { --ton: #fbbf24; }
 .ton-tuerkis { --ton: #22d3ee; }
 .ton-orange  { --ton: #fb923c; }
-.ton-grau    { --ton: #8c97b0; }
+.ton-grau    { --ton: var(--text-2); }
 
 .plan-rolle {
   width: 100%;
@@ -3368,14 +3586,14 @@ body.aufbau .plan { animation: plan-rein 0.5s cubic-bezier(0.22, 1, 0.36, 1) bot
   justify-content: center;
   padding: 7px 6px;
   border-radius: 9px;
-  background: rgba(255, 255, 255, 0.035);
+  background: var(--auflage-2);
   font-size: 12px;
   font-weight: 600;
   color: var(--text-dim);
   letter-spacing: -0.01em;
 }
 .plan-tag.heute {
-  background: rgba(91, 140, 255, 0.16);
+  background: color-mix(in srgb, var(--blau) 16%, transparent);
   color: var(--blue-soft);
 }
 .plan-tag-kurz { display: none; }
@@ -3396,9 +3614,9 @@ body.aufbau .plan { animation: plan-rein 0.5s cubic-bezier(0.22, 1, 0.36, 1) bot
 
 .plan-leer {
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.022);
+  background: var(--auflage-1);
 }
-.plan-leer.heute { background: rgba(91, 140, 255, 0.05); }
+.plan-leer.heute { background: color-mix(in srgb, var(--blau) 5%, transparent); }
 
 .plan-fach {
   position: relative;
@@ -3411,14 +3629,14 @@ body.aufbau .plan { animation: plan-rein 0.5s cubic-bezier(0.22, 1, 0.36, 1) bot
   border: 1px solid color-mix(in srgb, var(--ton) 34%, transparent);
   border-left: 3px solid var(--ton);
   border-radius: 9px;
-  background: color-mix(in srgb, var(--ton) 12%, rgba(10, 14, 26, 0.5));
+  background: color-mix(in srgb, var(--ton) 12%, color-mix(in srgb, var(--flaeche) 50%, transparent));
   color: var(--text);
   text-align: left;
   transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease, opacity 0.25s ease;
 }
 .plan-fach:hover {
   transform: translateY(-1px);
-  background: color-mix(in srgb, var(--ton) 22%, rgba(10, 14, 26, 0.5));
+  background: color-mix(in srgb, var(--ton) 22%, color-mix(in srgb, var(--flaeche) 50%, transparent));
   border-color: color-mix(in srgb, var(--ton) 60%, transparent);
 }
 .pf-name  { font-size: 12.5px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.15; }
@@ -3459,7 +3677,7 @@ body.aufbau .plan { animation: plan-rein 0.5s cubic-bezier(0.22, 1, 0.36, 1) bot
   padding: 4px 10px;
   border-radius: var(--r-pill);
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.035);
+  background: var(--auflage-2);
   color: var(--text-dim);
   font-size: 11px;
   transition: 0.16s ease;
@@ -3500,9 +3718,9 @@ body.aufbau .plan { animation: plan-rein 0.5s cubic-bezier(0.22, 1, 0.36, 1) bot
   border-radius: 2px;
   background: var(--ton, var(--text-faint));
 }
-.pl-zeile.schlicht i { background: rgba(255, 255, 255, 0.14); }
-.pl-zeile:hover { background: rgba(255, 255, 255, 0.06); }
-.pl-zeile.aktiv { background: rgba(91, 140, 255, 0.17); }
+.pl-zeile.schlicht i { background: var(--auflage-4); }
+.pl-zeile:hover { background: var(--auflage-3); }
+.pl-zeile.aktiv { background: color-mix(in srgb, var(--blau) 17%, transparent); }
 .plz-haupt {
   flex: 1;
   min-width: 0;
@@ -3528,12 +3746,12 @@ body.aufbau .plan { animation: plan-rein 0.5s cubic-bezier(0.22, 1, 0.36, 1) bot
   padding: 7px;
   border: none;
   border-radius: 9px;
-  background: rgba(251, 113, 133, 0.1);
+  background: color-mix(in srgb, var(--rot) 10%, transparent);
   color: var(--red);
   font-size: 11.5px;
   transition: 0.14s ease;
 }
-.pl-weg:hover { background: rgba(251, 113, 133, 0.2); }
+.pl-weg:hover { background: color-mix(in srgb, var(--rot) 20%, transparent); }
 
 /* ---------- Fach- und Stundenknopf nur bei Klausuren ---------- */
 .komponist .nur-schule { display: none; }
@@ -3565,7 +3783,7 @@ body.aufbau .plan { animation: plan-rein 0.5s cubic-bezier(0.22, 1, 0.36, 1) bot
   margin-left: 6px;
   padding: 1px 7px;
   border-radius: var(--r-pill);
-  background: rgba(91, 140, 255, 0.14);
+  background: color-mix(in srgb, var(--blau) 14%, transparent);
   color: var(--blue-soft);
   font-size: 10.5px;
 }
@@ -3631,8 +3849,8 @@ body.aufbau .plan { animation: plan-rein 0.5s cubic-bezier(0.22, 1, 0.36, 1) bot
 .entry-go svg { width: 15px; height: 15px; }
 .entry-go:hover {
   color: var(--blue-soft);
-  border-color: rgba(91, 140, 255, 0.32);
-  background: rgba(91, 140, 255, 0.12);
+  border-color: color-mix(in srgb, var(--blau) 32%, transparent);
+  background: color-mix(in srgb, var(--blau) 12%, transparent);
 }
 
 /* ==========================================================
@@ -3645,7 +3863,7 @@ body.aufbau .plan { animation: plan-rein 0.5s cubic-bezier(0.22, 1, 0.36, 1) bot
   border-radius: var(--r-card);
   border: 1px solid color-mix(in srgb, var(--ton) 30%, transparent);
   border-left: 4px solid var(--ton);
-  background: color-mix(in srgb, var(--ton) 8%, rgba(5, 8, 15, 0.42));
+  background: color-mix(in srgb, var(--ton) 8%, color-mix(in srgb, var(--flaeche) 42%, transparent));
   backdrop-filter: blur(34px) saturate(180%);
   -webkit-backdrop-filter: blur(34px) saturate(180%);
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
@@ -3676,7 +3894,7 @@ body.aufbau .plan { animation: plan-rein 0.5s cubic-bezier(0.22, 1, 0.36, 1) bot
   font-size: 14px; line-height: 1;
   transition: 0.16s ease;
 }
-.lp-zu:hover { color: var(--text); background: rgba(255, 255, 255, 0.08); }
+.lp-zu:hover { color: var(--text); background: var(--auflage-3); }
 .lp-titel {
   margin: 12px 0 18px;
   font-size: 24px;
@@ -3692,7 +3910,7 @@ body.aufbau .plan { animation: plan-rein 0.5s cubic-bezier(0.22, 1, 0.36, 1) bot
 .lp-feld {
   padding: 11px 13px;
   border-radius: var(--r-el);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--auflage-2);
 }
 .lp-feld span { display: block; font-size: 10.5px; letter-spacing: 0.05em;
                 text-transform: uppercase; color: var(--text-faint); }
@@ -3706,7 +3924,7 @@ body.aufbau .plan { animation: plan-rein 0.5s cubic-bezier(0.22, 1, 0.36, 1) bot
   padding: 7px 9px;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: rgba(0, 0, 0, 0.22);
+  background: var(--senke-1);
   color: var(--text);
   font-family: inherit;
   font-size: 13px;
@@ -3718,7 +3936,7 @@ body.aufbau .plan { animation: plan-rein 0.5s cubic-bezier(0.22, 1, 0.36, 1) bot
 .lp-feld.tp-datum input:focus,
 .lp-feld.tp-notiz textarea:focus {
   border-color: color-mix(in srgb, var(--blue) 50%, transparent);
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--senke-2);
 }
 html.finger .lp-feld.tp-datum input,
 html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
@@ -3728,14 +3946,14 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   padding: 8px 15px;
   border-radius: 10px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--auflage-2);
   color: var(--text-dim);
   font-size: 12.5px;
   transition: 0.16s ease;
 }
-.lp-knopf:hover { color: var(--text); background: rgba(255, 255, 255, 0.1); }
-.lp-knopf.weg:hover { color: var(--red); border-color: rgba(251, 113, 133, 0.35);
-                      background: rgba(251, 113, 133, 0.12); }
+.lp-knopf:hover { color: var(--text); background: var(--auflage-4); }
+.lp-knopf.weg:hover { color: var(--red); border-color: color-mix(in srgb, var(--rot) 35%, transparent);
+                      background: color-mix(in srgb, var(--rot) 12%, transparent); }
 
 /* Kurse mit Klausur oeffnen das Unterfenster */
 #pgLernenListe .voll-zeile.klickbar { cursor: pointer; }
@@ -3743,7 +3961,7 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
 
 /* ---------- Lernseite: Gruppen ---------- */
 .lern-gruppen { display: flex; flex-direction: column; gap: 16px; width: 100%; }
-.lern-gruppe.gruppe-wichtig { border-color: rgba(251, 113, 133, 0.3); }
+.lern-gruppe.gruppe-wichtig { border-color: color-mix(in srgb, var(--rot) 30%, transparent); }
 .lern-gruppe.gruppe-wichtig .block-kopf h3 { color: var(--red); }
 .lern-gruppe.gruppe-bereit  .block-kopf h3 { color: var(--green); }
 
@@ -3752,13 +3970,13 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   padding: 3px 10px;
   border-radius: var(--r-pill);
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--auflage-2);
   color: var(--text-faint);
   font-size: 10.5px;
 }
 .vz-material.da {
-  border-color: rgba(52, 211, 153, 0.3);
-  background: rgba(52, 211, 153, 0.1);
+  border-color: color-mix(in srgb, var(--gruen) 30%, transparent);
+  background: color-mix(in srgb, var(--gruen) 10%, transparent);
   color: var(--green);
 }
 
@@ -3781,7 +3999,7 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   display: flex; align-items: center; gap: 10px;
   padding: 9px 12px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--auflage-2);
   font-size: 13px;
 }
 .lp-mat-liste li span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
@@ -3794,31 +4012,31 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   font-size: 11px; line-height: 1;
   transition: 0.16s ease;
 }
-.lp-mat-weg:hover { color: var(--red); background: rgba(251, 113, 133, 0.14); }
+.lp-mat-weg:hover { color: var(--red); background: color-mix(in srgb, var(--rot) 14%, transparent); }
 .lp-mat-form { display: flex; gap: 8px; margin-top: 9px; }
 .lp-mat-form input {
   flex: 1; min-width: 0;
   padding: 9px 13px;
   border-radius: 10px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--auflage-2);
   color: var(--text);
   font-size: 13px;
   outline: none;
   transition: 0.16s ease;
 }
-.lp-mat-form input:focus { border-color: rgba(91, 140, 255, 0.5); }
+.lp-mat-form input:focus { border-color: color-mix(in srgb, var(--blau) 50%, transparent); }
 .lp-mat-form input::placeholder { color: var(--text-faint); }
 .lp-mat-form button {
   padding: 9px 16px;
   border-radius: 10px;
-  border: 1px solid rgba(91, 140, 255, 0.35);
-  background: rgba(91, 140, 255, 0.14);
+  border: 1px solid color-mix(in srgb, var(--blau) 35%, transparent);
+  background: color-mix(in srgb, var(--blau) 14%, transparent);
   color: var(--blue-soft);
   font-size: 12.5px;
   transition: 0.16s ease;
 }
-.lp-mat-form button:hover { background: rgba(91, 140, 255, 0.24); }
+.lp-mat-form button:hover { background: color-mix(in srgb, var(--blau) 24%, transparent); }
 
 /* ---------- Reihenfolge: Nummer an der Seite ---------- */
 .vz-rang {
@@ -3826,7 +4044,7 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   width: 24px; height: 24px;
   display: flex; align-items: center; justify-content: center;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--auflage-2);
   color: var(--text-faint);
   font-family: var(--mono);
   font-size: 11.5px;
@@ -3838,7 +4056,7 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
 }
 .voll-zeile.empfohlen {
   border-color: color-mix(in srgb, var(--frist, var(--blue)) 42%, transparent);
-  background: color-mix(in srgb, var(--frist, var(--blue)) 8%, rgba(255, 255, 255, 0.03));
+  background: color-mix(in srgb, var(--frist, var(--blue)) 8%, var(--auflage-2));
 }
 .vz-tipp {
   margin-left: 9px;
@@ -3865,13 +4083,13 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   padding: 12px 15px;
   border-radius: var(--r-el);
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--auflage-2);
   color: var(--text-dim);
   font-size: 13.5px;
   text-align: left;
   transition: 0.18s ease;
 }
-.lp-haken:hover { background: rgba(255, 255, 255, 0.07); color: var(--text); }
+.lp-haken:hover { background: var(--auflage-3); color: var(--text); }
 .lh-box {
   flex-shrink: 0;
   width: 22px; height: 22px;
@@ -3892,7 +4110,7 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
 .lp-haken.an .lh-box {
   border-color: var(--ton);
   background: var(--ton);
-  color: #05070d;
+  color: #fff;
 }
 .lp-haken.an .lh-zahl { color: var(--ton); }
 
@@ -3904,7 +4122,7 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   padding: 18px 20px;
   border-radius: var(--r-card);
   border: 1px solid var(--border);
-  background: rgba(3, 5, 11, 0.42);
+  background: color-mix(in srgb, var(--flaeche) 42%, transparent);
 }
 .fs-links { flex: 1; min-width: 0; }
 .fs-titel { font-size: 14px; font-weight: 600; }
@@ -3918,10 +4136,10 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
 .fs-tag {
   width: 11px; height: 11px;
   border-radius: 3px;
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--auflage-3);
   transition: background 0.2s ease, box-shadow 0.2s ease;
 }
-.fs-tag.vorbei { background: rgba(255, 255, 255, 0.035); }
+.fs-tag.vorbei { background: var(--auflage-2); }
 .fs-tag.voll {
   background: var(--ton);
   box-shadow: 0 0 7px color-mix(in srgb, var(--ton) 55%, transparent);
@@ -3989,7 +4207,7 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   font-size: 14px; line-height: 1;
   transition: 0.16s ease;
 }
-.ff-zu:hover { color: var(--text); background: rgba(255, 255, 255, 0.08); }
+.ff-zu:hover { color: var(--text); background: var(--auflage-3); }
 
 .ff-gitter {
   display: grid;
@@ -3997,7 +4215,7 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   gap: 10px;
   margin-top: 20px;
 }
-.ff-feld { padding: 11px 13px; border-radius: var(--r-el); background: rgba(255, 255, 255, 0.04); }
+.ff-feld { padding: 11px 13px; border-radius: var(--r-el); background: var(--auflage-2); }
 .ff-feld span { display: block; font-size: 10px; letter-spacing: 0.06em;
                 text-transform: uppercase; color: var(--text-faint); }
 .ff-feld b { display: block; margin-top: 4px; font-size: 13.5px; font-weight: 600; }
@@ -4016,7 +4234,7 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   display: flex; align-items: center; gap: 10px;
   padding: 9px 12px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--auflage-2);
   font-size: 12.5px;
 }
 .ff-tag   { flex: 0 0 84px; font-weight: 600; }
@@ -4030,12 +4248,12 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   padding: 10px 12px;
   border-radius: 10px;
   border: 1px solid transparent;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--auflage-2);
   font-size: 13px;
   cursor: pointer;
   transition: 0.16s ease;
 }
-.ff-klausuren li:hover { background: rgba(255, 255, 255, 0.08); border-color: var(--border-2); }
+.ff-klausuren li:hover { background: var(--auflage-3); border-color: var(--border-2); }
 .ffk-titel { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis;
              white-space: nowrap; color: var(--frist, var(--text)); font-weight: 500; }
 .ffk-wann  { font-family: var(--mono); font-size: 10.5px; color: var(--text-faint); }
@@ -4051,7 +4269,7 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
 .ff-leer {
   padding: 18px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--auflage-2);
   text-align: center;
   font-size: 12.5px;
   color: var(--text-faint);
@@ -4076,8 +4294,8 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   margin-top: 9px;
   padding: 20px 16px;
   border-radius: var(--r-el);
-  border: 1.5px dashed rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.025);
+  border: 1.5px dashed var(--auflage-4);
+  background: var(--auflage-1);
   color: var(--text-dim);
   font-size: 13px;
   text-align: center;
@@ -4104,12 +4322,12 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   display: flex; align-items: center; gap: 10px;
   padding: 9px 12px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--auflage-2);
   font-size: 13px;
   cursor: pointer;
   transition: background 0.14s ease;
 }
-.lp-dateiliste li:hover { background: rgba(255, 255, 255, 0.08); }
+.lp-dateiliste li:hover { background: var(--auflage-3); }
 .ld-art {
   flex-shrink: 0;
   padding: 3px 7px;
@@ -4121,7 +4339,7 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   letter-spacing: 0.05em;
 }
 .art-goodnotes .ld-art, .art-sonst .ld-art {
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--auflage-3);
   color: var(--text-faint);
 }
 .ld-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -4134,7 +4352,7 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   font-size: 11px; line-height: 1;
   transition: 0.16s ease;
 }
-.ld-weg:hover { color: var(--red); background: rgba(251, 113, 133, 0.14); }
+.ld-weg:hover { color: var(--red); background: color-mix(in srgb, var(--rot) 14%, transparent); }
 
 .lk-zeile { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 9px; }
 .lp-knopf.stark {
@@ -4156,16 +4374,16 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   max-height: 88vh;
   border-radius: 22px;
   overflow: hidden;
-  background: rgba(16, 21, 36, 0.44);
+  background: color-mix(in srgb, var(--flaeche) 44%, transparent);
   backdrop-filter: blur(50px) saturate(180%);
   -webkit-backdrop-filter: blur(50px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  border: 1px solid var(--auflage-3);
   box-shadow: 0 30px 74px rgba(0, 0, 0, 0.56);
 }
 .dv-kopf {
   display: flex; align-items: center; gap: 12px;
   padding: 14px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid var(--auflage-3);
 }
 .dv-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis;
            white-space: nowrap; font-size: 13.5px; font-weight: 600; }
@@ -4174,20 +4392,20 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   padding: 6px 13px;
   border-radius: 9px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--auflage-2);
   color: var(--text-dim);
   font-size: 12px;
   text-decoration: none;
   transition: 0.16s ease;
 }
-.dv-knopf:hover { color: var(--text); background: rgba(255, 255, 255, 0.1); }
+.dv-knopf:hover { color: var(--text); background: var(--auflage-4); }
 .dv-zu {
   width: 28px; height: 28px;
   border: none; border-radius: 9px;
   background: none; color: var(--text-faint);
   font-size: 14px; line-height: 1;
 }
-.dv-zu:hover { color: var(--text); background: rgba(255, 255, 255, 0.08); }
+.dv-zu:hover { color: var(--text); background: var(--auflage-3); }
 .dv-koerper { flex: 1; min-height: 0; display: flex; overflow: auto; padding: 14px; }
 .dv-koerper img { max-width: 100%; margin: auto; border-radius: 12px; }
 .dv-koerper iframe { flex: 1; min-height: 62vh; border: none; border-radius: 12px; background: #fff; }
@@ -4207,7 +4425,7 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
 .kf-kopf h3 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -0.02em; }
 .kf-unter { display: block; margin-top: 3px; font-size: 11.5px; color: var(--text-faint); }
 .kf-schalter { display: flex; gap: 4px; padding: 3px; border-radius: 11px;
-               background: rgba(255, 255, 255, 0.05); }
+               background: var(--auflage-2); }
 .kf-tab {
   padding: 6px 13px;
   border: none; border-radius: 8px;
@@ -4235,7 +4453,7 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   background: none; color: var(--text-faint);
   font-size: 14px; line-height: 1;
 }
-.kf-zu:hover { color: var(--text); background: rgba(255, 255, 255, 0.08); }
+.kf-zu:hover { color: var(--text); background: var(--auflage-3); }
 
 /* ---------- Liste ---------- */
 .kf-liste { list-style: none; margin: 20px 0 0; padding: 0;
@@ -4245,7 +4463,7 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   display: flex; align-items: flex-start; gap: 10px;
   padding: 10px 12px;
   border-radius: 11px;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--auflage-2);
 }
 .kf-nr { flex-shrink: 0; width: 20px; margin-top: 7px; font-family: var(--mono);
          font-size: 11px; color: var(--text-faint); text-align: right; }
@@ -4255,7 +4473,7 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   padding: 6px 9px;
   border: 1px solid transparent;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--auflage-2);
   color: var(--text);
   font-family: inherit;
   font-size: 13px;
@@ -4266,7 +4484,7 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   transition: 0.16s ease;
 }
 .kf-paar textarea:focus { border-color: color-mix(in srgb, var(--ton) 50%, transparent);
-                          background: rgba(255, 255, 255, 0.07); }
+                          background: var(--auflage-3); }
 .kf-antwort { color: var(--text-dim); }
 .kf-weg {
   flex-shrink: 0; margin-top: 4px;
@@ -4276,7 +4494,7 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   font-size: 11px; line-height: 1;
   transition: 0.16s ease;
 }
-.kf-weg:hover { color: var(--red); background: rgba(251, 113, 133, 0.14); }
+.kf-weg:hover { color: var(--red); background: color-mix(in srgb, var(--rot) 14%, transparent); }
 .kf-leer { display: block; padding: 26px; text-align: center;
            font-size: 12.5px; color: var(--text-faint); }
 
@@ -4286,7 +4504,7 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   padding: 9px 13px;
   border-radius: 10px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--auflage-2);
   color: var(--text);
   font-size: 13px;
   outline: none;
@@ -4315,7 +4533,7 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   padding: 10px 13px;
   border-radius: 10px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--auflage-2);
   color: var(--text);
   font-family: var(--mono);
   font-size: 12px;
@@ -4329,12 +4547,12 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   padding: 8px 15px;
   border-radius: 10px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--auflage-2);
   color: var(--text-dim);
   font-size: 12.5px;
   transition: 0.16s ease;
 }
-.kf-import-knopf:hover { color: var(--text); background: rgba(255, 255, 255, 0.1); }
+.kf-import-knopf:hover { color: var(--text); background: var(--auflage-4); }
 
 /* ==========================================================
    KARTEN AUS EINER MARKDOWN-DATEI
@@ -4352,7 +4570,7 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   padding: 22px 16px;
   border: 1.5px dashed var(--border-2);
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.018);
+  background: var(--auflage-1);
   cursor: pointer;
   text-align: center;
   transition: border-color 0.18s ease, background 0.18s ease;
@@ -4378,7 +4596,7 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   padding: 9px 14px;
   border-radius: 10px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--auflage-2);
   color: var(--text-dim);
   font-family: inherit;
   font-size: 12.5px;
@@ -4388,7 +4606,7 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
 .kf-prompt-knopf { border-color: color-mix(in srgb, var(--ton) 40%, transparent);
                    color: var(--ton); }
 .kf-prompt-knopf:hover { background: color-mix(in srgb, var(--ton) 14%, transparent); }
-.kf-muster-knopf:hover { color: var(--text); background: rgba(255, 255, 255, 0.1); }
+.kf-muster-knopf:hover { color: var(--text); background: var(--auflage-4); }
 
 .kf-aufbau { margin-top: 12px; }
 .kf-aufbau summary { font-size: 11.5px; color: var(--text-faint); cursor: pointer; }
@@ -4399,7 +4617,7 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   padding: 12px 14px;
   border-radius: 10px;
   border: 1px solid var(--border);
-  background: rgba(0, 0, 0, 0.26);
+  background: var(--senke-1);
   color: var(--text-dim);
   font-family: var(--mono);
   font-size: 11px;
@@ -4414,7 +4632,7 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   padding: 12px 14px;
   border-radius: 10px;
   border: 1px solid var(--border);
-  background: rgba(0, 0, 0, 0.26);
+  background: var(--senke-1);
   color: var(--text-dim);
   font-family: var(--mono);
   font-size: 11px;
@@ -4464,12 +4682,12 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   padding: 2px 9px; border-radius: 999px;
   font-size: 11px; font-weight: 600;
 }
-.kf-wf.wahr   { background: rgba(52, 211, 153, 0.16); color: var(--green); }
-.kf-wf.falsch { background: rgba(251, 113, 133, 0.16); color: var(--red); }
+.kf-wf.wahr   { background: color-mix(in srgb, var(--gruen) 16%, transparent); color: var(--green); }
+.kf-wf.falsch { background: color-mix(in srgb, var(--rot) 16%, transparent); color: var(--red); }
 .kf-erklaerung { margin-top: 6px; font-size: 11.5px; line-height: 1.55;
                  color: var(--text-faint); }
 .kf-erklaerung.gross { margin: 14px 0 0; padding: 12px 14px; border-radius: 11px;
-                       background: rgba(255, 255, 255, 0.04); font-size: 12.5px; }
+                       background: var(--auflage-2); font-size: 12.5px; }
 
 /* ---------- Die Arten beim Abfragen ----------
    Keine Karte zum Umdrehen: hier wird etwas getan, und das
@@ -4482,7 +4700,7 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   padding: 24px 22px;
   border-radius: 20px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.035);
+  background: var(--auflage-2);
 }
 .kf-aufgabe .kf-inhalt { font-size: 17px; line-height: 1.45; }
 
@@ -4494,7 +4712,7 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   padding: 13px 15px;
   border-radius: 12px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--auflage-2);
   color: var(--text-dim);
   font-family: inherit;
   font-size: 13.5px;
@@ -4509,13 +4727,13 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   color: var(--text);
 }
 .kf-option.richtig {
-  border-color: rgba(52, 211, 153, 0.5);
-  background: rgba(52, 211, 153, 0.13);
+  border-color: color-mix(in srgb, var(--gruen) 50%, transparent);
+  background: color-mix(in srgb, var(--gruen) 13%, transparent);
   color: var(--green);
 }
 .kf-option.daneben {
-  border-color: rgba(251, 113, 133, 0.5);
-  background: rgba(251, 113, 133, 0.12);
+  border-color: color-mix(in srgb, var(--rot) 50%, transparent);
+  background: color-mix(in srgb, var(--rot) 12%, transparent);
   color: var(--red);
 }
 .kf-option:disabled { cursor: default; opacity: 1; }
@@ -4536,7 +4754,7 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   border: 0;
   border-bottom: 2px solid color-mix(in srgb, var(--ton) 55%, transparent);
   border-radius: 6px 6px 0 0;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--auflage-2);
   color: var(--text);
   font-family: var(--mono);
   font-size: 15px;
@@ -4552,8 +4770,8 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   font-family: var(--mono);
   font-size: 14.5px;
 }
-.kf-luecke-fest.richtig { background: rgba(52, 211, 153, 0.16); color: var(--green); }
-.kf-luecke-fest.daneben { background: rgba(251, 113, 133, 0.14); color: var(--red);
+.kf-luecke-fest.richtig { background: color-mix(in srgb, var(--gruen) 16%, transparent); color: var(--green); }
+.kf-luecke-fest.daneben { background: color-mix(in srgb, var(--rot) 14%, transparent); color: var(--red);
                           text-decoration: line-through; }
 .kf-luecke-fest.daneben b { margin-left: 5px; color: var(--green);
                             text-decoration: none; font-weight: 600; }
@@ -4564,7 +4782,7 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   padding: 15px;
   border-radius: 13px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--auflage-2);
   color: var(--text-dim);
   font-family: inherit;
   font-size: 14.5px;
@@ -4573,10 +4791,10 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   transition: 0.15s ease;
 }
 .kf-wf-knopf:hover:not(:disabled) { border-color: var(--border-2); color: var(--text); }
-.kf-wf-knopf.richtig { border-color: rgba(52, 211, 153, 0.5);
-                       background: rgba(52, 211, 153, 0.14); color: var(--green); }
-.kf-wf-knopf.daneben { border-color: rgba(251, 113, 133, 0.5);
-                       background: rgba(251, 113, 133, 0.12); color: var(--red); }
+.kf-wf-knopf.richtig { border-color: color-mix(in srgb, var(--gruen) 50%, transparent);
+                       background: color-mix(in srgb, var(--gruen) 14%, transparent); color: var(--green); }
+.kf-wf-knopf.daneben { border-color: color-mix(in srgb, var(--rot) 50%, transparent);
+                       background: color-mix(in srgb, var(--rot) 12%, transparent); color: var(--red); }
 .kf-wf-knopf:disabled { cursor: default; }
 
 .kf-ergebnis {
@@ -4591,14 +4809,14 @@ html.finger .lp-feld.tp-notiz textarea { font-size: 16px; }
   padding: 11px 26px;
   border-radius: 11px;
   border: 1px solid var(--border-2);
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--auflage-3);
   color: var(--text);
   font-family: inherit;
   font-size: 13px;
   cursor: pointer;
   transition: 0.16s ease;
 }
-.kf-weiter:hover { background: rgba(255, 255, 255, 0.12); }
+.kf-weiter:hover { background: var(--auflage-4); }
 
 /* Am Finger: größere Ziele, und Eingabefelder auf 16px, sonst
    zoomt iOS beim Antippen die ganze Seite heran. */
@@ -4609,7 +4827,7 @@ html.finger .kf-ablage { padding: 26px 16px; }
 
 /* ---------- Abfrage ---------- */
 .kf-fortschritt { height: 3px; margin: 20px 0 16px; border-radius: 999px;
-                  background: rgba(255, 255, 255, 0.07); overflow: hidden; }
+                  background: var(--auflage-3); overflow: hidden; }
 .kf-fortschritt i { display: block; height: 100%; border-radius: 999px;
                     background: var(--ton); transition: width 0.3s ease; }
 .kf-karte {
@@ -4628,8 +4846,8 @@ html.finger .kf-ablage { padding: 26px 16px; }
   gap: 12px;
   padding: 24px;
   border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--auflage-3);
+  background: var(--auflage-2);
   text-align: center;
   backface-visibility: hidden;
   transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
@@ -4637,7 +4855,7 @@ html.finger .kf-ablage { padding: 26px 16px; }
 .kf-vorn   { transform: rotateY(0deg); }
 .kf-hinten { transform: rotateY(180deg);
              border-color: color-mix(in srgb, var(--ton) 40%, transparent);
-             background: color-mix(in srgb, var(--ton) 9%, rgba(255, 255, 255, 0.03)); }
+             background: color-mix(in srgb, var(--ton) 9%, var(--auflage-2)); }
 .kf-karte.offen .kf-vorn   { transform: rotateY(-180deg); }
 .kf-karte.offen .kf-hinten { transform: rotateY(0deg); }
 .kf-marke { font-size: 9.5px; letter-spacing: 0.08em; text-transform: uppercase;
@@ -4651,12 +4869,12 @@ html.finger .kf-ablage { padding: 26px 16px; }
 .kf-urteil.da { opacity: 1; pointer-events: auto; }
 .kf-urteil button { flex: 1; padding: 11px; border-radius: 11px; font-size: 13px;
                     transition: 0.16s ease; }
-.kf-nochmal-karte { border: 1px solid rgba(251, 113, 133, 0.35);
-                    background: rgba(251, 113, 133, 0.1); color: var(--red); }
-.kf-nochmal-karte:hover { background: rgba(251, 113, 133, 0.2); }
-.kf-gewusst { border: 1px solid rgba(52, 211, 153, 0.35);
-              background: rgba(52, 211, 153, 0.12); color: var(--green); }
-.kf-gewusst:hover { background: rgba(52, 211, 153, 0.22); }
+.kf-nochmal-karte { border: 1px solid color-mix(in srgb, var(--rot) 35%, transparent);
+                    background: color-mix(in srgb, var(--rot) 10%, transparent); color: var(--red); }
+.kf-nochmal-karte:hover { background: color-mix(in srgb, var(--rot) 20%, transparent); }
+.kf-gewusst { border: 1px solid color-mix(in srgb, var(--gruen) 35%, transparent);
+              background: color-mix(in srgb, var(--gruen) 12%, transparent); color: var(--green); }
+.kf-gewusst:hover { background: color-mix(in srgb, var(--gruen) 22%, transparent); }
 .kf-zaehler { margin-top: 12px; text-align: center; font-family: var(--mono);
               font-size: 11px; color: var(--text-faint); }
 
@@ -4693,12 +4911,12 @@ html.finger .kf-ablage { padding: 26px 16px; }
   padding: 4px;
   border-radius: 12px;
   align-self: center;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--auflage-3);
+  border: 1px solid var(--auflage-4);
   backdrop-filter: blur(26px) saturate(180%);
   -webkit-backdrop-filter: blur(26px) saturate(180%);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    inset 0 1px 0 var(--auflage-3),
     0 10px 26px rgba(0, 0, 0, 0.35);
 }
 .ansicht-schalter button {
@@ -4712,9 +4930,9 @@ html.finger .kf-ablage { padding: 26px 16px; }
 }
 .ansicht-schalter button:hover { color: var(--text); }
 .ansicht-schalter button.an {
-  background: rgba(91, 140, 255, 0.24);
+  background: color-mix(in srgb, var(--blau) 24%, transparent);
   color: var(--blue-soft);
-  box-shadow: inset 0 0 0 1px rgba(91, 140, 255, 0.32);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--blau) 32%, transparent);
 }
 
 /* Der Kopf der Seite bleibt mit oben, sonst schwebt der Schalter
@@ -4740,26 +4958,26 @@ html.finger .kf-ablage { padding: 26px 16px; }
   gap: 12px;
   padding: 10px 13px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.035);
+  background: var(--auflage-2);
   transition: background 0.14s ease;
 }
-.app-zeile:hover { background: rgba(255, 255, 255, 0.06); }
+.app-zeile:hover { background: var(--auflage-3); }
 .app-rang {
   flex-shrink: 0;
   width: 22px; height: 22px;
   display: flex; align-items: center; justify-content: center;
   border-radius: 7px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--auflage-2);
   color: var(--text-faint);
   font-family: var(--mono);
   font-size: 11px;
   font-weight: 600;
 }
-.app-zeile:nth-child(1) .app-rang { background: rgba(91, 140, 255, 0.22); color: var(--blue-soft); }
+.app-zeile:nth-child(1) .app-rang { background: color-mix(in srgb, var(--blau) 22%, transparent); color: var(--blue-soft); }
 .app-name { flex: 0 0 clamp(110px, 18%, 200px); min-width: 0; font-size: 13.5px; font-weight: 500;
             overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .app-spur { flex: 1; min-width: 40px; height: 7px; border-radius: 999px;
-            background: rgba(255, 255, 255, 0.05); overflow: hidden; }
+            background: var(--auflage-2); overflow: hidden; }
 /* Der Balken wächst aus dem Nichts heraus. Skaliert statt die Breite
    zu ändern: die Breite steht schon fest, dadurch bleibt die Zahl
    daneben ruhig stehen. */
@@ -4789,26 +5007,26 @@ html.finger .kf-ablage { padding: 26px 16px; }
 /* ---------- Verhaeltnis aktiv zu inaktiv ---------- */
 .iv-verhaeltnis { margin: 4px 0 14px; }
 .iv-spur { display: flex; height: 10px; border-radius: 999px; overflow: hidden;
-           background: rgba(255, 255, 255, 0.05); }
+           background: var(--auflage-2); }
 .iv-teil { display: block; height: 100%; transition: width 0.35s ease; }
 .iv-teil.aktiv { background: linear-gradient(90deg, var(--blue), var(--violet)); }
-.iv-teil.still { background: rgba(255, 255, 255, 0.14); }
+.iv-teil.still { background: var(--auflage-4); }
 .iv-legende { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 9px;
               font-size: 11.5px; color: var(--text-dim); }
 .iv-legende span { display: inline-flex; align-items: center; gap: 6px; }
 .iv-punkt { width: 8px; height: 8px; border-radius: 2px; }
 .iv-punkt.aktiv { background: var(--blue); }
-.iv-punkt.still { background: rgba(255, 255, 255, 0.25); }
+.iv-punkt.still { background: var(--auflage-5); }
 
 /* In der inaktiven Liste ist der Balken gedaempft — es ist keine Nutzung */
-#pgInaktivListe .app-spur i { background: rgba(255, 255, 255, 0.22); }
-#pgInaktivListe .app-zeile:nth-child(1) .app-rang { background: rgba(255, 255, 255, 0.09);
+#pgInaktivListe .app-spur i { background: var(--auflage-5); }
+#pgInaktivListe .app-zeile:nth-child(1) .app-rang { background: var(--auflage-3);
                                                     color: var(--text-dim); }
 
 
 /* Grosses Diagramm: Fuehrungslinie und Punkte beim Ueberfahren */
 #pgStChart { cursor: crosshair; }
-#pgStChart .st-guide { stroke: rgba(255, 255, 255, 0.28); stroke-width: 1;
+#pgStChart .st-guide { stroke: var(--auflage-5); stroke-width: 1;
                        stroke-dasharray: 3 3; opacity: 0; }
 #pgStChart .st-dot { opacity: 0; }
 #pgStChart .st-dot.phone { fill: var(--blue); }
@@ -4822,7 +5040,7 @@ html.finger .kf-ablage { padding: 26px 16px; }
 .gross-legende .legend-item:hover { border-color: transparent; color: var(--text-dim); }
 
 /* Y-Achse des grossen Diagramms */
-#pgStChart .st-raster { stroke: rgba(255, 255, 255, 0.06); stroke-width: 1; }
+#pgStChart .st-raster { stroke: var(--auflage-3); stroke-width: 1; }
 #pgStChart .st-achse-y {
   fill: var(--text-faint);
   font-family: var(--mono);
@@ -4859,19 +5077,19 @@ html.finger .kf-ablage { padding: 26px 16px; }
   aspect-ratio: 1 / 1;
   border: none;
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.055);
+  background: var(--auflage-3);
   padding: 0;
   transition: background 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
 }
 .hk-feld.done {
   background: var(--violet);
-  box-shadow: 0 0 8px rgba(167, 139, 250, 0.45);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--blau) 45%, transparent);
 }
-.hk-feld.kommt { background: rgba(255, 255, 255, 0.022); }
+.hk-feld.kommt { background: var(--auflage-1); }
 /* Heute ist der einzige Tag, den man umschalten kann */
 button.hk-feld { cursor: pointer; }
 button.hk-feld:hover { transform: scale(1.12); }
-.hk-feld.heute { outline: 1.5px solid rgba(255, 255, 255, 0.4); outline-offset: 1.5px; }
+.hk-feld.heute { outline: 1.5px solid var(--auflage-5); outline-offset: 1.5px; }
 .hk-feld.heute.done { outline-color: var(--violet); }
 
 /* ==========================================================
@@ -4892,15 +5110,15 @@ button.hk-feld:hover { transform: scale(1.12); }
 }
 .hj-feld {
   border-radius: 2px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--auflage-2);
   min-height: 3px;
 }
-.hj-feld.s1 { background: rgba(167, 139, 250, 0.3); }
-.hj-feld.s2 { background: rgba(167, 139, 250, 0.52); }
+.hj-feld.s1 { background: color-mix(in srgb, var(--blau) 30%, transparent); }
+.hj-feld.s2 { background: color-mix(in srgb, var(--blau) 52%, transparent); }
 .hj-feld.s3 { background: rgba(190, 130, 246, 0.76); }
 .hj-feld.s4 { background: rgb(212, 128, 244); box-shadow: 0 0 5px rgba(212, 128, 244, 0.5); }
-.hj-feld.kommt { background: rgba(255, 255, 255, 0.022); }
-.hj-feld.heute { outline: 1px solid rgba(255, 255, 255, 0.5); outline-offset: 1px; }
+.hj-feld.kommt { background: var(--auflage-1); }
+.hj-feld.heute { outline: 1px solid var(--auflage-5); outline-offset: 1px; }
 
 /* Der Umschalter sitzt zwischen Titel und Zaehler */
 #habitAnsicht { margin-left: auto; }
@@ -4926,7 +5144,7 @@ button.hk-feld:hover { transform: scale(1.12); }
 .app-pfeil svg { width: 15px; height: 15px; }
 .app-zeile.aufklappbar:hover .app-pfeil { color: var(--text-dim); }
 .app-zeile.offen .app-pfeil { transform: rotate(180deg); color: var(--blue-soft); }
-.app-zeile.offen { background: rgba(91, 140, 255, 0.09); }
+.app-zeile.offen { background: color-mix(in srgb, var(--blau) 9%, transparent); }
 
 .app-unter {
   height: 0;
@@ -4948,7 +5166,7 @@ button.hk-feld:hover { transform: scale(1.12); }
   display: flex;
   flex-direction: column;
   gap: 3px;
-  border-left: 1px solid rgba(255, 255, 255, 0.07);
+  border-left: 1px solid var(--auflage-3);
   margin-left: 11px;
 }
 .app-unter li {
@@ -4957,7 +5175,7 @@ button.hk-feld:hover { transform: scale(1.12); }
   gap: 10px;
   padding: 7px 11px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.025);
+  background: var(--auflage-1);
   font-size: 12.5px;
 }
 .au-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -4970,7 +5188,7 @@ button.hk-feld:hover { transform: scale(1.12); }
   color: var(--text-faint);
 }
 .au-spur { flex: 0 0 clamp(40px, 12%, 110px); height: 5px; border-radius: 999px;
-           background: rgba(255, 255, 255, 0.05); overflow: hidden; }
+           background: var(--auflage-2); overflow: hidden; }
 .au-spur i { display: block; height: 100%; border-radius: 999px;
              background: linear-gradient(90deg, var(--violet), var(--blue-soft)); }
 .au-zeit { flex-shrink: 0; width: 58px; text-align: right; font-family: var(--mono);
@@ -5180,11 +5398,11 @@ body.glanzt .card::after {
       rgba(var(--glanz-rgb), calc(0.10 * var(--glanz))) 60%,
       rgba(var(--glanz-rgb), 0) 76%),
     linear-gradient(150deg,
-      rgba(255, 255, 255, 0.15) 0%,
-      rgba(255, 255, 255, 0.05) 30%,
-      rgba(255, 255, 255, 0.02) 55%,
-      rgba(255, 255, 255, 0.055) 78%,
-      rgba(255, 255, 255, 0.12) 100%);
+      var(--auflage-4) 0%,
+      var(--auflage-2) 30%,
+      var(--auflage-1) 55%,
+      var(--auflage-3) 78%,
+      var(--auflage-4) 100%);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -5213,7 +5431,7 @@ body.glanzt .card::after {
   gap: 6px;
   padding: 4px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--auflage-2);
   align-self: flex-start;
 }
 .lr-plus {
@@ -5223,7 +5441,7 @@ body.glanzt .card::after {
   display: flex; align-items: center; justify-content: center;
   border: 1px solid var(--border);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--auflage-2);
   color: var(--text-dim);
   cursor: pointer;
   transition: 0.16s ease;
@@ -5247,9 +5465,9 @@ html.finger .lr-plus { width: 44px; height: 44px; }
   cursor: pointer;
   transition: background 0.18s ease, color 0.18s ease;
 }
-.lr-tab:hover { color: var(--text); background: rgba(255, 255, 255, 0.05); }
+.lr-tab:hover { color: var(--text); background: var(--auflage-2); }
 .lr-tab.active {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--auflage-4);
   color: var(--text);
 }
 
@@ -5287,17 +5505,17 @@ html.finger .lr-plus { width: 44px; height: 44px; }
   font-weight: 500;
   border: 1px solid transparent;
   color: var(--text-dim);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--auflage-2);
 }
 .ha-stufe.stufe-2 {
   color: #ffca7a;
-  background: rgba(245, 158, 11, 0.12);
-  border-color: rgba(245, 158, 11, 0.3);
+  background: color-mix(in srgb, var(--gelb) 12%, transparent);
+  border-color: color-mix(in srgb, var(--gelb) 30%, transparent);
 }
 .ha-stufe.stufe-3 {
   color: #ff9d9d;
-  background: rgba(248, 113, 113, 0.14);
-  border-color: rgba(248, 113, 113, 0.36);
+  background: color-mix(in srgb, var(--rot) 14%, transparent);
+  border-color: color-mix(in srgb, var(--rot) 36%, transparent);
 }
 
 /* Abhaken statt löschen */
@@ -5308,7 +5526,7 @@ html.finger .lr-plus { width: 44px; height: 44px; }
   padding: 0;
   display: grid;
   place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid var(--auflage-4);
   border-radius: 50%;
   background: transparent;
   color: var(--text-dim);
@@ -5317,8 +5535,8 @@ html.finger .lr-plus { width: 44px; height: 44px; }
 }
 .ha-haken svg { width: 15px; height: 15px; }
 .ha-haken:hover {
-  background: rgba(52, 211, 153, 0.16);
-  border-color: rgba(52, 211, 153, 0.45);
+  background: color-mix(in srgb, var(--gruen) 16%, transparent);
+  border-color: color-mix(in srgb, var(--gruen) 45%, transparent);
   color: #6ee7b7;
 }
 
@@ -5328,8 +5546,8 @@ html.finger .lr-plus { width: 44px; height: 44px; }
 .komponist.hausaufgabe .nur-ha { display: inline-flex; }
 .komponist.hausaufgabe .nur-stunde,
 .komponist.hausaufgabe .nur-termin { display: none; }
-.kp-knopf.stufe-2 { border-color: rgba(245, 158, 11, 0.4); color: #ffca7a; }
-.kp-knopf.stufe-3 { border-color: rgba(248, 113, 113, 0.45); color: #ff9d9d; }
+.kp-knopf.stufe-2 { border-color: color-mix(in srgb, var(--gelb) 40%, transparent); color: #ffca7a; }
+.kp-knopf.stufe-3 { border-color: color-mix(in srgb, var(--rot) 45%, transparent); color: #ff9d9d; }
 
 /* Im Fachfenster stehen zwei Knöpfe nebeneinander */
 .ff-kopf .ff-neu + .ff-neu { margin-left: 8px; }
@@ -5337,7 +5555,7 @@ html.finger .lr-plus { width: 44px; height: 44px; }
 /* Im Hausaufgaben-Panel sitzt die Wichtigkeit im Fuß und lässt sich
    dort durchschalten — deshalb ist sie hier ein Knopf, kein Schild. */
 .lp-fuss .lp-knopf.ha-stufe { border-radius: var(--radius, 10px); padding: 8px 14px; font-size: 13px; }
-.lp-fuss .lp-knopf.ha-stufe.stufe-1 { background: rgba(255, 255, 255, 0.05); }
+.lp-fuss .lp-knopf.ha-stufe.stufe-1 { background: var(--auflage-2); }
 
 /* Hausaufgabenzeilen lassen sich anklicken wie die Klausuren */
 .voll-zeile.klickbar { cursor: pointer; }
@@ -5384,22 +5602,22 @@ html.finger .lr-plus { width: 44px; height: 44px; }
   padding: 9px 18px;
   border-radius: 10px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--auflage-2);
   color: var(--text);
   font-size: 13.5px;
   font-weight: 500;
   cursor: pointer;
   transition: background 0.18s ease, border-color 0.18s ease, transform 0.16s ease;
 }
-.pj-knopf:hover:not(:disabled) { background: rgba(255, 255, 255, 0.1); }
+.pj-knopf:hover:not(:disabled) { background: var(--auflage-4); }
 .pj-knopf:active:not(:disabled) { transform: scale(0.97); }
 .pj-knopf:disabled { opacity: 0.4; cursor: default; }
 .pj-knopf.stark {
-  background: rgba(91, 140, 255, 0.16);
-  border-color: rgba(91, 140, 255, 0.4);
+  background: color-mix(in srgb, var(--blau) 16%, transparent);
+  border-color: color-mix(in srgb, var(--blau) 40%, transparent);
   color: #cfe0ff;
 }
-.pj-knopf.stark:hover:not(:disabled) { background: rgba(91, 140, 255, 0.24); }
+.pj-knopf.stark:hover:not(:disabled) { background: color-mix(in srgb, var(--blau) 24%, transparent); }
 
 /* ---------- Die Schritte ---------- */
 .pj-schritte {
@@ -5432,10 +5650,10 @@ html.finger .lr-plus { width: 44px; height: 44px; }
   padding: 12px 14px 12px 10px;
   border-radius: 12px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.035);
+  background: var(--auflage-2);
   transition: border-color 0.18s ease, background 0.18s ease;
 }
-.pj-schritt:hover { border-color: var(--border-strong, rgba(255,255,255,0.16)); }
+.pj-schritt:hover { border-color: var(--border-strong, var(--auflage-4)); }
 .pj-schritt::before {
   content: "";
   position: absolute;
@@ -5450,7 +5668,7 @@ html.finger .lr-plus { width: 44px; height: 44px; }
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--auflage-3);
   font-family: var(--mono);
   font-size: 11.5px;
   color: var(--text-dim);
@@ -5483,18 +5701,18 @@ html.finger .lr-plus { width: 44px; height: 44px; }
   padding: 7px 10px;
   border-radius: 9px;
   border: 1px solid var(--border);
-  background: rgba(0, 0, 0, 0.22);
+  background: var(--senke-1);
   color: var(--text);
   font-size: 13px;
   font-family: inherit;
 }
 .ps-feld:focus {
   outline: none;
-  border-color: rgba(91, 140, 255, 0.5);
-  box-shadow: 0 0 0 3px rgba(91, 140, 255, 0.12);
+  border-color: color-mix(in srgb, var(--blau) 50%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--blau) 12%, transparent);
 }
 select.ps-feld { cursor: pointer; }
-select.ps-feld option { background: #10141f; color: var(--text); }
+select.ps-feld option { background: var(--flaeche); color: var(--text); }
 
 .ps-werkzeug { display: flex; gap: 4px; }
 .ps-werkzeug button {
@@ -5510,7 +5728,7 @@ select.ps-feld option { background: #10141f; color: var(--text); }
   cursor: pointer;
   transition: background 0.16s ease, color 0.16s ease;
 }
-.ps-werkzeug button:hover:not(:disabled) { background: rgba(255,255,255,0.08); color: var(--text); }
+.ps-werkzeug button:hover:not(:disabled) { background: var(--auflage-3); color: var(--text); }
 .ps-werkzeug button:disabled { opacity: 0.25; cursor: default; }
 
 .pj-plus {
@@ -5530,8 +5748,8 @@ select.ps-feld option { background: #10141f; color: var(--text); }
   transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
 }
 .pj-plus:hover {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: var(--auflage-2);
+  border-color: var(--auflage-5);
   color: var(--text);
 }
 .pj-plus span { font-size: 17px; line-height: 1; }
@@ -5558,7 +5776,7 @@ select.ps-feld option { background: #10141f; color: var(--text); }
   padding: 20px;
   border-radius: 18px;
   border: 1px solid var(--border);
-  background: rgba(12, 16, 26, 0.92);
+  background: color-mix(in srgb, var(--flaeche) 92%, transparent);
   backdrop-filter: blur(30px) saturate(160%);
   -webkit-backdrop-filter: blur(30px) saturate(160%);
   animation: fenster-rein 0.24s cubic-bezier(0.22, 1, 0.36, 1);
@@ -5577,7 +5795,7 @@ select.ps-feld option { background: #10141f; color: var(--text); }
   padding: 12px 14px;
   border-radius: 12px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.035);
+  background: var(--auflage-2);
   text-align: left;
   cursor: pointer;
   transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
@@ -5619,14 +5837,14 @@ select.ps-feld option { background: #10141f; color: var(--text); }
   display: grid; place-items: center;
   border-radius: 50%;
   border: none;
-  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 0 0 2px var(--auflage-5);
   background: transparent;
-  color: #140a22;
+  color: #fff;
   font-size: 12px;
   cursor: pointer;
   transition: background 0.18s ease, box-shadow 0.18s ease;
 }
-.ps-haken:hover { box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.34); }
+.ps-haken:hover { box-shadow: inset 0 0 0 2px var(--auflage-5); }
 .pj-schritt.abgehakt .ps-haken {
   background: var(--ton, var(--blue));
   box-shadow: inset 0 0 0 2px var(--ton, var(--blue));
@@ -5651,7 +5869,7 @@ select.ps-feld option { background: #10141f; color: var(--text); }
   touch-action: none;
   transition: background 0.16s ease;
 }
-.ps-griff:hover { background: rgba(255, 255, 255, 0.08); }
+.ps-griff:hover { background: var(--auflage-3); }
 .ps-griff i {
   width: 3px;
   height: 3px;
@@ -5671,7 +5889,7 @@ select.ps-feld option { background: #10141f; color: var(--text); }
   transition: none;
   pointer-events: none;
   border-color: color-mix(in srgb, var(--ton, var(--blue)) 55%, transparent);
-  background: color-mix(in srgb, var(--ton, var(--blue)) 12%, rgba(16, 20, 31, 0.97));
+  background: color-mix(in srgb, var(--ton, var(--blue)) 12%, color-mix(in srgb, var(--flaeche) 97%, transparent));
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
 }
 .pj-schritt.zieht .ps-griff { cursor: grabbing; }
@@ -5681,8 +5899,8 @@ select.ps-feld option { background: #10141f; color: var(--text); }
 .ps-luecke {
   position: relative;
   border-radius: 12px;
-  border: 1px dashed rgba(255, 255, 255, 0.22);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed var(--auflage-5);
+  background: var(--auflage-2);
 }
 /* Eine graue Linie in der Mitte macht die Fuge auch dann deutlich,
    wenn die Lücke zwischen zwei Blöcken klein wirkt. */
@@ -5695,7 +5913,7 @@ select.ps-feld option { background: #10141f; color: var(--text); }
   height: 2px;
   margin-top: -1px;
   border-radius: 2px;
-  background: rgba(255, 255, 255, 0.16);
+  background: var(--auflage-4);
 }
 
 /* ==========================================================
@@ -5711,7 +5929,7 @@ select.ps-feld option { background: #10141f; color: var(--text); }
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: rgba(4, 6, 12, 0.45);
+  background: color-mix(in srgb, var(--flaeche) 45%, transparent);
 }
 .frage-schicht.open { display: flex; }
 .frage-fenster {
@@ -5719,7 +5937,7 @@ select.ps-feld option { background: #10141f; color: var(--text); }
   padding: 22px 24px 18px;
   border-radius: 18px;
   border: 1px solid var(--border);
-  background: rgba(12, 16, 26, 0.94);
+  background: color-mix(in srgb, var(--flaeche) 94%, transparent);
   backdrop-filter: blur(30px) saturate(160%);
   -webkit-backdrop-filter: blur(30px) saturate(160%);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
@@ -5742,16 +5960,16 @@ select.ps-feld option { background: #10141f; color: var(--text); }
   gap: 10px;
 }
 .pj-knopf.gefahr {
-  background: rgba(251, 113, 133, 0.16);
-  border-color: rgba(251, 113, 133, 0.42);
+  background: color-mix(in srgb, var(--rot) 16%, transparent);
+  border-color: color-mix(in srgb, var(--rot) 42%, transparent);
   color: #ffb3bf;
 }
-.pj-knopf.gefahr:hover:not(:disabled) { background: rgba(251, 113, 133, 0.26); }
+.pj-knopf.gefahr:hover:not(:disabled) { background: color-mix(in srgb, var(--rot) 26%, transparent); }
 
 /* Unterschritte sind eingerückt und hängen an ihrem Schritt */
 .pj-schritt.unter {
   margin-left: 34px;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--auflage-1);
 }
 .pj-schritt.unter::after {
   content: "";
@@ -5767,8 +5985,8 @@ select.ps-feld option { background: #10141f; color: var(--text); }
 }
 
 /* Ein Schritt mit Unterschritten hakt sich von selbst ab */
-.ps-haken.gesperrt { cursor: default; box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.1); }
-.ps-haken.gesperrt:hover { box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.1); }
+.ps-haken.gesperrt { cursor: default; box-shadow: inset 0 0 0 2px var(--auflage-4); }
+.ps-haken.gesperrt:hover { box-shadow: inset 0 0 0 2px var(--auflage-4); }
 
 /* Zähler der erledigten Unterschritte */
 .ps-zahl {
@@ -5778,12 +5996,12 @@ select.ps-feld option { background: #10141f; color: var(--text); }
   font-family: var(--mono);
   font-size: 11px;
   color: var(--text-faint);
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--auflage-3);
 }
 
 /* Nicht wählbare Bausteine bleiben sichtbar, aber stumm */
 .pw-karte.gesperrt { opacity: 0.42; cursor: default; }
-.pw-karte.gesperrt:hover { background: rgba(255, 255, 255, 0.035); border-color: var(--border); }
+.pw-karte.gesperrt:hover { background: var(--auflage-2); border-color: var(--border); }
 
 /* Der Umschalter sitzt oben im Block, neben dem Titel */
 .ps-titel {
@@ -5801,7 +6019,7 @@ select.ps-feld option { background: #10141f; color: var(--text); }
   font-size: 11px;
   color: var(--text-dim);
 }
-.pj-schritt.abgehakt .ps-haken.zaehlt { color: #140a22; }
+.pj-schritt.abgehakt .ps-haken.zaehlt { color: #fff; }
 
 /* Datum und Uhrzeit im Baukasten: ein Knopf statt eines Feldes */
 .ps-knopf {
@@ -5812,17 +6030,17 @@ select.ps-feld option { background: #10141f; color: var(--text); }
   padding: 7px 12px;
   border-radius: 9px;
   border: 1px solid var(--border);
-  background: rgba(0, 0, 0, 0.22);
+  background: var(--senke-1);
   color: var(--text-faint);
   font-size: 13px;
   font-family: inherit;
   cursor: pointer;
   transition: border-color 0.16s ease, color 0.16s ease, background 0.16s ease;
 }
-.ps-knopf:hover { border-color: var(--border-strong, rgba(255,255,255,0.2)); color: var(--text-dim); }
-.ps-knopf.gesetzt { color: var(--text); border-color: rgba(91, 140, 255, 0.4); }
+.ps-knopf:hover { border-color: var(--border-strong, var(--auflage-5)); color: var(--text-dim); }
+.ps-knopf.gesetzt { color: var(--text); border-color: color-mix(in srgb, var(--blau) 40%, transparent); }
 .ps-knopf svg { width: 15px; height: 15px; flex-shrink: 0; }
-.ps-knopf.offen { border-color: rgba(91, 140, 255, 0.6); }
+.ps-knopf.offen { border-color: color-mix(in srgb, var(--blau) 60%, transparent); }
 
 /* ==========================================================
    WOFÜR DIE ZEIT DRAUFGEHT
@@ -5905,7 +6123,7 @@ select.ps-feld option { background: #10141f; color: var(--text); }
   padding: 12px 14px;
   border-radius: 14px;
   border: 1px solid var(--border);
-  background: rgba(12, 16, 26, 0.94);
+  background: color-mix(in srgb, var(--flaeche) 94%, transparent);
   backdrop-filter: blur(30px) saturate(160%);
   -webkit-backdrop-filter: blur(30px) saturate(160%);
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5);
@@ -5942,7 +6160,7 @@ select.ps-feld option { background: #10141f; color: var(--text); }
 
 /* Der eigene Zeitraum des Rings */
 #pgKatAnsicht { margin-left: auto; margin-right: 12px; }
-#pgKatAnsicht .stbtn.an { background: rgba(91, 140, 255, 0.18); color: var(--blue-soft); }
+#pgKatAnsicht .stbtn.an { background: color-mix(in srgb, var(--blau) 18%, transparent); color: var(--blue-soft); }
 
 /* Die Kennzahlen blenden beim Wechsel des Zeitraums kurz auf, statt
    auf den neuen Wert zu springen. */
@@ -6415,12 +6633,12 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
   padding: 14px 16px;
   border-radius: 16px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.035);
+  background: var(--auflage-2);
   text-align: left;
   cursor: pointer;
   transition: border-color 0.16s ease, background 0.16s ease, transform 0.16s ease;
 }
-.wi-haupt:hover { border-color: var(--border-2); background: rgba(255, 255, 255, 0.055); }
+.wi-haupt:hover { border-color: var(--border-2); background: var(--auflage-3); }
 .wi-haupt:active { transform: scale(0.995); }
 
 /* Ein schmaler Streifen links traegt die Farbe der Frist */
@@ -6476,7 +6694,7 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
   padding: 8px 10px;
   border-radius: 13px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--auflage-2);
   color: var(--wi-ton, var(--blue));
 }
 .wi-zahl {
@@ -6512,12 +6730,12 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
   padding: 9px 12px;
   border-radius: 12px;
   border: 1px solid transparent;
-  background: rgba(255, 255, 255, 0.028);
+  background: var(--auflage-1);
   text-align: left;
   cursor: pointer;
   transition: border-color 0.16s ease, background 0.16s ease;
 }
-.wi-zeile:hover { border-color: var(--border); background: rgba(255, 255, 255, 0.05); }
+.wi-zeile:hover { border-color: var(--border); background: var(--auflage-2); }
 .wi-zeile.ton-rot   { --wi-ton: var(--red); }
 .wi-zeile.ton-gelb  { --wi-ton: var(--amber); }
 .wi-zeile.ton-ruhig { --wi-ton: var(--blue); }
@@ -6571,7 +6789,7 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
 }
 @keyframes atmen-aus {
   0%, 100% { transform: scale(1);    opacity: 0.65; box-shadow: 0 0 6px var(--amber); }
-  50%      { transform: scale(1.35); opacity: 1;    box-shadow: 0 0 12px var(--amber), 0 0 20px rgba(245, 169, 78, 0.3); }
+  50%      { transform: scale(1.35); opacity: 1;    box-shadow: 0 0 12px var(--amber), 0 0 20px color-mix(in srgb, var(--gelb) 30%, transparent); }
 }
 
 
@@ -6653,13 +6871,13 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
   padding: 10px 12px;
   border-radius: 11px;
   border: 1px solid transparent;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--auflage-2);
   font-size: 13px;
   color: var(--text-dim);
 }
 .an-hinweise li b { color: var(--text); font-weight: 600; }
-.an-hinweise li.gut      { border-color: rgba(52, 211, 153, 0.22); }
-.an-hinweise li.schlecht { border-color: rgba(251, 113, 133, 0.22); }
+.an-hinweise li.gut      { border-color: color-mix(in srgb, var(--gruen) 22%, transparent); }
+.an-hinweise li.schlecht { border-color: color-mix(in srgb, var(--rot) 22%, transparent); }
 .an-hinweise li .an-neben { margin-left: auto; }
 
 /* ---------- Kleiner Säulenverlauf ----------
@@ -6685,19 +6903,19 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
   display: flex;
   align-items: flex-end;
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.035);
+  background: var(--auflage-2);
   overflow: hidden;
 }
 .an-saeule-fuell {
   width: 100%;
   border-radius: 4px 4px 0 0;
-  background: linear-gradient(180deg, var(--blue) 0%, rgba(91, 140, 255, 0.55) 100%);
+  background: linear-gradient(180deg, var(--blue) 0%, color-mix(in srgb, var(--blau) 55%, transparent) 100%);
   transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 /* Ausreißer bekommen einen eigenen Ton, damit man sie sieht,
    ohne die Zahlen zu lesen */
 .an-saeule.auffaellig .an-saeule-fuell {
-  background: linear-gradient(180deg, var(--amber) 0%, rgba(245, 169, 78, 0.5) 100%);
+  background: linear-gradient(180deg, var(--amber) 0%, color-mix(in srgb, var(--gelb) 50%, transparent) 100%);
 }
 .an-saeule:hover .an-saeule-fuell { filter: brightness(1.25); }
 .an-saeule-fuss {
@@ -6730,7 +6948,7 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
   padding: 4px 7px;
   border-radius: 8px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--auflage-2);
   color: var(--text-dim);
   font-family: var(--mono);
   font-size: 11.5px;
@@ -6738,7 +6956,7 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
 }
 .zl-zeile .zl-feld:focus {
   outline: none;
-  border-color: rgba(91, 140, 255, 0.5);
+  border-color: color-mix(in srgb, var(--blau) 50%, transparent);
   color: var(--text);
 }
 .bt-fuellung.gut      { background: var(--green); }
@@ -6775,8 +6993,8 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
   margin: 12px clamp(12px, 2vw, 22px) 0;
   padding: 14px 16px 16px;
   border-radius: 16px;
-  border: 1px solid rgba(245, 169, 78, 0.3);
-  background: linear-gradient(150deg, rgba(245, 169, 78, 0.09), rgba(245, 169, 78, 0.04));
+  border: 1px solid color-mix(in srgb, var(--gelb) 30%, transparent);
+  background: linear-gradient(150deg, color-mix(in srgb, var(--gelb) 9%, transparent), color-mix(in srgb, var(--gelb) 4%, transparent));
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
 }
@@ -6802,7 +7020,7 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
   line-height: 1;
   cursor: pointer;
 }
-.einricht-zu:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+.einricht-zu:hover { color: var(--text); background: var(--auflage-3); }
 
 .einricht-text {
   margin: 8px 0 10px;
@@ -6827,7 +7045,7 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
   color: var(--blue-soft);
   font-weight: 600;
   text-decoration: none;
-  border-bottom: 1px solid rgba(91, 140, 255, 0.4);
+  border-bottom: 1px solid color-mix(in srgb, var(--blau) 40%, transparent);
 }
 .einricht-schritte a:hover { color: var(--text); }
 
@@ -6929,14 +7147,14 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
   padding: 3px 8px;
   border-radius: 8px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--auflage-2);
   color: var(--text-dim);
   font-family: var(--mono);
   font-size: 11px;
 }
 .hk-ziel select:focus-visible {
   outline: none;
-  border-color: rgba(91, 140, 255, 0.5);
+  border-color: color-mix(in srgb, var(--blau) 50%, transparent);
   color: var(--text);
 }
 
@@ -6953,11 +7171,11 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
   z-index: 700;
   display: flex;
   justify-content: flex-end;
-  background: rgba(3, 5, 11, 0);
+  background: transparent;
   transition: background 0.22s ease;
 }
 .notiz-schicht[hidden] { display: none; }
-.notiz-schicht.offen { background: rgba(3, 5, 11, 0.45); }
+.notiz-schicht.offen { background: var(--schleier); }
 
 .notiz-fenster {
   width: min(420px, 100%);
@@ -6965,7 +7183,7 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
   display: flex;
   flex-direction: column;
   border-left: 1px solid var(--border);
-  background: linear-gradient(180deg, rgba(12, 16, 26, 0.96), rgba(8, 11, 19, 0.97));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--flaeche) 96%, transparent), color-mix(in srgb, var(--flaeche) 97%, transparent));
   backdrop-filter: blur(26px) saturate(140%);
   -webkit-backdrop-filter: blur(26px) saturate(140%);
   box-shadow: -24px 0 60px rgba(0, 0, 0, 0.5);
@@ -6998,14 +7216,14 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
   padding: 6px 13px;
   border: none;
   border-radius: var(--r-pill);
-  background: rgba(91, 140, 255, 0.18);
+  background: color-mix(in srgb, var(--blau) 18%, transparent);
   color: var(--blue-soft);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: 0.16s ease;
 }
-.nz-neu:hover { background: rgba(91, 140, 255, 0.28); color: #fff; }
+.nz-neu:hover { background: color-mix(in srgb, var(--blau) 28%, transparent); color: #fff; }
 .nz-zu {
   padding: 4px 8px;
   border: none;
@@ -7016,7 +7234,7 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
   line-height: 1;
   cursor: pointer;
 }
-.nz-zu:hover { color: var(--text); background: rgba(255, 255, 255, 0.06); }
+.nz-zu:hover { color: var(--text); background: var(--auflage-3); }
 
 /* ---------- Suche ---------- */
 .nz-suche { padding: 0 18px 12px; flex-shrink: 0; }
@@ -7025,13 +7243,13 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
   padding: 9px 13px;
   border-radius: var(--r-pill);
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--auflage-2);
   color: var(--text);
   font-size: 13px;
 }
 .nz-suche input:focus {
   outline: none;
-  border-color: rgba(91, 140, 255, 0.5);
+  border-color: color-mix(in srgb, var(--blau) 50%, transparent);
 }
 .nz-suche input::placeholder { color: var(--text-faint); }
 
@@ -7060,13 +7278,13 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
 .nz-notiz {
   border-radius: 12px;
   border: 1px solid transparent;
-  background: rgba(255, 255, 255, 0.035);
+  background: var(--auflage-2);
   transition: border-color 0.16s ease, background 0.16s ease;
 }
-.nz-notiz:hover { background: rgba(255, 255, 255, 0.055); }
+.nz-notiz:hover { background: var(--auflage-3); }
 .nz-notiz.offen {
-  border-color: rgba(91, 140, 255, 0.35);
-  background: rgba(255, 255, 255, 0.06);
+  border-color: color-mix(in srgb, var(--blau) 35%, transparent);
+  background: var(--auflage-3);
 }
 
 .nz-auf {
@@ -7104,7 +7322,7 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
 .nz-bezug {
   padding: 1px 7px;
   border-radius: var(--r-pill);
-  background: rgba(167, 139, 250, 0.16);
+  background: color-mix(in srgb, var(--blau) 16%, transparent);
   color: var(--violet);
   font-size: 10px;
   font-weight: 600;
@@ -7147,7 +7365,7 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
   cursor: pointer;
   transition: 0.16s ease;
 }
-.nz-weg:hover { color: var(--red); border-color: rgba(251, 113, 133, 0.3); }
+.nz-weg:hover { color: var(--red); border-color: color-mix(in srgb, var(--rot) 30%, transparent); }
 
 /* Auf dem Telefon nimmt es die ganze Breite — daneben waere kein
    Platz mehr fuer den Zusammenhang, den es sonst freihaelt. */
@@ -7175,7 +7393,7 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
   padding: 14px 16px;
   border-radius: 14px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.035);
+  background: var(--auflage-2);
   flex-wrap: wrap;
 }
 
@@ -7187,7 +7405,7 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
   min-width: 74px;
   padding: 8px 12px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--auflage-2);
   border: 1px solid var(--border);
   color: var(--blue);
 }
@@ -7208,7 +7426,7 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
 .pu-fach { font-size: 12px; color: var(--text-dim); }
 
 .pu-fortschritt { display: flex; align-items: center; gap: 10px; font-size: 11.5px; color: var(--text-faint); }
-.pu-spur { flex: 1; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.06); overflow: hidden; }
+.pu-spur { flex: 1; height: 6px; border-radius: 3px; background: var(--auflage-3); overflow: hidden; }
 .pu-fuell { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--violet), var(--blue)); transition: width 0.4s ease; }
 
 .pu-unterlagen {
@@ -7231,7 +7449,7 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
   flex-shrink: 0;
   padding: 1px 5px;
   border-radius: 4px;
-  background: rgba(255,255,255,0.06);
+  background: var(--auflage-3);
   font-family: var(--mono);
   font-size: 8.5px;
   letter-spacing: 0.04em;
@@ -7252,7 +7470,7 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
   cursor: pointer;
   transition: 0.16s ease;
 }
-.pu-hin:hover { color: var(--text); border-color: var(--border-2); background: rgba(255,255,255,0.05); }
+.pu-hin:hover { color: var(--text); border-color: var(--border-2); background: var(--auflage-2); }
 
 /* Frist in der Projektliste */
 .vz-frist { font-family: var(--mono); font-size: 11px; }
@@ -7290,7 +7508,7 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
   padding: 14px 16px;
   border-radius: 12px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--auflage-2);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -7300,8 +7518,8 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
 .gk-zeile { display: flex; align-items: center; gap: 9px; font-size: 13.5px; }
 .gk-punkt { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .gk-punkt.aus    { background: var(--text-faint); }
-.gk-punkt.bereit { background: var(--amber); box-shadow: 0 0 8px rgba(245,169,78,0.5); }
-.gk-punkt.an     { background: var(--green); box-shadow: 0 0 8px rgba(52,211,153,0.5); }
+.gk-punkt.bereit { background: var(--amber); box-shadow: 0 0 8px color-mix(in srgb, var(--gelb) 50%, transparent); }
+.gk-punkt.an     { background: var(--green); box-shadow: 0 0 8px color-mix(in srgb, var(--gruen) 50%, transparent); }
 .gk-leise { margin-left: auto; font-size: 11.5px; color: var(--text-faint); }
 
 .gk-text { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--text-dim); }
@@ -7309,7 +7527,7 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
 .gk-fehler {
   margin: 0; padding: 8px 10px;
   border-radius: 8px;
-  background: rgba(251, 113, 133, 0.1);
+  background: color-mix(in srgb, var(--rot) 10%, transparent);
   font-size: 12px;
   line-height: 1.5;
   color: var(--red);
@@ -7328,7 +7546,7 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
   display: inline-block;
   padding: 2px 6px;
   border-radius: 5px;
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--auflage-3);
   font-family: var(--mono);
   font-size: 11px;
   color: var(--text);
@@ -7342,7 +7560,7 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
   padding: 6px 10px;
   border-radius: 9px;
   border: 1px solid var(--border);
-  background: rgba(255,255,255,0.04);
+  background: var(--auflage-2);
   color: var(--text);
   font-size: 12.5px;
 }
@@ -7356,7 +7574,7 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
   padding: 12px;
   border: 1px solid var(--border);
   border-radius: 12px;
-  background: rgba(255,255,255,0.025);
+  background: var(--auflage-1);
 }
 .gk-feld { display: flex; flex-direction: column; gap: 4px; }
 .gk-feld > span {
@@ -7370,7 +7588,7 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
   padding: 8px 10px;
   border: 1px solid var(--border);
   border-radius: 9px;
-  background: rgba(0,0,0,0.22);
+  background: var(--senke-1);
   color: var(--text);
   font-family: var(--mono, ui-monospace, monospace);
   font-size: 12px;
@@ -7382,7 +7600,7 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
   padding: 8px 10px;
   border: 1px solid var(--border);
   border-radius: 9px;
-  background: rgba(0,0,0,0.22);
+  background: var(--senke-1);
   color: var(--text);
   font-family: inherit;
   font-size: 12.5px;
@@ -7393,7 +7611,7 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
 .gk-weg textarea:focus {
   outline: none;
   border-color: var(--blue);
-  background: rgba(0,0,0,0.3);
+  background: var(--senke-2);
 }
 .gk-weg em {
   font-style: normal;
@@ -7407,7 +7625,7 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
 .gk-feld input:focus {
   outline: none;
   border-color: var(--blue);
-  background: rgba(0,0,0,0.3);
+  background: var(--senke-2);
 }
 
 /* Offline-Zustand: eine Zeile je Bedingung, Punkt davor */
@@ -7427,8 +7645,8 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
   height: 6px;
   border-radius: 50%;
 }
-.off-punkt.an  { background: var(--green, #34d399); }
-.off-punkt.aus { background: var(--red, #fb7185); }
+.off-punkt.an  { background: var(--green, var(--gruen)); }
+.off-punkt.aus { background: var(--red, var(--rot)); }
 
 /* ==========================================================
    KLAUSURDAUER JE FACH
@@ -7448,7 +7666,7 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
   border-radius: 10px;
   transition: background 0.14s ease;
 }
-.dauer-liste li:hover { background: rgba(255, 255, 255, 0.03); }
+.dauer-liste li:hover { background: var(--auflage-2); }
 .dauer-punkt {
   width: 8px; height: 8px; border-radius: 2px;
   background: var(--ton, var(--text-faint));
@@ -7464,7 +7682,7 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
   padding: 6px 8px;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: rgba(0, 0, 0, 0.22);
+  background: var(--senke-1);
   color: var(--text);
   font-family: var(--mono);
   font-size: 12.5px;
@@ -7478,7 +7696,7 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
 .dauer-eingabe input::placeholder { color: var(--text-faint); opacity: 0.5; }
 .dauer-eingabe input:focus {
   border-color: color-mix(in srgb, var(--ton, var(--blue)) 55%, transparent);
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--senke-2);
 }
 .dauer-eingabe em { font-style: normal; font-size: 11px; color: var(--text-faint); }
 .dauer-klar {
@@ -7499,7 +7717,7 @@ html.finger .dauer-eingabe input { font-size: 16px; width: 72px; }
   margin: 4px 0 10px;
   border: 1px solid var(--border);
   border-radius: 12px;
-  background: rgba(255,255,255,0.025);
+  background: var(--auflage-1);
   overflow: hidden;
 }
 .gk-kopf, .gk-reihe {
@@ -7518,7 +7736,7 @@ html.finger .dauer-eingabe input { font-size: 16px; width: 72px; }
   border-bottom: 1px solid var(--border);
 }
 .gk-kopf > span + span, .gk-reihe > .gk-haken { justify-self: center; }
-.gk-reihe + .gk-reihe { border-top: 1px solid rgba(255,255,255,0.045); }
+.gk-reihe + .gk-reihe { border-top: 1px solid var(--auflage-2); }
 .gk-name {
   min-width: 0;                    /* sonst sprengt die lange Mailadresse das Raster */
   font-size: 12.5px;
@@ -7578,7 +7796,7 @@ html.finger .gk-haken input { width: 19px; height: 19px; }
   padding: 6px 9px;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: rgba(0, 0, 0, 0.22);
+  background: var(--senke-1);
   color: var(--text);
   font-family: inherit;
   font-size: 12px;
@@ -7593,7 +7811,7 @@ html.finger .gk-zu-zeile select { font-size: 16px; padding: 9px; }
   padding: 7px 14px;
   border: 1px solid var(--border);
   border-radius: var(--r-pill);
-  background: rgba(255,255,255,0.04);
+  background: var(--auflage-2);
   color: var(--text-dim);
   font-size: 12.5px;
   font-weight: 500;
@@ -7604,7 +7822,7 @@ html.finger .gk-zu-zeile select { font-size: 16px; padding: 9px; }
 .gk-knopf:hover { color: var(--text); border-color: var(--border-2); }
 .gk-knopf.stark {
   border-color: transparent;
-  background: linear-gradient(135deg, var(--blue), #4a6fe8);
+  background: linear-gradient(135deg, var(--blue), var(--blau));
   color: #fff;
   align-self: flex-start;
 }
@@ -7629,14 +7847,14 @@ html.finger .gk-zu-zeile select { font-size: 16px; padding: 9px; }
   padding: 7px 15px;
   border: 1px solid var(--border);
   border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--auflage-2);
   color: var(--text-dim);
   font-family: inherit;
   font-size: 12.5px;
   cursor: pointer;
   transition: 0.16s ease;
 }
-.li-kopfknopf:hover:not(:disabled) { color: var(--text); background: rgba(255, 255, 255, 0.1); }
+.li-kopfknopf:hover:not(:disabled) { color: var(--text); background: var(--auflage-4); }
 .li-kopfknopf:disabled { opacity: 0.5; cursor: default; }
 
 .licht-gitter {
@@ -7700,7 +7918,7 @@ html.finger .gk-zu-zeile select { font-size: 16px; padding: 9px; }
   padding: 3px;
   border: 1px solid var(--border-2);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--auflage-2);
   cursor: pointer;
   transition: background 0.22s ease, border-color 0.22s ease;
 }
@@ -7730,7 +7948,7 @@ html.finger .gk-zu-zeile select { font-size: 16px; padding: 9px; }
   cursor: pointer;
   transition: background 0.16s ease;
 }
-.li-mehr:hover { background: rgba(255, 255, 255, 0.07); }
+.li-mehr:hover { background: var(--auflage-3); }
 .li-pfeil {
   width: 7px; height: 7px;
   border-right: 1.6px solid var(--text-faint);
@@ -7755,11 +7973,11 @@ html.finger .gk-zu-zeile select { font-size: 16px; padding: 9px; }
 .li-feld input[type="range"]::-webkit-slider-runnable-track {
   height: 8px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.09);
+  background: var(--auflage-3);
 }
 .li-regler input[type="range"]::-moz-range-track,
 .li-feld input[type="range"]::-moz-range-track {
-  height: 8px; border-radius: 999px; background: rgba(255, 255, 255, 0.09);
+  height: 8px; border-radius: 999px; background: var(--auflage-3);
 }
 .li-regler input[type="range"]::-webkit-slider-thumb,
 .li-feld input[type="range"]::-webkit-slider-thumb {
@@ -7768,7 +7986,7 @@ html.finger .gk-zu-zeile select { font-size: 16px; padding: 9px; }
   margin-top: -5px;
   border-radius: 50%;
   background: var(--licht, var(--blue));
-  border: 2px solid #0b0f1a;
+  border: 2px solid var(--grund);
   box-shadow: 0 0 10px color-mix(in srgb, var(--licht, var(--blue)) 55%, transparent);
   cursor: pointer;
 }
@@ -7776,7 +7994,7 @@ html.finger .gk-zu-zeile select { font-size: 16px; padding: 9px; }
 .li-feld input[type="range"]::-moz-range-thumb {
   width: 18px; height: 18px; border-radius: 50%;
   background: var(--licht, var(--blue));
-  border: 2px solid #0b0f1a;
+  border: 2px solid var(--grund);
   cursor: pointer;
 }
 
@@ -7803,7 +8021,7 @@ html.finger .gk-zu-zeile select { font-size: 16px; padding: 9px; }
   padding: 8px 10px;
   border: 1px solid var(--border);
   border-radius: 9px;
-  background: rgba(0, 0, 0, 0.24);
+  background: var(--senke-1);
   color: var(--text);
   font-family: inherit;
   font-size: 12.5px;
@@ -7821,14 +8039,14 @@ html.finger .gk-zu-zeile select { font-size: 16px; padding: 9px; }
   display: block;
   width: 34px; height: 34px;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid var(--auflage-4);
 }
 .li-farbe.haupt span { width: 44px; }
 
 .li-schnell { display: flex; flex-wrap: wrap; gap: 7px; }
 .li-tupfer {
   width: 26px; height: 26px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid var(--auflage-4);
   border-radius: 8px;
   cursor: pointer;
   transition: transform 0.14s ease, box-shadow 0.14s ease;
@@ -7923,8 +8141,8 @@ html.finger .li-feld select { font-size: 16px; }
 /* ---------- Ausgeschaltet: eine ruhige Zeile ---------- */
 .li-karte:not(.an):not(.aus-dem-netz) {
   padding: 11px 14px;
-  background: rgba(255, 255, 255, 0.018);
-  border-color: rgba(255, 255, 255, 0.05);
+  background: var(--auflage-1);
+  border-color: var(--auflage-2);
 }
 .li-karte:not(.an) .li-name b { font-size: 13.5px; font-weight: 500; color: var(--text-dim); }
 .li-karte:not(.an) .li-name span { font-size: 10.5px; }
@@ -7968,7 +8186,7 @@ html:not(.finger) select {
   padding: 8px 34px 8px 12px;
   border: 1px solid var(--border);
   border-radius: 10px;
-  background-color: rgba(0, 0, 0, 0.24);
+  background-color: var(--senke-1);
   color: var(--text);
   font-family: inherit;
   font-size: 12.5px;
@@ -7989,7 +8207,7 @@ html:not(.finger) select {
 
 html:not(.finger) select:hover {
   border-color: var(--border-2);
-  background-color: rgba(0, 0, 0, 0.32);
+  background-color: var(--senke-2);
 }
 html:not(.finger) select:focus-visible,
 html:not(.finger) select:focus {
@@ -8006,11 +8224,11 @@ html:not(.finger) select:disabled {
    nur begrenzt beeinflussen. Diese beiden Angaben wirken in
    Chrome und Edge und holen sie wenigstens ins Dunkle. */
 html:not(.finger) select option {
-  background: #131828;
-  color: #e7ebf3;
+  background: var(--flaeche-2);
+  color: var(--text);
   padding: 6px 10px;
 }
-html:not(.finger) select optgroup { background: #0d1120; color: #8b93a7; }
+html:not(.finger) select optgroup { background: var(--flaeche); color: var(--text-2); }
 
 /* ---------- Wo die Felder eine eigene Größe haben ----------
    Die gemeinsame Grundform bleibt, nur Maß und Schrift passen sich
@@ -8020,7 +8238,7 @@ html:not(.finger) select optgroup { background: #0d1120; color: #8b93a7; }
 html:not(.finger) .hk-ziel select {
   padding: 4px 26px 4px 9px;
   border-radius: 8px;
-  background-color: rgba(255, 255, 255, 0.04);
+  background-color: var(--auflage-2);
   color: var(--text-dim);
   font-family: var(--mono);
   font-size: 11px;
@@ -8083,7 +8301,7 @@ html:not(.finger) .aw-knopf {
   padding: 8px 11px 8px 12px;
   border: 1px solid var(--border);
   border-radius: 10px;
-  background: rgba(0, 0, 0, 0.24);
+  background: var(--senke-1);
   color: var(--text);
   font-family: inherit;
   font-size: 12.5px;
@@ -8108,7 +8326,7 @@ html:not(.finger) .aw-pfeil {
 }
 html:not(.finger) .aw-knopf:hover {
   border-color: var(--border-2);
-  background: rgba(0, 0, 0, 0.32);
+  background: var(--senke-2);
 }
 html:not(.finger) .aw-knopf:hover .aw-pfeil { border-color: var(--text-dim); }
 html:not(.finger) .aw-knopf[aria-expanded="true"] {
@@ -8136,14 +8354,14 @@ html:not(.finger) .aw-knopf:disabled { opacity: 0.45; cursor: not-allowed; }
   flex-direction: column;
   overflow: hidden;
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(16, 21, 36, 0.72);
+  border: 1px solid var(--auflage-4);
+  background: color-mix(in srgb, var(--flaeche) 72%, transparent);
   backdrop-filter: blur(40px) saturate(180%);
   -webkit-backdrop-filter: blur(40px) saturate(180%);
   box-shadow:
     0 22px 56px rgba(0, 0, 0, 0.58),
     0 2px 10px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    inset 0 1px 0 var(--auflage-3);
 
   opacity: 0;
   transform: translateY(-7px) scale(0.975);
@@ -8156,14 +8374,14 @@ html:not(.finger) .aw-knopf:disabled { opacity: 0.45; cursor: not-allowed; }
 .aw-suchzeile {
   flex-shrink: 0;
   padding: 9px 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid var(--auflage-3);
 }
 .aw-suche {
   width: 100%;
   padding: 8px 11px;
   border: 1px solid var(--border);
   border-radius: 9px;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--senke-2);
   color: var(--text);
   font-family: inherit;
   font-size: 12.5px;
@@ -8182,7 +8400,7 @@ html:not(.finger) .aw-knopf:disabled { opacity: 0.45; cursor: not-allowed; }
 .aw-rollen::-webkit-scrollbar { width: 8px; }
 .aw-rollen::-webkit-scrollbar-thumb {
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--auflage-4);
 }
 
 .aw-eintrag {
@@ -8208,7 +8426,7 @@ html:not(.finger) .aw-knopf:disabled { opacity: 0.45; cursor: not-allowed; }
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.aw-eintrag:hover { background: rgba(255, 255, 255, 0.07); color: var(--text); }
+.aw-eintrag:hover { background: var(--auflage-3); color: var(--text); }
 .aw-eintrag.gewaehlt {
   background: color-mix(in srgb, var(--blue) 16%, transparent);
   color: var(--blue-soft);
@@ -8301,15 +8519,15 @@ html.finger .li-schalter:active .li-knauf { width: 30px; }
     linear-gradient(90deg,
       color-mix(in srgb, var(--licht, var(--blue)) 55%, transparent) 0%,
       var(--licht, var(--blue)) var(--fuell),
-      rgba(255, 255, 255, 0.08) var(--fuell),
-      rgba(255, 255, 255, 0.08) 100%);
+      var(--auflage-3) var(--fuell),
+      var(--auflage-3) 100%);
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 .li-regler input[type="range"]::-moz-range-track,
 .li-feld input[type="range"]::-moz-range-track {
   height: 9px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--auflage-3);
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 /* Firefox füllt selbst — dort genügt die Farbe */
@@ -8366,7 +8584,7 @@ html.finger .li-schalter:active .li-knauf { width: 30px; }
   padding: 6px 10px 6px 7px;
   border: 1px solid var(--border);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.035);
+  background: var(--auflage-2);
   color: var(--text-dim);
   font-family: inherit;
   font-size: 11.5px;
@@ -8375,7 +8593,7 @@ html.finger .li-schalter:active .li-knauf { width: 30px; }
 }
 .li-palette:hover {
   border-color: var(--border-2);
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--auflage-3);
   color: var(--text);
   transform: translateY(-1px);
 }
@@ -8388,7 +8606,7 @@ html.finger .li-schalter:active .li-knauf { width: 30px; }
   width: 30px; height: 18px;
   border-radius: 6px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid var(--auflage-4);
 }
 .li-streifen i { flex: 1; }
 
@@ -8405,7 +8623,7 @@ html.finger .li-schalter:active .li-knauf { width: 30px; }
   transition: opacity 0.14s ease, color 0.14s ease, background 0.14s ease;
 }
 .li-palette:hover .li-palette-weg { opacity: 1; }
-.li-palette-weg:hover { color: var(--red); background: rgba(251, 113, 133, 0.16); }
+.li-palette-weg:hover { color: var(--red); background: color-mix(in srgb, var(--rot) 16%, transparent); }
 html.finger .li-palette-weg { opacity: 1; }
 
 .li-palette.neu { border-style: dashed; color: var(--text-faint); }
@@ -8473,7 +8691,7 @@ html.finger .li-palette-weg { opacity: 1; }
   padding: 7px 10px;
   border: 1px solid color-mix(in srgb, var(--licht, var(--blue)) 45%, transparent);
   border-radius: 9px;
-  background: rgba(0, 0, 0, 0.28);
+  background: var(--senke-2);
   color: var(--text);
   font-family: inherit;
   font-size: 12.5px;
@@ -8488,7 +8706,7 @@ html.finger .li-palette-weg { opacity: 1; }
   padding: 7px 12px;
   border: 1px solid var(--border);
   border-radius: 9px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--auflage-2);
   color: var(--text-dim);
   font-family: inherit;
   font-size: 12px;
@@ -8499,7 +8717,7 @@ html.finger .li-palette-weg { opacity: 1; }
   border-color: color-mix(in srgb, var(--licht, var(--blue)) 45%, transparent);
   color: var(--licht, var(--blue));
 }
-.li-taufe button:hover { background: rgba(255, 255, 255, 0.1); color: var(--text); }
+.li-taufe button:hover { background: var(--auflage-4); color: var(--text); }
 html.finger .li-taufe input { font-size: 16px; }
 
 /* Die aufgeklappte Karte gehört nach vorn. Ohne das legen sich die
@@ -8549,7 +8767,7 @@ html.finger .li-taufe input { font-size: 16px; }
 .li-karte:hover .li-stift,
 .li-stift:focus-visible,
 .li-stift[aria-expanded="true"] { opacity: 1; }
-.li-stift:hover { color: var(--text); background: rgba(255, 255, 255, 0.07); }
+.li-stift:hover { color: var(--text); background: var(--auflage-3); }
 .li-stift[aria-expanded="true"] {
   color: var(--licht, var(--blue));
   background: color-mix(in srgb, var(--licht, var(--blue)) 14%, transparent);
@@ -8567,7 +8785,7 @@ html.finger .li-stift svg { width: 17px; height: 17px; }
   margin-left: 8px;
   padding: 2px 8px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--auflage-3);
   color: var(--text-faint);
   font-size: 10px;
   font-weight: 600;
@@ -8595,7 +8813,7 @@ html.finger .li-stift svg { width: 17px; height: 17px; }
   padding: 9px 12px;
   border: 1px solid var(--border);
   border-radius: 10px;
-  background: rgba(0, 0, 0, 0.26);
+  background: var(--senke-1);
   color: var(--text);
   font-family: inherit;
   font-size: 13px;
@@ -8626,7 +8844,7 @@ html.finger .li-stift svg { width: 17px; height: 17px; }
   padding: 8px 15px;
   border: 1px solid var(--border);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--auflage-2);
   color: var(--text-dim);
   font-family: inherit;
   font-size: 12.5px;
@@ -8638,7 +8856,7 @@ html.finger .li-stift svg { width: 17px; height: 17px; }
   color: var(--licht, var(--blue));
 }
 .li-umbenennen-knoepfe button:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--auflage-4);
   color: var(--text);
 }
 html.finger .li-umbenennen .li-feld input { font-size: 16px; }
@@ -8655,7 +8873,7 @@ html.finger .li-umbenennen .li-feld input { font-size: 16px; }
    aktiver Stift bei einem roten Licht nach einer Warnung aus. */
 .li-stift[aria-expanded="true"] {
   color: var(--blue-soft);
-  background: rgba(91, 140, 255, 0.16);
+  background: color-mix(in srgb, var(--blau) 16%, transparent);
 }
 
 
@@ -8696,9 +8914,7 @@ html.finger .li-umbenennen .li-feld input { font-size: 16px; }
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background:
-    radial-gradient(900px 600px at 50% -10%, rgba(91, 140, 255, 0.14), transparent 60%),
-    rgba(4, 6, 12, 0.86);
+  background: color-mix(in srgb, var(--grund) 92%, transparent);
   backdrop-filter: blur(22px) saturate(140%);
   -webkit-backdrop-filter: blur(22px) saturate(140%);
   animation: an-auf 0.35s ease both;
@@ -8714,13 +8930,13 @@ body.gesperrt .app-shell { filter: blur(3px); pointer-events: none; user-select:
   max-width: 380px;
   padding: 30px 30px 26px;
   border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(16, 21, 36, 0.62);
+  border: 1px solid var(--auflage-4);
+  background: color-mix(in srgb, var(--flaeche) 62%, transparent);
   backdrop-filter: blur(50px) saturate(180%);
   -webkit-backdrop-filter: blur(50px) saturate(180%);
   box-shadow:
     0 30px 74px rgba(0, 0, 0, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    inset 0 1px 0 var(--auflage-3);
   animation: an-karte-auf 0.42s cubic-bezier(0.22, 1, 0.36, 1) both 0.06s;
 }
 @keyframes an-karte-auf {
@@ -8741,7 +8957,7 @@ body.gesperrt .app-shell { filter: blur(3px); pointer-events: none; user-select:
   width: 22px; height: 22px;
   border-radius: 7px;
   background: linear-gradient(135deg, var(--blue), var(--violet));
-  box-shadow: 0 0 16px rgba(91, 140, 255, 0.45);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--blau) 45%, transparent);
 }
 
 .an-titel {
@@ -8774,7 +8990,7 @@ body.gesperrt .app-shell { filter: blur(3px); pointer-events: none; user-select:
   padding: 12px 14px;
   border: 1px solid var(--border);
   border-radius: 12px;
-  background: rgba(0, 0, 0, 0.28);
+  background: var(--senke-2);
   color: var(--text);
   font-family: inherit;
   font-size: 14px;
@@ -8783,7 +8999,7 @@ body.gesperrt .app-shell { filter: blur(3px); pointer-events: none; user-select:
 }
 .an-feld input:focus {
   border-color: color-mix(in srgb, var(--blue) 60%, transparent);
-  background: rgba(0, 0, 0, 0.36);
+  background: var(--senke-2);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 15%, transparent);
 }
 
@@ -8791,8 +9007,8 @@ body.gesperrt .app-shell { filter: blur(3px); pointer-events: none; user-select:
   margin: 2px 0 0;
   padding: 10px 12px;
   border-radius: 10px;
-  background: rgba(251, 113, 133, 0.12);
-  border: 1px solid rgba(251, 113, 133, 0.28);
+  background: color-mix(in srgb, var(--rot) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--rot) 28%, transparent);
   color: var(--red);
   font-size: 12.5px;
   line-height: 1.5;
@@ -8808,7 +9024,7 @@ body.gesperrt .app-shell { filter: blur(3px); pointer-events: none; user-select:
   padding: 13px;
   border: none;
   border-radius: 12px;
-  background: linear-gradient(135deg, var(--blue), #4a6fe8);
+  background: linear-gradient(135deg, var(--blue), var(--blau));
   color: #fff;
   font-family: inherit;
   font-size: 14px;
@@ -8849,7 +9065,7 @@ html.finger .an-feld input { font-size: 16px; }
   padding: 8px 14px;
   border: 1px solid var(--border);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--auflage-2);
   color: var(--text);
   font-family: inherit;
   font-size: 12.5px;
@@ -8857,17 +9073,17 @@ html.finger .an-feld input { font-size: 16px; }
   cursor: pointer;
   transition: background 0.16s ease, border-color 0.16s ease, transform 0.12s ease;
 }
-.ko-knopf:hover { background: rgba(255, 255, 255, 0.08); border-color: var(--border-strong, var(--border)); }
+.ko-knopf:hover { background: var(--auflage-3); border-color: var(--border-strong, var(--border)); }
 .ko-knopf:active { transform: scale(0.98); }
 
 .ko-knopf.ko-haupt {
-  background: linear-gradient(135deg, var(--blue), #4a6fe8);
+  background: linear-gradient(135deg, var(--blue), var(--blau));
   border-color: transparent;
   color: #fff;
   font-weight: 600;
 }
-.ko-knopf.ko-weg { color: var(--red); border-color: rgba(251, 113, 133, 0.3); }
-.ko-knopf.ko-weg:hover { background: rgba(251, 113, 133, 0.12); }
+.ko-knopf.ko-weg { color: var(--red); border-color: color-mix(in srgb, var(--rot) 30%, transparent); }
+.ko-knopf.ko-weg:hover { background: color-mix(in srgb, var(--rot) 12%, transparent); }
 
 .ko-form {
   display: flex;
@@ -8884,7 +9100,7 @@ html.finger .an-feld input { font-size: 16px; }
   padding: 9px 12px;
   border: 1px solid var(--border);
   border-radius: 10px;
-  background: rgba(0, 0, 0, 0.24);
+  background: var(--senke-1);
   color: var(--text);
   font-family: inherit;
   font-size: 13px;
@@ -8921,7 +9137,7 @@ html.finger .an-feld input { font-size: 16px; }
 }
 .ko-loeschen {
   padding: 4px 9px;
-  border: 1px solid rgba(251, 113, 133, 0.28);
+  border: 1px solid color-mix(in srgb, var(--rot) 28%, transparent);
   border-radius: 8px;
   background: transparent;
   color: var(--red);
@@ -8930,7 +9146,7 @@ html.finger .an-feld input { font-size: 16px; }
   cursor: pointer;
   transition: background 0.16s ease;
 }
-.ko-loeschen:hover { background: rgba(251, 113, 133, 0.12); }
+.ko-loeschen:hover { background: color-mix(in srgb, var(--rot) 12%, transparent); }
 
 /* Auf dem Telefon tragen Felder 16px — sonst zoomt iOS beim Antippen */
 html.finger .ko-form input { font-size: 16px; }
@@ -8991,7 +9207,7 @@ body.kop-auf { overflow: hidden; }
   padding: 10px 11px;
   border: 1px solid var(--border);
   border-radius: var(--r-el);
-  background: rgba(255, 255, 255, 0.035);
+  background: var(--auflage-2);
   overflow: hidden;
 }
 .kop-ich-text { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
@@ -9009,7 +9225,7 @@ body.kop-auf { overflow: hidden; }
   border-radius: 11px;
   display: flex; align-items: center; justify-content: center;
   background: linear-gradient(135deg, var(--blue), var(--violet));
-  color: #06090f;
+  color: #fff;
   font-family: var(--mono);
   font-weight: 700;
   font-size: 12px;
@@ -9043,14 +9259,14 @@ body.kop-auf { overflow: hidden; }
   cursor: pointer;
   transition: background 0.14s ease, color 0.14s ease;
 }
-.kop-reiter:hover { background: rgba(255, 255, 255, 0.05); color: var(--text); }
+.kop-reiter:hover { background: var(--auflage-2); color: var(--text); }
 .kop-reiter.aktiv {
-  background: rgba(91, 140, 255, 0.16);
+  background: color-mix(in srgb, var(--blau) 16%, transparent);
   color: var(--text);
   font-weight: 600;
 }
 .kop-reiter.kop-weg { color: var(--red); }
-.kop-reiter.kop-weg:hover { background: rgba(251, 113, 133, 0.12); color: var(--red); }
+.kop-reiter.kop-weg:hover { background: color-mix(in srgb, var(--rot) 12%, transparent); color: var(--red); }
 
 .kop-trenner {
   height: 1px;
@@ -9131,7 +9347,7 @@ body.kop-auf { overflow: hidden; }
   padding: 10px 13px;
   border: 1px solid var(--border);
   border-radius: var(--r-el);
-  background: rgba(0, 0, 0, 0.26);
+  background: var(--senke-1);
   color: var(--text);
   font-family: inherit;
   font-size: 13.5px;
@@ -9149,14 +9365,14 @@ body.kop-auf { overflow: hidden; }
   padding: 10px 15px;
   border: 1px solid var(--border);
   border-radius: var(--r-el);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--auflage-2);
   color: var(--text);
   font-family: inherit;
   font-size: 13px;
   cursor: pointer;
   transition: background 0.14s ease;
 }
-.kop-bereich .row button:hover { background: rgba(255, 255, 255, 0.09); }
+.kop-bereich .row button:hover { background: var(--auflage-3); }
 
 /* ---------- Schließen: Kreis mit ESC darunter ---------- */
 .kop-zu {
@@ -9181,7 +9397,7 @@ body.kop-auf { overflow: hidden; }
   border-radius: 50%;
   transition: background 0.14s ease, border-color 0.14s ease, transform 0.14s ease;
 }
-.kop-zu:hover .kop-zu-kreis { background: rgba(255, 255, 255, 0.07); border-color: var(--text-dim); }
+.kop-zu:hover .kop-zu-kreis { background: var(--auflage-3); border-color: var(--text-dim); }
 .kop-zu:active .kop-zu-kreis { transform: scale(0.94); }
 .kop-zu-kreis svg { width: 15px; height: 15px; }
 .kop-zu-text {
@@ -9201,8 +9417,8 @@ body.kop-auf { overflow: hidden; }
 .kop-banner {
   height: 82px;
   background:
-    radial-gradient(420px 140px at 22% 120%, rgba(167, 139, 250, 0.5), transparent 70%),
-    linear-gradient(120deg, #2c3a63 0%, #24304e 45%, #1b2340 100%);
+    radial-gradient(420px 140px at 22% 120%, color-mix(in srgb, var(--blau) 50%, transparent), transparent 70%),
+    linear-gradient(120deg, var(--kontur-2) 0%, var(--flaeche-3) 45%, var(--flaeche-3) 100%);
 }
 .kop-karte-kopf {
   display: flex;
@@ -9234,7 +9450,7 @@ body.kop-auf { overflow: hidden; }
   border-radius: 24px;
   border: 4px solid var(--bg);
   background: linear-gradient(135deg, var(--blue), var(--violet));
-  color: #06090f;
+  color: #fff;
   font-family: var(--mono);
   font-weight: 700;
   font-size: 25px;
@@ -9247,7 +9463,7 @@ body.kop-auf { overflow: hidden; }
   inset: 4px;
   display: flex; align-items: center; justify-content: center;
   border-radius: 20px;
-  background: rgba(4, 7, 14, 0.66);
+  background: color-mix(in srgb, var(--flaeche) 66%, transparent);
   color: #fff;
   font-family: var(--sans);
   font-size: 11px;
@@ -9273,7 +9489,7 @@ body.kop-auf { overflow: hidden; }
   justify-content: space-between;
   gap: 14px;
   padding: 12px 15px;
-  background: rgba(10, 14, 26, 0.72);
+  background: color-mix(in srgb, var(--flaeche) 72%, transparent);
 }
 .kop-feld-text { min-width: 0; }
 .kop-feld-marke {
@@ -9295,7 +9511,7 @@ body.kop-auf { overflow: hidden; }
   padding: 7px 14px;
   border: 1px solid var(--border);
   border-radius: 9px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--auflage-2);
   color: var(--text);
   font-family: inherit;
   font-size: 12.5px;
@@ -9303,11 +9519,11 @@ body.kop-auf { overflow: hidden; }
   cursor: pointer;
   transition: background 0.14s ease, transform 0.12s ease;
 }
-.kop-klein:hover:not(:disabled) { background: rgba(255, 255, 255, 0.1); }
+.kop-klein:hover:not(:disabled) { background: var(--auflage-4); }
 .kop-klein:active:not(:disabled) { transform: scale(0.97); }
 .kop-klein:disabled { opacity: 0.45; cursor: default; }
 .kop-klein.kop-haupt {
-  background: linear-gradient(135deg, var(--blue), #4a6fe8);
+  background: linear-gradient(135deg, var(--blue), var(--blau));
   border-color: transparent;
   color: #fff;
   font-weight: 600;
@@ -9333,7 +9549,7 @@ button.sidebar-profile {
   transition: background 0.16s ease, border-color 0.16s ease;
 }
 button.sidebar-profile:hover {
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--auflage-3);
   border-color: var(--border-2);
 }
 button.sidebar-profile:active { transform: scale(0.99); }
@@ -9429,7 +9645,7 @@ html.finger .kop-bereich input { font-size: 16px; }
   border: 1px solid var(--border-2);
   border-bottom-width: 2px;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--auflage-3);
   color: var(--text);
   font-family: var(--mono);
   font-size: 11px;
@@ -9454,14 +9670,14 @@ html.finger .kop-bereich input { font-size: 16px; }
 .monat-tag.ferien {
   background:
     repeating-linear-gradient(135deg,
-      rgba(52, 211, 153, 0.07) 0 6px,
-      rgba(52, 211, 153, 0.02) 6px 12px);
+      color-mix(in srgb, var(--gruen) 7%, transparent) 0 6px,
+      color-mix(in srgb, var(--gruen) 2%, transparent) 6px 12px);
 }
 .monat-tag.feiertag {
   background:
     repeating-linear-gradient(135deg,
-      rgba(245, 169, 78, 0.09) 0 6px,
-      rgba(245, 169, 78, 0.03) 6px 12px);
+      color-mix(in srgb, var(--gelb) 9%, transparent) 0 6px,
+      color-mix(in srgb, var(--gelb) 3%, transparent) 6px 12px);
 }
 .mt-frei {
   display: block;
@@ -9495,7 +9711,7 @@ html.finger .kop-bereich input { font-size: 16px; }
   border: 1px solid color-mix(in srgb, var(--blue) 30%, transparent);
   border-radius: var(--r-card);
   background:
-    linear-gradient(120deg, rgba(91, 140, 255, 0.14), rgba(167, 139, 250, 0.07));
+    linear-gradient(120deg, color-mix(in srgb, var(--blau) 14%, transparent), color-mix(in srgb, var(--blau) 7%, transparent));
   animation: lf-rein 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 @keyframes lf-rein {
@@ -9511,7 +9727,7 @@ html.finger .kop-bereich input { font-size: 16px; }
   padding: 10px 18px;
   border: none;
   border-radius: var(--r-el);
-  background: linear-gradient(135deg, var(--blue), #4a6fe8);
+  background: linear-gradient(135deg, var(--blue), var(--blau));
   color: #fff;
   font-family: inherit;
   font-size: 13px;
@@ -9548,7 +9764,7 @@ html.finger .kop-bereich input { font-size: 16px; }
 /* Der Eintrag im Dashboard-Reiter */
 .entry-item.entry-karten { cursor: pointer; }
 .entry-item.entry-karten .entry-accent { background: var(--blue); }
-.entry-item.entry-karten:hover { background: rgba(255, 255, 255, 0.05); }
+.entry-item.entry-karten:hover { background: var(--auflage-2); }
 
 /* Auf dem Telefon steht der Knopf unter dem Text */
 @media (max-width: 699px) {
@@ -9581,7 +9797,7 @@ html.finger .kop-bereich input { font-size: 16px; }
   justify-content: space-between;
   gap: 14px;
   padding: 12px 15px;
-  background: rgba(10, 14, 26, 0.72);
+  background: color-mix(in srgb, var(--flaeche) 72%, transparent);
 }
 .pk-text { min-width: 0; }
 .pk-titel {
@@ -9768,7 +9984,7 @@ html.tablet #weatherCityLabel { display: none; }
   padding: 9px 12px;
   border: 1px solid var(--border);
   border-radius: var(--r-el);
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--auflage-2);
 }
 
 .kk-nr {
@@ -9776,7 +9992,7 @@ html.tablet #weatherCityLabel { display: none; }
   display: flex; align-items: center; justify-content: center;
   border-radius: 8px;
   background: var(--kk-ton, var(--blue));
-  color: #06090f;
+  color: #fff;
   font-family: var(--mono);
   font-weight: 700;
   font-size: 12px;
@@ -9784,12 +10000,12 @@ html.tablet #weatherCityLabel { display: none; }
 
 /* Von vorn nach hinten: aus Rot wird Grün. Die Farbe sagt dasselbe
    wie die Position, nur schneller. */
-.kk-s0 { --kk-ton: #fb7185; }
-.kk-s1 { --kk-ton: #f5a94e; }
+.kk-s0 { --kk-ton: var(--rot); }
+.kk-s1 { --kk-ton: var(--gelb); }
 .kk-s2 { --kk-ton: #f2c94c; }
 .kk-s3 { --kk-ton: #a3d977; }
 .kk-s4 { --kk-ton: #52c98a; }
-.kk-s5 { --kk-ton: #34d399; }
+.kk-s5 { --kk-ton: var(--gruen); }
 
 .kk-text { min-width: 0; }
 .kk-titel {
@@ -9801,7 +10017,7 @@ html.tablet #weatherCityLabel { display: none; }
 .kk-balken {
   height: 7px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--auflage-3);
   overflow: hidden;
 }
 .kk-balken i {
@@ -9823,14 +10039,14 @@ html.tablet #weatherCityLabel { display: none; }
   padding: 6px 12px;
   border: 1px solid var(--border);
   border-radius: 9px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--auflage-2);
   color: var(--text);
   font-family: inherit;
   font-size: 12px;
   cursor: pointer;
   transition: background 0.14s ease;
 }
-.kk-ab:hover:not(:disabled) { background: rgba(255, 255, 255, 0.1); }
+.kk-ab:hover:not(:disabled) { background: var(--auflage-4); }
 .kk-ab:disabled { opacity: 0.35; cursor: default; }
 
 .kk-fuss { font-size: 11.5px; color: var(--text-faint); text-align: right; }
@@ -9870,7 +10086,7 @@ html.tablet #weatherCityLabel { display: none; }
   margin: 10px 0 14px;
   padding: 10px 12px;
   border-radius: 8px;
-  background: rgba(251, 113, 133, 0.1);
+  background: color-mix(in srgb, var(--rot) 10%, transparent);
   color: var(--red);
   font-family: var(--mono);
   font-size: 12px;

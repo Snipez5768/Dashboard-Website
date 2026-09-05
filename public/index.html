@@ -30,8 +30,27 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect x=%2210%22 y=%2210%22 width=%2280%22 height=%2280%22 rx=%2224%22 fill=%22%23070a12%22 stroke=%22%235b8cff%22 stroke-width=%228%22/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+
+<!-- ============ HELL ODER DUNKEL ============
+     Das muss vor dem ersten Bildaufbau geschehen, nicht erst in
+     script.js: sonst malt der Browser eine Zehntelsekunde lang den
+     falschen Modus und blendet ihn dann um. Genau dieses Aufblitzen
+     faellt beim Oeffnen am staerksten auf.
+     Ohne Eintrag bleibt das Attribut weg — dann entscheidet die
+     Einstellung des Geraets ueber die Medienabfrage in style.css.
+     ========================================================= -->
+<script>
+  (function () {
+    try {
+      var wahl = localStorage.getItem("lifeos_thema");
+      if (wahl === "hell" || wahl === "dunkel") {
+        document.documentElement.setAttribute("data-thema", wahl);
+      }
+    } catch (f) { /* Kein Speicher: dann eben nach Geraeteeinstellung */ }
+  })();
+</script>
 
 <!-- ============ WELCHES GERÄT? ============
      Safari lädt auf dem iPad Seiten standardmäßig in Desktop-Breite.
