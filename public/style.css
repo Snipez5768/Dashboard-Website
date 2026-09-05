@@ -10760,3 +10760,77 @@ input:focus, textarea:focus, select:focus {
   font-weight: 700;
   letter-spacing: -0.02em;
 }
+
+/* ==========================================================
+   PHASE 6 — WENIGER PRO KARTE
+
+   Die Musterkarten trugen drei bis vier Dinge, diese hier acht bis
+   zwoelf. Die Luft dazwischen laesst sich nicht mit Abstaenden
+   herbeireden — der Platz ist schlicht vergeben.
+
+   Also zeigt jede Karte nur noch ihre Kernaussage, und ein Klick
+   auf sie fuehrt zur vollen Seite. Verloren geht nichts: es rueckt
+   eine Ebene tiefer.
+   ========================================================== */
+
+/* Die Karte fuehrt weiter — das muss man ihr ansehen und fuehlen. */
+.karte-fuehrt { cursor: pointer; }
+.karte-fuehrt:focus-visible {
+  outline: none;
+  box-shadow: var(--heb-3), var(--lichtkante),
+              0 0 0 3px var(--blau-fond), 0 0 0 1.5px var(--blau);
+}
+
+/* "Details anzeigen" sass mitten im Kalorien-Widget und tat genau
+   das, was jetzt ein Klick auf die Karte tut. Zwei Wege zum selben
+   Ziel, einer davon nimmt Platz weg. */
+#calDetailsBtn { display: none; }
+
+/* Leerzustaende sind Saetze, keine Bauwerke. Sie standen bisher in
+   eigenen Kaesten mit Kontur und Hintergrund und wirkten dadurch
+   wichtiger als die Karten mit Inhalt. */
+.cal-empty,
+.naechste-empty,
+.streak-leer {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--text-3);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Der Hinweis auf den naechsten Schritt gehoert unter den
+   Leerzustand, nicht als Knopf mitten hinein. */
+.naechste-empty::after,
+.cal-empty::after {
+  content: "Tippen zum Öffnen";
+  display: block;
+  margin-top: 6px;
+  font-size: 11.5px;
+  color: var(--text-3);
+  opacity: 0;
+  transition: opacity var(--w-normal) var(--kurve-weich);
+}
+.karte-fuehrt:hover .naechste-empty::after,
+.karte-fuehrt:hover .cal-empty::after { opacity: 1; }
+@media (hover: none) and (pointer: coarse) {
+  .naechste-empty::after, .cal-empty::after { opacity: 1; }
+}
+
+/* Die Legende der Bildschirmzeit wiederholte im Kopf, was die Kurve
+   ohnehin zeigt. Sie darf beim Annaehern erscheinen wie die
+   Werkzeuge daneben. */
+.card-head .legend {
+  opacity: 0;
+  transition: opacity var(--w-normal) var(--kurve-weich);
+}
+.card:hover .card-head .legend,
+.card:focus-within .card-head .legend { opacity: 1; }
+@media (hover: none) and (pointer: coarse) {
+  .card-head .legend { opacity: 1; }
+}
+
+/* Mehr Luft zwischen Kopf und Aussage, weniger Kleinteiliges darin */
+.card-head { margin-bottom: 14px; gap: 8px; }
+.card-body { gap: 10px; }

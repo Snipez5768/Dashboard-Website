@@ -2519,6 +2519,58 @@
      den ersten Eintrag waschen und Weiterlaufen behaupten, wo
      Schluss ist.
      ========================================================== */
+
+  /* ==========================================================
+     DIE KARTE IST DER WEG ZUR SEITE
+
+     Bisher trug jedes Widget seine Bedienung mit sich herum: Knoepfe,
+     Umschalter, Leerzustaende. Bei acht bis zwoelf Dingen pro Karte
+     bleibt kein Platz mehr fuer das, was die Karte eigentlich sagen
+     will — die Zahl, den naechsten Termin, den Stand.
+
+     Jetzt zeigt jede Karte ihre Kernaussage, und ein Klick auf sie
+     fuehrt zur vollen Seite. Verloren geht nichts, es rueckt nur eine
+     Ebene tiefer.
+
+     Klicks auf echte Bedienelemente laufen weiter wie bisher: wer ein
+     Habit abhakt, will nicht auf die Habit-Seite geschickt werden.
+     ========================================================== */
+  (function kartenAlsWeg() {
+    const ZIEL = {
+      "card-kalorien":   "kalorien",
+      "card-screentime": "bildschirmzeit",
+      "card-wetter":     "kalender",
+      "card-naechste":   "kalender",
+      "card-streaks":    "habits",
+      "card-habits":     "habits"
+    };
+
+    Object.entries(ZIEL).forEach(([id, seite]) => {
+      const karte = document.getElementById(id);
+      if (!karte) return;
+
+      karte.classList.add("karte-fuehrt");
+      karte.setAttribute("role", "link");
+      karte.setAttribute("tabindex", "0");
+
+      const hin = e => {
+        /* Alles, was selbst etwas tut, behaelt sein Verhalten. Sonst
+           koennte man kein Habit mehr abhaken, ohne die Seite zu
+           wechseln. */
+        if (e.target.closest("button, a, input, select, textarea, [role=button], [role=tab], svg[data-klick]")) return;
+        /* Wer Text markiert, will lesen, nicht navigieren. */
+        const auswahl = window.getSelection();
+        if (auswahl && String(auswahl).length > 0) return;
+        location.hash = "#/" + seite;
+      };
+
+      karte.addEventListener("click", hin);
+      karte.addEventListener("keydown", e => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); location.hash = "#/" + seite; }
+      });
+    });
+  })();
+
   (function leisteRaender() {
     const leiste = document.querySelector(".sidebar");
     const bahn = document.querySelector(".nav-scroll");
