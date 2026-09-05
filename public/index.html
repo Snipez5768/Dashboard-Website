@@ -260,8 +260,8 @@
             placeholder="Suchen — oder Termin / Klausur eintragen …">
           <button type="submit" class="search-btn">
             <span class="search-btn-wort">Suchen</span>
-            <svg class="search-btn-pfeil" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+            <svg class="search-btn-lupe" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.1" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.4"/><path d="m16 16 4 4"/></svg>
           </button>
         </form>
 
@@ -638,6 +638,7 @@
         <div class="lern-leiste">
           <div class="lern-reiter" id="lernReiter" role="tablist">
             <button type="button" class="lr-tab active" data-lreiter="klausuren" role="tab">Klausuren</button>
+            <button type="button" class="lr-tab" data-lreiter="tests" role="tab">Tests</button>
             <button type="button" class="lr-tab" data-lreiter="hausaufgaben" role="tab">Hausaufgaben</button>
             <button type="button" class="lr-tab" data-lreiter="themen" role="tab">Sonstiges</button>
           </div>
@@ -1143,7 +1144,42 @@
 </script>
 <!-- Die Anmeldung lädt bestand.js und script.js nach, sobald jemand
      angemeldet ist. Vorher laufen sie gar nicht erst an: sie kämen
-     an keine Daten und würden bei jedem Abruf stolpern. -->
-<script src="anmeldung.js"></script>
+     an keine Daten und würden bei jedem Abruf stolpern.
+
+     Laesst sie sich nicht laden, bleibt die Seite sonst weiss. Der
+     haeufigste Grund: der Rechner ist aus und die Datei liegt noch
+     nicht in der Kopie auf dem Geraet. Dann steht hier wenigstens,
+     was los ist. -->
+<script>
+  function lifeosNotfall() {
+    var schicht = document.getElementById("anmeldung");
+    if (schicht) { schicht.hidden = true; }
+    document.body.classList.remove("gesperrt");
+    var kasten = document.createElement("div");
+    kasten.setAttribute("style",
+      "position:fixed;inset:0;z-index:3000;display:flex;align-items:center;"
+      + "justify-content:center;padding:24px;background:#070a12;color:#e9eef8;"
+      + "font-family:'Space Grotesk',system-ui,sans-serif");
+    kasten.innerHTML =
+      "<div style=\"max-width:340px;text-align:left;line-height:1.6\">"
+      + "<div style=\"font-size:20px;font-weight:600;margin-bottom:10px\">"
+      + "App unvollst\u00e4ndig gespeichert</div>"
+      + "<p style=\"font-size:13px;color:#8c97b0;margin:0 0 14px\">"
+      + "Ein Teil der App fehlt in der Kopie auf diesem Ger\u00e4t \u2014 deshalb "
+      + "startet sie ohne den Rechner nicht. Einmal mit laufendem Rechner "
+      + "\u00f6ffnen legt die Kopie vollst\u00e4ndig an, danach geht es wieder ohne."
+      + "</p>"
+      + "<button id=\"lifeosNochmal\" style=\"width:100%;padding:13px;border:none;"
+      + "border-radius:12px;background:#5b8cff;color:#fff;font-family:inherit;"
+      + "font-size:14px;font-weight:600\">Erneut versuchen</button>"
+      + "<p style=\"font-size:11px;color:#5c6683;margin:14px 0 0\">"
+      + "Deine Daten sind nicht verloren \u2014 sie liegen weiter auf dem Ger\u00e4t "
+      + "und beim Rechner.</p></div>";
+    document.body.appendChild(kasten);
+    var knopf = document.getElementById("lifeosNochmal");
+    if (knopf) knopf.addEventListener("click", function () { location.reload(); });
+  }
+</script>
+<script src="anmeldung.js" onerror="lifeosNotfall()"></script>
 </body>
 </html>

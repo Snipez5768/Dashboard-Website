@@ -46,20 +46,14 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command ^
 echo.
 echo Starte Server ...
 
-REM --- Browser an der richtigen Adresse oeffnen -------------------------
-REM Ist 3000 belegt, weicht der Server auf 3001 aus. Ein fest
-REM verdrahtetes http://localhost:3000 zeigte dann auf das fremde
-REM Programm, das den Port haelt. Der Server schreibt seinen Port
-REM nach data\port.txt, sobald er hoert — darauf wird hier gewartet.
+REM --- Browser zeigen ---------------------------------------------------
+REM Zwei Dinge sollen dabei stimmen: die richtige Adresse (der Server
+REM weicht aus, wenn 3000 belegt ist) und kein zweiter Reiter, wenn
+REM die Seite schon offen ist. Beides steht in browser-oeffnen.ps1 —
+REM als eigene Datei, weil das in einer Zeile Batch nicht lesbar
+REM waere.
 if exist "data\port.txt" del "data\port.txt" >nul 2>nul
-start "" /min powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-  "for ($i = 0; $i -lt 75; $i++) {" ^
-  "  if (Test-Path 'data\port.txt') {" ^
-  "    $port = (Get-Content 'data\port.txt' -Raw).Trim();" ^
-  "    if ($port -match '^^\d+$') { Start-Process ('http://localhost:' + $port); break }" ^
-  "  }" ^
-  "  Start-Sleep -Milliseconds 400" ^
-  "}"
+start "" /min powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0browser-oeffnen.ps1"
 
 call npm run dev
 

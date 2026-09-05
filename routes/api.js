@@ -169,7 +169,9 @@ router.get("/health", (req, res) => {
   res.json({
     ok: true,
     time: new Date().toISOString(),
-    https: global.lifeosHttps || { an: false, grund: "nicht gestartet" }
+    https: global.lifeosHttps || { an: false, grund: "nicht gestartet" },
+    /* Für dev-server.bat: hängt schon ein Browser an der Leitung? */
+    klienten: offeneLeitungen
   });
 });
 
@@ -257,8 +259,14 @@ router.post("/bestand/frueher", (req, res) => {
    nie endet. Der Browser bringt mit EventSource alles mit, was
    dafür nötig ist, auch das Wiederverbinden nach einem Abriss.
    ========================================================== */
+/* Wie viele Browser hängen gerade an der offenen Leitung? Das
+   Startskript fragt danach: hängt schon einer dran, ist die Seite
+   offen und ein zweiter Reiter wäre nur im Weg. */
+let offeneLeitungen = 0;
+
 router.get("/bestand/strom", (req, res) => {
   const geraet = String(req.query.geraet || "");
+  offeneLeitungen++;
 
   res.set({
     "Content-Type": "text/event-stream; charset=utf-8",
@@ -270,6 +278,11 @@ router.get("/bestand/strom", (req, res) => {
   });
   res.flushHeaders && res.flushHeaders();
   res.write("retry: 3000\n\n");        // nach Abriss in 3 s wieder versuchen
+
+  let gezaehlt = true;
+  const wegzaehlen = () => { if (gezaehlt) { gezaehlt = false; offeneLeitungen--; } };
+  req.on("close", wegzaehlen);
+  res.on("close", wegzaehlen);
 
   const abmelden = meinBestand(req).anmelden(nachricht => {
     if (nachricht.quelle && nachricht.quelle === geraet) return;   // eigene Änderung

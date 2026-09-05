@@ -9,11 +9,15 @@
    fern und führt zur Anmeldung.
 
    OFFLINE
-   Ohne Server lässt sich nichts prüfen. Wer zuletzt angemeldet war,
-   darf die App dann trotzdem öffnen: die Daten liegen ohnehin schon
-   auf dem Gerät, und ein Sperrbildschirm, der niemanden hereinlässt,
-   würde die App unterwegs unbrauchbar machen. Sobald der Server
-   wieder antwortet, entscheidet er.
+   Ohne Server kann niemand nachfragen, ob das Passwort stimmt —
+   also legt das Gerät beim Anmelden einen Schlüssel an: eine
+   Prüfsumme des Passworts mit eigenem Salz. Offline wird dagegen
+   geprüft. Er gilt 30 Tage und verlängert sich bei jedem Besuch
+   mit Server; beim Abmelden wird er gelöscht.
+
+   Er verschlüsselt die Daten nicht — die liegen weiter offen im
+   Browserspeicher. Er hält den Bildschirm zu, mehr nicht. Sobald
+   der Server wieder antwortet, entscheidet der.
    ========================================================== */
 (function () {
   "use strict";
@@ -45,7 +49,85 @@
   /* Ob dieses Konto das erste im Haus ist */
   const VERWALTER = "lifeos_konto_verwalter";
 
+  /* ----------------------------------------------------------
+     DER SCHLÜSSEL FÜR DEN BETRIEB OHNE SERVER
+     ---------------------------------------------------------- */
+  const SCHLUESSEL = "lifeos_offline_schluessel";
+  const SCHLUESSEL_TAGE = 30;
+  const RUNDEN = 200000;
+
+  const alsBase64 = puffer =>
+    btoa(String.fromCharCode(...new Uint8Array(puffer)));
+
+  /* PBKDF2 gibt es nur im sicheren Kontext. Über die unverschlüsselte
+     Netzadresse fehlt crypto.subtle — dort gibt es aber ohnehin
+     keinen Service Worker und damit keinen Offline-Betrieb. */
+  const kannRechnen = () =>
+    !!(window.crypto && window.crypto.subtle && window.isSecureContext);
+
+  async function pruefsumme(passwort, salzB64) {
+    const roh = await crypto.subtle.importKey(
+      "raw", new TextEncoder().encode(passwort), "PBKDF2", false, ["deriveBits"]);
+    const salz = Uint8Array.from(atob(salzB64), z => z.charCodeAt(0));
+    const bits = await crypto.subtle.deriveBits(
+      { name: "PBKDF2", salt: salz, iterations: RUNDEN, hash: "SHA-256" }, roh, 256);
+    return alsBase64(bits);
+  }
+
+  function schluesselLesen() {
+    try { return JSON.parse(localStorage.getItem(SCHLUESSEL) || "null"); }
+    catch (f) { return null; }
+  }
+
+  const schluesselGilt = k =>
+    !!k && !!k.pruefsumme && !!k.salz && Number(k.ablauf) > Date.now();
+
+  /* Nach dem Anmelden mit Server: Schlüssel anlegen oder erneuern.
+     Nur hier liegt das Passwort im Klartext vor. */
+  async function schluesselSchreiben(konto, passwort) {
+    if (!kannRechnen() || !passwort) return;
+    try {
+      const salz = alsBase64(crypto.getRandomValues(new Uint8Array(16)));
+      localStorage.setItem(SCHLUESSEL, JSON.stringify({
+        nutzer: { id: konto.id, name: konto.name, verwalter: !!konto.verwalter },
+        salz,
+        pruefsumme: await pruefsumme(passwort, salz),
+        ablauf: Date.now() + SCHLUESSEL_TAGE * 86400000
+      }));
+    } catch (f) { /* dann eben ohne Schlüssel */ }
+  }
+
+  /* Jeder Besuch mit Server schiebt den Ablauf nach hinten — wer die
+     App benutzt, soll nicht plötzlich ausgesperrt sein. */
+  function schluesselVerlaengern(konto) {
+    const k = schluesselLesen();
+    if (!k || !k.pruefsumme) return;
+    k.ablauf = Date.now() + SCHLUESSEL_TAGE * 86400000;
+    if (konto) k.nutzer = { id: konto.id, name: konto.name, verwalter: !!konto.verwalter };
+    try { localStorage.setItem(SCHLUESSEL, JSON.stringify(k)); } catch (f) { /* egal */ }
+  }
+
+  const schluesselWeg = () => {
+    try { localStorage.removeItem(SCHLUESSEL); } catch (f) { /* egal */ }
+  };
+
+  /* Liegen überhaupt Daten dieses Dashboards auf dem Gerät? Danach
+     richtet sich, ob ein Einlass ohne Schlüssel etwas verbirgt oder
+     nur die eigene App unbrauchbar macht. */
+  function datenDa() {
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith("lifeos_") && k !== LETZTER && k !== KONTO
+            && k !== OFFLINE_ERLAUBT && k !== VERWALTER && k !== SCHLUESSEL) return true;
+      }
+    } catch (f) { /* egal */ }
+    return false;
+  }
+
   let einrichten = false;
+  /* Wenn ohne Server geprüft wird, steht hier der Schlüssel */
+  let offlineSchluessel = null;
 
   /* ----------------------------------------------------------
      KONTOWECHSEL
@@ -112,6 +194,24 @@
     if (zuletzt) feldName.value = zuletzt;
   }
 
+  /* Ohne Server: derselbe Kasten, andere Ansage. Der Name steht
+     fest — offline lässt sich nur das Konto öffnen, das hier schon
+     einmal angemeldet war. */
+  function alsOhneServer(schluessel) {
+    einrichten = false;
+    offlineSchluessel = schluessel;
+    $("anTitel").textContent = "Ohne Verbindung";
+    $("anText").textContent =
+      "Der Rechner antwortet nicht. Mit deinem Passwort kommst du trotzdem an das, "
+      + "was auf diesem Gerät liegt.";
+    feldZweites.hidden = true;
+    feldPasswort.setAttribute("autocomplete", "current-password");
+    knopf.textContent = "Öffnen";
+    $("anFuss").textContent = "Sobald der Rechner wieder läuft, gilt wieder er.";
+    feldName.value = (schluessel.nutzer && schluessel.nutzer.name) || "";
+    feldName.readOnly = true;
+  }
+
   function zeigen() {
     schicht.hidden = false;
     document.body.classList.add("gesperrt");
@@ -141,6 +241,7 @@
     /* Ohne diese Zeile käme man nach dem Abmelden offline weiter
        herein — die Erlaubnis liegt ja am Gerät. */
     try { localStorage.removeItem(OFFLINE_ERLAUBT); } catch (f) { /* egal */ }
+    schluesselWeg();
     fetch("/api/anmeldung/aus", { method: "POST" })
       .catch(() => { /* auch ohne Server abmelden */ })
       .finally(() => location.reload());
@@ -152,6 +253,10 @@
 
     const name = feldName.value.trim();
     const passwort = feldPasswort.value;
+
+    /* Ohne Server wird gegen den Schlüssel geprüft, nicht gegen das
+       Konto — der Server ist ja nicht da, um gefragt zu werden. */
+    if (offlineSchluessel) return offlineOeffnen(passwort);
 
     if (einrichten && passwort !== feldPasswort2.value) {
       return fehler("Die beiden Passwörter sind nicht gleich");
@@ -173,12 +278,33 @@
 
       kontoMerken(daten.nutzer);
       try { localStorage.setItem(LETZTER, daten.nutzer.name); } catch (f) { /* egal */ }
+      /* Jetzt — und nur jetzt — liegt das Passwort im Klartext vor.
+         Der Schlüssel für später wird hier angelegt. */
+      await schluesselSchreiben(daten.nutzer, passwort);
       verstecken();
       dashboardStarten();
     } catch (f) {
       fehler(f.message);
       knopf.disabled = false;
       knopf.textContent = einrichten ? "Konto anlegen" : "Anmelden";
+      feldPasswort.value = "";
+      feldPasswort.focus();
+    }
+  }
+
+  async function offlineOeffnen(passwort) {
+    knopf.disabled = true;
+    knopf.textContent = "Wird geprüft …";
+    try {
+      const summe = await pruefsumme(passwort, offlineSchluessel.salz);
+      if (summe !== offlineSchluessel.pruefsumme) throw new Error("Das Passwort stimmt nicht");
+      window.lifeosNutzer = offlineSchluessel.nutzer || null;
+      verstecken();
+      dashboardStarten();
+    } catch (f) {
+      fehler(f.message);
+      knopf.disabled = false;
+      knopf.textContent = "Öffnen";
       feldPasswort.value = "";
       feldPasswort.focus();
     }
@@ -193,6 +319,7 @@
       if (d.angemeldet) {
         kontoMerken(d.nutzer);
         try { localStorage.setItem(LETZTER, d.nutzer.name); } catch (f) { /* egal */ }
+        schluesselVerlaengern(d.nutzer);
         verstecken();
         return dashboardStarten();
       }
@@ -203,24 +330,54 @@
       /* Kein Server erreichbar. Wer hier zuletzt angemeldet war,
          kommt an seine bereits geladenen Daten — alles andere wäre
          eine App, die unterwegs nichts mehr zeigt. */
-      if (localStorage.getItem(OFFLINE_ERLAUBT)) {
+      const k = schluesselLesen();
+
+      /* Der übliche Fall: es gibt einen gültigen Schlüssel. Dann
+         nach dem Passwort fragen und lokal prüfen. */
+      if (schluesselGilt(k) && kannRechnen()) {
+        alsOhneServer(k);
+        zeigen();
+        return;
+      }
+
+      /* Ein Schlüssel, der abgelaufen ist, soll das auch sagen —
+         sonst rätselt man, warum das richtige Passwort nicht geht. */
+      if (k && k.pruefsumme && !schluesselGilt(k)) {
+        alsAnmeldung();
+        zeigen();
+        fehler("Dieses Gerät war über 30 Tage nicht am Server. "
+             + "Einmal mit laufendem Rechner anmelden, dann geht es wieder ohne.");
+        return;
+      }
+
+      /* Kein Schlüssel — etwa weil dieses Gerät sich zuletzt vor
+         seiner Einführung angemeldet hat. Liegen Daten hier, wäre
+         Aussperren sinnlos: sie stehen ohnehin im Browserspeicher,
+         und die App wäre unterwegs unbrauchbar. Also herein, mit
+         einem Hinweis. */
+      if (localStorage.getItem(OFFLINE_ERLAUBT) || datenDa()) {
         window.lifeosNutzer = {
           id: localStorage.getItem(KONTO),
           name: localStorage.getItem(LETZTER),
           verwalter: localStorage.getItem(VERWALTER) === "1"
         };
         verstecken();
-        return dashboardStarten();
+        dashboardStarten();
+        window.lifeosOhneSchluessel = true;
+        return;
       }
+
       alsAnmeldung();
       zeigen();
-      fehler("Kein Server erreichbar — und auf diesem Gerät ist niemand angemeldet.");
+      fehler("Kein Server erreichbar — und auf diesem Gerät liegen keine Daten.");
     });
 
   /* Antwortet der Server später mit „nicht angemeldet", ist die
      Sitzung abgelaufen. Dann zurück zum Anmelden, statt still
      nichts mehr zu laden. */
   window.lifeosSitzungWeg = function () {
+    /* Die Sitzung ist abgelaufen, nicht der Schlüssel — der bleibt,
+       damit man unterwegs weiter an seine Daten kommt. */
     try { localStorage.removeItem(OFFLINE_ERLAUBT); } catch (f) { /* egal */ }
     if (!schicht.hidden) return;
     alsAnmeldung();

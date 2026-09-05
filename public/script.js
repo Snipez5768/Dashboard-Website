@@ -75,6 +75,21 @@
 
   let termine = store.get("lifeos_termine", []);
   let klausuren = store.get("lifeos_klausuren", []);
+
+  /* ---------- Klausur oder Test? ----------
+     Beides liegt in derselben Liste. Ein Test trägt "pruefung:
+     test", eine Klausur trägt nichts — so bleiben alle bisherigen
+     Einträge das, was sie waren.
+
+     Die drei stehen hier oben, weil schon der erste Aufbau des
+     Dashboards nach dem Wort fragt. */
+  const istTest = k => !!k && k.pruefung === "test";
+  const pruefungWort = k => istTest(k) ? "Test" : "Klausur";
+
+  /* Ein Test dauert eine Schulstunde. Klausuren haben ihre eigene
+     Dauer je Fach; für Tests wäre eine zweite Tabelle mehr
+     Verwaltung als Nutzen. */
+  const TEST_DAUER = 45;
   let lernkarten = store.get("lifeos_lernkarten", {});   // { klausurId: [ {id, frage, antwort} ] }
   /* Eigene Lernthemen — alles, was weder Klausur noch Hausaufgabe
      ist: eine Sprache, ein Führerschein, ein Kapitel nebenher. Sie
@@ -86,8 +101,33 @@
      Wann eine Karte wieder dran ist. Steht hier oben, weil schon der
      erste Aufbau des Dashboards wissen will, wie viele heute fällig
      sind. Die Regeln dazu stehen weiter unten bei den Karten. */
-  const ABSTAENDE = [1, 2, 4, 8, 16, 32];   // Tage je Stufe
+  const ABSTAENDE = [1, 2, 4, 8, 16, 32];   // Tage je Fach
   const PORTION = "__faellig";              // der Stapel "heute fällig"
+
+  /* Die sechs Fächer des Kastens. Der Name sagt, was das Fach über
+     die Karte behauptet — die Zahl allein sagt das nicht. */
+  const KASTEN_NAMEN = [
+    "Neu — sitzt noch nicht",
+    "Wackelt noch",
+    "Kommt langsam",
+    "Sitzt meistens",
+    "Sitzt",
+    "Sitzt fest"
+  ];
+  const KASTEN_ZULETZT = ABSTAENDE.length - 1;
+
+  const karteStufe = c => {
+    const e = c && kartenPlan[c.id];
+    const st = e ? Number(e.stufe) : 0;
+    return Number.isFinite(st) ? Math.min(Math.max(st, 0), KASTEN_ZULETZT) : 0;
+  };
+
+  /* Karten auf die Fächer verteilen — die Grundlage der Ansicht */
+  function kastenVerteilung(karten) {
+    const faecher = ABSTAENDE.map(() => []);
+    (karten || []).forEach(c => { if (c && c.id) faecher[karteStufe(c)].push(c); });
+    return faecher;
+  }
 
   let kartenPlan = store.get("lifeos_karten_plan", {}) || {};
   const kartenPlanSichern = () => store.set("lifeos_karten_plan", kartenPlan);
@@ -577,6 +617,11 @@
     const data = wetterDaten;
     if (!data) return;
     const body = $("weatherBody");
+
+    /* Die Karte trägt die Ansicht als Klasse — daran hängt auf dem
+       Telefon, ob sie hoch genug für sieben Zeilen wird. */
+    const karte = $("card-wetter");
+    if (karte) karte.classList.toggle("woche", wetterAnsicht === "woche");
 
     if (wetterAnsicht === "woche") {
       const d = data.daily;
@@ -1355,7 +1400,7 @@
         <div class="entry-main">
           <div class="entry-title">${escapeHTML(e.title)}</div>
           <div class="entry-sub">${
-            e.art === "klausur" ? (klausurZusatz(e) || "Klausur") + " · "
+            e.art === "klausur" ? (klausurZusatz(e) || pruefungWort(e)) + " · "
             : e.art === "hausaufgabe"
               ? "Hausaufgabe" + (e.fach ? " " + fachInfo(e.fach).kurz : "") + " · "
             : e.art === "thema" ? "Thema · "
@@ -4873,8 +4918,12 @@
   const kartenSchicht = $("kartenSchicht");
   const kartenFenster = $("kartenFenster");
   let kartenKlausur = null;      // welche Klausur ist offen
-  let kartenSeite = "liste";     // "liste" | "abfrage"
+  let kartenSeite = "liste";     // "liste" | "abfrage" | "kasten"
   let abfrageIndex = 0;
+  /* Aus welchem Fach die laufende Abfrage kommt (null = ganzer
+     Stapel) und wohin die letzte Karte gewandert ist. */
+  let abfrageFach = null;
+  let abfrageWanderung = "";
   let abfrageOffen = false;      // Rueckseite sichtbar?
   let abfrageStapel = [];
   let abfrageGewusst = 0;
@@ -4926,19 +4975,42 @@
   /* Nach jeder Antwort: Stufe setzen und den nächsten Termin
      ausrechnen. Das passiert auch beim normalen Abfragen eines
      Stapels — sonst hätte man zwei Wahrheiten. */
+  /* Gibt zurück, wohin die Karte gewandert ist — die Abfrage zeigt
+     das an, sonst bleibt der Kasten eine Behauptung. */
   function karteBewerten(c, gewusst) {
-    if (!c || !c.id) return;
-    const alt = kartenPlan[c.id] || { stufe: 0 };
-    const stufe = gewusst ? Math.min(alt.stufe + 1, ABSTAENDE.length - 1) : 0;
+    if (!c || !c.id) return null;
+    const vorher = karteStufe(c);
+    /* Ein Fach vor oder ein Fach zurück. Nicht bis auf null: wer
+       eine Vokabel fünfmal konnte und einmal nicht, hat sie nicht
+       vergessen — sie wackelt. */
+    const stufe = gewusst ? Math.min(vorher + 1, KASTEN_ZULETZT)
+                          : Math.max(vorher - 1, 0);
     kartenPlan[c.id] = {
       stufe,
+      /* Was zurückfällt, kommt morgen wieder dran; was vorwärts
+         geht, nach dem Abstand seines neuen Fachs. */
       faellig: tagPlus(gewusst ? ABSTAENDE[stufe] : 1),
       zuletzt: todayStr()
     };
     kartenPlanSichern();
+    return { vorher, nachher: stufe };
   }
 
   const kartenVon = id => id === PORTION ? faelligeKarten() : (lernkarten[id] || []);
+
+  /* Für den Kasten zählt der ganze Stapel, nicht nur was heute
+     dran ist — sonst sähe man Fach 5 nie, weil es 16 Tage schläft. */
+  function alleKartenVon(id) {
+    if (id !== PORTION) return lernkarten[id] || [];
+    const raus = [];
+    Object.entries(lernkarten).forEach(([besitzer, karten]) => {
+      if (!Array.isArray(karten)) return;
+      const wo = klausuren.find(k => k.id === besitzer) || themen.find(t => t.id === besitzer);
+      if (!wo) return;
+      karten.forEach(c => raus.push({ ...c, ausStapel: wo.title }));
+    });
+    return raus;
+  }
   const kartenSichern = () => store.set("lifeos_lernkarten", lernkarten);
 
   /* ==========================================================
@@ -5018,7 +5090,7 @@
     }
 
     if (art === "klausur") {
-      eintrag.dauer = dauerFuer(eintrag.fach);
+      eintrag.dauer = eintrag.pruefung === "test" ? TEST_DAUER : dauerFuer(eintrag.fach);
       eintrag.startZeit = beginn || "";
       eintrag.endeZeit = beginn ? zeitPlus(beginn, eintrag.dauer) : "";
       return eintrag;
@@ -5340,8 +5412,14 @@ Gib die Datei als eine einzige Markdown-Datei aus.`;
     else lernPanelZeichnen();
   }
 
-  function abfrageStarten() {
-    abfrageStapel = kartenVon(kartenKlausur).slice();
+  /* Ohne Angabe der ganze Stapel; mit Angabe nur ein Fach des
+     Kastens. */
+  function abfrageStarten(nurFach) {
+    abfrageFach = (nurFach === undefined || nurFach === null) ? null : Number(nurFach);
+    const quelle = abfrageFach === null
+      ? kartenVon(kartenKlausur)
+      : alleKartenVon(kartenKlausur).filter(c => karteStufe(c) === abfrageFach);
+    abfrageStapel = quelle.slice();
     /* Gemischt, damit man nicht die Reihenfolge auswendig lernt */
     for (let i = abfrageStapel.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -5390,10 +5468,13 @@ Gib die Datei als eine einzige Markdown-Datei aus.`;
           <button type="button" class="kf-tab${kartenSeite === "liste" ? " an" : ""}" data-kf="liste">Bearbeiten</button>`}
           <button type="button" class="kf-tab${kartenSeite === "abfrage" ? " an" : ""}" data-kf="abfrage"
             ${karten.length ? "" : "disabled"}>Abfragen</button>
+          <button type="button" class="kf-tab${kartenSeite === "kasten" ? " an" : ""}" data-kf="kasten"
+            ${alleKartenVon(k.id).length ? "" : "disabled"}>Kasten</button>
         </div>
         <button type="button" class="kf-zu" data-kf="zu" aria-label="Schlie\u00dfen">\u2715</button>
       </div>
-      ${kartenSeite === "liste" ? listeHtml(karten) : abfrageHtml()}`;
+      ${kartenSeite === "liste" ? listeHtml(karten)
+        : kartenSeite === "kasten" ? kastenHtml(k) : abfrageHtml()}`;
 
     kartenFenster.querySelectorAll("[data-kf]").forEach(b => b.addEventListener("click", () => {
       const was = b.dataset.kf;
@@ -5404,9 +5485,54 @@ Gib die Datei als eine einzige Markdown-Datei aus.`;
     }));
 
     if (kartenSeite === "liste") listeBinden(k);
+    else if (kartenSeite === "kasten") kastenBinden();
     else abfrageBinden();
 
     kartenSchicht.classList.add("open");
+  }
+
+  /* ---------- Seite 3: der Kasten ----------
+     Sechs Fächer nebeneinander, jedes mit seinem Bestand. Wer ein
+     Fach antippt, fragt genau dieses ab — so kann man gezielt an
+     dem üben, was noch wackelt, statt jedes Mal alles zu sehen. */
+  function kastenHtml(k) {
+    const alle = alleKartenVon(k.id);
+    const faecher = kastenVerteilung(alle);
+    const groesstes = Math.max(1, ...faecher.map(f => f.length));
+
+    const zeilen = faecher.map((fach, i) => {
+      const faellig = fach.filter(karteFaellig).length;
+      const abstand = ABSTAENDE[i];
+      return `<li class="kk-fach kk-s${i}">
+        <span class="kk-nr">${i + 1}</span>
+        <div class="kk-text">
+          <div class="kk-titel">${KASTEN_NAMEN[i]}</div>
+          <div class="kk-unter">${abstand === 1 ? "täglich" : "alle " + abstand + " Tage"}${
+            faellig ? " · " + faellig + " heute dran" : ""}</div>
+        </div>
+        <div class="kk-balken"><i style="width:${
+          Math.round(100 * fach.length / groesstes)}%"></i></div>
+        <span class="kk-zahl">${fach.length}</span>
+        <button type="button" class="kk-ab" data-kasten="${i}"
+          ${fach.length ? "" : "disabled"}>Abfragen</button>
+      </li>`;
+    }).join("");
+
+    return `<div class="kk-raum">
+      <p class="kk-regel">Gewusst geht ein Fach weiter, nicht gewusst ein Fach zurück —
+        aus Fach 1 fällt nichts heraus. Was hinten liegt, sitzt.</p>
+      <ul class="kk-liste">${zeilen}</ul>
+      <div class="kk-fuss">${alle.length} ${alle.length === 1 ? "Karte" : "Karten"} im Kasten</div>
+    </div>`;
+  }
+
+  function kastenBinden() {
+    kartenFenster.querySelectorAll("[data-kasten]").forEach(b =>
+      b.addEventListener("click", () => {
+        kartenSeite = "abfrage";
+        abfrageStarten(Number(b.dataset.kasten));
+        kartenZeichnen();
+      }));
   }
 
   /* ---------- Seite 1: bearbeiten ---------- */
@@ -5711,7 +5837,14 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
     const c = abfrageStapel[abfrageIndex];
     const balken = `<div class="kf-fortschritt"><i style="width:${
       100 * abfrageIndex / abfrageStapel.length}%"></i></div>`;
-    const zaehler = `<div class="kf-zaehler">Karte ${abfrageIndex + 1} von ${abfrageStapel.length}</div>`;
+    /* Woher die Karte kommt und wohin die letzte gegangen ist —
+       ohne das bleibt der Kasten eine Behauptung. */
+    const fach = karteStufe(c);
+    const zaehler = `<div class="kf-zaehler">
+        <span>Karte ${abfrageIndex + 1} von ${abfrageStapel.length}</span>
+        <span class="kf-fach kf-s${fach}">Fach ${fach + 1}</span>
+        ${abfrageWanderung ? `<span class="kf-wandert">${abfrageWanderung}</span>` : ""}
+      </div>`;
     const art = kartenArt(c);
 
     /* Die einfache Karte bleibt Selbsteinsch\u00e4tzung: nur du wei\u00dft,
@@ -5918,7 +6051,14 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
     /* Und in den Lernplan: davon hängt ab, wann die Karte wieder
        auf dem Tagesstapel liegt. Nur beim ersten Durchgang, sonst
        zählte eine Karte doppelt, die man hinten nochmal sieht. */
-    if (abfrageIndex < abfrageErstLaenge) karteBewerten(laufende, gewusst);
+    if (abfrageIndex < abfrageErstLaenge) {
+      const weg = karteBewerten(laufende, gewusst);
+      if (weg) {
+        abfrageWanderung = weg.vorher === weg.nachher
+          ? "bleibt in Fach " + (weg.nachher + 1)
+          : "Fach " + (weg.vorher + 1) + " \u2192 " + (weg.nachher + 1);
+      }
+    }
     abfrageIndex++;
     abfrageZuruecksetzen();
     kartenZeichnen();
@@ -6242,6 +6382,7 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
     panel.innerHTML = `
       <div class="lp-kopf">
         <span class="lp-fach"><i></i>${escapeHTML(f.lang)}</span>
+        ${istTest(k) ? '<span class="lp-marke">Test</span>' : ""}
         <span class="lp-frist">${diff >= 0 ? badgeFor(diff, k.date) : "vorbei"}</span>
         <button type="button" class="lp-zu" aria-label="Schlie\u00dfen">\u2715</button>
       </div>
@@ -6276,7 +6417,7 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
       <div class="fortschritt">
         <div class="fs-links">
           <div class="fs-titel">Vorbereitung</div>
-          <div class="fs-text">Ein Kasten je Tag bis zur Klausur \u2014 abgehakte leuchten.</div>
+          <div class="fs-text">Ein Kasten je Tag bis zum Termin \u2014 abgehakte leuchten.</div>
           <div class="fs-gitter">${stand.tage.map(t =>
             `<i class="fs-tag${t.gelernt ? " voll" : t.vorbei ? " vorbei" : ""}${
               t.heute ? " heute" : ""}" title="${fmtDate(t.key)}${t.gelernt ? " \u00b7 gelernt" : ""}"></i>`
@@ -6474,8 +6615,9 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
 
   /* Nur was geplant ist — Vergangenes hat auf der Lernseite nichts
      mehr verloren. */
-  const geplanteKlausuren = () => klausuren
+  const geplanteKlausuren = (nurTests) => klausuren
     .filter(k => daysUntil(k.date) >= 0)
+    .filter(k => nurTests === undefined || istTest(k) === !!nurTests)
     .sort((a, b) => a.date.localeCompare(b.date));
 
   /* ---------- Was zuerst lernen? ----------
@@ -6511,12 +6653,44 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
   /* Welcher Reiter auf der Lernseite offen ist */
   let lernReiter = store.get("lifeos_lern_reiter", "klausuren");
 
+  /* Welcher Behälter zu welchem Reiter gehört — für die
+     Fehleranzeige unten. Dieselbe Zuordnung wie in reiterAnwenden. */
+  const LERN_BEHAELTER = {
+    klausuren: "pgLernGruppen", tests: "pgLernGruppen",
+    hausaufgaben: "pgHausGruppen", themen: "pgThemenGruppen"
+  };
+
+  function lernFehlerZeigen(fehler) {
+    console.error("[Lernseite]", fehler);
+    const id = LERN_BEHAELTER[lernReiter] || "pgLernGruppen";
+    const behaelter = $(id);
+    if (!behaelter) return;
+    behaelter.innerHTML =
+      `<div class="block lern-leer lern-fehler">
+         <div class="ll-titel">Diese Ansicht ist abgestürzt</div>
+         <div class="ll-text">Etwas in den Daten hat das Zeichnen unterbrochen — deine
+           Einträge sind deshalb nicht weg, nur gerade nicht zu sehen. Die Meldung
+           unten sagt genau, woran es lag.</div>
+         <pre class="lern-fehler-text">${escapeHTML(String((fehler && fehler.message) || fehler))}</pre>
+         <button type="button" class="lp-knopf" data-lern-neu-laden="1">Seite neu laden</button>
+       </div>`;
+    const knopf = behaelter.querySelector("[data-lern-neu-laden]");
+    if (knopf) knopf.addEventListener("click", () => location.reload());
+  }
+
   function baueLernen() {
-    reiterAnwenden();
-    faelligAuffrischen();
-    if (lernReiter === "hausaufgaben") { hausPanelZeichnen(); baueHausaufgaben(); }
-    else if (lernReiter === "themen") { themaPanelZeichnen(); baueThemen(); }
-    else baueLernKlausuren();
+    /* Alles hier drin, auch das Umschalten der Reiter-Klassen — ein
+       Fehler dort ließe die Anzeige sonst genauso stumm leer wie
+       einer beim eigentlichen Zeichnen. */
+    try {
+      reiterAnwenden();
+      faelligAuffrischen();
+      if (lernReiter === "hausaufgaben") { hausPanelZeichnen(); baueHausaufgaben(); }
+      else if (lernReiter === "themen") { themaPanelZeichnen(); baueThemen(); }
+      else baueLernKlausuren();
+    } catch (fehler) {
+      lernFehlerZeigen(fehler);
+    }
   }
 
   function reiterAnwenden() {
@@ -6524,22 +6698,39 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
       b.classList.toggle("active", b.dataset.lreiter === lernReiter));
     /* Je Reiter ein Paar aus Unterfenster und Liste — sichtbar ist
        immer nur das des offenen Reiters. */
+    /* Klausuren und Tests benutzen dasselbe Unterfenster und
+       dieselbe Liste — sie unterscheiden sich nur darin, was
+       gefiltert wird. */
     const zeigen = {
       klausuren:    ["pgLernPanel", "pgLernGruppen"],
+      tests:        ["pgLernPanel", "pgLernGruppen"],
       hausaufgaben: ["pgHausPanel", "pgHausGruppen"],
       themen:       ["pgThemaPanel", "pgThemenGruppen"]
     };
+    /* Klausuren und Tests zeigen auf dieselben zwei Behälter. Über
+       die Reiter einzeln zu iterieren hieße: wer zuletzt geprüft
+       wird, gewinnt — und "tests" kommt nach "klausuren", also
+       stand der Behälter bei jedem Blick auf die Klausuren wieder
+       auf "aus", egal was direkt zuvor galt. Deshalb erst pro
+       Behälter zusammentragen, ob IRGENDEIN Reiter, der auf ihn
+       zeigt, gerade der offene ist. */
+    const sichtbar = new Map();
     Object.entries(zeigen).forEach(([reiter, felder]) => {
       felder.forEach(id => {
-        const e = $(id);
-        if (e) e.classList.toggle("aus", reiter !== lernReiter);
+        if (reiter === lernReiter) sichtbar.set(id, true);
+        else if (!sichtbar.has(id)) sichtbar.set(id, false);
       });
+    });
+    sichtbar.forEach((istOffen, id) => {
+      const e = $(id);
+      if (e) e.classList.toggle("aus", !istOffen);
     });
     /* Der Plus-Knopf sagt, was er anlegt — er hängt am Reiter. */
     const plus = $("lernPlus");
     if (plus) {
       const was = lernReiter === "hausaufgaben" ? "Hausaufgabe"
-                : lernReiter === "themen" ? "Thema" : "Klausur";
+                : lernReiter === "themen" ? "Thema"
+                : lernReiter === "tests" ? "Test" : "Klausur";
       plus.title = was + " anlegen";
       plus.setAttribute("aria-label", was + " anlegen");
     }
@@ -6558,6 +6749,7 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
   if (lernPlus) lernPlus.addEventListener("click", () => {
     if (lernReiter === "themen") return entwurfStarten("thema", "Neues Thema");
     if (lernReiter === "hausaufgaben") return sucheMitBefehl("/hausaufgaben neu ");
+    if (lernReiter === "tests") return sucheMitBefehl("/tests neu ");
     sucheMitBefehl("/klausuren neu ");
   });
 
@@ -7108,15 +7300,16 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
     if (!behaelter) return;
     behaelter.innerHTML = "";
 
-    const alle = geplanteKlausuren();
+    const tests = lernReiter === "tests";
+    const alle = geplanteKlausuren(tests);
 
     if (!alle.length) {
       $("lernenSub").textContent = "Nichts geplant";
       behaelter.innerHTML =
         `<div class="block lern-leer">
-           <div class="ll-titel">Keine Klausur geplant</div>
-           <div class="ll-text">Mit <b>/klausuren neu</b> eine anlegen — Fach, Stunde und Raum
-             kommen dann aus deinem Stundenplan.</div>
+           <div class="ll-titel">${tests ? "Kein Test geplant" : "Keine Klausur geplant"}</div>
+           <div class="ll-text">Mit <b>${tests ? "/tests neu" : "/klausuren neu"}</b> einen anlegen —
+             Fach, Stunde und Raum kommen dann aus deinem Stundenplan.</div>
          </div>`;
       return;
     }
@@ -7180,7 +7373,20 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
       behaelter.appendChild(block);
     });
 
-    behaelter.appendChild(dauerBlock());
+    /* Die Dauern gehören zu den Klausuren. Ein Test dauert eine
+       Schulstunde — dafür braucht es keine Tabelle, nur einen Satz. */
+    if (tests) {
+      const hinweis = document.createElement("div");
+      hinweis.className = "block";
+      hinweis.innerHTML =
+        `<div class="block-kopf"><h3>Wie lange dauert ein Test?</h3>
+           <span class="block-zahl">${TEST_DAUER} min</span></div>
+         <div class="block-unter">Eine Schulstunde, so steht er auch im Kalender.
+           Für Klausuren lässt sich die Dauer je Fach einstellen — im Reiter daneben.</div>`;
+      behaelter.appendChild(hinweis);
+    } else {
+      behaelter.appendChild(dauerBlock());
+    }
   }
 
   /* ==========================================================
@@ -9754,6 +9960,29 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
     NAV_SYMBOLE[a.dataset.seite] = a.querySelector("svg").outerHTML;
   });
 
+  /* Ein Befehl bekommt sein Zeichen normalerweise von der Seite, die
+     er öffnet. Wer keine Seite hat — Papierkorb, Rückblick —, bringt
+     eines mit: sonst steht seine Zeile ohne Symbol in der Liste und
+     sieht aus wie ein Fehler. */
+  const SYM_PAPIERKORB =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
+    + 'stroke-linecap="round" stroke-linejoin="round">'
+    + '<path d="M4 6.5h16"/><path d="M9.5 6.5V4.8A1.3 1.3 0 0 1 10.8 3.5h2.4a1.3 1.3 0 0 1 1.3 1.3v1.7"/>'
+    + '<path d="M6.2 6.5 7 19.2a1.6 1.6 0 0 0 1.6 1.5h6.8a1.6 1.6 0 0 0 1.6-1.5l.8-12.7"/>'
+    + '<path d="M10.3 10.2v6.6M13.7 10.2v6.6"/></svg>';
+
+  const SYM_RUECKBLICK =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
+    + 'stroke-linecap="round" stroke-linejoin="round">'
+    + '<path d="M3.6 8.6V4.4"/><path d="M3.6 8.6h4.2"/>'
+    + '<path d="M4.2 8.4A8.4 8.4 0 1 1 3.7 14"/>'
+    + '<path d="M12 7.6V12l3 1.9"/></svg>';
+
+  /* Eine Stelle für beide Quellen — sonst muss man an sechs Orten
+     daran denken. */
+  const befehlSymbol = knoten =>
+    (knoten && (knoten.symbolSvg || NAV_SYMBOLE[knoten.seite])) || "";
+
   /* ---------- Unterbefehle, die mehrfach vorkommen ---------- */
   const habitCheck = {
     wort: "check", titel: "Habit abhaken", info: "für heute umschalten", art: "auswahl",
@@ -9835,12 +10064,14 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
     { wort: "/dashboard", titel: "Dashboard", info: "Zur Übersicht", seite: "dashboard" },
 
     { wort: "/papierkorb", titel: "Papierkorb", info: "Gelöschtes zurückholen",
+      symbolSvg: SYM_PAPIERKORB,
       unter: [
         { wort: "öffnen", titel: "Papierkorb öffnen", info: "zeigt, was verschwunden ist", art: "sofort",
           tun: () => openSettings("papierkorb") }
       ] },
 
     { wort: "/rückblick", titel: "Wochenrückblick", info: "Schreibt die Notiz jetzt",
+      symbolSvg: SYM_RUECKBLICK,
       unter: [
         { wort: "woche", titel: "Vergangene Woche", info: "als Notiz ablegen", art: "sofort",
           tun: () => {
@@ -9881,11 +10112,54 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
           art: "entwurf", entwurfArt: "klausur",
           vorschlaege: () => Object.keys(FAECHER).map(id => ({
             id, wert: fachInfo(id).kurz, lang: fachInfo(id).lang })) },
+        { wort: "karten", titel: "Karten öffnen", info: "Karteikarten der Klausur",
+          art: "auswahl",
+          liste: () => klausuren.filter(k => !istTest(k)).map(k => ({
+            wert: k.title, id: k.id,
+            zusatz: (kartenVon(k.id).length || 0) + " Karten · " + fmtDate(k.date) })),
+          tun: e => { seiteZeigen("lernen"); kartenOeffnen(e.id, "liste"); } },
+        { wort: "abfragen", titel: "Klausur abfragen", info: "Karten der Reihe nach",
+          art: "auswahl",
+          liste: () => klausuren.filter(k => !istTest(k) && kartenVon(k.id).length)
+            .map(k => ({ wert: k.title, id: k.id,
+                         zusatz: kartenVon(k.id).length + " Karten" })),
+          tun: e => { seiteZeigen("lernen"); kartenOeffnen(e.id, "abfrage"); } },
         { wort: "löschen", titel: "Klausur löschen", info: "entfernt die Klausur", art: "auswahl",
-          liste: () => klausuren.map(k => ({ wert: k.title, id: k.id, zusatz: fmtDate(k.date) })),
+          liste: () => klausuren.filter(k => !istTest(k))
+            .map(k => ({ wert: k.title, id: k.id, zusatz: fmtDate(k.date) })),
           tun: e => { loescheEintrag(e.id, "klausur");
                       if (aktuelleSeite === "kalender") baueKalender();
                       showToast(`Klausur „${e.wert}" gelöscht`); } }
+      ] },
+
+    /* Ein Test ist die kurze Schwester der Klausur: dieselben Felder,
+       dieselben Karten, 45 statt 135 Minuten. Er bekommt einen
+       eigenen Befehl, damit man beim Anlegen nicht erst umstellen
+       muss. */
+    { wort: "/tests", titel: "Tests", info: "Kurze Prüfungen", seite: "lernen",
+      unter: [
+        { wort: "neu", titel: "Test anlegen", info: "Fach wählen oder eigenen Namen tippen",
+          art: "entwurf", entwurfArt: "test",
+          vorschlaege: () => Object.keys(FAECHER).map(id => ({
+            id, wert: fachInfo(id).kurz, lang: fachInfo(id).lang })) },
+        { wort: "karten", titel: "Karten öffnen", info: "Karteikarten des Tests",
+          art: "auswahl",
+          liste: () => klausuren.filter(istTest).map(t => ({
+            wert: t.title, id: t.id,
+            zusatz: (kartenVon(t.id).length || 0) + " Karten · " + fmtDate(t.date) })),
+          tun: e => { seiteZeigen("lernen"); kartenOeffnen(e.id, "liste"); } },
+        { wort: "abfragen", titel: "Test abfragen", info: "Karten der Reihe nach",
+          art: "auswahl",
+          liste: () => klausuren.filter(t => istTest(t) && kartenVon(t.id).length)
+            .map(t => ({ wert: t.title, id: t.id,
+                         zusatz: kartenVon(t.id).length + " Karten" })),
+          tun: e => { seiteZeigen("lernen"); kartenOeffnen(e.id, "abfrage"); } },
+        { wort: "löschen", titel: "Test löschen", info: "entfernt den Test", art: "auswahl",
+          liste: () => klausuren.filter(istTest)
+            .map(k => ({ wert: k.title, id: k.id, zusatz: fmtDate(k.date) })),
+          tun: e => { loescheEintrag(e.id, "klausur");
+                      if (aktuelleSeite === "kalender") baueKalender();
+                      showToast(`Test „${e.wert}" gelöscht`); } }
       ] },
 
     { wort: "/themen", titel: "Eigene Themen", info: "Lernen ohne Klausur", seite: "lernen",
@@ -10254,7 +10528,7 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
       const w = p.wort.toLowerCase();
       slashTreffer = BAUM
         .filter(b => b.wort.startsWith(w) || w === "/")
-        .map(b => ({ text: b.wort, info: b.info, symbol: NAV_SYMBOLE[b.seite], knoten: b }));
+        .map(b => ({ text: b.wort, info: b.info, symbol: befehlSymbol(b), knoten: b }));
     } else if (p.stufe === 1) {
       const w = p.wort.toLowerCase();
       const moeglich = [];
@@ -10268,7 +10542,7 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
         .map(u => ({ text: u.wort,
                      info: u.art === "seite-oeffnen" ? u.info : u.titel + " — " + u.info,
                      taste: u.art === "seite-oeffnen" || u.art === "sofort" ? "Enter" : "Tab",
-                     symbol: NAV_SYMBOLE[p.wurzel.seite], knoten: u }));
+                     symbol: befehlSymbol(p.wurzel), knoten: u }));
     } else {
       const u = p.unter;
       if (u.art === "auswahl") {
@@ -10278,7 +10552,7 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
         slashTreffer = alle
           .filter(e => e.wert.toLowerCase().startsWith(w))
           .map(e => ({ text: e.wert, info: e.zusatz || u.info, taste: "Enter",
-                       symbol: NAV_SYMBOLE[p.wurzel.seite], knoten: u, nutz: e }));
+                       symbol: befehlSymbol(p.wurzel), knoten: u, nutz: e }));
         if (slashTreffer.length) slashLeerGrund = "";
       } else if (u.art === "entwurf") {
         /* Name und Datum trennen, damit beim Tippen schon steht, was
@@ -10317,10 +10591,11 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
                Vorher stand hier fest "Klausur" — dadurch hieß eine über
                /hausaufgaben angelegte Mathe-Aufgabe "Klausur Ma". */
             const vorsatz = u.entwurfArt === "hausaufgabe" ? "Hausaufgabe "
+                          : u.entwurfArt === "test"        ? "Test "
                           : u.entwurfArt === "klausur"     ? "Klausur "
                           : "";
             return { text: v.wert, einfuegen: v.wert + kommaTeil, info, warnung: fehlt, taste: "Enter",
-                     symbol: NAV_SYMBOLE[p.wurzel.seite], knoten: u,
+                     symbol: befehlSymbol(p.wurzel), knoten: u,
                      nutz: { fach: v.id, titel: vorsatz + v.wert, datum: teil.datum } };
           });
 
@@ -10330,13 +10605,13 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
         const frei = p.rest && !doppelt
           ? [{ text: teil.titel, einfuegen: teil.titel + kommaTeil,
                info: u.titel + amTag + (faecher.length ? " — eigener Name" : " — Enter bestätigt"),
-               taste: "Enter", symbol: NAV_SYMBOLE[p.wurzel.seite], knoten: u, nutz: p.rest }]
+               taste: "Enter", symbol: befehlSymbol(p.wurzel), knoten: u, nutz: p.rest }]
           : [];
 
         slashTreffer = faecher.concat(frei);
       } else if (p.rest) {
         slashTreffer = [{ text: p.rest, info: u.titel + " — Enter bestätigt", taste: "Enter",
-                          symbol: NAV_SYMBOLE[p.wurzel.seite], knoten: u, nutz: p.rest }];
+                          symbol: befehlSymbol(p.wurzel), knoten: u, nutz: p.rest }];
       } else {
         slashTreffer = [];
       }
@@ -10768,14 +11043,18 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
     komponist.classList.add("offen");
     /* Hausaufgaben haben ein Fach, aber keine Uhrzeit und keine
        Stunde: wann am Tag man sie macht, sagt nichts aus. */
-    komponist.classList.toggle("schule", art === "klausur" || art === "hausaufgabe");
+    /* Der Test bekommt dieselben Felder wie die Klausur: Fach,
+       Stunde, Raum. Er ist nur kürzer. */
+    komponist.classList.toggle("schule",
+      art === "klausur" || art === "test" || art === "hausaufgabe");
     komponist.classList.toggle("hausaufgabe", art === "hausaufgabe");
     /* Ein eigenes Thema braucht kein Datum — der Termin ist ein
        Angebot, keine Bedingung. Die Klasse blendet die Uhrzeit aus
        und lässt das Datum leer beginnen. */
     komponist.classList.toggle("thema", art === "thema");
     if (art === "thema" && !datum) entwurf.datum = "";
-    $("kpArt").textContent = art === "klausur" ? "Klausur"
+    $("kpArt").textContent = art === "test" ? "Test"
+                          : art === "klausur" ? "Klausur"
                           : art === "hausaufgabe" ? "Hausaufgabe"
                           : art === "thema" ? "Thema" : "Termin";
     /* Beim Thema kommt der Name nicht aus einer Vorschlagsliste —
@@ -10884,7 +11163,7 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
        sonst uebersieht man leicht, dass die Stunde leer geblieben ist. */
     const hin = $("kpHinweis");
     let text = "";
-    if (entwurf.art === "klausur" && entwurf.fach) {
+    if ((entwurf.art === "klausur" || entwurf.art === "test") && entwurf.fach) {
       if (!schultag(entwurf.datum)) text = "Wochenende — kein Unterricht";
       else if (!stundenFuerFach(entwurf.fach, entwurf.datum).length)
         text = "Kein " + fachInfo(entwurf.fach).kurz + " am " + TAGE_LANG[schultag(entwurf.datum)];
@@ -11322,7 +11601,10 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
     const zeit = entwurf.start && entwurf.ende ? `${entwurf.start}–${entwurf.ende}`
                : entwurf.start ? entwurf.start : "";
     const eintrag = { id: "e" + Date.now(), title: entwurf.titel, date: entwurf.datum, time: zeit };
-    if (entwurf.art === "klausur" && entwurf.fach) {
+    /* Das Merkmal muss vor zeitenEintragen stehen: daran hängt, ob
+       45 Minuten oder die Fachdauer eingetragen werden. */
+    if (entwurf.art === "test") eintrag.pruefung = "test";
+    if ((entwurf.art === "klausur" || entwurf.art === "test") && entwurf.fach) {
       eintrag.fach = entwurf.fach;
       if (entwurf.block) {
         eintrag.von = entwurf.block.von;
@@ -11333,7 +11615,7 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
     /* Die Uhrzeit wandert mit in den Eintrag — der Kalender soll
        nicht raten müssen, und der Abgleich am Server kennt weder
        Stundenplan noch die eingestellten Dauern. */
-    zeitenEintragen(eintrag, entwurf.art);
+    zeitenEintragen(eintrag, entwurf.art === "test" ? "klausur" : entwurf.art);
 
     if (entwurf.art === "hausaufgabe") {
       eintrag.fach = entwurf.fach || null;
@@ -11345,9 +11627,13 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
       nutzAktion("hausaufgabe");
       store.set("lifeos_hausaufgaben", hausaufgaben);
       googleAnstossen();
-    } else if (entwurf.art === "klausur") {
+    } else if (entwurf.art === "klausur" || entwurf.art === "test") {
       klausuren.push(eintrag);
       nutzAktion("klausur");
+      /* Der Reiter springt dorthin, wo der neue Eintrag steht —
+         sonst legt man einen Test an und sieht ihn nicht. */
+      lernReiter = entwurf.art === "test" ? "tests" : "klausuren";
+      store.set("lifeos_lern_reiter", lernReiter);
       klausurenSichern();
     } else {
       termine.push(eintrag);
@@ -12514,7 +12800,31 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
                         : "Safari stellt hier keinen Zwischenspeicher bereit")}
        ${zeile(dateien > 0, dateien > 0 ? dateien + " Dateien gespeichert" : "Noch keine Kopie abgelegt")}
        ${zeile(alsApp, alsApp ? "Läuft als App vom Home-Bildschirm" : "Läuft im Browser, nicht als App")}
-       <div id="offRat"></div>`;
+       <div id="offRat"></div>
+       ${hatSW ? `<button type="button" class="ko-knopf off-erneuern" id="offErneuern">
+            Kopie erneuern</button>
+          <p class="gk-text gk-leise">Holt alle Dateien neu vom Rechner. Nötig, wenn das Gerät
+            eine ältere Fassung der App festhält. Deine Daten bleiben, die Anmeldung auch.</p>` : ""}`;
+
+    const erneuern = $("offErneuern");
+    if (erneuern) erneuern.addEventListener("click", async () => {
+      erneuern.disabled = true;
+      erneuern.textContent = "Wird erneuert …";
+      try {
+        /* Erst den Worker weg, dann die Lager — in dieser Reihenfolge,
+           sonst legt der noch laufende Worker gleich wieder etwas an. */
+        for (const reg of await navigator.serviceWorker.getRegistrations()) await reg.unregister();
+        if (window.caches) {
+          for (const name of await caches.keys()) await caches.delete(name);
+        }
+        showToast("Kopie geleert — die Seite lädt neu.", "success");
+        setTimeout(() => location.reload(true), 700);
+      } catch (fehler) {
+        erneuern.disabled = false;
+        erneuern.textContent = "Kopie erneuern";
+        showToast("Ging nicht: " + fehler.message, "error");
+      }
+    });
 
     const rat = $("offRat");
     if (bereit && alsApp) {

@@ -422,7 +422,7 @@ button { cursor: pointer; }
   transition: 0.16s ease;
 }
 .search-btn:hover { filter: brightness(1.12); }
-.search-btn-pfeil { display: none; width: 17px; height: 17px; }
+.search-btn-lupe { display: none; width: 17px; height: 17px; }
 /* ==========================================================
    KARTEN & RASTER
    ========================================================== */
@@ -597,8 +597,11 @@ html.tablet #card-kalorien { display: none; }
    Habits über die beiden untersten — sechs Zeilen brauchen Höhe. */
 @media (orientation: portrait) {
   html.tablet #card-screentime { grid-area: 1 / 1  / 2 / 25; }
-  html.tablet #card-wetter     { grid-area: 2 / 1  / 4 / 11; }
-  html.tablet #card-naechste   { grid-area: 2 / 11 / 4 / 18; }
+  /* Die Termine sind die Liste, die man liest — sie bekommen die
+     breiteste Spalte. Das Wetter ist eine Zahl und ein Symbol und
+     kommt mit weniger aus; seine Wochenliste rollt. */
+  html.tablet #card-wetter     { grid-area: 2 / 1  / 4 / 8;  }
+  html.tablet #card-naechste   { grid-area: 2 / 8  / 4 / 18; }
   html.tablet #card-streaks    { grid-area: 2 / 18 / 4 / 25; }
   html.tablet #card-habits     { grid-area: 4 / 1  / 6 / 25; }
 }
@@ -611,11 +614,13 @@ html.tablet #card-kalorien { display: none; }
 @media (orientation: landscape) {
   /* Quer: drei Reihen. Wetter und Habits stehen über je zwei davon,
      die Bildschirmzeit nimmt die volle Breite der obersten. */
-  html.tablet #card-wetter     { grid-area: 1 / 1  / 3 / 8;  }
+  /* Quer hatte das Wetter zwei Reihen und die Termine eine — genau
+     andersherum als der Blick es braucht. Jetzt umgekehrt. */
+  html.tablet #card-wetter     { grid-area: 1 / 1  / 2 / 8;  }
   html.tablet #card-screentime { grid-area: 1 / 8  / 2 / 25; }
   html.tablet #card-habits     { grid-area: 2 / 8  / 4 / 18; }
   html.tablet #card-streaks    { grid-area: 2 / 18 / 4 / 25; }
-  html.tablet #card-naechste   { grid-area: 3 / 1  / 4 / 8;  }
+  html.tablet #card-naechste   { grid-area: 2 / 1  / 4 / 8;  }
 }
 @media (max-width: 760px) {
   .widget-grid { grid-template-columns: 1fr; }
@@ -6124,7 +6129,7 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
     display: flex; align-items: center; justify-content: center;
   }
   .search-btn-wort { display: none; }
-  .search-btn-pfeil { display: block; }
+  .search-btn-lupe { display: block; }
 
   /* ---------- Widget-Köpfe ----------
      Titel und Bedienelemente teilten sich eine Zeile, und der Titel
@@ -8754,6 +8759,10 @@ body.gesperrt .app-shell { filter: blur(3px); pointer-events: none; user-select:
 
 .an-form { display: flex; flex-direction: column; gap: 13px; }
 .an-feld { display: flex; flex-direction: column; gap: 6px; }
+/* Wie bei der Schicht: eigenes display schlaegt das hidden-Attribut.
+   Ohne diese Zeile stand „Passwort wiederholen“ auch dort, wo nur
+   angemeldet und nicht eingerichtet wird. */
+.an-feld[hidden] { display: none; }
 .an-feld > span {
   font-size: 10.5px;
   font-weight: 600;
@@ -8942,6 +8951,8 @@ html.finger .ko-form input { font-size: 16px; }
   inset: 0;
   z-index: 1400;
   display: flex;
+  /* Nichts darf aus dem Panel herauswachsen — gescrollt wird innen */
+  overflow: hidden;
   background: var(--bg);
   animation: kop-auf 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -9053,6 +9064,12 @@ body.kop-auf { overflow: hidden; }
 .kop-inhalt {
   flex: 1;
   min-width: 0;
+  /* Ohne diese Zeile stand das Panel auf dem Telefon still: als
+     Flex-Kind hat es von Haus aus "min-height: auto" und wächst
+     damit über den Bildschirm hinaus, statt sich auf ihn zu
+     beschränken. Die Bahn darin hatte dann nie etwas zu rollen —
+     sie war schon so hoch wie ihr Inhalt. */
+  min-height: 0;
   max-width: 900px;
   position: relative;
   display: flex;
@@ -9062,10 +9079,12 @@ body.kop-auf { overflow: hidden; }
 .kop-bahn {
   flex: 1;
   min-width: 0;
+  min-height: 0;
   max-width: 760px;
   padding: 56px 60px 80px;
   overflow-y: auto;
   overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 .kop-bahn.wechsel > .kop-bereich:not([hidden]) {
   animation: kop-rein 0.26s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -9607,4 +9626,255 @@ html.finger .kop-bereich input { font-size: 16px; }
 
 @media (max-width: 699px) {
   .vw-knopf { padding: 6px 10px; font-size: 11.5px; }
+}
+
+
+/* ==========================================================
+   NICHTS SCHIEBT DIE SEITE ZUR SEITE
+   Auf dem Telefon ließ sich die ganze Seite waagerecht ziehen —
+   ein einzelnes zu breites Element genügt dafür. Der Auslöser war
+   die Reiterleiste der Analyse: 353 px in einem 335 px breiten
+   Kasten, und schon hing die komplette Seite 18 px schief.
+
+   Zwei Regeln dagegen. Erstens: der Seitenbehälter bewegt sich
+   waagerecht gar nicht mehr. Zweitens: was wirklich breiter ist —
+   Stundenplan, Reiterleisten, Navigation — rollt in seinem eigenen
+   Fenster und gibt die Bewegung nicht nach außen weiter
+   (overscroll-behavior). Ohne das Zweite wandert auf iOS jede
+   Wischbewegung, die am Ende ankommt, in die Seite dahinter.
+   ========================================================== */
+@media (max-width: 900px), (hover: none) and (pointer: coarse) {
+  .seite:not(#seite-dashboard).aktiv { overflow-x: hidden; }
+  .layout { overflow-x: hidden; }
+
+  /* Die Reiterleiste der Analyse rollt selbst, statt die Seite
+     mitzunehmen. Der Balken darunter wäre hier nur im Weg. */
+  .seg-toggle.an-reiter {
+    display: flex;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .seg-toggle.an-reiter::-webkit-scrollbar { display: none; }
+  .seg-toggle.an-reiter .stbtn { flex-shrink: 0; }
+
+  /* Dieselbe Behandlung für die Reiter der Lernseite: lieber
+     schieben als "Hausaufga…" */
+  .lern-reiter {
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .lern-reiter::-webkit-scrollbar { display: none; }
+  .lern-reiter .lr-tab { flex-shrink: 0; }
+
+  /* Stundenplan und Navigationsreihe rollten schon — sie sollen die
+     Bewegung nur nicht weiterreichen. */
+  .plan-rolle,
+  .nav-scroll,
+  .kop-liste,
+  .karten-fenster .kf-schalter { overscroll-behavior-x: contain; }
+}
+
+/* ==========================================================
+   WETTER IN DER LISTENANSICHT — AUF DEM TELEFON
+   Sieben Zeilen in eine 148 px hohe Karte zu quetschen ergibt
+   20-px-Zeilen und ein Rollfenster im Rollfenster. Auf dem Telefon
+   ist darunter ohnehin Platz: die Karte wird also hoch genug für
+   alle sieben, und weitergescrollt wird die Seite.
+   ========================================================== */
+@media (max-width: 699px) {
+  #card-wetter.woche .weather { min-height: 342px; }
+  #card-wetter.woche .weather-woche { overflow-y: visible; gap: 5px; }
+  #card-wetter.woche .wtag { min-height: 40px; }
+
+  /* ---------- Suchknopf ----------
+     Die Lupe steht jetzt im Knopf. Links davor eine zweite zu
+     zeigen, wäre dasselbe Zeichen zweimal — sie geht weg und das
+     Feld bekommt die Breite. */
+  .search-icon { display: none; }
+  .search { padding-left: 16px; }
+}
+
+/* Auf dem Tablet ist die Wetterkarte jetzt die schmalste. Der
+   Ortsname daneben drückte den Titel zu „Wett…" — er steht ohnehin
+   in den Einstellungen und darf hier weichen. */
+html.tablet #weatherCityLabel { display: none; }
+
+
+/* Ein Test sieht aus wie eine Klausur — dieses Schild sagt, dass er
+   keine ist. */
+.lp-marke {
+  padding: 2px 9px;
+  border-radius: var(--r-pill);
+  border: 1px solid color-mix(in srgb, var(--ton, var(--blue)) 45%, transparent);
+  background: color-mix(in srgb, var(--ton, var(--blue)) 16%, transparent);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+/* ==========================================================
+   HABITS UND STREAKS AUF DEM TELEFON
+   Beide Listen teilen ihre Höhe unter den Zeilen auf, und beide
+   richten Schrift, Knopf und Spur am Container aus. Auf dem
+   Telefon standen sie in 214 bzw. 160 px — sechs Habits ergaben
+   damit 30-px-Zeilen, fünf Streaks 28-px-Zeilen: lesbar nur mit
+   gutem Willen.
+
+   Nach unten ist auf dem Telefon Platz, die Seite rollt ohnehin.
+   Also bekommen beide ihn.
+   ========================================================== */
+@media (max-width: 699px) {
+  .habit-list  { min-height: 348px; }
+  .streak-list { min-height: 272px; }
+
+  /* Die Sicherheitsnetze für den Fall, dass ein Container-Maß
+     ausfällt, dürfen dann nicht mehr bei 28 px kleben. */
+  .hb-zeile    { min-height: 44px; }
+  .hb-knopf    { min-width: 26px; min-height: 26px; }
+  .hb-spur     { min-height: 7px; }
+  .streak-row  { min-height: 44px; }
+}
+
+
+/* ==========================================================
+   KARTEIKASTEN
+   Sechs Fächer untereinander. Der Balken zeigt, wie sich die
+   Karten verteilen — vorne viel heißt: da ist noch Arbeit.
+   ========================================================== */
+.kk-raum { display: flex; flex-direction: column; gap: 14px; padding: 4px 2px 2px; }
+
+.kk-regel {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-dim);
+}
+
+.kk-liste { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+
+.kk-fach {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) 84px 30px auto;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-el);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.kk-nr {
+  width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 8px;
+  background: var(--kk-ton, var(--blue));
+  color: #06090f;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 12px;
+}
+
+/* Von vorn nach hinten: aus Rot wird Grün. Die Farbe sagt dasselbe
+   wie die Position, nur schneller. */
+.kk-s0 { --kk-ton: #fb7185; }
+.kk-s1 { --kk-ton: #f5a94e; }
+.kk-s2 { --kk-ton: #f2c94c; }
+.kk-s3 { --kk-ton: #a3d977; }
+.kk-s4 { --kk-ton: #52c98a; }
+.kk-s5 { --kk-ton: #34d399; }
+
+.kk-text { min-width: 0; }
+.kk-titel {
+  font-size: 13px; font-weight: 600; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.kk-unter { font-size: 11px; color: var(--text-faint); }
+
+.kk-balken {
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+}
+.kk-balken i {
+  display: block; height: 100%;
+  border-radius: 999px;
+  background: var(--kk-ton, var(--blue));
+  transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.kk-zahl {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  text-align: right;
+}
+
+.kk-ab {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.14s ease;
+}
+.kk-ab:hover:not(:disabled) { background: rgba(255, 255, 255, 0.1); }
+.kk-ab:disabled { opacity: 0.35; cursor: default; }
+
+.kk-fuss { font-size: 11.5px; color: var(--text-faint); text-align: right; }
+
+/* Das Fach der laufenden Karte, unten in der Zählzeile */
+.kf-zaehler { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.kf-fach {
+  padding: 2px 9px;
+  border-radius: var(--r-pill);
+  border: 1px solid color-mix(in srgb, var(--kk-ton, var(--blue)) 45%, transparent);
+  background: color-mix(in srgb, var(--kk-ton, var(--blue)) 16%, transparent);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text);
+}
+.kf-wandert {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--text-faint);
+}
+
+@media (max-width: 699px) {
+  .kk-fach { grid-template-columns: 24px minmax(0, 1fr) 26px auto; gap: 9px; }
+  .kk-balken { display: none; }
+  .kk-ab { padding: 6px 10px; }
+}
+
+
+/* Der Knopf sitzt unter der Zustandsliste des Offline-Betriebs */
+.off-erneuern { align-self: flex-start; margin-top: 4px; }
+
+
+/* Sichtbarer Fehler statt stiller Leere auf der Lernseite */
+.lern-fehler { border-color: color-mix(in srgb, var(--red) 45%, var(--border)); }
+.lern-fehler-text {
+  margin: 10px 0 14px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(251, 113, 133, 0.1);
+  color: var(--red);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
