@@ -11250,3 +11250,195 @@ a.insel, button.insel { border: 0; font: inherit; color: inherit; text-align: le
 /* Streaks sind meist die schmalste Spalte. Dort traegt die Zahl die
    Aussage und steht deshalb im Wert, nicht in einer Marke daneben. */
 #card-streaks .insel .marke { font-size: 11px; padding: 3px 8px; }
+
+/* ==========================================================
+   PHASE 9 — DIE VIER VERBLIEBENEN WIDGETS
+
+   Habits, Streaks und Termine waren schon Inseln. Kalorien,
+   Wetter, Bildschirmzeit und Tipp hatte ich nur umgefaerbt —
+   ihnen fehlte der Aufbau aus der Demo. Genau die vier sahen
+   deshalb weiter aus wie vorher, nur heller.
+
+   Sie bekommen jetzt dasselbe wie die anderen: das Malzeichen
+   oben links, den Titel als leise Zeile daneben, die Zahl gross.
+   ========================================================== */
+
+#card-kalorien .card-head,
+#card-wetter .card-head,
+#card-screentime .card-head {
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+/* Der Titel steht neben dem Malzeichen und traegt nicht mehr die
+   Karte — das tut jetzt die Zahl darunter. */
+#card-kalorien .card-title,
+#card-wetter .card-title,
+#card-screentime .card-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-2);
+  margin-right: auto;
+}
+
+/* Das Abzeichen wird zur Marke wie in den anderen Inseln */
+#card-kalorien .card-badge,
+#card-wetter .card-badge,
+#card-screentime .card-badge {
+  margin-left: 0;
+  padding: 4px 10px;
+  border: none;
+  border-radius: var(--r-pill);
+  background: var(--flaeche-3);
+  color: var(--text-2);
+  font-family: var(--sans);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Die Zahl ist die Hauptsache — dieselben Werte wie in der Demo */
+#card-kalorien .cal-value,
+#card-wetter .weather-temp {
+  font-size: clamp(28px, 22cqw, 40px);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+#card-kalorien .cal-sub,
+#card-wetter .weather-desc {
+  font-size: 12.5px;
+  color: var(--text-2);
+}
+
+/* In schmalen Widgets nimmt das Malzeichen sonst zu viel Platz */
+@media (max-width: 900px) {
+  #card-kalorien .i-mal,
+  #card-wetter .i-mal,
+  #card-screentime .i-mal { width: 32px; height: 32px; border-radius: 11px; }
+  #card-kalorien .i-mal svg,
+  #card-wetter .i-mal svg,
+  #card-screentime .i-mal svg { width: 17px; height: 17px; }
+}
+
+/* ----------------------------------------------------------
+   DER TIPP
+
+   Er war ein Absatz mit Symbol darueber und Fusszeile darunter.
+   Als Insel ist er eine Zeile: Malzeichen, Zusammenhang, Sache,
+   und rechts der Pfeil, der sagt wohin es geht.
+   ---------------------------------------------------------- */
+#card-vorschlag .tab-panel[data-panel="vorschlag"] {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+#card-vorschlag .vorschlag-icon {
+  width: 38px; height: 38px;
+  margin: 0;
+  border: none;
+  border-radius: 13px;
+  background: var(--gelb-fond);
+  color: var(--gelb-schrift);
+  flex-shrink: 0;
+}
+#card-vorschlag .vorschlag-mitte { min-width: 0; flex: 1; }
+#card-vorschlag .vorschlag-text {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  -webkit-line-clamp: 2;
+  order: 2;
+}
+#card-vorschlag .vorschlag-sub {
+  margin: 0 0 2px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text-2);
+  -webkit-line-clamp: 1;
+  order: 1;
+}
+
+/* In der Demo hatten die Inseln volle Breite. Im Raster teilen sich
+   drei bis vier eine Reihe, und dann reicht der Platz nicht fuer
+   Malzeichen, Titel und Abzeichen nebeneinander.
+
+   Es weicht das Abzeichen, nicht der Titel: "Heute" oder "Berlin"
+   sagt weniger als "Kalorien" oder "Wetter". Das Malzeichen bleibt,
+   es ist das, woran man die Insel von weitem erkennt. */
+@container (max-width: 300px) {
+  #card-kalorien .card-badge,
+  #card-wetter .card-badge,
+  #card-screentime .card-badge { display: none; }
+}
+@container (max-width: 210px) {
+  #card-kalorien .card-title,
+  #card-wetter .card-title,
+  #card-screentime .card-title { display: none; }
+}
+
+/* Der Titel darf schrumpfen und abschneiden, statt das Malzeichen
+   zusammenzuquetschen. */
+#card-kalorien .card-title,
+#card-wetter .card-title,
+#card-screentime .card-title {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#card-kalorien .i-mal,
+#card-wetter .i-mal,
+#card-screentime .i-mal { flex-shrink: 0; }
+
+/* Die Container-Abfrage darueber greift nicht zuverlaessig — der
+   Bezugsrahmen liegt nicht auf der Karte. Statt sie zu erzwingen,
+   entscheide ich die Sache inhaltlich:
+
+   "Heute" auf einem Widget, das ohnehin nur heute zeigt, sagt
+   nichts. Es kostete aber genau die Breite, die dem Titel fehlte —
+   deshalb stand da "W" statt "Wetter". Weg damit.
+
+   Der Ort beim Wetter wandert nicht mit: er steht in der Insel
+   selbst schon bei den Werten. */
+#card-kalorien .card-badge,
+#card-screentime .card-badge,
+#card-wetter .card-badge { display: none; }
+
+#card-kalorien .card-title,
+#card-wetter .card-title,
+#card-screentime .card-title {
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Der Tipp: ich hatte die Zeile auf ein Element "vorschlag-mitte"
+   gestellt, das es im Markup gar nicht gibt — Symbol, Text, Unterzeile
+   und Fusszeile sind Geschwister. Mit flex-direction: row reihten sie
+   sich dadurch alle vier nebeneinander auf und zerfielen.
+
+   Ein Raster ordnet sie richtig, ohne das Markup anzufassen:
+   Malzeichen links ueber beide Textzeilen, Fusszeile darunter. */
+#card-vorschlag .tab-panel[data-panel="vorschlag"] {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    "mal  sub"
+    "mal  text"
+    "foot foot";
+  align-content: center;
+  align-items: center;
+  gap: 1px 12px;
+  flex-direction: initial;
+}
+#card-vorschlag .vorschlag-icon { grid-area: mal; align-self: center; }
+#card-vorschlag .vorschlag-sub  { grid-area: sub;  margin: 0; }
+#card-vorschlag .vorschlag-text { grid-area: text; }
+#card-vorschlag .vorschlag-foot { grid-area: foot; margin-top: 10px; }
