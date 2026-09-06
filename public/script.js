@@ -3214,8 +3214,13 @@
   /* Die Grundordnung — dieselbe wie im Stylesheet, sonst springt
      die Aufteilung beim ersten Laden. */
   const ORD_KACHELN = [
-    "card-klausur", "card-screentime2", "card-kalorien", "card-timer",
-    "card-habits", "card-naechste", "card-tagesplan", "card-schule",
+    "card-klausur", "card-screentime2", "card-kalorien",
+    /* Die Habits stehen VOR dem Tagesplan: nur so findet die dichte
+       Fuellung fuer ihn die Luecke unter dem Timer. Kaeme er vorher,
+       setzte er sich neben den Timer, und die Habits rutschten in
+       die naechste Zeile. */
+    "card-timer", "card-habits", "card-tagesplan",
+    "card-naechste", "card-schule",
     "card-wetter", "card-wetter2"
   ];
 
