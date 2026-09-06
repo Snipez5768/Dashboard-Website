@@ -10588,3 +10588,104 @@ input:focus, textarea:focus, select:focus {
   #seite-dashboard #card-wetter,
   #seite-dashboard #card-kalorien   { grid-area: auto / span 1; min-height: 120px; }
 }
+
+/* ----------------------------------------------------------
+   KORREKTUR: die Kacheln wurden gestreckt
+
+   Mit display: contents lagen die Habit- und Streak-Kacheln direkt
+   im Raster — und das Raster streckt jede Kachel auf volle
+   Reihenhoehe. Bei sieben Reihen sind das rund 110 Pixel fuer 40
+   Pixel Inhalt. Die Haelfte jeder Kachel war leer.
+
+   Also andersherum: die beiden Behaelter bleiben als Spalte im
+   Raster stehen, und ihre Kacheln stapeln sich darin mit ihrer
+   natuerlichen Hoehe. Genau so steht es auf der Musterseite.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-habits,
+#seite-dashboard #card-habits > .card-body,
+#seite-dashboard #card-habits .habit-list,
+#seite-dashboard #card-habits .hb-liste,
+#seite-dashboard #card-streaks,
+#seite-dashboard #card-streaks > .card-body,
+#seite-dashboard #card-streaks .streak-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  min-width: 0;
+  height: 100%;
+  background: none;
+  box-shadow: none;
+  border: none;
+  padding: 0;
+  overflow: hidden;
+}
+#seite-dashboard #card-habits  { grid-area: 1 / 1 / 8 / 3; }
+#seite-dashboard #card-streaks { grid-area: 1 / 3 / 8 / 5; }
+#seite-dashboard #card-habits:hover,
+#seite-dashboard #card-streaks:hover { transform: none; box-shadow: none; }
+
+/* Die Liste darf rollen, wenn mehr Kacheln da sind als Platz —
+   die Seite bleibt dabei stehen. */
+#seite-dashboard #card-habits .hb-liste,
+#seite-dashboard #card-streaks .streak-list {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+#seite-dashboard #card-habits .hb-liste::-webkit-scrollbar,
+#seite-dashboard #card-streaks .streak-list::-webkit-scrollbar { display: none; }
+
+/* Jede Kachel traegt ihre eigene Hoehe, statt auf Reihenhoehe
+   gestreckt zu werden. */
+#seite-dashboard .hb-zeile,
+#seite-dashboard .streak-row {
+  grid-column: auto;
+  grid-row: auto;
+  flex: 0 0 auto;
+  height: auto;
+  min-height: 62px;
+}
+
+/* Die Originalregel heisst ".streak-list .streak-row" und setzt
+   flex: 1 1 0 — die Kacheln teilten sich damit die Spaltenhoehe
+   untereinander auf, statt ihre eigene zu tragen. Gleiche Staerke
+   statt !important. */
+#seite-dashboard .streak-list .streak-row,
+#seite-dashboard .hb-liste .hb-zeile,
+#seite-dashboard .habit-list .hb-zeile {
+  flex: 0 0 auto;
+  height: auto;
+  min-height: 62px;
+}
+
+/* Die Stapel beginnen oben, nicht in der Mitte — sonst schwebt die
+   Liste zwischen zwei leeren Haelften. */
+#seite-dashboard .hb-liste,
+#seite-dashboard .habit-list,
+#seite-dashboard .streak-list {
+  justify-content: flex-start;
+  align-content: flex-start;
+}
+
+/* Restkasten um die Stapel: das Widget ist kein Behaelter mehr,
+   sondern nur noch die Spalte, in der die Kacheln stehen. */
+#seite-dashboard #card-habits,
+#seite-dashboard #card-streaks,
+#seite-dashboard #card-habits .habit-list,
+#seite-dashboard #card-habits .hb-liste,
+#seite-dashboard #card-streaks .streak-list,
+#seite-dashboard #card-habits .card-body,
+#seite-dashboard #card-streaks .card-body {
+  background: none;
+  background-image: none;
+  box-shadow: none;
+  border: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+#seite-dashboard #card-habits::after,
+#seite-dashboard #card-streaks::after,
+#seite-dashboard #card-habits::before,
+#seite-dashboard #card-streaks::before { content: none; }
