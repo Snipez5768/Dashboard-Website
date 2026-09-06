@@ -427,6 +427,60 @@
         </section>
 
         <!-- STREAKS (zieht später mit auf die Habits-Seite um) -->
+
+        <!-- ============ WETTER · VORHERSAGE ============
+             Block 4 des Bauplans. Das erste Wetter-Widget zeigt
+             jetzt, dieses die kommenden Tage. -->
+        <section class="card" id="card-wetter2">
+          <div class="card-head">
+            <span class="i-mal blau"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17a4 4 0 010-8 5.5 5.5 0 0110.5 1.5A3.5 3.5 0 0117 17z"/></svg></span>
+            <span class="card-title">Vorhersage</span>
+          </div>
+          <div class="card-body vorhersage" id="vorhersageBody">
+            <div class="muted-line">Lade Vorhersage …</div>
+          </div>
+        </section>
+
+        <!-- ============ BILDSCHIRMZEIT · ZAHL ============
+             Block 5. Heute gross, gestern klein darunter, Balken zum
+             Limit. Das andere Bildschirmzeit-Widget traegt die Kurve. -->
+        <section class="card" id="card-screentime2">
+          <div class="card-head">
+            <span class="i-mal gelb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M11 18.5h2"/></svg></span>
+            <span class="card-title">Bildschirmzeit</span>
+          </div>
+          <div class="card-body stzahl" id="stZahlBody">
+            <div class="muted-line">—</div>
+          </div>
+        </section>
+
+        <!-- ============ NAECHSTE KLAUSUR ============
+             Block 6. Faellt keine an, tritt der naechste Termin
+             an ihre Stelle — ein leeres Widget sagt nichts. -->
+        <section class="card" id="card-klausur">
+          <div class="card-head">
+            <span class="i-mal rot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 016.5 3H19v15.5H6.5A2.5 2.5 0 004 21z"/></svg></span>
+            <span class="card-title">Nächste Klausur</span>
+            <span class="card-badge" id="klausurFrist">—</span>
+          </div>
+          <div class="card-body klausur" id="klausurBody">
+            <div class="muted-line">—</div>
+          </div>
+        </section>
+
+        <!-- ============ SCHULE ============
+             Block 9. Nur Schulisches: Hausaufgaben, Klausuren, Tests. -->
+        <section class="card" id="card-schule">
+          <div class="card-head">
+            <span class="i-mal gruen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5L12 3l9 4.5-9 4.5z"/><path d="M7 10v5c0 1.5 2.2 2.5 5 2.5s5-1 5-2.5v-5"/></svg></span>
+            <span class="card-title">Schule</span>
+            <span class="card-badge" id="schuleZahl">0</span>
+          </div>
+          <div class="card-body schule" id="schuleBody">
+            <ul class="entry-list" id="schuleDashList"></ul>
+          </div>
+        </section>
+
         <section class="card" id="card-streaks">
           <div class="card-head">
             <span class="card-title">Streaks</span>
