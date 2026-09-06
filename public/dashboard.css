@@ -2171,3 +2171,169 @@
 #seite-dashboard #card-wetter .weather-main { align-items: center; }
 #seite-dashboard .tm-fach { height: 26px; min-height: 26px; }
 #seite-dashboard .tm-vor  { height: 24px; }
+
+/* ==========================================================
+   ==========================================================
+   KACHELN AUS GLAS — ein Versuch auf Widerruf
+
+   Alles hier haengt an [data-glas="an"] am Wurzelelement. Steht
+   der Schalter im Kontopanel auf Aus, faellt der ganze Block weg
+   und die Kacheln sehen aus wie zuvor.
+
+   Glas lebt davon, dass etwas hindurchscheint. Auf reinem Schwarz
+   gibt es nichts zu brechen — also bekommt der Grund im Glasmodus
+   zwei sehr weiche Aufhellungen. Sie sind grau, nicht farbig: der
+   dunkle Modus bleibt schwarz, der helle weiss.
+   ========================================================== */
+
+/* ---- Der Grund, damit das Glas etwas zu tun hat ---- */
+:root[data-glas="an"] body {
+  background-color: var(--bg-page);
+  background-image:
+    radial-gradient(58% 44% at 18% 12%, rgba(255,255,255,.055), transparent 70%),
+    radial-gradient(52% 40% at 84% 78%, rgba(255,255,255,.038), transparent 72%);
+  background-attachment: fixed;
+}
+:root[data-glas="an"][data-thema="hell"] body,
+:root[data-glas="an"]:not([data-thema="dunkel"]) body {
+  background-image:
+    radial-gradient(58% 44% at 18% 12%, rgba(0,0,0,.045), transparent 70%),
+    radial-gradient(52% 40% at 84% 78%, rgba(0,0,0,.032), transparent 72%);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-glas="an"]:not([data-thema="hell"]) body {
+    background-image:
+      radial-gradient(58% 44% at 18% 12%, rgba(255,255,255,.055), transparent 70%),
+      radial-gradient(52% 40% at 84% 78%, rgba(255,255,255,.038), transparent 72%);
+  }
+}
+:root[data-glas="an"][data-thema="dunkel"] body {
+  background-image:
+    radial-gradient(58% 44% at 18% 12%, rgba(255,255,255,.055), transparent 70%),
+    radial-gradient(52% 40% at 84% 78%, rgba(255,255,255,.038), transparent 72%);
+}
+
+/* ---- Die Kachel ----
+   Die Kapselform-Gruppe weiter oben nennt jede Kachel mit zwei
+   Kennungen. Eine Regel mit einer Kennung und einem Attribut kommt
+   dagegen nicht an, also stehen hier alle zehn einzeln. */
+[data-glas="an"] #seite-dashboard #card-wetter,
+[data-glas="an"] #seite-dashboard #card-wetter2,
+[data-glas="an"] #seite-dashboard #card-screentime2,
+[data-glas="an"] #seite-dashboard #card-kalorien,
+[data-glas="an"] #seite-dashboard #card-timer,
+[data-glas="an"] #seite-dashboard #card-klausur,
+[data-glas="an"] #seite-dashboard #card-habits,
+[data-glas="an"] #seite-dashboard #card-schule,
+[data-glas="an"] #seite-dashboard #card-naechste,
+[data-glas="an"] #seite-dashboard #card-tagesplan
+ {
+  position: relative;
+  background: color-mix(in srgb, var(--surface-card) 58%, transparent);
+  -webkit-backdrop-filter: blur(22px) saturate(1.5);
+  backdrop-filter: blur(22px) saturate(1.5);
+  border: 1px solid color-mix(in srgb, var(--text-primary) 9%, transparent);
+  box-shadow:
+    0 2px 10px rgba(0,0,0,.16),
+    0 14px 40px rgba(0,0,0,.20);
+}
+
+/* Der Glanz an der oberen Kante — was eine Scheibe vom Rechteck
+   unterscheidet. Er sitzt in einer eigenen Ebene, damit er den
+   Inhalt nicht anfasst. */
+[data-glas="an"] #seite-dashboard #card-wetter::after,
+[data-glas="an"] #seite-dashboard #card-wetter2::after,
+[data-glas="an"] #seite-dashboard #card-screentime2::after,
+[data-glas="an"] #seite-dashboard #card-kalorien::after,
+[data-glas="an"] #seite-dashboard #card-timer::after,
+[data-glas="an"] #seite-dashboard #card-klausur::after,
+[data-glas="an"] #seite-dashboard #card-habits::after,
+[data-glas="an"] #seite-dashboard #card-schule::after,
+[data-glas="an"] #seite-dashboard #card-naechste::after,
+[data-glas="an"] #seite-dashboard #card-tagesplan::after
+ {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--surface-dark-elevated) 22%, transparent) 0,
+    transparent 38%);
+  opacity: .55;
+}
+
+/* ---- Was in der Kachel liegt, wird ebenfalls leichter ----
+   Volle Flaechen auf einer Scheibe sehen aus wie aufgeklebt. */
+:root[data-glas="an"] #seite-dashboard .entry-item,
+:root[data-glas="an"] #seite-dashboard .hb-zeile,
+:root[data-glas="an"] #seite-dashboard .i-mal,
+:root[data-glas="an"] #seite-dashboard .card-badge,
+:root[data-glas="an"] #seite-dashboard .tm-icon,
+:root[data-glas="an"] #seite-dashboard .tm-vor {
+  background: color-mix(in srgb, var(--surface-sunken) 62%, transparent);
+}
+:root[data-glas="an"] #seite-dashboard .entry-item:hover,
+:root[data-glas="an"] #seite-dashboard .hb-zeile:hover {
+  background: color-mix(in srgb, var(--surface-sunken) 88%, transparent);
+}
+
+/* Das Laufende bleibt kraeftig — es ist der eine Punkt, der
+   auffallen soll. */
+:root[data-glas="an"] #seite-dashboard .entry-item.today {
+  background: var(--accent-active);
+}
+
+/* Balken und Spuren behalten ihre Kante, sonst verschwimmen sie */
+:root[data-glas="an"] #seite-dashboard .stz-balken,
+:root[data-glas="an"] #seite-dashboard .kw-balken,
+:root[data-glas="an"] #seite-dashboard .tm-spur,
+:root[data-glas="an"] #seite-dashboard .tp-balken {
+  background: color-mix(in srgb, var(--surface-sunken) 80%, transparent);
+}
+
+/* ---- Die Seitenleiste und die Kopfzeile ziehen mit ----
+   Eine Scheibe neben einer Wand sieht nach Fehler aus. */
+:root[data-glas="an"] .sidebar,
+:root[data-glas="an"] .search {
+  background: color-mix(in srgb, var(--surface-card) 55%, transparent);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  backdrop-filter: blur(20px) saturate(1.4);
+}
+
+/* ---- Wer keine Hintergrundunschaerfe kann, bekommt die Kachel
+        etwas dichter: sonst stuende der Text auf dem Grund ---- */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  [data-glas="an"] #seite-dashboard #card-wetter,
+[data-glas="an"] #seite-dashboard #card-wetter2,
+[data-glas="an"] #seite-dashboard #card-screentime2,
+[data-glas="an"] #seite-dashboard #card-kalorien,
+[data-glas="an"] #seite-dashboard #card-timer,
+[data-glas="an"] #seite-dashboard #card-klausur,
+[data-glas="an"] #seite-dashboard #card-habits,
+[data-glas="an"] #seite-dashboard #card-schule,
+[data-glas="an"] #seite-dashboard #card-naechste,
+[data-glas="an"] #seite-dashboard #card-tagesplan {
+    background: color-mix(in srgb, var(--surface-card) 88%, transparent);
+  }
+}
+
+/* ---- Wer Bewegung sparsam mag, bekommt keine Unschaerfe ----
+   Sie kostet auf schwachen Geraeten spuerbar Leistung. */
+@media (prefers-reduced-motion: reduce) {
+  [data-glas="an"] #seite-dashboard #card-wetter,
+[data-glas="an"] #seite-dashboard #card-wetter2,
+[data-glas="an"] #seite-dashboard #card-screentime2,
+[data-glas="an"] #seite-dashboard #card-kalorien,
+[data-glas="an"] #seite-dashboard #card-timer,
+[data-glas="an"] #seite-dashboard #card-klausur,
+[data-glas="an"] #seite-dashboard #card-habits,
+[data-glas="an"] #seite-dashboard #card-schule,
+[data-glas="an"] #seite-dashboard #card-naechste,
+[data-glas="an"] #seite-dashboard #card-tagesplan {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: color-mix(in srgb, var(--surface-card) 90%, transparent);
+  }
+}

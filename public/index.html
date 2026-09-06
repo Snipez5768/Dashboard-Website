@@ -52,6 +52,11 @@
       if (wahl === "hell" || wahl === "dunkel") {
         document.documentElement.setAttribute("data-thema", wahl);
       }
+      /* Glas gehoert in denselben Vorlauf: kaeme es erst mit dem
+         Skript, blitzten die Kacheln kurz undurchsichtig auf. */
+      if (localStorage.getItem("lifeos_glas") !== "aus") {
+        document.documentElement.setAttribute("data-glas", "an");
+      }
     } catch (f) { /* Kein Speicher: dann eben nach Geraeteeinstellung */ }
   })();
 </script>
@@ -1287,6 +1292,17 @@
           <p class="kop-hinweis" id="themaHinweis">Automatisch folgt der Einstellung deines
             Geräts und wechselt abends von selbst. Die Wahl gilt nur hier, nicht auf deinen
             anderen Geräten.</p>
+
+          <!-- Ein Versuch auf Widerruf. Steht der Schalter auf Aus,
+               ist der Glaseffekt vollstaendig weg. -->
+          <h3 class="kop-unter" style="margin-top:18px">Kacheln aus Glas</h3>
+          <div class="seg-toggle thema-wahl" id="glasWahl" role="group" aria-label="Kacheln aus Glas">
+            <button type="button" data-glas="aus">Aus</button>
+            <button type="button" data-glas="an">An</button>
+          </div>
+          <p class="kop-hinweis">Zum Ausprobieren: die Kacheln werden durchscheinend und
+            verwischen, was hinter ihnen liegt. Gefällt es nicht, steht hier wieder Aus —
+            sonst ändert sich nichts.</p>
         </div>
 
         <div class="kop-abschnitt">

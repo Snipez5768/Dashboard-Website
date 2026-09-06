@@ -3145,6 +3145,38 @@
     }
   }
 
+  /* ----------------------------------------------------------
+     KACHELN AUS GLAS
+     Ein Versuch auf Widerruf. Alles daran haengt an einem Attribut
+     am Wurzelelement — steht es auf Aus, ist der Effekt restlos
+     weg, und die Kacheln sehen aus wie zuvor.
+     ---------------------------------------------------------- */
+  function glasWahl() {
+    /* Zum Ausprobieren steht Glas an — nur ein ausdrueckliches Aus
+       schaltet es ab. */
+    return localStorage.getItem("lifeos_glas") === "aus" ? "aus" : "an";
+  }
+
+  function glasSetzen(wert) {
+    if (wert === "an") document.documentElement.setAttribute("data-glas", "an");
+    else                document.documentElement.removeAttribute("data-glas");
+    try { localStorage.setItem("lifeos_glas", wert); } catch (f) {}
+    const leiste = $("glasWahl");
+    if (!leiste) return;
+    leiste.querySelectorAll("button[data-glas]").forEach(k =>
+      k.classList.toggle("active", k.dataset.glas === wert));
+  }
+
+  (function glasBinden() {
+    const leiste = $("glasWahl");
+    if (!leiste) return;
+    leiste.addEventListener("click", e => {
+      const k = e.target.closest("button[data-glas]");
+      if (k) glasSetzen(k.dataset.glas);
+    });
+    glasSetzen(glasWahl());
+  })();
+
   /* Steht der Schalter auf "Automatisch", muss die Seite mitwechseln,
      wenn das Geraet abends umstellt — ohne Neuladen. */
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
