@@ -729,3 +729,101 @@
   font-size: clamp(11px, .82vw, 13px);
   color: var(--text-muted);
 }
+
+/* ----------------------------------------------------------
+   16  DIE BILDSCHIRMZEIT-STATISTIK
+
+   Zwei Geraete, zwei Toene: das Handy traegt das Blau der Seite,
+   der Rechner ein neutrales Grau. Die Unterscheidung ist keine
+   Bewertung, also hat sie auch keine Signalfarbe verdient — das
+   Diagramm im Dashboard macht es schon so.
+
+   Zuvor stand hier Violett gegen Altblau, beides hart im Code und
+   die einzigen Farben der Seite ausserhalb des Kanons. Und
+   --violet, --blue und --blue-soft zeigten inzwischen alle auf
+   dasselbe Blau: die beiden Geraete waren gar nicht mehr zu
+   unterscheiden.
+   ---------------------------------------------------------- */
+#seite-bildschirmzeit .st-line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* Die Gesamtlinie traegt das Blau, das Handy darunter das Grau */
+#seite-bildschirmzeit .st-line.pc    { stroke: #0A84FF; }
+#seite-bildschirmzeit .st-line.phone { stroke: #8E8E93; }
+#seite-bildschirmzeit .st-dot.pc     { fill: #0A84FF; }
+#seite-bildschirmzeit .st-dot.phone  { fill: #8E8E93; }
+#seite-bildschirmzeit .legend-dot.pc {
+  background: #0A84FF; box-shadow: none; animation: none;
+}
+#seite-bildschirmzeit .legend-dot.phone {
+  background: #8E8E93; box-shadow: none; animation: none;
+}
+
+/* Die Achsen: waagerechtes Raster ganz zurueckhaltend, die beiden
+   Achsen selbst eine Spur kraeftiger. Beschriftung klein, grau und
+   mit Tabellenziffern, damit die Zahlen untereinander stehen. */
+#seite-bildschirmzeit .st-raster {
+  stroke: color-mix(in srgb, var(--text-muted) 15%, transparent);
+  stroke-width: 1;
+}
+#seite-bildschirmzeit .st-achse-x,
+#seite-bildschirmzeit .st-achse-y-linie {
+  stroke: color-mix(in srgb, var(--text-muted) 34%, transparent);
+  stroke-width: 1;
+}
+#seite-bildschirmzeit .st-achse-y {
+  font-family: var(--sans);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  fill: var(--text-muted);
+}
+#seite-bildschirmzeit .st-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 7px;
+}
+#seite-bildschirmzeit .st-axis span {
+  font-family: var(--sans);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+#seite-bildschirmzeit .st-axis span.jetzt {
+  color: var(--blue-ink);
+  font-weight: 600;
+}
+
+/* Die Fuehrungslinie beim Ueberfahren */
+#seite-bildschirmzeit .st-guide {
+  stroke: color-mix(in srgb, var(--text-muted) 40%, transparent);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+/* Die Legende als Pillen, wie ueberall sonst */
+#seite-bildschirmzeit .gross-legende {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+#seite-bildschirmzeit .gross-legende .legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 11px;
+  border: none;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+  font-family: var(--sans);
+  font-size: clamp(10.5px, .78vw, 12px);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--t-base) var(--ease-soft);
+}
+#seite-bildschirmzeit .gross-legende .legend-item:hover {
+  background: color-mix(in srgb, var(--surface-sunken) 55%, var(--surface-card));
+}

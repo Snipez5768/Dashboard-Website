@@ -5509,12 +5509,17 @@
     const y = v => H - padY - (v / maxWert) * (H - padY * 2);
 
     const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+    /* Feste Werte statt Variablen — ein stop-color ist ein
+       Praesentationsattribut und kennt kein var(). Beide Toene
+       tragen auf schwarzem wie auf weissem Grund. */
     defs.innerHTML =
       `<linearGradient id="pgGradPc" x1="0" y1="0" x2="0" y2="1">
-         <stop offset="0%" stop-color="rgba(167,139,250,0.42)"/><stop offset="100%" stop-color="rgba(167,139,250,0)"/>
+         <stop offset="0%" stop-color="#0A84FF" stop-opacity="0.45"/>
+         <stop offset="100%" stop-color="#0A84FF" stop-opacity="0.02"/>
        </linearGradient>
        <linearGradient id="pgGradPhone" x1="0" y1="0" x2="0" y2="1">
-         <stop offset="0%" stop-color="rgba(91,140,255,0.42)"/><stop offset="100%" stop-color="rgba(91,140,255,0)"/>
+         <stop offset="0%" stop-color="#8E8E93" stop-opacity="0.45"/>
+         <stop offset="100%" stop-color="#8E8E93" stop-opacity="0.03"/>
        </linearGradient>`;
     svg.appendChild(defs);
 
@@ -5522,13 +5527,19 @@
        gezeichnet, damit die Flaechen darueber liegen. */
     marken.forEach(wert => {
       const yy = y(wert);
-      svg.appendChild(svgEl("line", { class: "st-raster",
+      /* Die Nulllinie ist die X-Achse und wird staerker gezeichnet
+         als das Raster darueber. */
+      svg.appendChild(svgEl("line", { class: wert === 0 ? "st-achse-x" : "st-raster",
         x1: padL, y1: yy, x2: W, y2: yy }));
       const beschriftung = svgEl("text", { class: "st-achse-y",
         x: padL - 8, y: yy + 3.5, "text-anchor": "end" });
       beschriftung.textContent = achsenText(wert);
       svg.appendChild(beschriftung);
     });
+
+    /* Die Y-Achse als senkrechte Linie am linken Rand */
+    svg.appendChild(svgEl("line", { class: "st-achse-y-linie",
+      x1: padL, y1: padY, x2: padL, y2: y(0) }));
 
     /* Ohne Handy-Kurve waere eine gestapelte Gesamtlinie irrefuehrend:
        sie enthielte die Telefonzeit, ohne sie zu zeigen. Dann wird
