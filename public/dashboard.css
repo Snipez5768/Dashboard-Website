@@ -3036,91 +3036,107 @@
     display: block;
     position: fixed;
     left: 0; right: 0; bottom: 0;
-    height: 172px;
+    /* Die Hoehe traegt den Heimbalken mit: unten am iPad liegt
+       eine Zone, in der nichts stehen soll. Waechst die Leiste,
+       ruecken die Kaestchen mit nach oben. */
+    height: calc(150px + env(safe-area-inset-bottom, 0px));
     z-index: 60;
     touch-action: none;          /* das Ziehen gehoert der Leiste */
     cursor: grab;
     /* Der Grund verlaeuft nach oben ins Nichts, damit die Kacheln
-       darunter nicht abgeschnitten wirken. */
+       darunter nicht abgeschnitten wirken.
+
+       Die Maske nimmt den Weichzeichner mit heraus. Ohne sie blieb
+       oben ein Streifen, der verwischt, aber nichts verdeckt — auf
+       dem Stundenplan standen dort helle Schlieren. */
     background: linear-gradient(to top,
-      var(--bg-page) 38%,
-      color-mix(in srgb, var(--bg-page) 78%, transparent) 68%,
-      transparent 100%);
+      var(--bg-page) 52%,
+      color-mix(in srgb, var(--bg-page) 72%, transparent) 100%);
     -webkit-backdrop-filter: blur(14px);
     backdrop-filter: blur(14px);
+    -webkit-mask-image: linear-gradient(to top, #000 56%, transparent 100%);
+    mask-image: linear-gradient(to top, #000 56%, transparent 100%);
   }
   :root[data-leiste="bogen"] .bogen-leiste:active { cursor: grabbing; }
 
-  /* Die Bahn: der Nullpunkt liegt oben mittig, von dort setzt das
-     Skript jeden Eintrag auf den Kreis. */
+  /* Die Bahn: der Nullpunkt liegt tief unten und mittig, von dort
+     setzt das Skript jeden Eintrag auf den Kreis. Tief, damit die
+     Reihe wirklich am unteren Rand sitzt und nicht darueber
+     schwebt. */
   :root[data-leiste="bogen"] .bg-bahn {
     position: absolute;
-    left: 50%; top: 20px;
+    left: 50%; top: 78px;
     width: 0; height: 0;
   }
 
+  /* Jeder Eintrag ist ein Kaestchen: Name links, Symbol rechts.
+     Eine feste Breite gibt es nicht — es waechst mit dem Namen, und
+     translate(-50%) setzt es trotzdem mittig auf seinen Punkt. */
   :root[data-leiste="bogen"] .bg-seite {
     position: absolute;
     left: 0; top: 0;
     transform-origin: 50% 0;
-    width: 96px;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 5px;
-    padding: 0;
+    gap: 9px;
+    padding: 6px;
     border: none;
-    background: none;
-    color: var(--text-muted);
-    font-family: var(--sans);
-    cursor: pointer;
-    transition: color var(--t-base) var(--ease-soft),
-                opacity var(--t-base) var(--ease-soft);
-  }
-  /* Beim Ziehen darf nichts nachlaufen — sonst haengt die Reihe
-     hinter dem Finger her. Beim Loslassen rastet sie weich ein. */
-  :root[data-leiste="bogen"] .bg-seite {
-    transition: transform .34s cubic-bezier(.32,.72,0,1),
-                opacity .22s var(--ease-soft),
-                color .22s var(--ease-soft);
-  }
-  :root[data-leiste="bogen"] .bg-bahn.zieht .bg-seite { transition: none; }
-
-  :root[data-leiste="bogen"] .bg-mal {
-    width: 46px; height: 46px;
-    display: grid; place-items: center;
-    border-radius: 50%;
+    border-radius: 999px;
     background: var(--surface-card);
     box-shadow: var(--shadow-2);
-    transition: background var(--t-base) var(--ease-soft),
-                color var(--t-base) var(--ease-soft),
-                transform var(--t-base) var(--ease);
+    color: var(--text-muted);
+    font-family: var(--sans);
+    white-space: nowrap;
+    cursor: pointer;
+    /* Beim Ziehen darf die Bewegung nicht nachlaufen — sonst haengt
+       die Reihe hinter dem Finger her. Beim Loslassen rastet sie
+       weich ein. */
+    transition: transform .34s cubic-bezier(.32,.72,0,1),
+                opacity .22s var(--ease-soft),
+                background var(--t-base) var(--ease-soft),
+                color var(--t-base) var(--ease-soft);
   }
-  :root[data-leiste="bogen"] .bg-mal svg { width: 21px; height: 21px; }
+  /* Waehrend des Zuges folgt die Bewegung sofort, das Auftauchen der
+     Nachbarn darf trotzdem weich sein. */
+  :root[data-leiste="bogen"] .bg-bahn.zieht .bg-seite {
+    transition: opacity .18s var(--ease-soft);
+  }
 
+  :root[data-leiste="bogen"] .bg-mal {
+    width: 32px; height: 32px;
+    display: grid; place-items: center;
+    border-radius: 50%;
+    background: var(--surface-sunken);
+    transition: background var(--t-base) var(--ease-soft);
+  }
+  :root[data-leiste="bogen"] .bg-mal svg { width: 18px; height: 18px; }
+
+  /* Den Namen traegt nur der Eintrag in der Mitte. Truegen ihn alle,
+     stiessen die Kaestchen aneinander — und lesen will man ohnehin
+     nur, wo man gerade landet. */
   :root[data-leiste="bogen"] .bg-name {
-    font-size: 11px;
+    display: none;
+    font-size: 12.5px;
     font-weight: 600;
     letter-spacing: -.01em;
-    white-space: nowrap;
-    opacity: 0;
-    transition: opacity var(--t-base) var(--ease-soft);
   }
 
   /* Der Eintrag in der Mitte ist die Seite, auf der man ist */
-  :root[data-leiste="bogen"] .bg-seite.mitte { color: var(--text-primary); }
-  :root[data-leiste="bogen"] .bg-seite.mitte .bg-mal {
+  :root[data-leiste="bogen"] .bg-seite.mitte {
+    padding-left: 15px;
     background: var(--accent-active);
     color: #fff;
-    transform: scale(1.16);
-    box-shadow: 0 6px 20px color-mix(in srgb, var(--accent-active) 45%, transparent);
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--accent-active) 40%, transparent);
   }
-  :root[data-leiste="bogen"] .bg-seite.mitte .bg-name { opacity: 1; }
+  :root[data-leiste="bogen"] .bg-seite.mitte .bg-name { display: block; }
+  :root[data-leiste="bogen"] .bg-seite.mitte .bg-mal {
+    background: rgba(255, 255, 255, .22);
+  }
 
   /* Die Seitenleiste tritt ab, der Inhalt rueckt nach */
   :root[data-leiste="bogen"] .sidebar { display: none; }
-  :root[data-leiste="bogen"] .seite { padding-bottom: 176px; }
-  :root[data-leiste="bogen"] #seite-dashboard .widget-grid { padding-bottom: 176px; }
+  :root[data-leiste="bogen"] .seite { padding-bottom: calc(158px + env(safe-area-inset-bottom, 0px)); }
+  :root[data-leiste="bogen"] #seite-dashboard .widget-grid { padding-bottom: calc(158px + env(safe-area-inset-bottom, 0px)); }
 }
 
 /* Wer Bewegung sparsam mag, bekommt kein Nachfedern */

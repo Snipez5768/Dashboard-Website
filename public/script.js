@@ -14342,9 +14342,10 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
      Attribut gibt es die Leiste nicht und die Seitenleiste steht,
      wo sie stand.
      ========================================================== */
-  const BOGEN_R = 1500;       /* Radius in Pixeln — je groesser, desto flacher */
-  const BOGEN_SCHRITT = 4;    /* Grad zwischen zwei Eintraegen */
-  const BOGEN_SICHT = 4.4;    /* so weit reicht die Reihe zur Seite hin */
+  const BOGEN_R = 2400;       /* Radius in Pixeln — je groesser, desto flacher */
+  const BOGEN_SCHRITT = 3.1;  /* Grad zwischen zwei Eintraegen — mal Radius
+                                 ergibt das den Abstand: rund 130 Pixel */
+  const BOGEN_SICHT = 3.8;    /* so weit reicht die Reihe zur Seite hin */
 
   let bogenSeiten = [], bogenPos = 0, bogenZieht = null;
 
@@ -14374,9 +14375,10 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
       knopf.dataset.seite = a.dataset.seite;
       const svg = a.querySelector("svg");
       const name = a.querySelector("span");
+      /* Name links, Symbol rechts, beides in einem Kaestchen */
       knopf.innerHTML =
-        '<span class="bg-mal">' + (svg ? svg.outerHTML : "") + "</span>" +
-        '<span class="bg-name">' + (name ? name.textContent : "") + "</span>";
+        '<span class="bg-name">' + (name ? name.textContent : "") + "</span>" +
+        '<span class="bg-mal">' + (svg ? svg.outerHTML : "") + "</span>";
       bahn.appendChild(knopf);
       bogenSeiten.push(knopf);
     });
@@ -14397,14 +14399,18 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
         "translate(-50%, 0) translate(" + x.toFixed(1) + "px, " + y.toFixed(1) + "px) " +
         "rotate(" + grad.toFixed(2) + "deg)";
 
-      /* Was weit weg ist, tritt zurueck — sonst steht am Rand ein
-         Gedraenge, das niemand liest. Gemessen wird in Eintraegen und
-         nicht in Grad, damit das Verblassen gleich bleibt, wenn man
-         am Radius dreht. */
+      /* In Ruhe steht nur die Seite da, auf der man gerade ist. Die
+         uebrigen tauchen erst auf, wenn man zieht — sonst laege am
+         unteren Rand dauernd eine Reihe im Weg.
+
+         Was weit weg ist, tritt zurueck. Gemessen wird in Eintraegen
+         und nicht in Grad, damit das Verblassen gleich bleibt, wenn
+         man am Radius dreht. */
       const weite = Math.abs(i - bogenPos);
-      const fort = weite > BOGEN_SICHT;
-      el.style.opacity = fort ? "0" : String(Math.max(0.3, 1 - weite / (BOGEN_SICHT + 0.6)));
-      el.classList.toggle("mitte", weite < 0.5);
+      const inDerMitte = weite < 0.5;
+      const fort = weite > BOGEN_SICHT || !(bogenZieht || inDerMitte);
+      el.style.opacity = fort ? "0" : String(Math.max(0.32, 1 - weite / (BOGEN_SICHT + 0.8)));
+      el.classList.toggle("mitte", inDerMitte);
       el.style.pointerEvents = fort ? "none" : "auto";
     });
   }
@@ -14467,6 +14473,9 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
           bogenZuSeite(auf.dataset.seite);
           seiteZeigen(auf.dataset.seite);
         }
+        /* Auch ohne Seitenwechsel neu zeichnen: die Nachbarn sind
+           beim Aufsetzen aufgetaucht und muessen wieder abtreten. */
+        bogenZeichnen();
         return;
       }
 
