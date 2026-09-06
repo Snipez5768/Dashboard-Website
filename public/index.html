@@ -1444,6 +1444,19 @@
     window.addEventListener("load", () => {
       navigator.serviceWorker.register("sw.js").catch(() => { /* dann eben nur online */ });
     });
+
+    /* Beim Start gibt der Worker sofort die gespeicherte Kopie aus —
+       sonst bliebe die App leer, wenn der Rechner aus ist. Die neue
+       Fassung landet erst danach im Lager. Meldet er, dass sich
+       etwas geaendert hat, laedt die Seite einmal nach. Sonst
+       saehe man Aenderungen immer erst beim uebernaechsten Start. */
+    var lifeosSchonGeladen = false;
+    navigator.serviceWorker.addEventListener("message", function (e) {
+      if (!e.data || e.data.art !== "neue-fassung") return;
+      if (lifeosSchonGeladen) return;
+      lifeosSchonGeladen = true;
+      location.reload();
+    });
   }
 </script>
 <!-- Die Anmeldung lädt bestand.js und script.js nach, sobald jemand

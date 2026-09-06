@@ -3007,31 +3007,12 @@
   }
 }
 
-/* ----------------------------------------------------------
-   DIE AUFTEILUNG, DIE BEIM ORDNEN HERAUSKAM
-
-   Reihenfolge und Ausblendung standen im gespeicherten Plan. Der
-   ist mit der Bedienung weggefallen, also stehen sie jetzt hier.
-
-   Die Habits stehen VOR dem Tagesplan: nur dann findet die dichte
-   Fuellung fuer ihn die Luecke unter dem Timer. Kaeme er vorher,
-   setzte er sich neben den Timer, und die Habits rutschten in die
-   naechste Zeile.
-   ---------------------------------------------------------- */
-@media (min-width: 700px) and (max-width: 1250px),
-       (min-width: 700px) and (max-width: 1400px) and (pointer: coarse) {
-  #seite-dashboard #card-wetter,
-  #seite-dashboard #card-wetter2 { display: none; }
-
-  #seite-dashboard #card-klausur     { order: 1; }
-  #seite-dashboard #card-screentime2 { order: 2; }
-  #seite-dashboard #card-kalorien    { order: 3; }
-  #seite-dashboard #card-timer       { order: 4; }
-  #seite-dashboard #card-habits      { order: 5; }
-  #seite-dashboard #card-tagesplan   { order: 6; }
-  #seite-dashboard #card-naechste    { order: 7; }
-  #seite-dashboard #card-schule      { order: 8; }
-}
+/* Reihenfolge, Groessen und die ausgeblendeten Wetterkacheln setzt
+   das Skript aus dem gespeicherten Plan — siehe "DIE ANORDNUNG VOM
+   IPAD ANWENDEN" in script.js. Zwei Quellen fuer dieselbe Sache
+   waeren eine zu viel: eine Regel hier koennte das Wetter nicht
+   wieder hervorholen, wenn der Plan es zeigt. Was weiter oben in
+   der Tabletaufteilung steht, gilt, solange es keinen Plan gibt. */
 
 /* ==========================================================
    ==========================================================

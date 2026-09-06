@@ -18,7 +18,7 @@
 /* Bei jeder Aenderung hochzaehlen: der Browser tauscht den Worker
    nur aus, wenn sich seine Datei unterscheidet, und ein neuer Name
    raeumt zugleich die alte Kopie weg. */
-const LAGER = "lifeos-v10";
+const LAGER = "lifeos-v11";
 
 /* So lange wird auf den Server gewartet, bevor die Kopie einspringt */
 const NETZ_FRIST = 2000;
@@ -52,10 +52,22 @@ self.addEventListener("install", e => {
 self.addEventListener("activate", e => {
   e.waitUntil((async () => {
     const namen = await caches.keys();
-    await Promise.all(namen.filter(n => n !== LAGER).map(n => caches.delete(n)));
+    const alte = namen.filter(n => n !== LAGER);
+    await Promise.all(alte.map(n => caches.delete(n)));
     await self.clients.claim();
+    /* Gab es vorher schon ein Lager, ist das hier eine neue
+       Fassung und nicht der erste Besuch — dann zeigt das offene
+       Fenster noch die alte Seite und sollte nachladen. */
+    if (alte.length) neueFassungMelden();
   })());
 });
+
+/* Sagt allen offenen Fenstern, dass eine neue Fassung bereitliegt.
+   Was daraus wird, entscheidet die Seite selbst. */
+async function neueFassungMelden() {
+  const fenster = await self.clients.matchAll({ type: "window" });
+  fenster.forEach(f => f.postMessage({ art: "neue-fassung" }));
+}
 
 /* Ist die Anfrage etwas, das wir aufheben wollen? */
 function istGeruest(url) {
@@ -113,13 +125,28 @@ self.addEventListener("fetch", e => {
   if (anfrage.mode === "navigate" && istApp) {
     /* Beides synchron anmelden: waitUntil nimmt später nichts mehr
        an, und ohne es darf der Worker mitten im Auffrischen enden. */
+    /* Womit die Seite gleich beantwortet wird. Der Vergleich braucht
+       genau das und nicht den Stand im Lager: dorthin schreibt das
+       Auffrischen ja selbst, und kaeme es zuerst, meldete der Worker
+       eine neue Fassung, die die Seite schon bekommen hat. */
+    let serviertSagen;
+    const serviert = new Promise(fertig => { serviertSagen = fertig; });
+
     const auffrischen = fetch(anfrage)
       .then(async antwort => {
-        if (antwort && antwort.ok) {
-          const lager = await caches.open(LAGER);
-          await lager.put("/index.html", antwort.clone());
-          await lager.put("/", antwort.clone());
-        }
+        if (!antwort || !antwort.ok) return antwort;
+        /* Der Text wird einmal gelesen und zweimal abgelegt —
+           ein Koerper laesst sich nur einmal auslesen. */
+        const neu = await antwort.clone().text();
+        const lager = await caches.open(LAGER);
+        const kopf = { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } };
+        await lager.put("/index.html", new Response(neu, kopf));
+        await lager.put("/", new Response(neu, kopf));
+        /* Nur wenn die Seite wirklich etwas anderes bekommen hat.
+           Beim allerersten Mal lag nichts da — dann ist das, was
+           gerade laedt, ohnehin die neue Fassung. */
+        const alt = await serviert;
+        if (alt !== null && alt !== neu) neueFassungMelden();
         return antwort;
       })
       .catch(() => null);
@@ -134,7 +161,14 @@ self.addEventListener("fetch", e => {
                  || await lager.match("/index.html")
                  || await lager.match("/");
 
-      if (kopie) return kopie;
+      if (kopie) {
+        /* Laesst sich die Kopie nicht lesen, wird eben nicht
+           gemeldet — lieber die alte Seite als ein Warten, das
+           niemand mehr aufloest. */
+        try { serviertSagen(await kopie.clone().text()); }
+        catch (fehler) { serviertSagen(null); }
+        return kopie;
+      }
 
       /* Noch nichts gespeichert: dann bleibt nur der Server, und auf
          den lohnt das Warten — eine Frist bringt hier nichts, weil
@@ -142,6 +176,9 @@ self.addEventListener("fetch", e => {
          passierte nach einem geleerten Zwischenspeicher: der Server
          lief, brauchte aber einen Moment, und die Frist lieferte die
          Notfallseite, obwohl die echte längst unterwegs war. */
+      /* Erst sagen, dann warten: das Auffrischen wartet seinerseits
+         auf diese Antwort — andersherum warteten beide aufeinander. */
+      serviertSagen(null);
       const antwort = await auffrischen;
       return antwort || new Response(
         "<!doctype html><meta charset=utf-8><title>Life OS</title>" +

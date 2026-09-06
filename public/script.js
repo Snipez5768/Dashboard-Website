@@ -14518,4 +14518,122 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
     bogenSetzen(bogenWahl());
   })();
 
+
+  /* ==========================================================
+     DIE ANORDNUNG VOM IPAD ANWENDEN
+
+     Der Ordnen-Modus ist ausgebaut, seine Anordnung nicht: Luca hat
+     die Kacheln damals selbst gestellt, und der Plan dazu liegt
+     weiter im Speicher des Geraets unter "lifeos_ipad_plan". Beim
+     Ausbau habe ich nur die Reihenfolge ins Stylesheet gerettet —
+     die Groessen fielen dabei heraus. Hier stehen sie wieder.
+
+     Das ist nur der Anwender, nicht die Bedienung: verstellen laesst
+     sich nichts mehr, die Anordnung steht.
+
+     Sie gilt ausdruecklich nur auf Tabletbreite. Am Rechner steht
+     die Aufteilung aus dem Bauplan, und die bleibt unangetastet —
+     deshalb wird beim Anwenden die Breite geprueft und alles
+     zurueckgenommen, was hier gesetzt wurde.
+     ========================================================== */
+  /* Dieselbe Bedingung wie im Stylesheet — als Abfrage, nicht als
+     zweite Zahlenreihe, sonst laufen beide auseinander. */
+  const PLAN_BEDINGUNG = BOGEN_BEDINGUNG;
+
+  /* Die Grundordnung. Die Habits stehen VOR dem Tagesplan: nur dann
+     findet die dichte Fuellung fuer ihn die Luecke unter dem Timer.
+     Kaeme er vorher, setzte er sich neben den Timer, und die Habits
+     rutschten in die naechste Zeile. */
+  const PLAN_KACHELN = [
+    "card-klausur", "card-screentime2", "card-kalorien",
+    "card-timer", "card-habits", "card-tagesplan",
+    "card-naechste", "card-schule",
+    "card-wetter", "card-wetter2"
+  ];
+
+  /* Das Wetter steht auf dem iPad ausgeblendet */
+  const PLAN_ANFANGS_WEG = ["card-wetter", "card-wetter2"];
+
+  /* Vier Breiten in Feldern des Sechserrasters, vier Hoehen in
+     Zeilen zu zwoelf Pixeln. Die Hoehen sind so gewaehlt, dass
+     Stapel aufgehen: zwei S uebereinander sind genau ein L, S und M
+     zusammen ein XL. */
+  const PLAN_BREITEN = [2, 3, 4, 6];
+  const PLAN_HOEHEN  = [5, 8, 10, 13];
+
+  /* Womit eine Kachel anfaengt, wenn im Plan nichts dazu steht */
+  const PLAN_VORGABE = {
+    "card-klausur":     { b: 3, h: 1 },
+    "card-screentime2": { b: 1, h: 0 },
+    "card-kalorien":    { b: 1, h: 0 },
+    "card-timer":       { b: 1, h: 0 },
+    "card-habits":      { b: 1, h: 3 },
+    "card-naechste":    { b: 3, h: 3 },
+    "card-tagesplan":   { b: 1, h: 1 },
+    "card-schule":      { b: 1, h: 1 },
+    "card-wetter":      { b: 1, h: 0 },
+    "card-wetter2":     { b: 1, h: 2 }
+  };
+
+  const planPlan = (() => {
+    const p = store.get("lifeos_ipad_plan", null);
+    const leer = { reihe: [], breit: {}, hoehe: {}, weg: PLAN_ANFANGS_WEG.slice() };
+    if (!p || typeof p !== "object") return leer;
+    return {
+      reihe: Array.isArray(p.reihe) ? p.reihe : [],
+      weg:   Array.isArray(p.weg)   ? p.weg   : PLAN_ANFANGS_WEG.slice(),
+      breit: (p.breit && typeof p.breit === "object") ? p.breit : {},
+      hoehe: (p.hoehe && typeof p.hoehe === "object") ? p.hoehe : {}
+    };
+  })();
+
+  function planStufe(id, feld) {
+    const eigen = feld === "b" ? planPlan.breit[id] : planPlan.hoehe[id];
+    if (Number.isInteger(eigen)) return eigen;
+    const v = PLAN_VORGABE[id];
+    return v ? v[feld] : 1;
+  }
+
+  /* Die gespeicherte Reihenfolge, ergaenzt um alles, was noch nicht
+     darin steht — so tauchen neue Kacheln hinten auf, statt zu
+     verschwinden. */
+  function planReihenfolge() {
+    const bekannt = planPlan.reihe.filter(id => PLAN_KACHELN.includes(id));
+    return bekannt.concat(PLAN_KACHELN.filter(id => !bekannt.includes(id)));
+  }
+
+  function planAnwenden() {
+    const tablet = matchMedia(PLAN_BEDINGUNG).matches;
+    const folge = planReihenfolge();
+
+    PLAN_KACHELN.forEach(id => {
+      const k = $(id);
+      if (!k) return;
+
+      if (!tablet) {
+        /* Am Rechner und auf dem Telefon zaehlt nichts davon */
+        ["order", "grid-column", "grid-row", "height", "min-height", "display"]
+          .forEach(e => k.style.removeProperty(e));
+        return;
+      }
+
+      k.style.order = folge.indexOf(id);
+
+      if (planPlan.weg.includes(id)) { k.style.display = "none"; return; }
+      k.style.removeProperty("display");
+
+      const b = PLAN_BREITEN[planStufe(id, "b")] || PLAN_BREITEN[1];
+      const h = PLAN_HOEHEN[planStufe(id, "h")]  || PLAN_HOEHEN[1];
+      k.style.gridColumn = "span " + b;
+      k.style.gridRow = "span " + h;
+      k.style.height = "auto";
+      k.style.minHeight = "0";
+    });
+  }
+
+  planAnwenden();
+  /* Dreht jemand das iPad, wechselt die Breite und damit die Frage,
+     ob die Anordnung ueberhaupt gilt. */
+  matchMedia(PLAN_BEDINGUNG).addEventListener("change", planAnwenden);
+
 })();
