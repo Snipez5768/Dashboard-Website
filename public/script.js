@@ -3228,19 +3228,24 @@
      mit: bei drei Kacheln nebeneinander liegen zwei Luecken von je
      zwoelf Pixeln dazwischen, also acht je Kachel. */
   const ORD_BREITEN = [
-    { wort: "1/3", wert: "calc(33.333% - 8px)" },
-    { wort: "1/2", wert: "calc(50% - 6px)" },
-    { wort: "2/3", wert: "calc(66.667% - 4px)" },
-    { wort: "1/1", wert: "100%" }
+    { wort: "1/3", felder: 2 },
+    { wort: "1/2", felder: 3 },
+    { wort: "2/3", felder: 4 },
+    { wort: "1/1", felder: 6 }
   ];
   /* Die Hoehen in Pixeln, nicht in Anteilen: eine Kachel mit einer
      Zahl darin braucht dieselbe Hoehe, ob sie ein Drittel oder die
      ganze Breite hat. */
+  /* 5, 8, 10 und 13 Zeilen ergeben 108, 180, 228 und 300 Pixel.
+     Die Zahlen sind so gewaehlt, dass Stapel aufgehen: zwei S
+     uebereinander sind genau ein L, S und M zusammen ein XL. Damit
+     schliessen zwei niedrige Kacheln buendig mit der hohen daneben
+     ab, statt eine Luecke zu lassen. */
   const ORD_HOEHEN = [
-    { wort: "S", wert: 108 },
-    { wort: "M", wert: 168 },
-    { wort: "L", wert: 258 },
-    { wort: "XL", wert: 348 }
+    { wort: "S",  felder: 5 },
+    { wort: "M",  felder: 8 },
+    { wort: "L",  felder: 10 },
+    { wort: "XL", felder: 13 }
   ];
 
   /* Womit eine Kachel anfaengt, wenn nichts eingestellt wurde */
@@ -3251,8 +3256,8 @@
     "card-timer":       { b: 1, h: 0 },
     "card-habits":      { b: 1, h: 3 },
     "card-naechste":    { b: 3, h: 3 },
-    "card-tagesplan":   { b: 1, h: 2 },
-    "card-schule":      { b: 1, h: 2 },
+    "card-tagesplan":   { b: 1, h: 1 },
+    "card-schule":      { b: 1, h: 1 },
     "card-wetter":      { b: 1, h: 0 },
     "card-wetter2":     { b: 1, h: 2 }
   };
@@ -3305,6 +3310,8 @@
         k.style.removeProperty("max-width");
         k.style.removeProperty("min-height");
         k.style.removeProperty("height");
+        k.style.removeProperty("grid-column");
+        k.style.removeProperty("grid-row");
         k.style.removeProperty("display");
         return;
       }
@@ -3319,10 +3326,10 @@
 
       const b = ORD_BREITEN[ordStufe(id, "b")] || ORD_BREITEN[1];
       const h = ORD_HOEHEN[ordStufe(id, "h")]  || ORD_HOEHEN[1];
-      k.style.flex = "0 0 " + b.wert;
-      k.style.maxWidth = b.wert;
-      k.style.minHeight = h.wert + "px";
+      k.style.gridColumn = "span " + b.felder;
+      k.style.gridRow = "span " + h.felder;
       k.style.height = "auto";
+      k.style.minHeight = "0";
     });
 
     /* Der Knopf steht nur da, wo er etwas bewirkt */

@@ -3073,3 +3073,71 @@ body.ordnet #seite-dashboard .card { overflow: hidden; }
   #seite-dashboard #card-naechste,
   #seite-dashboard #card-tagesplan { align-self: flex-start; }
 }
+
+/* ----------------------------------------------------------
+   DAS TABLET WIRD WIEDER EIN RASTER — ABER EIN FEINES
+
+   Im Flexkasten blieb unter einer kurzen Kachel Luft stehen, bis
+   die ganze Reihe umbrach: standen Klausur und Kalorien oben und
+   darunter Termine und Schule, klaffte dazwischen eine Luecke.
+
+   Sechs Spalten decken die vier Breiten ab (2, 3, 4, 6 Felder),
+   die Zeilen sind zwoelf Pixel hoch. Bei zwoelf Pixeln Abstand
+   ergibt eine Spanne von n Zeilen genau 24n-12 Pixel — die vier
+   Hoehen sind 5, 8, 11 und 15 Zeilen, also 108, 180, 252 und 348.
+
+   "dense" laesst eine spaetere Kachel in eine frueher entstandene
+   Luecke rutschen, statt sie stehen zu lassen. Genau das war
+   gewuenscht: die Kacheln schliessen oben buendig ab.
+   ---------------------------------------------------------- */
+@media (min-width: 700px) and (max-width: 1250px),
+       (min-width: 700px) and (max-width: 1400px) and (pointer: coarse) {
+  #seite-dashboard .widget-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-rows: none;
+    grid-auto-rows: 12px;
+    grid-auto-flow: row dense;
+    align-items: stretch;
+    gap: 12px;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    padding: 4px 4px 24px;
+  }
+
+  /* Die Kacheln bekommen ihre Spanne von der Ordnen-Funktion.
+     Was hier steht, gilt nur, solange sie noch nichts gesetzt hat. */
+  /* Timer und Tagesplan stapeln sich neben den Habits: 5 und 8
+     Zeilen sind zusammen genau die 13 der Habits, und der Abstand
+     dazwischen steckt schon in der Zeilenrechnung. Sie schliessen
+     unten buendig ab. */
+  #seite-dashboard #card-klausur     { grid-column: span 6; grid-row: span 8;  }
+  #seite-dashboard #card-screentime2 { grid-column: span 3; grid-row: span 5;  }
+  #seite-dashboard #card-kalorien    { grid-column: span 3; grid-row: span 5;  }
+  #seite-dashboard #card-timer       { grid-column: span 3; grid-row: span 5;  }
+  #seite-dashboard #card-habits      { grid-column: span 3; grid-row: span 13; }
+  #seite-dashboard #card-tagesplan   { grid-column: span 3; grid-row: span 8;  }
+  #seite-dashboard #card-naechste    { grid-column: span 6; grid-row: span 13; }
+  #seite-dashboard #card-schule      { grid-column: span 3; grid-row: span 8;  }
+  #seite-dashboard #card-wetter      { grid-column: span 3; grid-row: span 5;  }
+  #seite-dashboard #card-wetter2     { grid-column: span 3; grid-row: span 10; }
+
+  /* Im Raster fuellt jede Kachel ihr Feld — die Hoehe kommt aus
+     der Spanne, nicht aus dem Inhalt. */
+  #seite-dashboard #card-wetter,
+  #seite-dashboard #card-wetter2,
+  #seite-dashboard #card-screentime2,
+  #seite-dashboard #card-kalorien,
+  #seite-dashboard #card-timer,
+  #seite-dashboard #card-klausur,
+  #seite-dashboard #card-habits,
+  #seite-dashboard #card-schule,
+  #seite-dashboard #card-naechste,
+  #seite-dashboard #card-tagesplan {
+    align-self: stretch;
+    height: auto;
+    min-height: 0;
+    max-width: none;
+  }
+}
