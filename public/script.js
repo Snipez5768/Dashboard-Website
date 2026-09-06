@@ -14325,4 +14325,197 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
     return true;
   };
 
+
+  /* ==========================================================
+     DIE BOGENLEISTE — nur auf dem Tablet, und nur auf Wunsch
+
+     Statt der Seitenleiste eine Reihe am unteren Rand, auf einem
+     flachen Bogen: die Seiten kommen links unten aus dem Bild,
+     laufen durch die Mitte und verschwinden rechts wieder. Was in
+     der Mitte steht, ist die Seite, auf der man ist.
+
+     Ziehen dreht den Bogen. Beim Loslassen rastet er auf den
+     naechsten Eintrag ein — dazwischen stehenzubleiben waere kein
+     Zustand, den die App kennt.
+
+     Alles haengt an data-leiste="bogen" am Wurzelelement. Ohne das
+     Attribut gibt es die Leiste nicht und die Seitenleiste steht,
+     wo sie stand.
+     ========================================================== */
+  const BOGEN_R = 1500;       /* Radius in Pixeln — je groesser, desto flacher */
+  const BOGEN_SCHRITT = 4;    /* Grad zwischen zwei Eintraegen */
+  const BOGEN_SICHT = 4.4;    /* so weit reicht die Reihe zur Seite hin */
+
+  let bogenSeiten = [], bogenPos = 0, bogenZieht = null;
+
+  /* Dieselbe Bedingung wie fuer die Tablet-Aufteilung */
+  const BOGEN_BEDINGUNG =
+    "(min-width: 700px) and (max-width: 1250px)," +
+    "(min-width: 700px) and (max-width: 1400px) and (pointer: coarse)";
+
+  function bogenAn() {
+    return document.documentElement.getAttribute("data-leiste") === "bogen"
+        && matchMedia(BOGEN_BEDINGUNG).matches;
+  }
+
+  /* Die Eintraege kommen aus der Seitenleiste — so bleiben beide
+     gleich, ohne dass man die Liste zweimal pflegt. */
+  function bogenBauen() {
+    const leiste = $("bogenLeiste");
+    if (!leiste) return;
+    const bahn = leiste.querySelector(".bg-bahn");
+    bahn.innerHTML = "";
+    bogenSeiten = [];
+
+    document.querySelectorAll(".sidebar .nav-link[data-seite]").forEach(a => {
+      const knopf = document.createElement("button");
+      knopf.type = "button";
+      knopf.className = "bg-seite";
+      knopf.dataset.seite = a.dataset.seite;
+      const svg = a.querySelector("svg");
+      const name = a.querySelector("span");
+      knopf.innerHTML =
+        '<span class="bg-mal">' + (svg ? svg.outerHTML : "") + "</span>" +
+        '<span class="bg-name">' + (name ? name.textContent : "") + "</span>";
+      bahn.appendChild(knopf);
+      bogenSeiten.push(knopf);
+    });
+
+    bogenZuSeite(aktuelleSeite);
+  }
+
+  /* Jeder Eintrag sitzt auf dem Kreis: x aus dem Sinus, y aus dem
+     Kosinus. Der Mittelpunkt liegt weit unterhalb des Bildrands,
+     deshalb wirkt der Bogen flach. */
+  function bogenZeichnen() {
+    bogenSeiten.forEach((el, i) => {
+      const grad = (i - bogenPos) * BOGEN_SCHRITT;
+      const bog = (grad * Math.PI) / 180;
+      const x = BOGEN_R * Math.sin(bog);
+      const y = BOGEN_R * (1 - Math.cos(bog));
+      el.style.transform =
+        "translate(-50%, 0) translate(" + x.toFixed(1) + "px, " + y.toFixed(1) + "px) " +
+        "rotate(" + grad.toFixed(2) + "deg)";
+
+      /* Was weit weg ist, tritt zurueck — sonst steht am Rand ein
+         Gedraenge, das niemand liest. Gemessen wird in Eintraegen und
+         nicht in Grad, damit das Verblassen gleich bleibt, wenn man
+         am Radius dreht. */
+      const weite = Math.abs(i - bogenPos);
+      const fort = weite > BOGEN_SICHT;
+      el.style.opacity = fort ? "0" : String(Math.max(0.3, 1 - weite / (BOGEN_SICHT + 0.6)));
+      el.classList.toggle("mitte", weite < 0.5);
+      el.style.pointerEvents = fort ? "none" : "auto";
+    });
+  }
+
+  function bogenZuSeite(seite) {
+    const i = bogenSeiten.findIndex(el => el.dataset.seite === seite);
+    if (i >= 0) { bogenPos = i; bogenZeichnen(); }
+  }
+
+  /* Wechselt die Seite auf anderem Weg — ueber eine Kachel, die
+     Suche oder den Zurueck-Knopf —, dreht sich der Bogen mit. Ueber
+     die Adresse zu gehen ist der sicherste Weg: jeder Wechsel
+     schreibt sie, ganz gleich, wer ihn ausgeloest hat. */
+  window.addEventListener("hashchange", () => {
+    if (!bogenZieht) bogenZuSeite(String(location.hash || "").slice(2));
+  });
+
+  /* ---------- Ziehen ---------- */
+  (function bogenBinden() {
+    const leiste = $("bogenLeiste");
+    if (!leiste) return;
+
+    const bahn = leiste.querySelector(".bg-bahn");
+
+    leiste.addEventListener("pointerdown", ev => {
+      if (!bogenAn()) return;
+      const auf = ev.target.closest && ev.target.closest(".bg-seite");
+      bogenZieht = { x: ev.clientX, start: bogenPos, bewegt: false, auf: auf };
+      bahn.classList.add("zieht");
+      /* Der Fang haelt den Zeiger bei der Leiste, auch wenn der
+         Finger darueber hinauswandert. Klappt er nicht, zieht man
+         eben ohne — kein Grund, hier abzubrechen. */
+      try { leiste.setPointerCapture(ev.pointerId); } catch (f) {}
+    });
+
+    leiste.addEventListener("pointermove", ev => {
+      if (!bogenZieht) return;
+      const weg = ev.clientX - bogenZieht.x;
+      if (Math.abs(weg) > 4) bogenZieht.bewegt = true;
+      /* Ein Bogenmass auf dem Kreis entspricht dem Ziehweg geteilt
+         durch den Radius — daraus wird der Winkel und daraus die
+         Zahl der Eintraege. */
+      const grad = (weg / BOGEN_R) * (180 / Math.PI);
+      bogenPos = bogenZieht.start - grad / BOGEN_SCHRITT;
+      bogenPos = Math.max(-0.6, Math.min(bogenSeiten.length - 0.4, bogenPos));
+      bogenZeichnen();
+    });
+
+    const loslassen = () => {
+      if (!bogenZieht) return;
+      const gezogen = bogenZieht.bewegt;
+      const auf = bogenZieht.auf;
+      bogenZieht = null;
+      bahn.classList.remove("zieht");
+
+      /* Kein Weg zurueckgelegt: das war ein Tipp. Wer daneben
+         tippt, soll nichts ausloesen. */
+      if (!gezogen) {
+        if (auf && auf.dataset.seite !== aktuelleSeite) {
+          bogenZuSeite(auf.dataset.seite);
+          seiteZeigen(auf.dataset.seite);
+        }
+        return;
+      }
+
+      /* Einrasten und die Seite wechseln */
+      const ziel = Math.max(0, Math.min(bogenSeiten.length - 1, Math.round(bogenPos)));
+      bogenPos = ziel;
+      bogenZeichnen();
+      const seite = bogenSeiten[ziel] && bogenSeiten[ziel].dataset.seite;
+      if (seite && seite !== aktuelleSeite) seiteZeigen(seite);
+    };
+    leiste.addEventListener("pointerup", loslassen);
+    leiste.addEventListener("pointercancel", loslassen);
+
+    /* Am Rechner kann man auch mit dem Rad blaettern */
+    leiste.addEventListener("wheel", ev => {
+      if (!bogenAn()) return;
+      ev.preventDefault();
+      const ziel = Math.max(0, Math.min(bogenSeiten.length - 1,
+        bogenPos + (ev.deltaY > 0 ? 1 : -1)));
+      if (ziel === bogenPos) return;
+      bogenPos = ziel;
+      bogenZeichnen();
+      const seite = bogenSeiten[ziel] && bogenSeiten[ziel].dataset.seite;
+      if (seite) seiteZeigen(seite);
+    }, { passive: false });
+  })();
+
+  /* ---------- Der Schalter ---------- */
+  function bogenWahl() {
+    return localStorage.getItem("lifeos_leiste") === "bogen" ? "bogen" : "seite";
+  }
+  function bogenSetzen(wert) {
+    if (wert === "bogen") document.documentElement.setAttribute("data-leiste", "bogen");
+    else                  document.documentElement.removeAttribute("data-leiste");
+    try { localStorage.setItem("lifeos_leiste", wert); } catch (f) {}
+    const w = $("leisteWahl");
+    if (w) w.querySelectorAll("button[data-leiste]").forEach(k =>
+      k.classList.toggle("active", k.dataset.leiste === wert));
+    if (wert === "bogen") { bogenBauen(); }
+  }
+
+  (function leisteBinden() {
+    const w = $("leisteWahl");
+    if (!w) return;
+    w.addEventListener("click", e => {
+      const k = e.target.closest("button[data-leiste]");
+      if (k) bogenSetzen(k.dataset.leiste);
+    });
+    bogenSetzen(bogenWahl());
+  })();
+
 })();

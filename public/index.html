@@ -1017,6 +1017,15 @@
   </div>
 </div>
 
+<!-- ============ BOGENLEISTE ============
+     Statt der Seitenleiste eine Reihe am unteren Rand, auf einem
+     flachen Bogen. Die Eintraege setzt das Skript aus der
+     Seitenleiste zusammen — so bleiben beide gleich, ohne dass
+     man die Liste zweimal pflegt. -->
+<div class="bogen-leiste" id="bogenLeiste" aria-label="Seiten">
+  <div class="bg-bahn"></div>
+</div>
+
 <div class="chart-tooltip" id="chartTooltip" role="tooltip"></div>
 <div class="kat-tipp" id="katTipp" role="tooltip" aria-hidden="true"></div>
 
@@ -1398,6 +1407,16 @@
           <p class="kop-hinweis">Zum Ausprobieren: die Kacheln werden durchscheinend und
             verwischen, was hinter ihnen liegt. Gefällt es nicht, steht hier wieder Aus —
             sonst ändert sich nichts.</p>
+
+          <!-- Auch ein Versuch auf Widerruf, und nur auf dem Tablet -->
+          <h3 class="kop-unter" style="margin-top:18px">Seitenwechsel</h3>
+          <div class="seg-toggle thema-wahl" id="leisteWahl" role="group" aria-label="Seitenwechsel">
+            <button type="button" data-leiste="seite">Leiste links</button>
+            <button type="button" data-leiste="bogen">Bogen unten</button>
+          </div>
+          <p class="kop-hinweis">Auf dem Tablet: statt der Leiste links eine Reihe am
+            unteren Rand, auf einem flachen Bogen. Ziehen wechselt die Seite, in der
+            Mitte steht die, auf der du bist. Am Rechner ändert sich nichts.</p>
         </div>
 
         <div class="kop-abschnitt">

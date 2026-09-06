@@ -18,7 +18,7 @@
 /* Bei jeder Aenderung hochzaehlen: der Browser tauscht den Worker
    nur aus, wenn sich seine Datei unterscheidet, und ein neuer Name
    raeumt zugleich die alte Kopie weg. */
-const LAGER = "lifeos-v9";
+const LAGER = "lifeos-v10";
 
 /* So lange wird auf den Server gewartet, bevor die Kopie einspringt */
 const NETZ_FRIST = 2000;
