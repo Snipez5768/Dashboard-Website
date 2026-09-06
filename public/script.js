@@ -11890,21 +11890,283 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
       <div class="kennzahl"><div class="kz-label">Schnitt (14 Tage)</div><div class="kz-wert">${schnitt || "—"}</div>
         <div class="kz-zusatz">${mitWerten.length} Tage erfasst</div></div>`;
 
-    const liste = $("pgKalTage");
-    liste.innerHTML = "";
-    const max = Math.max(1, ziel, ...tage.map(t => t.wert));
-    [...tage].reverse().forEach(t => {
-      const ueber = ziel > 0 && t.wert > ziel;
-      liste.appendChild(zeile(
-        `<span class="vz-punkt ${t.wert ? (ueber ? "" : "erledigt") : ""}"></span>
-         <div class="vz-haupt">
-           <div class="vz-titel">${t.tag}, ${fmtDate(t.key)}</div>
-           <div class="vz-sub">${t.wert ? (ziel ? Math.round(t.wert / ziel * 100) + " % vom Ziel" : "erfasst") : "nichts getrackt"}</div>
-         </div>
-         <div class="bt-spur" style="max-width:200px"><div class="bt-fuellung" style="width:${Math.round(t.wert / max * 100)}%"></div></div>
-         <span class="vz-wert">${t.wert || "—"}</span>`, ueber ? "bald" : ""));
+    /* Die Liste der letzten vierzehn Tage steht nicht mehr auf der
+       Seite — an ihrer Stelle sind die Rezepte. Der Schnitt aus
+       diesen Tagen bleibt als Kennzahl oben stehen, dafuer wird
+       oberhalb weiter gerechnet. */
+  }
+
+
+  /* ==========================================================
+     REZEPTE
+
+     Anlegen, Zutaten und Schritte eintragen, dann Schritt fuer
+     Schritt kochen. Beim Kochen fuellt ein Schritt den Schirm: man
+     hat die Haende voll und schaut nur kurz hin — da hilft keine
+     Liste, sondern ein grosser Satz und ein Knopf.
+
+     Am Ende wandern die Kalorien in den Tag, ohne dass man sie noch
+     einmal tippt. Das ist der Grund, warum die Rezepte auf dieser
+     Seite stehen und nicht auf einer eigenen.
+     ========================================================== */
+  let rezepte = store.get("lifeos_rezepte", []);
+  if (!Array.isArray(rezepte)) rezepte = [];
+  let rezeptOffen = null;      /* id des aufgeklappten Rezepts */
+
+  function rezepteSichern() { store.set("lifeos_rezepte", rezepte); }
+  function rezeptVon(id) { return rezepte.find(r => r && r.id === id) || null; }
+
+  function renderRezepte() {
+    const liste = $("rezeptListe");
+    const zahl = $("rezeptZahl");
+    if (!liste) return;
+
+    if (zahl) zahl.textContent = String(rezepte.length);
+
+    if (!rezepte.length) {
+      liste.innerHTML = '<li class="muted-line">Noch kein Rezept angelegt</li>';
+    } else {
+      liste.innerHTML = rezepte.map(r => {
+        const schritte = (r.schritte || []).length;
+        const zutaten = (r.zutaten || []).length;
+        const teile = [];
+        if (zutaten)  teile.push(zutaten + (zutaten === 1 ? " Zutat" : " Zutaten"));
+        if (schritte) teile.push(schritte + (schritte === 1 ? " Schritt" : " Schritte"));
+        if (r.kcal)   teile.push(r.kcal + " kcal");
+        return `
+          <li class="voll-zeile rezept-zeile${rezeptOffen === r.id ? " offen" : ""}" data-rezept="${r.id}">
+            <div class="vz-haupt">
+              <div class="vz-titel">${escapeHTML(r.name || "Ohne Namen")}</div>
+              <div class="vz-sub">${teile.length ? escapeHTML(teile.join(" · ")) : "noch nichts eingetragen"}</div>
+            </div>
+            <button type="button" class="rz-start" data-kochen="${r.id}"
+              ${schritte ? "" : "disabled title='Erst Schritte eintragen'"}>Kochen</button>
+          </li>`;
+      }).join("");
+    }
+
+    liste.querySelectorAll("[data-rezept]").forEach(el => {
+      el.addEventListener("click", ev => {
+        if (ev.target.closest("[data-kochen]")) return;   /* der Knopf kocht */
+        rezeptOeffnen(el.dataset.rezept);
+      });
+    });
+    liste.querySelectorAll("[data-kochen]").forEach(el => {
+      el.addEventListener("click", () => kochenStarten(el.dataset.kochen));
     });
   }
+
+  /* ---------- Ein Rezept bearbeiten ---------- */
+  function rezeptOeffnen(id) {
+    const r = rezeptVon(id);
+    const kasten = $("rezeptDetail");
+    if (!kasten) return;
+
+    /* Noch einmal auf dasselbe: wieder zu. */
+    if (rezeptOffen === id) { rezeptSchliessen(); return; }
+
+    rezeptOffen = id;
+    kasten.hidden = false;
+    $("rezeptDetailName").textContent = r ? (r.name || "Rezept") : "Rezept";
+    $("rezeptKcal").value = r && r.kcal ? r.kcal : "";
+    $("rezeptPortionen").value = r && r.portionen ? r.portionen : "";
+    rezeptTeileZeichnen();
+    renderRezepte();
+    kasten.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  function rezeptSchliessen() {
+    rezeptOffen = null;
+    const kasten = $("rezeptDetail");
+    if (kasten) kasten.hidden = true;
+    renderRezepte();
+  }
+
+  /* Zutaten und Schritte stehen nebeneinander und werden gleich
+     behandelt — dieselbe Funktion zeichnet beide. */
+  function rezeptTeileZeichnen() {
+    const r = rezeptVon(rezeptOffen);
+    if (!r) return;
+
+    const male = (ziel, feld, leer) => {
+      const el = $(ziel);
+      if (!el) return;
+      const werte = r[feld] || [];
+      if (!werte.length) { el.innerHTML = `<li class="muted-line">${leer}</li>`; return; }
+      el.innerHTML = werte.map((wert, i) => `
+        <li class="rz-eintrag">
+          <span class="rz-text">${escapeHTML(wert)}</span>
+          <button type="button" class="rz-weg" data-feld="${feld}" data-nr="${i}"
+            aria-label="Entfernen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
+        </li>`).join("");
+      el.querySelectorAll(".rz-weg").forEach(k => {
+        k.addEventListener("click", () => {
+          r[k.dataset.feld].splice(Number(k.dataset.nr), 1);
+          rezepteSichern();
+          rezeptTeileZeichnen();
+          renderRezepte();
+        });
+      });
+    };
+
+    male("rezeptZutaten", "zutaten", "Noch keine Zutat");
+    male("rezeptSchritte", "schritte", "Noch kein Schritt");
+  }
+
+  /* ---------- Kochen ---------- */
+  let kochRezept = null, kochNr = 0;
+
+  function kochenStarten(id) {
+    const r = rezeptVon(id);
+    if (!r || !(r.schritte || []).length) return;
+    kochRezept = r;
+    kochNr = 0;
+    const schirm = $("kochSchirm");
+    if (!schirm) return;
+    schirm.hidden = false;
+    document.body.classList.add("koch-laeuft");
+    kochZeichnen();
+  }
+
+  function kochBeenden() {
+    kochRezept = null;
+    const schirm = $("kochSchirm");
+    if (schirm) schirm.hidden = true;
+    document.body.classList.remove("koch-laeuft");
+  }
+
+  function kochZeichnen() {
+    if (!kochRezept) return;
+    const schritte = kochRezept.schritte || [];
+    const letzter = kochNr >= schritte.length - 1;
+
+    $("kochName").textContent = kochRezept.name || "Rezept";
+    $("kochText").textContent = schritte[kochNr] || "";
+    $("kochZahl").textContent = "Schritt " + (kochNr + 1) + " von " + schritte.length;
+    $("kochFuellung").style.width =
+      Math.round(((kochNr + 1) / schritte.length) * 100) + "%";
+
+    $("kochZurueck").disabled = kochNr === 0;
+    /* Der letzte Schritt fuehrt nicht weiter, sondern schliesst ab —
+       und traegt dabei gleich die Kalorien ein. */
+    $("kochWeiter").textContent = letzter
+      ? (kochRezept.kcal ? "Fertig · " + kochRezept.kcal + " kcal eintragen" : "Fertig")
+      : "Weiter";
+
+    /* Die Zutaten stehen nur beim ersten Schritt — danach hat man
+       sie beisammen und braucht den Platz fuer den Text. */
+    const kasten = $("kochZutaten");
+    const zutaten = kochRezept.zutaten || [];
+    if (kasten) {
+      kasten.hidden = kochNr !== 0 || !zutaten.length;
+      if (!kasten.hidden) {
+        $("kochZutatenListe").innerHTML =
+          zutaten.map(z => `<li>${escapeHTML(z)}</li>`).join("");
+      }
+    }
+  }
+
+  function kochWeiter() {
+    if (!kochRezept) return;
+    const schritte = kochRezept.schritte || [];
+    if (kochNr < schritte.length - 1) { kochNr++; kochZeichnen(); return; }
+
+    /* Fertig: die Kalorien des Rezepts kommen zum heutigen Stand
+       dazu, statt ihn zu ersetzen — es kann ja noch etwas anderes
+       gegessen worden sein. */
+    const kcal = Number(kochRezept.kcal) || 0;
+    if (kcal > 0) {
+      setCaloriesConsumed((kalorien.consumed || 0) + kcal);
+      spaet(() => kalorienMerken(), null);
+      /* setCaloriesConsumed zeichnet das Widget neu, nicht die Seite —
+         die steht daneben und zeigte sonst weiter den alten Stand. */
+      spaet(() => baueKalorien(), null);
+      spaet(() => showToast(kcal + " kcal eingetragen.", "success"), null);
+    }
+    kochBeenden();
+  }
+
+  /* ---------- Die Bedienung ---------- */
+  (function rezepteBinden() {
+    const form = $("rezeptForm");
+    if (!form) return;
+
+    form.addEventListener("submit", e => {
+      e.preventDefault();
+      const name = $("rezeptName").value.trim();
+      if (!name) return;
+      const id = "rz" + Date.now().toString(36);
+      rezepte.push({ id, name, kcal: 0, portionen: 1, zutaten: [], schritte: [] });
+      rezepteSichern();
+      $("rezeptName").value = "";
+      rezeptOeffnen(id);
+    });
+
+    /* Zutat und Schritt laufen ueber dieselbe Mechanik */
+    [["zutatForm", "zutatText", "zutaten"],
+     ["schrittForm", "schrittText", "schritte"]].forEach(([f, feld, ziel]) => {
+      const el = $(f);
+      if (!el) return;
+      el.addEventListener("submit", e => {
+        e.preventDefault();
+        const r = rezeptVon(rezeptOffen);
+        const wert = $(feld).value.trim();
+        if (!r || !wert) return;
+        if (!Array.isArray(r[ziel])) r[ziel] = [];
+        r[ziel].push(wert);
+        rezepteSichern();
+        $(feld).value = "";
+        rezeptTeileZeichnen();
+        renderRezepte();
+      });
+    });
+
+    /* Kalorien und Portionen werden beim Tippen gemerkt */
+    [["rezeptKcal", "kcal"], ["rezeptPortionen", "portionen"]].forEach(([f, feld]) => {
+      const el = $(f);
+      if (!el) return;
+      el.addEventListener("input", () => {
+        const r = rezeptVon(rezeptOffen);
+        if (!r) return;
+        r[feld] = Math.max(0, Number(el.value) || 0);
+        rezepteSichern();
+        renderRezepte();
+      });
+    });
+
+    $("rezeptZu").addEventListener("click", rezeptSchliessen);
+
+    $("rezeptKochen").addEventListener("click", () => {
+      if (rezeptOffen) kochenStarten(rezeptOffen);
+    });
+
+    $("rezeptLoeschen").addEventListener("click", () => {
+      const r = rezeptVon(rezeptOffen);
+      if (!r) return;
+      rezepte = rezepte.filter(x => x.id !== r.id);
+      rezepteSichern();
+      rezeptSchliessen();
+    });
+
+    $("kochZu").addEventListener("click", kochBeenden);
+    $("kochWeiter").addEventListener("click", kochWeiter);
+    $("kochZurueck").addEventListener("click", () => {
+      if (kochNr > 0) { kochNr--; kochZeichnen(); }
+    });
+
+    /* Beim Kochen liegt das Telefon auf der Arbeitsplatte — die
+       Pfeiltasten sind fuer den Rechner gedacht. */
+    document.addEventListener("keydown", e => {
+      if (!kochRezept) return;
+      if (e.key === "Escape")      { kochBeenden(); }
+      else if (e.key === "ArrowRight") { kochWeiter(); }
+      else if (e.key === "ArrowLeft" && kochNr > 0) { kochNr--; kochZeichnen(); }
+    });
+
+    renderRezepte();
+  })();
 
   $("kalForm").addEventListener("submit", e => {
     e.preventDefault();
@@ -14020,6 +14282,11 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
                                 } },
     lifeos_kalorien:     w => { kalorien = w;   renderCalories(); renderVorschlag(true); },
     lifeos_kalorien_verlauf: w => { kalVerlauf = w; },
+    /* Ohne diesen Eintrag kommen die Rezepte zwar vom Server an,
+       landen aber nirgends: die Liste blieb leer, obwohl gespeichert
+       war. */
+    lifeos_rezepte:      w => { rezepte = Array.isArray(w) ? w : [];
+                                spaet(() => renderRezepte(), null); },
     lifeos_screentime:   w => { screentime = w; renderScreenTime(); },
     lifeos_projekte:     w => { projekte = w;   bereichZeichnen(BEREICHE.projekt); },
     lifeos_planung:      w => { planung = w;    bereichZeichnen(BEREICHE.planung); },

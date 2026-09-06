@@ -219,7 +219,7 @@
           </a></li>
           <li><a href="#/kalorien" class="nav-link" data-seite="kalorien">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2c1.1 3.2-2.1 4.2-2.1 7.6a4.1 4.1 0 0 0 8.2 0c0-1.3-.6-2.4-1.1-2.5.3 2.4-1 3.5-2.2 3.5-1.6 0-2.2-1.5-1.1-3.5.9-1.7.5-3.7-1.7-5.1Z"/><path d="M8.3 14.4a3.7 3.7 0 0 0 7.4 0"/></svg>
-            <span>Kalorien</span>
+            <span>Kalorien &amp; Rezepte</span>
           </a></li>
           <li><a href="#/bildschirmzeit" class="nav-link" data-seite="bildschirmzeit">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.8" y="4" width="18.4" height="12.5" rx="2.2"/><path d="M9 20.5h6M12 16.5v4"/></svg>
@@ -669,7 +669,7 @@
       <!-- ============ SEITE: KALORIEN ============ -->
       <section class="seite" id="seite-kalorien">
         <div class="seiten-kopf">
-          <h2 class="seiten-titel">Kalorien</h2>
+          <h2 class="seiten-titel">Kalorien &amp; Rezepte</h2>
           <span class="seiten-sub" id="kalorienSub">&#8212;</span>
         </div>
         <div class="block">
@@ -705,9 +705,66 @@
             </div>
           </div>
         </div>
+        <!-- ============ REZEPTE ============
+             Anlegen, Zutaten und Schritte eintragen, dann Schritt
+             fuer Schritt kochen. Am Ende wandern die Kalorien in
+             den Tag, ohne dass man sie noch einmal tippt. -->
         <div class="block">
-          <div class="block-kopf"><h3>Die letzten 14 Tage</h3></div>
-          <ul class="voll-liste" id="pgKalTage"></ul>
+          <div class="block-kopf">
+            <h3>Rezepte</h3>
+            <span class="block-zahl" id="rezeptZahl">0</span>
+          </div>
+          <div class="block-unter">Schritt f&#252;r Schritt kochen &#8212; die Kalorien wandern danach in den Tag.</div>
+          <form class="zeilen-form" id="rezeptForm" autocomplete="off">
+            <input class="zeilen-input" id="rezeptName" type="text" placeholder="Neues Rezept &#8230;" maxlength="80">
+            <button class="zeilen-btn" type="submit">Anlegen</button>
+          </form>
+          <ul class="voll-liste rezept-liste" id="rezeptListe"></ul>
+        </div>
+
+        <!-- Die Bearbeitung eines Rezepts -->
+        <div class="block" id="rezeptDetail" hidden>
+          <div class="block-kopf">
+            <h3 id="rezeptDetailName">Rezept</h3>
+            <button type="button" class="rz-zu" id="rezeptZu" aria-label="Schlie&#223;en">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+            </button>
+          </div>
+
+          <div class="rz-felder">
+            <label class="rz-feld">
+              <span>Kalorien je Portion</span>
+              <input class="zeilen-input" id="rezeptKcal" type="number" min="0" step="10" placeholder="z.B. 620">
+            </label>
+            <label class="rz-feld">
+              <span>Portionen</span>
+              <input class="zeilen-input" id="rezeptPortionen" type="number" min="1" step="1" placeholder="1">
+            </label>
+          </div>
+
+          <div class="rz-spalten">
+            <div class="rz-spalte">
+              <div class="rz-unter">Zutaten</div>
+              <ul class="rz-liste" id="rezeptZutaten"></ul>
+              <form class="zeilen-form" id="zutatForm" autocomplete="off">
+                <input class="zeilen-input" id="zutatText" type="text" placeholder="Zutat hinzuf&#252;gen &#8230;" maxlength="120">
+                <button class="zeilen-btn" type="submit">+</button>
+              </form>
+            </div>
+            <div class="rz-spalte">
+              <div class="rz-unter">Schritte</div>
+              <ol class="rz-liste rz-schritte" id="rezeptSchritte"></ol>
+              <form class="zeilen-form" id="schrittForm" autocomplete="off">
+                <input class="zeilen-input" id="schrittText" type="text" placeholder="Schritt hinzuf&#252;gen &#8230;" maxlength="240">
+                <button class="zeilen-btn" type="submit">+</button>
+              </form>
+            </div>
+          </div>
+
+          <div class="rz-fuss">
+            <button type="button" class="rz-kochen" id="rezeptKochen">Kochen</button>
+            <button type="button" class="rz-loeschen" id="rezeptLoeschen">Rezept l&#246;schen</button>
+          </div>
         </div>
       </section>
 
@@ -929,6 +986,36 @@
 </div>
 
 <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+<!-- ============ KOCHEN ============
+     Ein Schritt fuellt den Schirm. Beim Kochen hat man die Haende
+     voll und schaut nur kurz hin — da hilft keine Liste, sondern
+     ein grosser Satz und ein Knopf. -->
+<div class="koch-schirm" id="kochSchirm" hidden>
+  <div class="koch-kopf">
+    <div class="koch-name" id="kochName">Rezept</div>
+    <button type="button" class="koch-zu" id="kochZu" aria-label="Kochen beenden">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+
+  <div class="koch-spur"><i id="kochFuellung"></i></div>
+  <div class="koch-zahl" id="kochZahl">Schritt 1 von 1</div>
+
+  <div class="koch-mitte">
+    <p class="koch-text" id="kochText">&#8212;</p>
+  </div>
+
+  <div class="koch-zutaten" id="kochZutaten" hidden>
+    <div class="koch-zutaten-kopf">Zutaten</div>
+    <ul id="kochZutatenListe"></ul>
+  </div>
+
+  <div class="koch-fuss">
+    <button type="button" class="koch-knopf zurueck" id="kochZurueck">Zur&#252;ck</button>
+    <button type="button" class="koch-knopf weiter" id="kochWeiter">Weiter</button>
+  </div>
+</div>
+
 <div class="chart-tooltip" id="chartTooltip" role="tooltip"></div>
 <div class="kat-tipp" id="katTipp" role="tooltip" aria-hidden="true"></div>
 
