@@ -697,3 +697,35 @@
 }
 #seite-analyse .an-trend.gut     { background: var(--tint-green); color: var(--green-ink); }
 #seite-analyse .an-trend.schlecht{ background: var(--tint-red);   color: var(--red-ink); }
+
+/* ----------------------------------------------------------
+   15  DER RING AUF DER KALORIEN-SEITE
+   Er zeigt dasselbe wie der im Dashboard-Widget und sieht jetzt
+   auch so aus. Der alte Strichring bleibt im Aufbau stehen, damit
+   seine Zeichenfunktion weiterlaeuft — zu sehen ist er nicht mehr.
+   ---------------------------------------------------------- */
+#seite-kalorien .kal-ring-gross { position: relative; }
+#seite-kalorien .cal-gauge { display: none; }
+#seite-kalorien .cal-ring {
+  width: 100%; height: 100%; display: block;
+}
+#seite-kalorien .cal-ring circle { fill: none; stroke-linecap: round; }
+#seite-kalorien .cal-ring-spur   { stroke: color-mix(in srgb, var(--text-muted) 16%, transparent); }
+#seite-kalorien .cal-ring-wert   { transition: stroke-dashoffset .7s cubic-bezier(.32,.72,0,1); }
+#seite-kalorien .cal-center {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 2px; padding-top: 0;
+}
+#seite-kalorien .cal-value {
+  font-family: var(--sans);
+  font-size: clamp(26px, 2.3vw, 38px);
+  font-weight: 700; letter-spacing: -.035em; line-height: 1;
+  font-variant-numeric: tabular-nums;
+  animation: none;
+}
+#seite-kalorien .cal-sub {
+  font-size: clamp(11px, .82vw, 13px);
+  color: var(--text-muted);
+}

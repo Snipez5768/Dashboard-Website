@@ -785,11 +785,13 @@
 
     /* Der glatte Ring der Musterseite. Sein Umfang ist 2·π·40 =
        251,33 — davon bleibt der ungefuellte Teil als Versatz. */
-    const ring = $("calRingWert");
-    if (ring) {
+    /* Derselbe Ring steht auf der Kalorien-Seite — beide zeigen
+       dasselbe, also werden sie zusammen gefuellt. */
+    [$("calRingWert"), $("pgCalRingWert")].forEach(ring => {
+      if (!ring) return;
       ring.style.strokeDashoffset = (251.33 * (1 - pct)).toFixed(1);
       ring.style.stroke = over ? "var(--status-red)" : "var(--accent-active)";
-    }
+    });
 
     /* Die Flamme zaehlt die Tage am Stueck, an denen ueberhaupt
        etwas eingetragen wurde — getrackt zu haben ist das, was
