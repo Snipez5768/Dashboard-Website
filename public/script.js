@@ -1079,13 +1079,16 @@
     dotPc.setAttribute("cx", px); dotPc.setAttribute("cy", stGeometrie.y(p.phone + p.pc));
     $("stChart").classList.add("aktiv");
 
-    chartTooltip.innerHTML =
-      `${p.tooltipLabel}<br>Handy ${formatMinutes(p.phone)} · PC ${formatMinutes(p.pc)}` +
-      `<br>Gesamt ${formatMinutes(p.phone + p.pc)}`;
-    const cx = box.left + px;
-    chartTooltip.style.left = cx + "px";
-    chartTooltip.style.top = (box.top - 10) + "px";
-    chartTooltip.classList.add("visible");
+    /* Dieselbe Darstellung wie in der grossen Statistik */
+    const zeile = (klasse, wort, wert) =>
+      `<div class="ct-zeile"><i class="ct-punkt ${klasse}"></i>` +
+      `<span class="ct-wort">${wort}</span>` +
+      `<span class="ct-wert">${formatMinutes(wert)}</span></div>`;
+    tooltipZeigen(box, px,
+      `<div class="ct-kopf">${escapeHTML(p.tooltipLabel)}</div>` +
+      zeile("phone", "Handy", p.phone) + zeile("pc", "PC", p.pc) +
+      `<div class="ct-zeile gesamt"><span class="ct-wort">Gesamt</span>` +
+      `<span class="ct-wert">${formatMinutes(p.phone + p.pc)}</span></div>`);
   }
 
   function stHoverEnde() {
@@ -5592,6 +5595,24 @@
   }
 
   /* Naechstgelegener Punkt zur Zeigerposition */
+  /* Der Kasten beim Ueberfahren.
+
+     Er sass ueber dem Diagramm und ragte oben heraus — auf dem
+     Dashboard bis in die Kopfzeile der Kachel. Jetzt liegt er
+     innerhalb, mit vierzehn Pixeln Abstand zur Oberkante, und
+     haelt sich seitlich an den Rand, statt herauszulaufen. */
+  function tooltipZeigen(box, px, html) {
+    chartTooltip.innerHTML = html;
+    chartTooltip.classList.add("visible");
+    /* Erst zeigen, dann messen: eine verborgene Box misst null. */
+    const halb = chartTooltip.offsetWidth / 2;
+    const links = Math.min(
+      Math.max(box.left + px, box.left + halb + 6),
+      box.right - halb - 6);
+    chartTooltip.style.left = links + "px";
+    chartTooltip.style.top  = (box.top + 14) + "px";
+  }
+
   let pgGeometrie = null;
 
   function pgHover(ev) {
@@ -5619,14 +5640,20 @@
     $("pgDotPc").setAttribute("cy", pgGeometrie.y(ST_HANDY ? p.phone + p.pc : p.pc));
     $("pgStChart").classList.add("aktiv");
 
-    chartTooltip.innerHTML = `${escapeHTML(p.tip || p.label || "")}<br>`
-      + (ST_HANDY
-          ? `Handy ${formatMinutes(p.phone)} \u00b7 PC ${formatMinutes(p.pc)}`
-            + `<br>Gesamt ${formatMinutes(p.phone + p.pc)}`
-          : `PC ${formatMinutes(p.pc)}`);
-    chartTooltip.style.left = (box.left + px) + "px";
-    chartTooltip.style.top = (box.top - 10) + "px";
-    chartTooltip.classList.add("visible");
+    /* Eine Zeile je Wert, mit dem Punkt der zugehoerigen Kurve —
+       so ist ohne Nachdenken klar, welche Zahl wohin gehoert. */
+    const zeile = (klasse, wort, wert) =>
+      `<div class="ct-zeile"><i class="ct-punkt ${klasse}"></i>` +
+      `<span class="ct-wort">${wort}</span>` +
+      `<span class="ct-wert">${formatMinutes(wert)}</span></div>`;
+
+    const kopf = `<div class="ct-kopf">${escapeHTML(p.tip || p.label || "")}</div>`;
+    const leib = ST_HANDY
+      ? zeile("phone", "Handy", p.phone) + zeile("pc", "PC", p.pc)
+        + `<div class="ct-zeile gesamt"><span class="ct-wort">Gesamt</span>`
+        + `<span class="ct-wert">${formatMinutes(p.phone + p.pc)}</span></div>`
+      : zeile("pc", "PC", p.pc);
+    tooltipZeigen(box, px, kopf + leib);
   }
 
   function pgHoverEnde() {
