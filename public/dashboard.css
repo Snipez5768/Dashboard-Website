@@ -2196,18 +2196,21 @@
   --glas-deckung: 90%;
   --glas-innen:   80%;
   --glas-kante:   7%;
+  --glas-glanz:   .60;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-thema="hell"]) {
     --glas-deckung: 58%;
     --glas-innen:   62%;
     --glas-kante:   9%;
+    --glas-glanz:   .07;
   }
 }
 :root[data-thema="dunkel"] {
   --glas-deckung: 58%;
   --glas-innen:   62%;
   --glas-kante:   9%;
+  --glas-glanz:   .07;
 }
 
 /* ---- Der Grund, damit das Glas etwas zu tun hat ---- */
@@ -2259,10 +2262,11 @@
   background: color-mix(in srgb, var(--surface-card) var(--glas-deckung), transparent);
   -webkit-backdrop-filter: blur(22px) saturate(1.5);
   backdrop-filter: blur(22px) saturate(1.5);
-  border: 1px solid color-mix(in srgb, var(--text-primary) var(--glas-kante), transparent);
-  box-shadow:
-    0 2px 10px rgba(0,0,0,.16),
-    0 14px 40px rgba(0,0,0,.20);
+  /* Keine umlaufende Kante: die las sich als grauer Rahmen um jede
+     Kachel, und Rahmen sollte es nie geben. Die Scheibe zeigt sich
+     ueber den Glanz an der Oberkante und die Unschaerfe dahinter. */
+  border: none;
+  box-shadow: var(--shadow-3);
 }
 
 /* Der Glanz an der oberen Kante — was eine Scheibe vom Rechteck
@@ -2286,9 +2290,8 @@
   pointer-events: none;
   background: linear-gradient(
     to bottom,
-    color-mix(in srgb, var(--surface-dark-elevated) 22%, transparent) 0,
-    transparent 38%);
-  opacity: .55;
+    rgba(255,255,255,var(--glas-glanz)) 0,
+    transparent 42%);
 }
 
 /* ---- Was in der Kachel liegt, wird ebenfalls leichter ----
@@ -2363,4 +2366,17 @@
     backdrop-filter: none;
     background: color-mix(in srgb, var(--surface-card) 90%, transparent);
   }
+}
+
+/* Der Pausenknopf faerbt sich beim Ueberfahren gelb, der Stoppknopf
+   rot — die beiden Bedeutungen tragen ihre Farbe. Das Symbol bleibt
+   dunkel: Weiss auf diesem Gelb liegt bei 2,2 zu 1, Dunkel bei 8,1.
+   Bei einem Zeichen von dreizehn Pixeln zaehlt das. */
+#seite-dashboard #timerHalten:hover {
+  background: var(--status-orange);
+  color: #17171A;
+}
+#seite-dashboard #timerAus:hover {
+  background: var(--status-red);
+  color: #fff;
 }
