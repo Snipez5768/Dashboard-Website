@@ -3045,3 +3045,31 @@ body.ordnet #seite-dashboard .card:hover { transform: none; }
    wenn sie klein gestellt wird — sonst sieht man nicht, was man
    tut. */
 body.ordnet #seite-dashboard .card { overflow: hidden; }
+
+/* ----------------------------------------------------------
+   JEDE KACHEL BEHAELT IHRE HOEHE
+
+   Im Flexkasten streckt align-items: stretch jede Kachel auf die
+   Hoehe der hoechsten in ihrer Reihe. Stellte man den Timer auf S
+   und die Habits daneben auf XL, wurde der Timer trotzdem 348
+   Pixel hoch — die eingestellte Groesse zaehlte nicht mehr.
+
+   Mit flex-start behaelt jede, was eingestellt ist. Darunter
+   bleibt dann Luft, wo die Nachbarin hoeher ist — genau wie am
+   Rechner, wo die Kacheln auch verschieden hoch sind.
+   ---------------------------------------------------------- */
+@media (min-width: 700px) and (max-width: 1250px),
+       (min-width: 700px) and (max-width: 1400px) and (pointer: coarse) {
+  #seite-dashboard .widget-grid { align-items: flex-start; }
+
+  #seite-dashboard #card-wetter,
+  #seite-dashboard #card-wetter2,
+  #seite-dashboard #card-screentime2,
+  #seite-dashboard #card-kalorien,
+  #seite-dashboard #card-timer,
+  #seite-dashboard #card-klausur,
+  #seite-dashboard #card-habits,
+  #seite-dashboard #card-schule,
+  #seite-dashboard #card-naechste,
+  #seite-dashboard #card-tagesplan { align-self: flex-start; }
+}
