@@ -288,3 +288,412 @@
   height: auto;
   aspect-ratio: 1;
 }
+
+/* ==========================================================
+   ==========================================================
+   DIE BAUSTEINE DER EINZELNEN SEITEN
+
+   Drei davon kommen mehrfach vor und werden zuerst behandelt:
+   die Kennzahl (Kalorien, Bildschirmzeit, Analyse), die
+   Balkenzeile (Bildschirmzeit, Analyse) und die Eingabezeile
+   (Projekte, Automation). Danach folgt, was jede Seite fuer
+   sich hat.
+   ========================================================== */
+
+/* ----------------------------------------------------------
+   7  DIE KENNZAHL
+   Label klein in Grau, Zahl gross mit Tabellenziffern, Zusatz
+   darunter — genau der Aufbau der Widgets auf der Musterseite.
+   ---------------------------------------------------------- */
+.seite:not(#seite-dashboard) .kennzahl-reihe {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: clamp(10px, 1vw, 16px);
+}
+.seite:not(#seite-dashboard) .kennzahl {
+  padding: clamp(12px, 1.1vw, 17px) clamp(13px, 1.2vw, 18px);
+  border: none;
+  border-radius: 20px;
+  background: var(--surface-sunken);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+.seite:not(#seite-dashboard) .kz-label {
+  font-size: clamp(10.5px, .78vw, 12.5px);
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0;
+  text-transform: none;
+  margin-bottom: 5px;
+}
+.seite:not(#seite-dashboard) .kz-wert {
+  font-family: var(--sans);
+  font-size: clamp(21px, 1.85vw, 30px);
+  font-weight: 700;
+  letter-spacing: -.035em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+.seite:not(#seite-dashboard) .kz-wert small,
+.seite:not(#seite-dashboard) .kz-wert span.einheit {
+  font-size: clamp(11px, .85vw, 14px);
+  font-weight: 500;
+  color: var(--text-muted);
+}
+.seite:not(#seite-dashboard) .kz-zusatz {
+  margin-top: 5px;
+  font-size: clamp(10.5px, .78vw, 12.5px);
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+/* ----------------------------------------------------------
+   8  DIE BALKENZEILE
+   Name links, Balken in der Mitte, Wert rechts. Der Balken ist
+   acht Pixel hoch wie ueberall.
+   ---------------------------------------------------------- */
+.seite:not(#seite-dashboard) .bt-zeile,
+.seite:not(#seite-dashboard) .app-zeile,
+.seite:not(#seite-dashboard) .au-zeile {
+  display: flex;
+  align-items: center;
+  gap: clamp(9px, .9vw, 13px);
+  padding: clamp(8px, .8vw, 11px) clamp(10px, 1vw, 14px);
+  border: none;
+  border-radius: 16px;
+  background: var(--surface-sunken);
+  transition: transform var(--t-base) var(--ease),
+              background var(--t-base) var(--ease-soft);
+}
+.seite:not(#seite-dashboard) .bt-zeile:hover,
+.seite:not(#seite-dashboard) .app-zeile:hover,
+.seite:not(#seite-dashboard) .au-zeile:hover {
+  transform: translateX(2px);
+  background: color-mix(in srgb, var(--surface-sunken) 60%, var(--surface-card));
+}
+
+.seite:not(#seite-dashboard) .bt-name,
+.seite:not(#seite-dashboard) .app-name,
+.seite:not(#seite-dashboard) .au-name {
+  font-size: clamp(12px, .92vw, 14px);
+  font-weight: 600;
+  letter-spacing: -.015em;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.seite:not(#seite-dashboard) .an-neben,
+.seite:not(#seite-dashboard) .au-domain {
+  font-size: clamp(10px, .74vw, 11.5px);
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+/* Die Spur */
+.seite:not(#seite-dashboard) .bt-spur,
+.seite:not(#seite-dashboard) .app-spur,
+.seite:not(#seite-dashboard) .au-spur {
+  flex: 1 1 auto;
+  min-width: 40px;
+  height: 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-muted) 18%, transparent);
+  box-shadow: none;
+  overflow: hidden;
+}
+.seite:not(#seite-dashboard) .bt-fuellung,
+.seite:not(#seite-dashboard) .app-spur > i,
+.seite:not(#seite-dashboard) .au-spur > i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent-active);
+  transition: width .6s cubic-bezier(.32,.72,0,1);
+}
+/* Wo eine Grenze ueberschritten ist, sagt die Farbe es */
+.seite:not(#seite-dashboard) .bt-fuellung.schlecht { background: var(--status-red); }
+.seite:not(#seite-dashboard) .bt-fuellung.gut      { background: var(--status-green); }
+
+.seite:not(#seite-dashboard) .bt-wert,
+.seite:not(#seite-dashboard) .app-zeit,
+.seite:not(#seite-dashboard) .app-anteil,
+.seite:not(#seite-dashboard) .au-zeit {
+  flex: 0 0 auto;
+  font-size: clamp(11px, .84vw, 13px);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.seite:not(#seite-dashboard) .app-rang {
+  flex: 0 0 auto;
+  width: 22px; height: 22px;
+  display: grid; place-items: center;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--text-muted) 14%, transparent);
+  font-size: 10.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+/* ----------------------------------------------------------
+   9  DIE EINGABEZEILE — Projekte und Automation
+   ---------------------------------------------------------- */
+.seite:not(#seite-dashboard) .zeilen-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+.seite:not(#seite-dashboard) .zeilen-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 9px 14px;
+  border: none;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  color: var(--text-primary);
+  font-family: var(--sans);
+  font-size: clamp(12px, .92vw, 14px);
+}
+.seite:not(#seite-dashboard) .zeilen-input::placeholder { color: var(--text-muted); }
+.seite:not(#seite-dashboard) .zeilen-input:focus-visible {
+  outline: 2px solid var(--accent-active);
+  outline-offset: 1px;
+}
+.seite:not(#seite-dashboard) .zeilen-btn {
+  flex: 0 0 auto;
+  padding: 9px 17px;
+  border: none;
+  border-radius: 999px;
+  background: var(--surface-dark);
+  color: var(--text-inverse);
+  font-family: var(--sans);
+  font-size: clamp(11.5px, .88vw, 13px);
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform var(--t-fast) var(--ease),
+              filter var(--t-base) var(--ease-soft);
+}
+.seite:not(#seite-dashboard) .zeilen-btn:hover  { filter: brightness(1.15); }
+.seite:not(#seite-dashboard) .zeilen-btn:active { transform: scale(.96); }
+
+/* ----------------------------------------------------------
+   10  KALENDER & SCHULE
+   Der Monat bleibt ein Raster — nur runder, und die Termine
+   darin werden Pillen statt gefuellter Balken.
+   ---------------------------------------------------------- */
+#seite-kalender .monat-tag {
+  border-radius: 14px;
+  border: none;
+  background: var(--surface-sunken);
+  transition: background var(--t-base) var(--ease-soft);
+}
+#seite-kalender .monat-tag:hover { background: color-mix(in srgb, var(--surface-sunken) 55%, var(--surface-card)); }
+#seite-kalender .monat-tag.wochenende { background: color-mix(in srgb, var(--surface-sunken) 55%, transparent); }
+#seite-kalender .monat-tag.heute {
+  background: var(--tint-blue);
+  box-shadow: inset 0 0 0 1.5px var(--accent-active);
+}
+#seite-kalender .mt-zahl {
+  font-size: clamp(10.5px, .8vw, 12.5px);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+#seite-kalender .monat-tag.heute .mt-zahl { color: var(--blue-ink); }
+
+#seite-kalender .mt-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: clamp(9.5px, .72vw, 11px);
+  font-weight: 600;
+  line-height: 1.3;
+  background: var(--surface-card);
+  color: var(--text-primary);
+  overflow: hidden;
+}
+#seite-kalender .mt-chip .mt-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#seite-kalender .mt-punkt {
+  flex: 0 0 auto;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent-active);
+}
+#seite-kalender .mt-chip.termin  .mt-punkt { background: var(--accent-active); }
+#seite-kalender .mt-chip.klausur .mt-punkt { background: var(--status-red); }
+
+/* Der Stundenplan: jede Stunde eine Kapsel */
+#seite-kalender .plan-fach {
+  border-radius: 14px;
+  border: none;
+  padding: 7px 10px;
+  background: var(--surface-sunken);
+}
+#seite-kalender .pf-name {
+  font-size: clamp(11px, .85vw, 13px);
+  font-weight: 650;
+  letter-spacing: -.015em;
+}
+#seite-kalender .pf-raum,
+#seite-kalender .plan-uhr {
+  font-size: clamp(9.5px, .72vw, 11px);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+#seite-kalender .plan-leer {
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--text-muted) 6%, transparent);
+}
+
+/* ----------------------------------------------------------
+   11  LERNEN
+   Die Reiter sind ein Segmentschalter wie auf der Musterseite.
+   ---------------------------------------------------------- */
+#seite-lernen .lr-tab {
+  padding: 7px 15px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--sans);
+  font-size: clamp(11.5px, .88vw, 13px);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--t-base) var(--ease-soft),
+              color var(--t-base) var(--ease-soft);
+}
+#seite-lernen .lr-tab:hover { color: var(--text-primary); }
+#seite-lernen .lr-tab.aktiv,
+#seite-lernen .lr-tab.active {
+  background: var(--surface-dark);
+  color: var(--text-inverse);
+}
+#seite-lernen .lern-panel {
+  border-radius: 20px;
+  border: none;
+  background: var(--surface-sunken);
+  padding: clamp(11px, 1vw, 15px);
+}
+#seite-lernen .dauer-punkt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 16px;
+  background: var(--surface-sunken);
+}
+#seite-lernen .dauer-name {
+  font-size: clamp(12px, .92vw, 14px);
+  font-weight: 600;
+}
+#seite-lernen .dauer-lang {
+  font-size: clamp(10px, .76vw, 11.5px);
+  color: var(--text-muted);
+}
+
+/* ----------------------------------------------------------
+   12  PROJEKTE UND AUTOMATION
+   ---------------------------------------------------------- */
+#seite-projekte .pj-spalte,
+#seite-planung .pj-spalte {
+  border-radius: 20px;
+  border: none;
+  background: var(--surface-sunken);
+  padding: clamp(11px, 1vw, 15px);
+}
+#seite-projekte .pj-raum,
+#seite-planung .pj-raum {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: clamp(10px, 1vw, 15px);
+}
+
+/* ----------------------------------------------------------
+   13  LICHT
+   ---------------------------------------------------------- */
+#seite-licht .licht-kopf-knoepfe {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+#seite-licht .li-kopfknopf {
+  padding: 7px 15px;
+  border: none;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+  font-family: var(--sans);
+  font-size: clamp(11.5px, .88vw, 13px);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--t-base) var(--ease-soft),
+              color var(--t-base) var(--ease-soft),
+              transform var(--t-fast) var(--ease);
+}
+#seite-licht .li-kopfknopf:hover  { background: var(--surface-dark); color: var(--text-inverse); }
+#seite-licht .li-kopfknopf:active { transform: scale(.96); }
+#seite-licht .licht-gitter {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: clamp(10px, 1vw, 15px);
+}
+#seite-licht .ll-titel {
+  font-size: clamp(13px, 1vw, 15px);
+  font-weight: 650;
+  letter-spacing: -.02em;
+}
+#seite-licht .ll-text {
+  margin-top: 5px;
+  font-size: clamp(11px, .82vw, 13px);
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* ----------------------------------------------------------
+   14  ANALYSE
+   Die Saeulen bekommen runde Kanten und die Akzentfarbe.
+   ---------------------------------------------------------- */
+#seite-analyse .an-saeule-spur {
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-muted) 14%, transparent);
+  overflow: hidden;
+}
+#seite-analyse .an-saeule-fuell {
+  border-radius: 999px;
+  background: var(--accent-active);
+  transition: height .6s cubic-bezier(.32,.72,0,1);
+}
+#seite-analyse .an-saeule-fuss {
+  margin-top: 5px;
+  font-size: clamp(9px, .7vw, 10.5px);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+#seite-analyse .an-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: clamp(10px, .74vw, 11.5px);
+  font-weight: 600;
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+}
+#seite-analyse .an-trend.gut     { background: var(--tint-green); color: var(--green-ink); }
+#seite-analyse .an-trend.schlecht{ background: var(--tint-red);   color: var(--red-ink); }
