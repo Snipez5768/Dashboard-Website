@@ -655,3 +655,53 @@
   height: auto;
   min-height: 60px;
 }
+
+/* ----------------------------------------------------------
+   NACH DEM ZWEITEN BILDSCHIRMFOTO
+   ---------------------------------------------------------- */
+
+/* "/2100 kcal" klebte am unteren Rand — der Karte fehlte unten Luft,
+   weil die Zahl aus dem absoluten Zustand kam und keine hatte. */
+#seite-dashboard #card-kalorien .cal-body { padding-bottom: 4px; gap: 2px; }
+#seite-dashboard #card-kalorien .cal-sub  { margin-top: 2px; }
+
+/* Die Seite liess sich noch rollen. Die Hoehe kam aus drei Stellen:
+   der Terminkarte, die unter "Alle 10 zeigen" leer weiterlief, der
+   Kurve, und den Abstaenden. */
+#seite-dashboard #card-naechste .naechste,
+#seite-dashboard #card-naechste .entry-list { flex: 0 0 auto; }
+#seite-dashboard #card-naechste { align-self: flex-start; }
+#seite-dashboard #card-habits   { align-self: flex-start; }
+
+#seite-dashboard .widget-grid { gap: 10px; }
+#seite-dashboard .widget-grid > .card { padding: 16px 18px; }
+#seite-dashboard #card-screentime .st-chart { height: 120px; }
+#seite-dashboard .hb-zeile,
+#seite-dashboard .streak-row,
+#seite-dashboard .entry-item { min-height: 54px; padding: 8px 14px 8px 8px; }
+
+@media (min-width: 1000px) {
+  #seite-dashboard #card-kalorien   { width: calc(25% - 8px); }
+  #seite-dashboard #card-wetter     { width: calc(25% - 8px); }
+  #seite-dashboard #card-naechste,
+  #seite-dashboard #card-habits,
+  #seite-dashboard #card-streaks    { width: calc(50% - 5px); }
+}
+
+/* Die Streak-Liste mass weiter 0 bei 332 Pixeln Inhalt, obwohl sie
+   auf display: flex steht und ihre Zeilen im Fluss sind. Woher die
+   Null kommt, liess sich nicht eindeutig zuordnen — in style.css
+   streiten sich mehrere Regeln um die Hoehe dieser Kette.
+
+   fit-content beendet den Streit: die Box misst, was in ihr steht. */
+#seite-dashboard #card-streaks,
+#seite-dashboard #card-streaks .card-body,
+#seite-dashboard #card-streaks .streaks,
+#seite-dashboard #card-streaks .streak-list,
+#seite-dashboard #card-habits,
+#seite-dashboard #card-habits .card-body,
+#seite-dashboard #card-habits .habit-list,
+#seite-dashboard #card-habits .hb-liste {
+  height: fit-content;
+  min-height: fit-content;
+}

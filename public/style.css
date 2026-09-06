@@ -10374,15 +10374,22 @@ input:focus, textarea:focus, select:focus {
 #seite-dashboard #card-quick { display: none; }
 
 /* Die Listen-Behaelter verschwinden, damit ihre Zeilen direkt im
-   Raster liegen. display: contents nimmt ein Element aus dem Aufbau
-   heraus, ohne seine Kinder anzutasten. */
-#seite-dashboard #card-habits,
-#seite-dashboard #card-habits > .card-body,
-#seite-dashboard #card-habits .habit-list,
-#seite-dashboard #card-habits .hb-liste,
-#seite-dashboard #card-streaks,
-#seite-dashboard #card-streaks > .card-body,
-#seite-dashboard #card-streaks .streak-list { display: contents; }
+/* ENTFERNT: display: contents auf den Listen-Behaeltern.
+   Es nahm .streak-list und .card-body aus dem Aufbau — gemessen
+   hatten sie Hoehe 0 bei 332 Pixeln Inhalt, und die Streaks lagen
+   deshalb ausserhalb ihrer Karte auf der Bildschirmzeit.
+   Die Regel stammt aus dem Versuch, jede Zeile als eigene Kachel
+   ins Raster zu legen; das Dashboard arbeitet inzwischen anders.
+        Raster liegen. display: contents nimmt ein Element aus dem Aufbau
+        heraus, ohne seine Kinder anzutasten. 
+     #seite-dashboard #card-habits,
+     #seite-dashboard #card-habits > .card-body,
+     #seite-dashboard #card-habits .habit-list,
+     #seite-dashboard #card-habits .hb-liste,
+     #seite-dashboard #card-streaks,
+     #seite-dashboard #card-streaks > .card-body,
+      #seite-dashboard #card-streaks .streak-list { display: contents; }     entfernt: nahm die Liste aus dem Aufbau, Hoehe 0 
+ */
 
 /* Keine Ueberschriften, keine Rahmen um Gruppen */
 #seite-dashboard .card-title,
