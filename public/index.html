@@ -300,6 +300,23 @@
 
       <!-- ============ SEITE: DASHBOARD ============ -->
       <section class="seite aktiv" id="seite-dashboard">
+
+        <!-- ============ KACHELN ORDNEN ============
+             Nur auf dem Tablet sichtbar. Verschieben, Breite
+             aendern und ausblenden — mit Knoepfen statt Ziehen:
+             auf dem iPad trifft man einen Knopf sicherer als
+             eine Ziehflaeche, und es geht auch mit der Maus. -->
+        <div class="ord-leiste" id="ordLeiste">
+          <button type="button" class="ord-start" id="ordStart">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.4" y="3.4" width="7.6" height="7.6" rx="2.2"/><rect x="13" y="3.4" width="7.6" height="7.6" rx="2.2"/><rect x="3.4" y="13" width="7.6" height="7.6" rx="2.2"/><rect x="13" y="13" width="7.6" height="7.6" rx="2.2"/></svg>
+            <span>Kacheln ordnen</span>
+          </button>
+          <div class="ord-aktiv" id="ordAktiv" hidden>
+            <span class="ord-hinweis">Verschieben, Breite &#228;ndern, ausblenden</span>
+            <button type="button" class="ord-zurueck" id="ordZurueck">Zur&#252;cksetzen</button>
+            <button type="button" class="ord-fertig" id="ordFertig">Fertig</button>
+          </div>
+        </div>
       <!-- WIDGET-RASTER: Anordnung und Größe stehen in lifeos_layout -->
       <div class="widget-grid" id="widgetGrid">
 

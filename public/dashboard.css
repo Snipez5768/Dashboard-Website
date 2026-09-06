@@ -2658,9 +2658,8 @@
     padding: 4px 4px 20px;
   }
 
-  /* Das Wetter faellt auf dem iPad weg — beide Kacheln. */
-  #seite-dashboard #card-wetter,
-  #seite-dashboard #card-wetter2 { display: none; }
+  /* Das Wetter faellt auf dem iPad weg — aber ueber den Plan im
+     Ordnen-Modus, nicht hier. Nur so kann man es wiederholen. */
 
   /* Jede Kachel bestimmt ihren Platz selbst; die Reihenfolge
      kommt aus order, nicht aus der Reihenfolge im Aufbau. */
@@ -2903,3 +2902,120 @@
      Hoehe wachsen. */
   #seite-dashboard #card-timer { align-self: flex-start; }
 }
+
+/* ==========================================================
+   KACHELN ORDNEN
+
+   Der Knopf steht nur auf dem Tablet — dort, wo die Anordnung
+   auch gilt. Am Rechner ist er verborgen, denn die Aufteilung
+   kommt dort aus dem Bauplan und soll so bleiben.
+   ========================================================== */
+.ord-leiste {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.ord-leiste[hidden] { display: none; }
+
+@media (min-width: 700px) and (max-width: 1180px) {
+  .ord-leiste:not([hidden]) { display: flex; }
+}
+
+.ord-start,
+.ord-fertig,
+.ord-zurueck {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 999px;
+  font-family: var(--sans);
+  font-size: clamp(11.5px, .88vw, 13px);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--t-base) var(--ease-soft),
+              color var(--t-base) var(--ease-soft),
+              transform var(--t-fast) var(--ease);
+}
+.ord-start {
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+}
+.ord-start svg { width: 15px; height: 15px; }
+.ord-start:hover  { background: var(--surface-dark); color: var(--text-inverse); }
+.ord-start:active { transform: scale(.96); }
+
+.ord-aktiv {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+}
+.ord-aktiv[hidden] { display: none; }
+.ord-hinweis {
+  margin-right: auto;
+  font-size: clamp(11px, .84vw, 12.5px);
+  color: var(--text-muted);
+}
+.ord-fertig {
+  background: var(--accent-active);
+  color: #fff;
+}
+.ord-zurueck {
+  background: none;
+  color: var(--text-muted);
+}
+.ord-zurueck:hover { background: var(--tint-red); color: var(--red-ink); }
+.ord-fertig:active,
+.ord-zurueck:active { transform: scale(.96); }
+
+/* ---- Die Kachel im Ordnen-Modus ---- */
+#seite-dashboard .card.ordnet {
+  position: relative;
+  outline: 2px dashed color-mix(in srgb, var(--accent-active) 45%, transparent);
+  outline-offset: -2px;
+}
+/* Was ausgeblendet ist, bleibt hier sichtbar — sonst kaeme man nie
+   wieder daran. Nur eben deutlich als "aus" erkennbar. */
+#seite-dashboard .card.ord-verborgen {
+  opacity: .38;
+  outline-style: dotted;
+}
+
+.ord-griffe {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 4;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--surface-dark);
+  box-shadow: 0 4px 14px rgba(0,0,0,.28);
+}
+.ord-griffe button {
+  width: 30px; height: 30px;
+  display: grid; place-items: center;
+  padding: 0; border: none; border-radius: 50%;
+  background: none;
+  color: var(--text-inverse);
+  cursor: pointer;
+  transition: background var(--t-base) var(--ease-soft),
+              transform var(--t-fast) var(--ease);
+}
+.ord-griffe svg { width: 15px; height: 15px; }
+.ord-griffe button:hover  { background: color-mix(in srgb, var(--text-inverse) 18%, transparent); }
+.ord-griffe button:active { transform: scale(.9); }
+.ord-griffe .ord-weg:hover { background: var(--status-red); color: #fff; }
+
+/* Im Ordnen-Modus soll nichts anderes anspringen */
+body.ordnet #seite-dashboard .card { pointer-events: none; }
+body.ordnet #seite-dashboard .ord-griffe { pointer-events: auto; }
+body.ordnet #seite-dashboard .card:hover { transform: none; }
+
+/* display schlaegt das hidden-Attribut — ohne diese Zeile bleibt
+   der Startknopf im Ordnen-Modus stehen. */
+.ord-start[hidden] { display: none; }

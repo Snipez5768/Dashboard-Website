@@ -3189,6 +3189,218 @@
     glasSetzen(glasWahl());
   })();
 
+
+  /* ==========================================================
+     KACHELN ORDNEN — nur auf dem Tablet
+
+     Verschieben, Breite aendern, ausblenden. Mit Knoepfen statt
+     Ziehen: auf dem iPad trifft man einen Knopf sicherer als eine
+     Ziehflaeche, und es geht auch mit der Maus.
+
+     Die Anordnung gilt ausdruecklich nur fuer die Tablet-Breite.
+     Am Rechner steht die Aufteilung aus Lucas Bauplan, und die
+     soll unangetastet bleiben — deshalb wird beim Anwenden die
+     Fensterbreite geprueft und beim Verlassen alles zurueckgesetzt,
+     was hier gesetzt wurde.
+     ========================================================== */
+  const ORD_MIN = 700, ORD_MAX = 1180;
+  /* Die Grundordnung — dieselbe wie im Stylesheet, sonst springt
+     die Aufteilung beim ersten Laden. */
+  const ORD_KACHELN = [
+    "card-klausur", "card-screentime2", "card-kalorien", "card-timer",
+    "card-habits", "card-naechste", "card-tagesplan", "card-schule",
+    "card-wetter", "card-wetter2"
+  ];
+
+  /* Das Wetter steht auf dem iPad ausgeblendet — aber ueber den
+     Plan, nicht ueber das Stylesheet. Nur so kann man es im
+     Ordnen-Modus wiederholen. */
+  const ORD_ANFANGS_WEG = ["card-wetter", "card-wetter2"];
+
+  let ordPlan = store.get("lifeos_ipad_plan", null);
+  /* Beim allerersten Mal gilt die Vorgabe: Wetter aus. Danach
+     zaehlt nur noch, was hier eingestellt wurde. */
+  if (!ordPlan || typeof ordPlan !== "object") {
+    ordPlan = { reihe: [], breit: {}, weg: ORD_ANFANGS_WEG.slice() };
+  }
+  if (!Array.isArray(ordPlan.reihe)) ordPlan.reihe = [];
+  if (!Array.isArray(ordPlan.weg))   ordPlan.weg = [];
+  if (!ordPlan.breit || typeof ordPlan.breit !== "object") ordPlan.breit = {};
+
+  let ordModus = false;
+
+  function ordTablet() {
+    return innerWidth >= ORD_MIN && innerWidth <= ORD_MAX;
+  }
+  function ordSichern() { store.set("lifeos_ipad_plan", ordPlan); }
+
+  /* Die gespeicherte Reihenfolge, ergaenzt um alles, was noch nicht
+     darin steht — so tauchen neue Kacheln hinten auf, statt zu
+     verschwinden. */
+  function ordReihenfolge() {
+    const bekannt = ordPlan.reihe.filter(id => ORD_KACHELN.includes(id));
+    const rest = ORD_KACHELN.filter(id => !bekannt.includes(id));
+    return bekannt.concat(rest);
+  }
+
+  function ordAnwenden() {
+    const tablet = ordTablet();
+    const folge = ordReihenfolge();
+
+    ORD_KACHELN.forEach(id => {
+      const k = $(id);
+      if (!k) return;
+
+      if (!tablet) {
+        /* Am Rechner und auf dem Telefon zaehlt nichts davon */
+        k.style.removeProperty("order");
+        k.style.removeProperty("flex");
+        k.style.removeProperty("max-width");
+        k.style.removeProperty("display");
+        return;
+      }
+
+      k.style.order = folge.indexOf(id);
+
+      if (ordPlan.weg.includes(id)) {
+        k.style.display = "none";
+        return;
+      }
+      k.style.removeProperty("display");
+
+      /* Zwei Breiten: halb oder ganz. Mehr Abstufungen braeuchten
+         auf 820 Pixeln niemand — ein Drittel waere 268 breit. */
+      const ganz = ordPlan.breit[id] === 2;
+      k.style.flex = ganz ? "0 0 100%" : "0 0 calc(50% - 6px)";
+      k.style.maxWidth = ganz ? "100%" : "calc(50% - 6px)";
+    });
+
+    /* Der Knopf steht nur da, wo er etwas bewirkt */
+    const leiste = $("ordLeiste");
+    if (leiste) leiste.hidden = !tablet;
+    if (!tablet && ordModus) ordBeenden();
+  }
+
+  /* ---------- Die Griffe an jeder Kachel ---------- */
+  function ordGriffeSetzen() {
+    ORD_KACHELN.forEach(id => {
+      const k = $(id);
+      if (!k) return;
+      let griff = k.querySelector(".ord-griffe");
+
+      if (!ordModus) { if (griff) griff.remove(); k.classList.remove("ordnet"); return; }
+
+      k.classList.add("ordnet");
+      if (griff) return;   /* schon da */
+
+      griff = document.createElement("div");
+      griff.className = "ord-griffe";
+      const ganz = ordPlan.breit[id] === 2;
+      const weg = ordPlan.weg.includes(id);
+      griff.innerHTML = `
+        <button type="button" data-ord="hoch" title="Nach vorn" aria-label="Nach vorn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14l6-6 6 6"/></svg>
+        </button>
+        <button type="button" data-ord="runter" title="Nach hinten" aria-label="Nach hinten">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10l6 6 6-6"/></svg>
+        </button>
+        <button type="button" data-ord="breite" title="${ganz ? "Halbe Breite" : "Volle Breite"}"
+          aria-label="Breite ändern">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.6 12h16.8"/><path d="M7.4 8.2 3.6 12l3.8 3.8"/><path d="M16.6 8.2 20.4 12l-3.8 3.8"/></svg>
+        </button>
+        <button type="button" data-ord="weg" class="ord-weg" title="${weg ? "Wieder zeigen" : "Ausblenden"}"
+          aria-label="Ausblenden">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 6.6 17.4 17.4M17.4 6.6 6.6 17.4"/></svg>
+        </button>`;
+
+      griff.addEventListener("click", ev => {
+        const b = ev.target.closest("[data-ord]");
+        if (!b) return;
+        ev.stopPropagation();
+        ordHandlung(id, b.dataset.ord);
+      });
+      k.appendChild(griff);
+    });
+  }
+
+  function ordHandlung(id, was) {
+    const folge = ordReihenfolge();
+    const i = folge.indexOf(id);
+
+    if (was === "hoch" && i > 0) {
+      folge.splice(i - 1, 0, folge.splice(i, 1)[0]);
+      ordPlan.reihe = folge;
+    } else if (was === "runter" && i < folge.length - 1) {
+      folge.splice(i + 1, 0, folge.splice(i, 1)[0]);
+      ordPlan.reihe = folge;
+    } else if (was === "breite") {
+      ordPlan.breit[id] = ordPlan.breit[id] === 2 ? 1 : 2;
+    } else if (was === "weg") {
+      const w = ordPlan.weg.indexOf(id);
+      if (w >= 0) ordPlan.weg.splice(w, 1); else ordPlan.weg.push(id);
+    }
+
+    ordSichern();
+    ordAnwenden();
+    /* Die Griffe tragen den Zustand im Titel — neu setzen */
+    ORD_KACHELN.forEach(k2 => { const el = $(k2); const g = el && el.querySelector(".ord-griffe"); if (g) g.remove(); });
+    ordGriffeSetzen();
+  }
+
+  /* Ausgeblendete Kacheln bleiben im Ordnen-Modus sichtbar, sonst
+     kaeme man nie wieder an sie heran. */
+  function ordAusgeblendeteZeigen() {
+    ORD_KACHELN.forEach(id => {
+      const k = $(id);
+      if (!k) return;
+      const weg = ordPlan.weg.includes(id);
+      k.classList.toggle("ord-verborgen", ordModus && weg);
+      if (ordModus && weg) k.style.removeProperty("display");
+    });
+  }
+
+  function ordStarten() {
+    if (!ordTablet()) return;
+    ordModus = true;
+    document.body.classList.add("ordnet");
+    $("ordStart").hidden = true;
+    $("ordAktiv").hidden = false;
+    ordAnwenden();
+    ordAusgeblendeteZeigen();
+    ordGriffeSetzen();
+  }
+
+  function ordBeenden() {
+    ordModus = false;
+    document.body.classList.remove("ordnet");
+    const s = $("ordStart"), a = $("ordAktiv");
+    if (s) s.hidden = false;
+    if (a) a.hidden = true;
+    ordGriffeSetzen();
+    ordAusgeblendeteZeigen();
+    ordAnwenden();
+  }
+
+  (function ordBinden() {
+    const start = $("ordStart");
+    if (!start) return;
+    start.addEventListener("click", ordStarten);
+    $("ordFertig").addEventListener("click", ordBeenden);
+    $("ordZurueck").addEventListener("click", () => {
+      ordPlan = { reihe: [], breit: {}, weg: ORD_ANFANGS_WEG.slice() };
+      ordSichern();
+      ordAnwenden();
+      ordAusgeblendeteZeigen();
+      ORD_KACHELN.forEach(id => { const el = $(id); const g = el && el.querySelector(".ord-griffe"); if (g) g.remove(); });
+      ordGriffeSetzen();
+    });
+
+    /* Dreht man das iPad, wechselt die Breite — dann gilt die
+       Anordnung womoeglich nicht mehr. */
+    addEventListener("resize", ordAnwenden);
+    ordAnwenden();
+  })();
+
   /* Steht der Schalter auf "Automatisch", muss die Seite mitwechseln,
      wenn das Geraet abends umstellt — ohne Neuladen. */
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
