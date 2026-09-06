@@ -2627,7 +2627,8 @@
    quetschen; dann steht ueberall eine Zahl und nirgends etwas,
    das man lesen kann.
    ---------------------------------------------------------- */
-@media (min-width: 700px) and (max-width: 1180px) {
+@media (min-width: 700px) and (max-width: 1250px),
+       (min-width: 700px) and (max-width: 1400px) and (pointer: coarse) {
 
   /* Die Seitenleiste nimmt 236 der 820 Pixel — fast ein Drittel.
      Eingeklappt bleiben die Symbole, der Platz geht an den Inhalt. */
@@ -2791,7 +2792,8 @@
    Und die Listen bekommen genug Hoehe, dass nichts rollen muss —
    auf dem iPad ist Platz genug dafuer.
    ---------------------------------------------------------- */
-@media (min-width: 700px) and (max-width: 1180px) {
+@media (min-width: 700px) and (max-width: 1250px),
+       (min-width: 700px) and (max-width: 1400px) and (pointer: coarse) {
   #seite-dashboard .widget-grid { align-items: start; }
 
   #seite-dashboard #card-habits   { min-height: 318px; }
@@ -2811,7 +2813,8 @@
 /* Auf dem Tablet traegt jede Kachel ihre eigene Hoehe — dafuer muss
    das align-self: stretch aus der Rechner-Aufteilung weichen. Es
    steht dort mit zwei Kennungen, also hier auch. */
-@media (min-width: 700px) and (max-width: 1180px) {
+@media (min-width: 700px) and (max-width: 1250px),
+       (min-width: 700px) and (max-width: 1400px) and (pointer: coarse) {
   #seite-dashboard #card-wetter,
   #seite-dashboard #card-wetter2,
   #seite-dashboard #card-screentime2,
@@ -2833,7 +2836,8 @@
    Nur der Timer richtet sich nach oben aus — er soll neben den
    Habits nicht auf 318 Pixel gestreckt werden, nur weil dort fuenf
    Zeilen stehen. */
-@media (min-width: 700px) and (max-width: 1180px) {
+@media (min-width: 700px) and (max-width: 1250px),
+       (min-width: 700px) and (max-width: 1400px) and (pointer: coarse) {
   #seite-dashboard .widget-grid { align-items: stretch; }
 
   #seite-dashboard #card-wetter,
@@ -2862,7 +2866,8 @@
    ihre Breite selbst, die Reihe ist so hoch wie ihre hoechste —
    und nichts ueberlappt mehr.
    ---------------------------------------------------------- */
-@media (min-width: 700px) and (max-width: 1180px) {
+@media (min-width: 700px) and (max-width: 1250px),
+       (min-width: 700px) and (max-width: 1400px) and (pointer: coarse) {
   #seite-dashboard .widget-grid {
     display: flex;
     /* Ohne diese Zeile bleibt die Richtung aus einer frueheren Regel
@@ -2918,7 +2923,8 @@
 }
 .ord-leiste[hidden] { display: none; }
 
-@media (min-width: 700px) and (max-width: 1180px) {
+@media (min-width: 700px) and (max-width: 1250px),
+       (min-width: 700px) and (max-width: 1400px) and (pointer: coarse) {
   .ord-leiste:not([hidden]) { display: flex; }
 }
 

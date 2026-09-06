@@ -3203,7 +3203,14 @@
      Fensterbreite geprueft und beim Verlassen alles zurueckgesetzt,
      was hier gesetzt wurde.
      ========================================================== */
-  const ORD_MIN = 700, ORD_MAX = 1180;
+  /* Dieselbe Bedingung wie im Stylesheet — als Abfrage, nicht als
+     zweite Zahlenreihe: sonst laufen beide irgendwann auseinander.
+     Ein iPad Pro im Querformat ist 1194 oder 1366 Pixel breit und
+     fiel bei einer festen Grenze von 1180 heraus. Ein Laptop mit
+     derselben Breite hat einen feinen Zeiger, ein iPad nicht. */
+  const ORD_BEDINGUNG =
+    "(min-width: 700px) and (max-width: 1250px)," +
+    "(min-width: 700px) and (max-width: 1400px) and (pointer: coarse)";
   /* Die Grundordnung — dieselbe wie im Stylesheet, sonst springt
      die Aufteilung beim ersten Laden. */
   const ORD_KACHELN = [
@@ -3230,7 +3237,7 @@
   let ordModus = false;
 
   function ordTablet() {
-    return innerWidth >= ORD_MIN && innerWidth <= ORD_MAX;
+    return matchMedia(ORD_BEDINGUNG).matches;
   }
   function ordSichern() { store.set("lifeos_ipad_plan", ordPlan); }
 
