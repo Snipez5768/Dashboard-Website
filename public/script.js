@@ -518,22 +518,22 @@
 
   /* ---------- Icons ---------- */
   const ICONS = {
-    gmail: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="3" y="5.4" width="18" height="13.2" rx="2.6"/><path d="m4 6.8 8 5.8 8-5.8"/></svg>`,
-    spotify: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="8.6"/><path d="M7.6 9.8c2.9-1 6.3-.9 8.8.5M8.1 13c2.3-.7 4.8-.6 6.9.4M8.6 15.8c1.7-.5 3.6-.4 5.2.3"/></svg>`,
-    youtube: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="2.8" y="5.8" width="18.4" height="12.4" rx="3.4"/><path d="M10.8 9.9v4.2l3.7-2.1-3.7-2.1Z" fill="currentColor" stroke="none"/></svg>`,
+    gmail: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><rect x="3" y="5.4" width="18" height="13.2" rx="2.6"/><path d="m4 6.8 8 5.8 8-5.8"/></svg>`,
+    spotify: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.6"/><path d="M7.6 9.8c2.9-1 6.3-.9 8.8.5M8.1 13c2.3-.7 4.8-.6 6.9.4M8.6 15.8c1.7-.5 3.6-.4 5.2.3"/></svg>`,
+    youtube: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><rect x="2.8" y="5.8" width="18.4" height="12.4" rx="3.4"/><path d="M10.8 9.9v4.2l3.7-2.1-3.7-2.1Z" fill="currentColor" stroke="none"/></svg>`,
     tiktok: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3.8v10.4a3.4 3.4 0 1 1-2.7-3.33"/><path d="M14 3.8c.35 2.1 1.9 3.7 4.1 4.05"/></svg>`,
-    school: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 4 2.6 8.8 12 13.6l9.4-4.8L12 4Z"/><path d="M6.4 11.2v4.6c0 1.1 2.6 2.4 5.6 2.4s5.6-1.3 5.6-2.4v-4.6"/></svg>`,
-    link: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M9.6 14.4 14.4 9.6"/><path d="M11.2 6.6 12.5 5.3a3.6 3.6 0 1 1 5.1 5.1l-1.3 1.3M12.8 17.4l-1.3 1.3a3.6 3.6 0 1 1-5.1-5.1l1.3-1.3"/></svg>`
+    school: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><path d="M12 4 2.6 8.8 12 13.6l9.4-4.8L12 4Z"/><path d="M6.4 11.2v4.6c0 1.1 2.6 2.4 5.6 2.4s5.6-1.3 5.6-2.4v-4.6"/></svg>`,
+    link: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.6 14.4 14.4 9.6"/><path d="M11.2 6.6 12.5 5.3a3.6 3.6 0 1 1 5.1 5.1l-1.3 1.3M12.8 17.4l-1.3 1.3a3.6 3.6 0 1 1-5.1-5.1l1.3-1.3"/></svg>`
   };
   const iconSVG = name => ICONS[name] || ICONS.link;
 
   const WEATHER_ICONS = {
-    sun: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4.6"/><path d="M12 2.4v2.4M12 19.2v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.4 12h2.4M19.2 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/></svg>`,
-    cloud: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M7 18h10a4 4 0 0 0 .5-8 5.5 5.5 0 0 0-10.7 1.5A3.5 3.5 0 0 0 7 18Z"/></svg>`,
-    fog: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 8h16M3 12h18M4 16h16M6.5 20h11"/></svg>`,
-    rain: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 15h9.5a3.8 3.8 0 0 0 .4-7.6A5 5 0 0 0 7.4 9.4 3.3 3.3 0 0 0 7 15Z"/><path d="m8 18.6-1 2M12 18.6l-1 2M16 18.6l-1 2"/></svg>`,
-    snow: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 15h9.5a3.8 3.8 0 0 0 .4-7.6A5 5 0 0 0 7.4 9.4 3.3 3.3 0 0 0 7 15Z"/><path d="M9 19v.01M12 20v.01M15 19v.01"/></svg>`,
-    storm: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 13h9.5a3.8 3.8 0 0 0 .4-7.6A5 5 0 0 0 7.4 7.4 3.3 3.3 0 0 0 7 13Z"/><path d="m13 13-2.5 4h3L11 21"/></svg>`
+    sun: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.6"/><path d="M12 2.4v2.4M12 19.2v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.4 12h2.4M19.2 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/></svg>`,
+    cloud: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><path d="M7 18h10a4 4 0 0 0 .5-8 5.5 5.5 0 0 0-10.7 1.5A3.5 3.5 0 0 0 7 18Z"/></svg>`,
+    fog: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16M3 12h18M4 16h16M6.5 20h11"/></svg>`,
+    rain: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 15h9.5a3.8 3.8 0 0 0 .4-7.6A5 5 0 0 0 7.4 9.4 3.3 3.3 0 0 0 7 15Z"/><path d="m8 18.6-1 2M12 18.6l-1 2M16 18.6l-1 2"/></svg>`,
+    snow: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 15h9.5a3.8 3.8 0 0 0 .4-7.6A5 5 0 0 0 7.4 9.4 3.3 3.3 0 0 0 7 15Z"/><path d="M9 19v.01M12 20v.01M15 19v.01"/></svg>`,
+    storm: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 13h9.5a3.8 3.8 0 0 0 .4-7.6A5 5 0 0 0 7.4 7.4 3.3 3.3 0 0 0 7 13Z"/><path d="m13 13-2.5 4h3L11 21"/></svg>`
   };
   function weatherCodeInfo(code) {
     if (code === 0) return { icon: "sun", text: "Klarer Himmel" };
@@ -591,7 +591,7 @@
   let wetterAnsicht = store.get("lifeos_wetter_ansicht", "jetzt");   // "jetzt" | "woche"
   let wetterDaten = null;
 
-  const TROPFEN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">' +
+  const TROPFEN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">' +
     '<path d="M12 3.5c3.2 3.8 5.5 6.6 5.5 9.4a5.5 5.5 0 0 1-11 0c0-2.8 2.3-5.6 5.5-9.4Z"/></svg>';
 
   async function loadWeather(force) {
@@ -1359,10 +1359,10 @@
 
   /* Der Pfeil sagt "hier geht es weiter" — er ersetzt das doppelte
      Seitensymbol, das vorher im Malzeichen und im Knopf stand. */
-  const SYM_PFEIL_RECHTS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
-  const SYM_KALENDER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3.2v3.6M16 3.2v3.6"/></svg>';
-  const SYM_WECKER   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="7.4"/><path d="M12 9.6V13l2.4 1.5M5.2 4.2 3 6.4M18.8 4.2 21 6.4"/></svg>';
-  const SYM_LERNEN   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7.3C10.4 5.9 8.4 5.2 5.6 5.2c-.9 0-1.6.7-1.6 1.6v9.7c0 .9.7 1.6 1.6 1.6 2.8 0 4.8.7 6.4 2.1 1.6-1.4 3.6-2.1 6.4-2.1.9 0 1.6-.7 1.6-1.6V6.8c0-.9-.7-1.6-1.6-1.6-2.8 0-4.8.7-6.4 2.1Z"/><path d="M12 7.3v13"/></svg>';
+  const SYM_PFEIL_RECHTS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
+  const SYM_KALENDER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3.2v3.6M16 3.2v3.6"/></svg>';
+  const SYM_WECKER   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="7.4"/><path d="M12 9.6V13l2.4 1.5M5.2 4.2 3 6.4M18.8 4.2 21 6.4"/></svg>';
+  const SYM_LERNEN   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7.3C10.4 5.9 8.4 5.2 5.6 5.2c-.9 0-1.6.7-1.6 1.6v9.7c0 .9.7 1.6 1.6 1.6 2.8 0 4.8.7 6.4 2.1 1.6-1.4 3.6-2.1 6.4-2.1.9 0 1.6-.7 1.6-1.6V6.8c0-.9-.7-1.6-1.6-1.6-2.8 0-4.8.7-6.4 2.1Z"/><path d="M12 7.3v13"/></svg>';
 
   /* Farbe nach Restzeit — ab acht Tagen gruen, vier bis sieben gelb,
      drei oder weniger rot. Eine Stelle, damit alle Listen gleich
@@ -2383,13 +2383,13 @@
      Wird bei jeder Datenänderung neu berechnet.
      ========================================================== */
   const V_ICONS = {
-    flame: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 3.2c1.1 3.2-2.1 4.2-2.1 7.6a4.1 4.1 0 0 0 8.2 0c0-1.3-.6-2.4-1.1-2.5.3 2.4-1 3.5-2.2 3.5-1.6 0-2.2-1.5-1.1-3.5.9-1.7.5-3.7-1.7-5.1Z"/></svg>`,
-    screen: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="13" rx="2.4"/><path d="M8.5 20.5h7"/></svg>`,
-    book: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 4 2.6 8.8 12 13.6l9.4-4.8L12 4Z"/><path d="M6.4 11.2v4.6c0 1.1 2.6 2.4 5.6 2.4s5.6-1.3 5.6-2.4v-4.6"/></svg>`,
-    calendar: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3.8" y="5.4" width="16.4" height="14.8" rx="2.6"/><path d="M3.8 10h16.4M8.2 3.4v3.4M15.8 3.4v3.4"/></svg>`,
-    check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>`,
-    settings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3.3"/><path d="M12 2.6v3M12 18.4v3M21.4 12h-3M5.6 12h-3M18.6 5.4l-2.1 2.1M7.5 16.5l-2.1 2.1M18.6 18.6l-2.1-2.1M7.5 7.5 5.4 5.4"/></svg>`,
-    sun: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="4.4"/><path d="M12 2.6v2.2M12 19.2v2.2M4.4 4.4l1.6 1.6M18 18l1.6 1.6M2.6 12h2.2M19.2 12h2.2M4.4 19.6 6 18M18 6l1.6-1.6"/></svg>`
+    flame: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><path d="M12 3.2c1.1 3.2-2.1 4.2-2.1 7.6a4.1 4.1 0 0 0 8.2 0c0-1.3-.6-2.4-1.1-2.5.3 2.4-1 3.5-2.2 3.5-1.6 0-2.2-1.5-1.1-3.5.9-1.7.5-3.7-1.7-5.1Z"/></svg>`,
+    screen: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="13" rx="2.4"/><path d="M8.5 20.5h7"/></svg>`,
+    book: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><path d="M12 4 2.6 8.8 12 13.6l9.4-4.8L12 4Z"/><path d="M6.4 11.2v4.6c0 1.1 2.6 2.4 5.6 2.4s5.6-1.3 5.6-2.4v-4.6"/></svg>`,
+    calendar: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.8" y="5.4" width="16.4" height="14.8" rx="2.6"/><path d="M3.8 10h16.4M8.2 3.4v3.4M15.8 3.4v3.4"/></svg>`,
+    check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>`,
+    settings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.3"/><path d="M12 2.6v3M12 18.4v3M21.4 12h-3M5.6 12h-3M18.6 5.4l-2.1 2.1M7.5 16.5l-2.1 2.1M18.6 18.6l-2.1-2.1M7.5 7.5 5.4 5.4"/></svg>`,
+    sun: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.4"/><path d="M12 2.6v2.2M12 19.2v2.2M4.4 4.4l1.6 1.6M18 18l1.6 1.6M2.6 12h2.2M19.2 12h2.2M4.4 19.6 6 18M18 6l1.6-1.6"/></svg>`
   };
 
   function buildSuggestions() {
@@ -2720,7 +2720,7 @@
   }
 
   const HAKEN_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ` +
-    `stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">` +
+    `stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">` +
     `<path d="m5 12.5 4.6 4.6L19 7.2"/></svg>`;
 
   /* ==========================================================
@@ -3050,7 +3050,7 @@
     add.className = "quick-tile add-tile";
     add.title = "Link hinzufügen";
     add.setAttribute("aria-label", "Link hinzufügen");
-    add.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 5.5v13M5.5 12h13"/></svg>`;
+    add.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5.5v13M5.5 12h13"/></svg>`;
     add.addEventListener("click", openSettings);
     grid.appendChild(add);
   }
@@ -5165,7 +5165,7 @@
       zeile.classList.add("aufklappbar");
       zeile.insertAdjacentHTML("beforeend",
         `<span class="app-pfeil" aria-hidden="true">
-           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
              stroke-linecap="round" stroke-linejoin="round"><path d="M6 9.5 12 15.5 18 9.5"/></svg>
          </span>`);
 
@@ -8774,7 +8774,7 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
           </div>
           <button type="button" class="li-stift" data-stift="${escapeHTML(g.ip)}"
                   aria-expanded="${bearbeitet}" aria-label="Name und Gruppe">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M16.4 4.6a2 2 0 0 1 2.8 2.8L8.5 18.1l-3.7.9.9-3.7Z"/>
             </svg>
@@ -11998,7 +11998,7 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
           <span class="rz-text">${escapeHTML(wert)}</span>
           <button type="button" class="rz-weg" data-feld="${feld}" data-nr="${i}"
             aria-label="Entfernen">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
           </button>
         </li>`).join("");
       el.querySelectorAll(".rz-weg").forEach(k => {
@@ -12483,10 +12483,10 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
     popDatum.innerHTML = `
       <div class="kal-kopf">
         <button type="button" class="kal-pfeil" data-schritt="-1" aria-label="Vorheriger Monat">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M14.5 5.5 8.5 12l6 6.5"/></svg></button>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 5.5 8.5 12l6 6.5"/></svg></button>
         <div class="kal-monat">${MONTHS[monat]} ${jahr}</div>
         <button type="button" class="kal-pfeil" data-schritt="1" aria-label="Nächster Monat">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9.5 5.5 15.5 12l-6 6.5"/></svg></button>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 5.5 15.5 12l-6 6.5"/></svg></button>
       </div>
       ${fachZeile}
       <div class="kal-wochentage"><span>Mo</span><span>Di</span><span>Mi</span><span>Do</span><span>Fr</span><span>Sa</span><span>So</span></div>
