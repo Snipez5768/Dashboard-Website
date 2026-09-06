@@ -2273,7 +2273,7 @@
                 aria-pressed="${fertig}">
           <span class="i-mal${erfuellt ? " gruen" : ""}">${zeichen}</span>
           <span class="i-text">
-            <span class="i-sache">${erfuellt ? "Woche geschafft" : diese + " von " + ziel + " diese Woche"}</span>
+            <span class="i-sache">${erfuellt ? "geschafft" : diese + " von " + ziel}</span>
             <span class="i-wert">${escapeHTML(h.name)}</span>
           </span>
           <span class="i-rechts">

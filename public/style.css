@@ -10329,264 +10329,29 @@ input:focus, textarea:focus, select:focus {
 
 
 /* ==========================================================
-   SCHRITT 1 — NUR DIE ANORDNUNG
+   ==========================================================
+   DAS DASHBOARD
 
-   Das Dashboard stand auf einem Raster aus 24 Spalten, in dem
-   19 Regeln jeder Karte einen festen Platz zuwiesen. Zweimal habe
-   ich versucht, das mit staerkeren Regeln zu ueberschreiben, und
-   zweimal ist es zusammengebrochen: die Karten landeten in je
-   einer der 24 Spalten.
-
-   Der Fehler war der Ansatz. Ich habe gegen das Raster
-   angeschrieben, statt es zu verlassen.
-
-   Aus dem Behaelter wird jetzt eine Flex-Spalte. Damit sind alle
-   19 Rasterplaetze und alle Spannweiten von selbst wirkungslos —
-   Flex kennt weder grid-area noch grid-column und ignoriert sie
-   stillschweigend. Keine einzige der alten Regeln muss angefasst
-   oder ueberstimmt werden.
+   Ein Block, nicht vier gestapelte. Die Werte sind dieselben wie
+   auf der Musterseite — dort stand die Kapsel bei 22 Pixeln Radius,
+   das Malzeichen bei 36, der Wert bei 16 Pixeln. In der App waren
+   sie durch vier Korrekturschichten davon abgewandert.
    ========================================================== */
-#seite-dashboard.aktiv { overflow-y: auto; overflow-x: hidden; }
-
-#seite-dashboard .widget-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 100%;
-  max-width: 760px;
-  margin: 0 auto;
-  min-height: 0;
-}
-
-/* Jede Karte fuellt die Spalte und waechst mit ihrem Inhalt. Im
-   Raster hatte sie eine feste Reihenhoehe, an der alles darin in
-   Prozent rechnete. */
-#seite-dashboard .widget-grid > .card {
-  width: 100%;
-  height: auto;
-  min-height: 0;
-  max-height: none;
-  flex: 0 0 auto;
-}
-
-/* Ab hier ist Platz fuer zwei Spalten nebeneinander. Eine dritte
-   kaeme nicht in Frage — dann waeren die Inseln wieder so schmal
-   wie im alten Raster. */
-@media (min-width: 1180px) {
-  #seite-dashboard .widget-grid {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-content: flex-start;
-    max-width: 1120px;
-  }
-  #seite-dashboard .widget-grid > .card { width: calc(50% - 5px); }
-  #seite-dashboard #card-screentime,
-  #seite-dashboard #card-quick { width: 100%; }
-}
-
-/* Reihenfolge: oben, was heute noch etwas von dir will */
-#seite-dashboard #card-naechste   { order: 1; }
-#seite-dashboard #card-habits     { order: 2; }
-#seite-dashboard #card-streaks    { order: 3; }
-#seite-dashboard #card-kalorien   { order: 4; }
-#seite-dashboard #card-wetter     { order: 5; }
-#seite-dashboard #card-screentime { order: 6; }
-#seite-dashboard #card-quick      { order: 7; }
-
-/* Das Mehrfach-Widget entfaellt: Habits und Termine haben eigene
-   Widgets, die Reiter zeigten dieselben Daten doppelt. */
-#seite-dashboard #card-vorschlag { display: none; }
-
-/* Die Hoehenzwaenge, die aus der festen Reihenhoehe kamen */
-#seite-dashboard .card-body,
-#seite-dashboard .habit-list,
-#seite-dashboard .hb-liste,
-#seite-dashboard .streak-list,
-#seite-dashboard .entry-list,
-#seite-dashboard .naechste,
-#seite-dashboard .weather,
-#seite-dashboard .cal-body {
-  height: auto;
-  max-height: none;
-  min-height: 0;
-  overflow: visible;
-  flex: 0 0 auto;
-}
-#seite-dashboard .hb-zeile,
-#seite-dashboard .streak-row { height: auto; min-height: 64px; flex: 0 0 auto; }
-#seite-dashboard #card-screentime .st-chart { min-height: 180px; }
-
-/* ==========================================================
-   SCHRITT 2 — ALLES AUF EINE SEITE
-
-   Schritt 1 hat aus dem Raster eine Spalte gemacht und die Seite
-   damit rollbar. Das war falsch: ein Dashboard, das man
-   durchscrollen muss, ist kein Dashboard mehr. Es soll auf einen
-   Blick alles zeigen.
-
-   Also wieder ein Raster — aber nicht das alte aus 24 Spalten mit
-   19 festen Plaetzen, sondern eins mit sechs Feldern fuer sechs
-   Widgets, das genau die verfuegbare Hoehe fuellt.
-
-   Was in ein Feld nicht passt, rollt innerhalb seines Widgets.
-   Nicht die Seite rollt, sondern die Liste darin.
-   ========================================================== */
-
-/* Die Seite rollt nicht. Sie fuellt den Bildschirm, mehr nicht. */
-#seite-dashboard.aktiv {
-  overflow: hidden;
-  min-height: 0;
-}
-
-#seite-dashboard .widget-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  width: 100%;
-  max-width: none;
-  margin: 0;
-  flex: 1;
-  min-height: 0;
-  height: 100%;
-}
-
-/* Jedes Widget fuellt sein Feld genau — nicht mehr, nicht weniger.
-   Ueberlappt hat es vorher, weil die Karten aus Schritt 1 ihre
-   Hoehe vom Inhalt nahmen und der Behaelter sie nicht mehr
-   begrenzte. */
-#seite-dashboard .widget-grid > .card {
-  min-width: 0;
-  min-height: 0;
-  height: 100%;
-  width: auto;
-  max-height: none;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  position: relative;
-}
-
-/* Zwei Reihen, drei Spalten, sechs Widgets */
-#seite-dashboard #card-naechste   { grid-area: 1 / 1 / 2 / 2; }
-#seite-dashboard #card-habits     { grid-area: 1 / 2 / 2 / 3; }
-#seite-dashboard #card-streaks    { grid-area: 1 / 3 / 2 / 4; }
-#seite-dashboard #card-kalorien   { grid-area: 2 / 1 / 3 / 2; }
-#seite-dashboard #card-wetter     { grid-area: 2 / 2 / 3 / 3; }
-#seite-dashboard #card-screentime { grid-area: 2 / 3 / 3 / 4; }
-#seite-dashboard #card-vorschlag  { display: none; }
-#seite-dashboard #card-quick      { display: none; }
-
-/* Was nicht ins Feld passt, rollt in seinem Widget — nicht die
-   Seite. Die Rollleiste bleibt unsichtbar, damit die Insel ruhig
-   aussieht. */
-#seite-dashboard .card-body,
-#seite-dashboard .habit-list,
-#seite-dashboard .streak-list,
-#seite-dashboard .entry-list,
-#seite-dashboard .naechste {
-  flex: 1;
-  min-height: 0;
-  height: auto;
-  max-height: none;
-  overflow-y: auto;
-  overflow-x: hidden;
-  overscroll-behavior: contain;
-  scrollbar-width: none;
-}
-#seite-dashboard .card-body::-webkit-scrollbar,
-#seite-dashboard .habit-list::-webkit-scrollbar,
-#seite-dashboard .streak-list::-webkit-scrollbar,
-#seite-dashboard .entry-list::-webkit-scrollbar { display: none; }
-
-/* Die Zeilen behalten ihre Hoehe, statt sich zu quetschen */
-#seite-dashboard .hb-zeile,
-#seite-dashboard .streak-row,
-#seite-dashboard .entry-item { flex: 0 0 auto; min-height: 58px; }
-
-/* Kein Rahmen, kein Name — nur die Kapsel und was sie sagt */
-#seite-dashboard .card-title,
-#seite-dashboard .card-badge,
-#seite-dashboard .card-head { display: none; }
-
-/* Die drei Zahlen-Widgets sind selbst die Kapsel */
-#seite-dashboard #card-kalorien,
-#seite-dashboard #card-wetter,
-#seite-dashboard #card-screentime {
-  padding: 16px 18px;
-  border-radius: 26px;
-  border: none;
-  background: var(--flaeche);
-  box-shadow: var(--heb-2), var(--lichtkante);
-  justify-content: center;
-}
-#seite-dashboard #card-kalorien:hover,
-#seite-dashboard #card-wetter:hover,
-#seite-dashboard #card-screentime:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--heb-3), var(--lichtkante);
-}
-
-/* Die Listen-Widgets sind kein Kasten — ihre Zeilen sind die Inseln */
-#seite-dashboard #card-naechste,
-#seite-dashboard #card-habits,
-#seite-dashboard #card-streaks {
-  background: none;
-  box-shadow: none;
-  border: none;
-  padding: 0;
-}
-#seite-dashboard #card-naechste:hover,
-#seite-dashboard #card-habits:hover,
-#seite-dashboard #card-streaks:hover { transform: none; box-shadow: none; }
 
 /* ----------------------------------------------------------
-   HANDY — dort darf gerollt werden, sechs Widgets passen nicht
-   auf eine Handyhoehe
+   1  DAS RASTER
+   Acht Spalten, sechs Reihen, alles auf eine Bildschirmhoehe.
    ---------------------------------------------------------- */
-@media (max-width: 900px) {
-  #seite-dashboard.aktiv { overflow-y: auto; }
-  #seite-dashboard .widget-grid {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: none;
-    grid-auto-rows: auto;
-    height: auto;
-  }
-  #seite-dashboard .widget-grid > .card {
-    grid-area: auto !important;
-    height: auto;
-    min-height: 0;
-  }
-  #seite-dashboard .card-body,
-  #seite-dashboard .habit-list,
-  #seite-dashboard .streak-list,
-  #seite-dashboard .entry-list { overflow: visible; flex: 0 0 auto; }
-}
-
-/* ==========================================================
-   SCHRITT 3 — DAS MOSAIK
-
-   Sechs gleich grosse Felder waren die falsche Annahme. Nicht jedes
-   Widget braucht gleich viel Platz: das Wetter sind drei Zahlen, die
-   Bildschirmzeit ist eine Kurve. Und eine Liste aus sechs Habits in
-   einem Feld ist immer noch eine Liste in einem Kasten — genau das,
-   was weg sollte.
-
-   Also ein Mosaik aus acht Spalten und vier Reihen. Grosse Kacheln
-   fuer das, was Flaeche braucht, kleine fuer alles andere. Und jedes
-   einzelne Habit, jeder einzelne Streak wird eine eigene Kachel.
-
-   Damit das geht, verschwinden die Listen-Behaelter: display:
-   contents nimmt ein Element aus dem Aufbau heraus, ohne seine
-   Kinder anzutasten. Die Habit-Knoepfe liegen dadurch direkt im
-   Raster, statt in einem Kasten darin.
-   ========================================================== */
+#seite-dashboard.aktiv { overflow: hidden; min-height: 0; }
 
 #seite-dashboard .widget-grid {
   display: grid;
   grid-template-columns: repeat(8, minmax(0, 1fr));
-  grid-template-rows: repeat(4, minmax(0, 1fr));
-  gap: 10px;
+  /* Sieben Reihen: eine Habit-Kachel braucht eine, Wetter und
+     Kalorien brauchen zwei — sonst wird die Zahl unten abgeschnitten. */
+  grid-template-rows: repeat(7, minmax(0, 1fr));
+  grid-auto-flow: row dense;
+  gap: 8px;
   width: 100%;
   max-width: none;
   margin: 0;
@@ -10595,16 +10360,22 @@ input:focus, textarea:focus, select:focus {
   overflow: hidden;
 }
 
-/* ---- Die grossen Kacheln ---- */
-#seite-dashboard #card-screentime { grid-area: 1 / 1 / 3 / 5; }   /* Kurve braucht Breite */
-#seite-dashboard #card-naechste   { grid-area: 1 / 5 / 3 / 9; }   /* Strahl braucht Hoehe */
+/* Habits stapeln sich in den Spalten 1-2, Streaks in 3-4. Eine
+   feste Spaltenangabe ohne Reihenangabe genuegt — die Reihen
+   vergibt das Raster selbst. */
+#seite-dashboard .hb-zeile   { grid-column: 1 / 3; }
+#seite-dashboard .streak-row { grid-column: 3 / 5; }
 
-/* ---- Die kleinen ---- */
-#seite-dashboard #card-wetter     { grid-area: 3 / 1 / 4 / 3; }
-#seite-dashboard #card-kalorien   { grid-area: 3 / 3 / 4 / 5; }
+#seite-dashboard #card-screentime { grid-area: 1 / 5 / 3 / 9; }
+#seite-dashboard #card-naechste   { grid-area: 3 / 5 / 6 / 9; }
+#seite-dashboard #card-wetter     { grid-area: 6 / 5 / 8 / 7; }
+#seite-dashboard #card-kalorien   { grid-area: 6 / 7 / 8 / 9; }
+#seite-dashboard #card-vorschlag,
+#seite-dashboard #card-quick { display: none; }
 
-/* ---- Habits und Streaks: der Behaelter verschwindet, die Zeilen
-        werden selbst zu Kacheln ---- */
+/* Die Listen-Behaelter verschwinden, damit ihre Zeilen direkt im
+   Raster liegen. display: contents nimmt ein Element aus dem Aufbau
+   heraus, ohne seine Kinder anzutasten. */
 #seite-dashboard #card-habits,
 #seite-dashboard #card-habits > .card-body,
 #seite-dashboard #card-habits .habit-list,
@@ -10613,175 +10384,207 @@ input:focus, textarea:focus, select:focus {
 #seite-dashboard #card-streaks > .card-body,
 #seite-dashboard #card-streaks .streak-list { display: contents; }
 
-#seite-dashboard #card-vorschlag,
-#seite-dashboard #card-quick { display: none; }
+/* Keine Ueberschriften, keine Rahmen um Gruppen */
+#seite-dashboard .card-title,
+#seite-dashboard .card-badge,
+#seite-dashboard .card-head { display: none; }
 
-/* ---- Die kleine Kachel ----
-   Hochkant statt in einer Zeile: auf 150 Pixel Breite ist fuer
-   Malzeichen, Text und Haken nebeneinander kein Platz. */
+/* ----------------------------------------------------------
+   2  DIE KACHELN
+   Querformat, Inhalt senkrecht mittig. Vorher sass er oben und
+   liess darunter eine leere Haelfte stehen — das las sich wie ein
+   Fehler, nicht wie Gestaltung.
+   ---------------------------------------------------------- */
 #seite-dashboard .hb-zeile,
 #seite-dashboard .streak-row {
-  grid-column: span 1;
-  grid-row: span 1;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 6px;
-  min-height: 0;
-  height: 100%;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 11px;
   width: auto;
-  padding: 12px 13px;
-  border-radius: 22px;
+  height: 100%;
+  min-height: 0;
+  padding: 10px 14px 10px 10px;
   border: none;
-  background: var(--flaeche);
-  box-shadow: var(--heb-2), var(--lichtkante);
+  border-radius: 22px;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-2);
   overflow: hidden;
-  transition: transform var(--w-normal) var(--kurve),
-              box-shadow var(--w-normal) var(--kurve-weich);
+  cursor: pointer;
+  transition: transform var(--t-base) var(--ease),
+              box-shadow var(--t-base) var(--ease-soft);
 }
 #seite-dashboard .hb-zeile:hover,
 #seite-dashboard .streak-row:hover {
   transform: translateY(-1px);
-  box-shadow: var(--heb-3), var(--lichtkante);
+  box-shadow: var(--shadow-3);
+}
+#seite-dashboard .hb-zeile:active,
+#seite-dashboard .streak-row:active {
+  transform: scale(.985); transition-duration: var(--t-fast);
 }
 
-/* Das Malzeichen und der Haken teilen sich die obere Zeile */
-#seite-dashboard .hb-zeile .i-mal,
-#seite-dashboard .streak-row .i-mal { width: 32px; height: 32px; border-radius: 11px; font-size: 14px; }
-#seite-dashboard .hb-zeile .i-mal svg,
-#seite-dashboard .streak-row .i-mal svg { width: 17px; height: 17px; }
-
-#seite-dashboard .hb-zeile .i-text,
-#seite-dashboard .streak-row .i-text { width: 100%; flex: 0 0 auto; }
-#seite-dashboard .hb-zeile .i-wert,
-#seite-dashboard .streak-row .i-wert { font-size: 15px; }
-#seite-dashboard .hb-zeile .i-sache,
-#seite-dashboard .streak-row .i-sache { font-size: 10.5px; }
-
-/* Rechts stand vorher Verlauf und Haken nebeneinander. In der
-   Kachel sitzen sie unten und teilen sich die Breite. */
-#seite-dashboard .hb-zeile .i-rechts,
-#seite-dashboard .streak-row .i-rechts {
-  margin: 0;
-  width: 100%;
-  justify-content: space-between;
-  gap: 6px;
+#seite-dashboard .i-mal {
+  width: 34px; height: 34px;
+  flex-shrink: 0;
+  border-radius: var(--r-icon);
+  display: grid; place-items: center;
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+  font-size: 14px; font-weight: 700; letter-spacing: -.02em;
 }
-#seite-dashboard .hb-zeile .perlen { gap: 3px; }
-#seite-dashboard .hb-zeile .perle  { width: 7px; height: 7px; }
-#seite-dashboard .hb-zeile .hb-knopf { width: 26px; height: 26px; }
+#seite-dashboard .i-mal svg { width: 18px; height: 18px; }
+#seite-dashboard .i-mal.gruen { background: var(--tint-green);  color: var(--green-ink); }
+#seite-dashboard .i-mal.rot   { background: var(--tint-red);    color: var(--red-ink); }
+#seite-dashboard .i-mal.gelb  { background: var(--tint-orange); color: var(--orange-ink); }
+#seite-dashboard .i-mal.blau  { background: var(--tint-blue);   color: var(--blue-ink); }
+
+#seite-dashboard .i-text {
+  min-width: 0; flex: 1;
+  display: flex; flex-direction: column; gap: 0;
+}
+#seite-dashboard .i-sache {
+  display: block; font-size: 11px; font-weight: 500; color: var(--text-muted);
+  line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#seite-dashboard .i-wert {
+  display: block; font-size: 15px; font-weight: 700; letter-spacing: -.025em;
+  line-height: 1.25; font-variant-numeric: tabular-nums;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#seite-dashboard .i-wert small { font-size: 11.5px; font-weight: 500; color: var(--text-muted); }
+#seite-dashboard .i-rechts {
+  margin-left: auto; flex-shrink: 0;
+  display: flex; align-items: center; gap: 8px;
+}
+#seite-dashboard .perlen { gap: 3px; }
+#seite-dashboard .perle { width: 7px; height: 7px; }
+#seite-dashboard .hb-knopf { width: 26px; height: 26px; }
 #seite-dashboard .streak-row .marke { font-size: 10.5px; padding: 3px 8px; }
 
-/* Die Termin-Zeilen bleiben Zeilen — sie stehen im Strahl */
-#seite-dashboard #card-naechste .entry-item { grid-column: auto; grid-row: auto; }
+/* ----------------------------------------------------------
+   3  DIE VIER GROSSEN KACHELN
+   ---------------------------------------------------------- */
+#seite-dashboard #card-screentime,
+#seite-dashboard #card-naechste,
+#seite-dashboard #card-wetter,
+#seite-dashboard #card-kalorien {
+  min-width: 0; min-height: 0; height: 100%;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  border: none;
+  border-radius: 22px;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-2);
+  padding: 14px 16px;
+  transition: transform var(--t-base) var(--ease),
+              box-shadow var(--t-base) var(--ease-soft);
+}
+#seite-dashboard #card-screentime:hover,
+#seite-dashboard #card-wetter:hover,
+#seite-dashboard #card-kalorien:hover {
+  transform: translateY(-1px); box-shadow: var(--shadow-3);
+}
 
-/* ---- Handy: eine Spalte, dort darf gerollt werden ---- */
+/* Die Termine tragen ihre Zeilen selbst — die Kachel ist nur
+   der Rahmen um den Strahl. */
+#seite-dashboard #card-naechste { padding: 12px 14px; }
+#seite-dashboard #card-naechste .naechste,
+#seite-dashboard #card-naechste .entry-list {
+  flex: 1; min-height: 0; height: auto; max-height: none;
+  overflow-y: auto; overflow-x: hidden;
+  overscroll-behavior: contain; scrollbar-width: none;
+  display: flex; flex-direction: column; gap: 6px;
+}
+#seite-dashboard #card-naechste .entry-list::-webkit-scrollbar { display: none; }
+
+/* Eine Terminzeile ist eine Insel im Strahl */
+#seite-dashboard .entry-item {
+  display: flex; align-items: center; gap: 11px;
+  flex: 0 0 auto;
+  min-height: 52px;
+  padding: 9px 12px 9px 9px;
+  border: none;
+  border-radius: 18px;
+  background: var(--surface-sunken);
+  transition: transform var(--t-base) var(--ease),
+              background var(--t-base) var(--ease-soft),
+              box-shadow var(--t-base) var(--ease-soft);
+}
+#seite-dashboard .entry-item:hover {
+  transform: translateX(2px);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-2);
+}
+/* Was heute ansteht, ist eine vollflaechige blaue Karte — genau wie
+   der laufende Eintrag auf der Musterseite. */
+#seite-dashboard .entry-item.today {
+  background: var(--accent-active);
+  box-shadow: 0 4px 16px var(--tint-blue), 0 12px 30px var(--tint-blue);
+}
+#seite-dashboard .entry-item.today .i-wert  { color: #fff; }
+#seite-dashboard .entry-item.today .i-sache { color: rgba(255,255,255,.80); }
+#seite-dashboard .entry-item.today .i-mal   { background: rgba(255,255,255,.20); color: #fff; }
+#seite-dashboard .entry-item.today .marke   { background: rgba(255,255,255,.22); color: #fff; }
+#seite-dashboard .entry-item.today .entry-go { color: rgba(255,255,255,.75); }
+
+/* ----------------------------------------------------------
+   4  DIE ZAHLEN
+   ---------------------------------------------------------- */
+#seite-dashboard .card-body,
+#seite-dashboard .weather,
+#seite-dashboard .cal-body,
+#seite-dashboard .st-chart {
+  flex: 1; min-height: 0; height: auto; max-height: none;
+  overflow: hidden;
+}
+#seite-dashboard #card-wetter .weather,
+#seite-dashboard #card-kalorien .cal-body {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+}
+#seite-dashboard .cal-value,
+#seite-dashboard .weather-temp {
+  font-family: var(--sans);
+  font-size: clamp(24px, 4.5vw, 36px);
+  font-weight: 700;
+  letter-spacing: -.035em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  animation: none;
+}
+#seite-dashboard .cal-sub,
+#seite-dashboard .weather-desc {
+  font-family: var(--sans); font-size: 12px; color: var(--text-muted);
+}
+#seite-dashboard .cal-empty,
+#seite-dashboard .naechste-empty {
+  border: none; background: none; padding: 10px 4px;
+  color: var(--text-muted); font-size: 12.5px; text-align: center;
+}
+#seite-dashboard .st-lauflicht { display: none; }
+#seite-dashboard .hero-name,
+#seite-dashboard .cal-value,
+#seite-dashboard .weather-temp { animation: none; }
+
+/* ----------------------------------------------------------
+   5  HANDY
+   Eine Spalte, dort darf gerollt werden: sechs Widgets auf eine
+   Handyhoehe zu zwingen hiesse, jedes auf 100 Pixel zu quetschen.
+   ---------------------------------------------------------- */
 @media (max-width: 900px) {
   #seite-dashboard.aktiv { overflow-y: auto; }
   #seite-dashboard .widget-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-rows: none;
-    grid-auto-rows: minmax(96px, auto);
+    grid-auto-rows: minmax(60px, auto);
     height: auto;
     overflow: visible;
   }
-  #seite-dashboard #card-screentime { grid-area: auto / span 2; min-height: 190px; }
-  #seite-dashboard #card-naechste   { grid-area: auto / span 2; }
-  #seite-dashboard #card-wetter,
-  #seite-dashboard #card-kalorien   { grid-area: auto / span 1; }
-}
-
-/* ==========================================================
-   SCHRITT 4 — QUERFORMAT UND EIGENE SPALTEN
-
-   Die quadratischen Kacheln waren falsch: ein Habit ist ein Name
-   mit einem Verlauf daneben, das ist ein Querformat. Und sie sollen
-   untereinander stehen, nicht ueber die Flaeche verteilt.
-
-   Also bekommen Habits und Streaks je eine eigene Spalte, in der
-   sie sich stapeln. Eine feste Spaltenangabe ohne Reihenangabe
-   genuegt dafuer: das Raster setzt sie dann automatisch
-   untereinander.
-
-   Sechs Reihen statt vier — nur so ist Platz fuer sechs gestapelte
-   Habits, ohne dass die Kacheln quadratisch werden.
-   ========================================================== */
-
-#seite-dashboard .widget-grid {
-  grid-template-columns: repeat(8, minmax(0, 1fr));
-  grid-template-rows: repeat(6, minmax(0, 1fr));
-}
-
-/* Habits stapeln sich in den Spalten 1–2, Streaks in 3–4.
-   Keine Reihenangabe: die vergibt das Raster von selbst. */
-#seite-dashboard .hb-zeile   { grid-column: 1 / 3; grid-row: auto; }
-#seite-dashboard .streak-row { grid-column: 3 / 5; grid-row: auto; }
-
-/* Rechts die vier grossen Kacheln */
-#seite-dashboard #card-screentime { grid-area: 1 / 5 / 3 / 9; }
-#seite-dashboard #card-naechste   { grid-area: 3 / 5 / 6 / 9; }
-#seite-dashboard #card-wetter     { grid-area: 6 / 5 / 7 / 7; }
-#seite-dashboard #card-kalorien   { grid-area: 6 / 7 / 7 / 9; }
-
-/* ---- Die Querformat-Kachel ----
-   Wieder eine Zeile statt hochkant: doppelt so breit wie hoch, da
-   ist fuer Malzeichen, Text und Haken nebeneinander Platz. */
-#seite-dashboard .hb-zeile,
-#seite-dashboard .streak-row {
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 10px;
-  padding: 10px 14px 10px 10px;
-  border-radius: 20px;
-}
-#seite-dashboard .hb-zeile .i-mal,
-#seite-dashboard .streak-row .i-mal { width: 34px; height: 34px; border-radius: 12px; font-size: 15px; }
-#seite-dashboard .hb-zeile .i-text,
-#seite-dashboard .streak-row .i-text { width: auto; flex: 1; }
-#seite-dashboard .hb-zeile .i-wert,
-#seite-dashboard .streak-row .i-wert { font-size: 15px; }
-#seite-dashboard .hb-zeile .i-sache,
-#seite-dashboard .streak-row .i-sache { font-size: 10.5px; }
-#seite-dashboard .hb-zeile .i-rechts,
-#seite-dashboard .streak-row .i-rechts {
-  margin-left: auto;
-  width: auto;
-  justify-content: flex-end;
-  gap: 8px;
-}
-#seite-dashboard .hb-zeile .perle { width: 7px; height: 7px; }
-#seite-dashboard .hb-zeile .hb-knopf { width: 26px; height: 26px; }
-
-/* ---- Handy ---- */
-@media (max-width: 900px) {
-  #seite-dashboard .widget-grid {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: none;
-    grid-auto-rows: minmax(64px, auto);
-  }
   #seite-dashboard .hb-zeile,
-  #seite-dashboard .streak-row { grid-column: auto; }
-  #seite-dashboard #card-screentime,
-  #seite-dashboard #card-naechste,
+  #seite-dashboard .streak-row { grid-column: auto / span 2; height: auto; min-height: 60px; }
+  #seite-dashboard #card-screentime { grid-area: auto / span 2; min-height: 180px; }
+  #seite-dashboard #card-naechste   { grid-area: auto / span 2; min-height: 200px; }
   #seite-dashboard #card-wetter,
-  #seite-dashboard #card-kalorien { grid-area: auto; }
-  #seite-dashboard #card-screentime { min-height: 190px; }
-}
-
-/* Das Raster setzt in DOM-Reihenfolge und springt nicht zurueck:
-   die Streaks stehen im HTML vor den Habits, belegten die Reihen 1
-   bis 5 und die Habits begannen erst in Reihe 3. "dense" erlaubt
-   dem Raster, spaeter kommende Kacheln in fruehere Luecken zu
-   setzen. */
-#seite-dashboard .widget-grid { grid-auto-flow: row dense; }
-
-/* Die Originalregel heisst ".hb-zeile.erledigt .hb-knopf" und wiegt
-   damit schwerer als mein ".erledigt .hb-knopf". Gleiche Staerke
-   statt !important. Gruen, weil Erledigtes in dieser App gruen ist. */
-.hb-zeile.erledigt .hb-knopf,
-.insel.erledigt .hb-knopf {
-  background: var(--status-green);
-  box-shadow: inset 0 0 0 2px var(--status-green);
+  #seite-dashboard #card-kalorien   { grid-area: auto / span 1; min-height: 120px; }
 }
