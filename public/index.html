@@ -440,6 +440,43 @@
         <!-- ============ WETTER · VORHERSAGE ============
              Block 4 des Bauplans. Das erste Wetter-Widget zeigt
              jetzt, dieses die kommenden Tage. -->
+        <!-- ============ TIMER ============
+             Block 10 des zweiten Bauplans. Einen Timer stellen,
+             der hier laeuft. -->
+        <section class="card" id="card-timer">
+          <div class="card-head">
+            <span class="card-title">Timer</span>
+            <span class="card-badge" id="timerMarke" hidden>läuft</span>
+          </div>
+          <div class="card-body timer" id="timerBody">
+            <div class="tm-zeit" id="timerZeit">00:00</div>
+            <div class="tm-spur"><i id="timerFuellung"></i></div>
+            <div class="tm-reihe" id="timerVorgaben">
+              <button type="button" class="tm-vor" data-min="5">5</button>
+              <button type="button" class="tm-vor" data-min="10">10</button>
+              <button type="button" class="tm-vor" data-min="25">25</button>
+              <button type="button" class="tm-vor" data-min="45">45</button>
+            </div>
+            <div class="tm-reihe" id="timerSteuerung" hidden>
+              <button type="button" class="tm-knopf" id="timerHalten">Pause</button>
+              <button type="button" class="tm-knopf" id="timerAus">Stopp</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ TAGESPLAN ============
+             Block 9. Der Ablauf des Tages an einer Zeitleiste, mit
+             einem Balken je Punkt, der zeigt, wie weit er ist. -->
+        <section class="card" id="card-tagesplan">
+          <div class="card-head">
+            <span class="card-title">Tagesplan</span>
+            <span class="card-badge" id="tagesplanMarke">—</span>
+          </div>
+          <div class="card-body tagesplan" id="tagesplanBody">
+            <div class="muted-line">Lade Tagesplan …</div>
+          </div>
+        </section>
+
         <section class="card" id="card-wetter2">
           <div class="card-head">
             <span class="i-mal blau"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17a4 4 0 010-8 5.5 5.5 0 0110.5 1.5A3.5 3.5 0 0117 17z"/></svg></span>
@@ -1156,6 +1193,21 @@
           <div class="row">
             <input type="text" id="settingStLimit" placeholder="Tagesziel (z.B. 4:00)">
             <button id="settingStLimitSave" type="button">Speichern</button>
+          </div>
+        </div>
+
+        <div class="kop-abschnitt">
+          <h3 class="kop-unter">Tagesplan</h3>
+          <p class="kop-hinweis">Die beiden Eckpunkte des Tages. Was dazwischen liegt,
+            baut sich von selbst: die Schulzeit aus dem Stundenplan, der Rest aus
+            deinen Terminen mit Uhrzeit.</p>
+          <div class="row">
+            <input type="time" id="settingAufstehen">
+            <button id="settingAufstehenSave" type="button">Aufstehen</button>
+          </div>
+          <div class="row">
+            <input type="time" id="settingSchlafen">
+            <button id="settingSchlafenSave" type="button">Feierabend</button>
           </div>
         </div>
       </section>

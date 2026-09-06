@@ -61,6 +61,9 @@
     /* Tagesziel fuer die Bildschirmzeit in Minuten. Es faerbt den
        Balken im Dashboard-Widget. */
     screenLimit: 240,
+    /* Eckpunkte des Tagesplans */
+    aufstehen: "06:00",
+    schlafen: "22:30",
     /* Profilbild als eingebettete Datenadresse, auf 256 Kanten
        gestutzt — so reist es mit den Einstellungen zum iPad. */
     bild: ""
@@ -655,15 +658,17 @@
       const max = data.daily?.temperature_2m_max?.[0];
       const regen = data.daily?.precipitation_probability_max?.[0];
       const tempText = `${Math.round(cur.temperature_2m)}°`;
-      /* Eine Zeile fuer alles Weitere, wie auf der Musterseite */
+      /* Hoechst- und Tiefstwert stehen neben der Temperatur, nicht in
+         der Textzeile: in einer Kachel von zwei Spalten waere die
+         Zeile sonst zweizeilig und stiesse unten an. */
       const spanne = (min !== undefined && max !== undefined)
-        ? " · " + Math.round(min) + "° bis " + Math.round(max) + "°" : "";
+        ? `<span class="weather-spanne">${Math.round(min)}° / ${Math.round(max)}°</span>` : "";
       body.innerHTML = `
         <div class="weather-main">
           <div class="weather-icon">${WEATHER_ICONS[info.icon]}</div>
           <div class="weather-werte">
-            <div class="weather-temp">${Math.round(cur.temperature_2m)}<small>°</small></div>
-            <div class="weather-desc">${escapeHTML(info.text)}${spanne}</div>
+            <div class="weather-temp">${Math.round(cur.temperature_2m)}<small>°</small>${spanne}</div>
+            <div class="weather-desc">${escapeHTML(info.text)}</div>
           </div>
         </div>
         `;
@@ -1507,8 +1512,7 @@
               : anteil >= 70  ? "var(--status-orange)"
               : "var(--status-green)";
 
-    const vergleich = gestern === null ? ""
-      : `<div class="stz-gestern">gestern ${dauerText(gestern)}</div>`;
+    const vergleich = gestern === null ? "" : "gestern " + dauerText(gestern) + " · ";
 
     /* Stunden und Minuten gross, die Einheiten klein daneben —
        so steht es auf der Musterseite. */
@@ -1528,9 +1532,8 @@
 
     body.innerHTML = `
       <div class="stz-zahl">${gross}</div>
-      ${vergleich}
-      <div class="stz-balken"><i style="width:${anteil}%;background:${ton}"></i></div>
-      <div class="stz-limit">${anteil}% von ${dauerText(limit)}</div>`;
+      <div class="stz-gestern">${vergleich}${anteil}% von ${dauerText(limit)}</div>
+      <div class="stz-balken"><i style="width:${anteil}%;background:${ton}"></i></div>`;
   }
 
   /* ----------------------------------------------------------
@@ -1672,8 +1675,268 @@
     try { renderStZahl(); }          catch (f) { console.error("[Bildschirmzeit-Zahl]", f); }
     try { renderKlausurWidget(); }   catch (f) { console.error("[Klausur-Widget]", f); }
     try { renderSchuleWidget(); }    catch (f) { console.error("[Schule-Widget]", f); }
+    try { spaet(() => renderTagesplan(), null); } catch (f) { console.error("[Tagesplan]", f); }
   }
 
+
+  /* ==========================================================
+     BLOCK 9 — DER TAGESPLAN
+
+     Er wird gebaut, nicht eingetragen: Aufstehen kommt aus den
+     Einstellungen, die Schulzeit aus dem Stundenplan von heute, der
+     Rest aus den Kalenderterminen mit Uhrzeit. Jeder Punkt traegt
+     einen Balken, der zeigt, wie weit er ist — vorbei, laufend oder
+     noch nicht dran.
+     ========================================================== */
+
+  /* "08:30" -> 510 Minuten seit Mitternacht */
+  function uhrInMin(s) {
+    const m = /^(\d{1,2}):(\d{2})/.exec(String(s || ""));
+    return m ? Number(m[1]) * 60 + Number(m[2]) : null;
+  }
+  function minInUhr(m) {
+    m = Math.max(0, Math.round(m));
+    return String(Math.floor(m / 60) % 24).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0");
+  }
+
+  /* Die Schulstunden von heute, zu einem Block zusammengefasst. Vier
+     Einzelstunden hintereinander sind kein Tagesplan, sondern eine
+     Liste — die steht auf der Schulseite. */
+  function schuleHeute() {
+    const plan = spaet(() => STUNDENPLAN, []) || [];
+    const stunden = spaet(() => STUNDEN, []) || [];
+    if (!plan.length || !stunden.length) return null;
+
+    /* tag 1 ist Montag; getDay() zaehlt ab Sonntag */
+    const wt = new Date().getDay();
+    const heute = plan.filter(s => s && Number(s.tag) === wt);
+    if (!heute.length) return null;
+
+    let erste = Infinity, letzte = -Infinity;
+    for (const s of heute) {
+      const a = stunden.find(x => x.nr === Number(s.von));
+      const b = stunden.find(x => x.nr === Number(s.bis)) || a;
+      if (!a || !b) continue;
+      erste = Math.min(erste, uhrInMin(a.von));
+      letzte = Math.max(letzte, uhrInMin(b.bis));
+    }
+    if (!isFinite(erste) || !isFinite(letzte)) return null;
+    return { von: erste, bis: letzte, zahl: heute.length };
+  }
+
+  function tagesplanPunkte() {
+    const punkte = [];
+
+    /* Aufstehen — die Uhrzeit steht in den Einstellungen */
+    const auf = uhrInMin(settings.aufstehen || "06:00");
+    const schule = schuleHeute();
+
+    if (auf !== null) {
+      punkte.push({
+        von: auf,
+        bis: schule ? Math.min(schule.von, auf + 120) : auf + 60,
+        sache: "Aufstehen",
+        zusatz: "Start in den Tag",
+        ton: "gelb"
+      });
+    }
+
+    if (schule) {
+      punkte.push({
+        von: schule.von, bis: schule.bis,
+        sache: "Schule",
+        zusatz: schule.zahl + (schule.zahl === 1 ? " Stunde" : " Stunden")
+                + " · bis " + minInUhr(schule.bis),
+        ton: "blau"
+      });
+    }
+
+    /* Kalendertermine von heute, sofern sie eine Uhrzeit tragen */
+    const heuteKey = todayStr();
+    (spaet(() => termine, []) || []).forEach(t => {
+      if (!t || t.date !== heuteKey) return;
+      const start = uhrInMin(t.time);
+      if (start === null) return;
+      punkte.push({
+        von: start,
+        bis: start + (Number(t.dauer) || 60),
+        sache: t.title || "Termin",
+        zusatz: t.ort ? t.ort : minInUhr(start),
+        ton: "gruen"
+      });
+    });
+
+    /* Feierabend: erst wenn der Tag sonst zu Ende waere */
+    const schluss = uhrInMin(settings.schlafen || "22:30");
+    if (schluss !== null && (!punkte.length || schluss > punkte[punkte.length - 1].bis)) {
+      punkte.push({ von: schluss, bis: schluss + 30, sache: "Feierabend",
+                    zusatz: "Tag zu Ende", ton: "grau" });
+    }
+
+    return punkte.sort((a, b) => a.von - b.von);
+  }
+
+  function renderTagesplan() {
+    const body = $("tagesplanBody");
+    const marke = $("tagesplanMarke");
+    if (!body) return;
+
+    const punkte = tagesplanPunkte();
+    const jetzt = new Date();
+    const min = jetzt.getHours() * 60 + jetzt.getMinutes();
+
+    if (!punkte.length) {
+      if (marke) marke.textContent = "—";
+      body.innerHTML = '<div class="muted-line">Für heute nichts eingeplant</div>';
+      return;
+    }
+
+    /* Was gerade laeuft, steht im Abzeichen */
+    const laufend = punkte.find(p => min >= p.von && min < p.bis);
+    if (marke) {
+      marke.textContent = laufend ? laufend.sache : minInUhr(min);
+      marke.className = "card-badge" + (laufend ? " blau" : "");
+    }
+
+    body.innerHTML = punkte.map(p => {
+      const dauer = Math.max(1, p.bis - p.von);
+      const anteil = min <= p.von ? 0
+                   : min >= p.bis ? 100
+                   : Math.round(((min - p.von) / dauer) * 100);
+      const zustand = anteil >= 100 ? "vorbei" : anteil > 0 ? "laeuft" : "offen";
+      return `
+        <div class="tp-punkt ${zustand}">
+          <span class="tp-uhr">${minInUhr(p.von)}</span>
+          <div class="tp-inhalt">
+            <div class="tp-sache">${escapeHTML(p.sache)}</div>
+            <div class="tp-zusatz">${escapeHTML(p.zusatz || "")}</div>
+            <div class="tp-balken"><i style="width:${anteil}%"></i></div>
+          </div>
+        </div>`;
+    }).join("");
+  }
+
+  /* ==========================================================
+     BLOCK 10 — DER TIMER
+
+     Er laeuft an einer Zielzeit, nicht an einem Zaehler: schlaeft
+     der Rechner ein oder steht der Reiter im Hintergrund, stimmt
+     die Restzeit beim Zurueckkommen trotzdem.
+     ========================================================== */
+  let timerZiel = Number(store.get("lifeos_timer_ziel", 0)) || 0;
+  let timerRest = Number(store.get("lifeos_timer_rest", 0)) || 0;   /* bei Pause */
+  let timerGanz = Number(store.get("lifeos_timer_ganz", 0)) || 0;
+  let timerTakt = null;
+
+  function timerSichern() {
+    store.set("lifeos_timer_ziel", timerZiel);
+    store.set("lifeos_timer_rest", timerRest);
+    store.set("lifeos_timer_ganz", timerGanz);
+  }
+
+  function timerSekunden() {
+    if (timerRest) return timerRest;                    /* angehalten */
+    if (!timerZiel) return 0;
+    return Math.max(0, Math.round((timerZiel - Date.now()) / 1000));
+  }
+
+  function renderTimer() {
+    const zeit = $("timerZeit");
+    if (!zeit) return;
+
+    /* Abgelaufen zuerst abraeumen, damit die Anzeige darunter schon
+       den Zustand danach zeigt: sonst blieben die Vorgabeknoepfe
+       verborgen und man konnte ohne Neuladen keinen neuen stellen. */
+    if (timerZiel && !timerRest && timerSekunden() === 0) {
+      timerZiel = 0; timerRest = 0; timerSichern();
+      timerAnhalten();
+      spaet(() => showToast("Timer abgelaufen.", "success"), null);
+    }
+
+    const rest     = timerSekunden();
+    const laeuft   = !!timerZiel && !timerRest;
+    const pausiert = !!timerRest;
+    /* Gestellt gewesen, aber weder laufend noch angehalten: fertig. */
+    const fertig   = !laeuft && !pausiert && timerGanz > 0;
+
+    const m = Math.floor(rest / 60), s = rest % 60;
+    zeit.textContent = String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+    zeit.classList.toggle("aus", fertig);
+
+    const fuell = $("timerFuellung");
+    if (fuell) fuell.style.width = timerGanz ? ((rest / timerGanz) * 100).toFixed(1) + "%" : "0%";
+    /* Ohne laufenden Timer nimmt die Spur nur Platz weg */
+    if (fuell && fuell.parentElement) fuell.parentElement.hidden = !(laeuft || pausiert);
+
+    const marke = $("timerMarke");
+    if (marke) {
+      marke.hidden = !(laeuft || pausiert || fertig);
+      marke.textContent = fertig ? "fertig" : laeuft ? "läuft" : "Pause";
+      marke.className = "card-badge " + (fertig ? "rot" : laeuft ? "gruen" : "gelb");
+    }
+
+    /* Die Vorgaben stehen bereit, sobald nichts mehr laeuft — auch
+       neben einem abgelaufenen Timer. */
+    const vorgaben = $("timerVorgaben"), steuerung = $("timerSteuerung");
+    if (vorgaben)  vorgaben.hidden  = laeuft || pausiert;
+    if (steuerung) steuerung.hidden = !(laeuft || pausiert);
+    const halten = $("timerHalten");
+    if (halten) halten.textContent = laeuft ? "Pause" : "Weiter";
+  }
+
+  function timerLaufen() {
+    if (timerTakt) return;
+    timerTakt = setInterval(renderTimer, 250);
+  }
+  function timerAnhalten() {
+    if (timerTakt) { clearInterval(timerTakt); timerTakt = null; }
+  }
+
+  function timerStellen(minuten) {
+    timerGanz = minuten * 60;
+    timerRest = 0;
+    timerZiel = Date.now() + timerGanz * 1000;
+    timerSichern();
+    timerLaufen();
+    renderTimer();
+  }
+
+  document.querySelectorAll("#timerVorgaben .tm-vor").forEach(b => {
+    b.addEventListener("click", () => timerStellen(Number(b.dataset.min) || 5));
+  });
+
+  if ($("timerHalten")) {
+    $("timerHalten").addEventListener("click", () => {
+      if (timerRest) {                      /* weiter */
+        timerZiel = Date.now() + timerRest * 1000;
+        timerRest = 0;
+        timerLaufen();
+      } else {                              /* anhalten */
+        timerRest = timerSekunden();
+        timerZiel = 0;
+        timerAnhalten();
+      }
+      timerSichern();
+      renderTimer();
+    });
+  }
+
+  if ($("timerAus")) {
+    $("timerAus").addEventListener("click", () => {
+      timerZiel = 0; timerRest = 0; timerGanz = 0;
+      timerSichern();
+      timerAnhalten();
+      renderTimer();
+    });
+  }
+
+  if (timerZiel || timerRest) timerLaufen();
+  renderTimer();
+
+  /* Der Tagesplan geht mit der Uhr weiter — einmal pro Minute reicht,
+     die Balken bewegen sich nicht schneller. */
+  renderTagesplan();
+  setInterval(renderTagesplan, 60000);
   function renderNaechste() {
     renderNeueWidgets();   /* die vier aus dem Bauplan haengen an denselben Daten */
     const alle = naechsteEintraege().filter(e => e.art === "termin");
@@ -2966,6 +3229,8 @@
     const stl = Number(settings.screenLimit) || 240;
     $("settingStLimit").value =
       Math.floor(stl / 60) + ":" + String(stl % 60).padStart(2, "0");
+    $("settingAufstehen").value = settings.aufstehen || "06:00";
+    $("settingSchlafen").value  = settings.schlafen  || "22:30";
     $("settingCalConsumed").value = kalorien.consumed || "";
     const t = getDayEntry(todayStr());
     $("settingStPhone").value = t.phone ? formatMinutes(t.phone) : "";
@@ -3153,6 +3418,25 @@
     renderScreenTime();
     renderNeueWidgets();
     showToast("Tagesziel gespeichert: " + dauerText(min) + ".", "success");
+  });
+
+  /* Die beiden Eckpunkte des Tagesplans. Sie sagen, wo der Tag
+     anfaengt und aufhoert — dazwischen baut er sich aus Stundenplan
+     und Terminen. */
+  [
+    ["settingAufstehen", "aufstehen", "Aufstehzeit"],
+    ["settingSchlafen",  "schlafen",  "Feierabend"]
+  ].forEach(([feld, schluessel, wort]) => {
+    const knopf = $(feld + "Save");
+    if (!knopf) return;
+    knopf.addEventListener("click", () => {
+      const wert = $(feld).value;
+      if (!/^\d{2}:\d{2}$/.test(wert)) return;
+      settings[schluessel] = wert;
+      store.set("lifeos_settings", settings);
+      spaet(() => renderTagesplan(), null);
+      showToast(wort + " gespeichert: " + wert + ".", "success");
+    });
   });
 
   $("settingCitySave").addEventListener("click", async () => {

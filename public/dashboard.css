@@ -391,6 +391,8 @@
    ---------------------------------------------------------- */
 #seite-dashboard #card-naechste,
 #seite-dashboard #card-habits,
+/* Ohne Platz im Bauplan: die Kurve bleibt auf ihrer eigenen Seite */
+#seite-dashboard #card-screentime,
 #seite-dashboard #card-streaks,
 #seite-dashboard #card-kalorien,
 #seite-dashboard #card-wetter,
@@ -865,15 +867,19 @@
   overflow: hidden;
 }
 
-#seite-dashboard #card-wetter      { grid-area: 1 / 1 / 3 / 4;  }  /* jetzt */
-#seite-dashboard #card-screentime2 { grid-area: 1 / 4 / 3 / 7;  }  /* Zahl */
-#seite-dashboard #card-screentime  { grid-area: 1 / 7 / 4 / 13; }  /* Kurve */
-#seite-dashboard #card-wetter2     { grid-area: 3 / 1 / 5 / 4;  }  /* Vorhersage */
-#seite-dashboard #card-kalorien    { grid-area: 3 / 4 / 5 / 7;  }
-#seite-dashboard #card-klausur     { grid-area: 5 / 1 / 7 / 4;  }
-#seite-dashboard #card-habits      { grid-area: 5 / 4 / 7 / 7;  }
-#seite-dashboard #card-schule      { grid-area: 4 / 7 / 7 / 10; }
-#seite-dashboard #card-naechste    { grid-area: 4 / 10 / 7 / 13; }
+/* Der zweite Bauplan — zehn Bloecke, alle 72 Felder belegt.
+   Die grosse Bildschirmzeit-Kurve steht nicht mehr darin; sie
+   bleibt ueber das Menue erreichbar. */
+#seite-dashboard #card-wetter      { grid-area: 1 / 1 / 2 / 3;  }  /* jetzt        2×1 */
+#seite-dashboard #card-screentime2 { grid-area: 1 / 3 / 2 / 6;  }  /* Zahl         3×1 */
+#seite-dashboard #card-habits      { grid-area: 1 / 6 / 4 / 8;  }  /*              2×3 */
+#seite-dashboard #card-klausur     { grid-area: 1 / 8 / 3 / 13; }  /*              5×2 */
+#seite-dashboard #card-wetter2     { grid-area: 2 / 1 / 4 / 4;  }  /* Vorhersage   3×2 */
+#seite-dashboard #card-kalorien    { grid-area: 2 / 4 / 3 / 6;  }  /*              2×1 */
+#seite-dashboard #card-timer       { grid-area: 3 / 4 / 4 / 6;  }  /*              2×1 */
+#seite-dashboard #card-naechste    { grid-area: 3 / 8 / 7 / 13; }  /*              5×4 */
+#seite-dashboard #card-schule      { grid-area: 4 / 1 / 7 / 4;  }  /*              3×3 */
+#seite-dashboard #card-tagesplan   { grid-area: 4 / 4 / 7 / 8;  }  /*              4×3 */
 
 /* Streaks faellt weg: die Serie erscheint als kleine Flamme bei den
    Kalorien. Geloescht ist nichts — die volle Uebersicht steht weiter
@@ -1536,3 +1542,305 @@
 /* Bricht der Titel um, ruecken Thema und Balken nach — dafuer
    darf das Thema dann nur noch eine Zeile belegen. */
 #seite-dashboard .kw-thema { -webkit-line-clamp: 2; }
+
+/* ==========================================================
+   ==========================================================
+   DER ZWEITE BAUPLAN — was er an Gestaltung nach sich zieht
+   ========================================================== */
+
+/* ----------------------------------------------------------
+   1  DIE FLACHEN KACHELN
+   Wetter, Bildschirmzeit-Zahl, Kalorien und Timer sind nur noch
+   eine Rasterreihe hoch — rund 125 Pixel. Die 46er Zahl aus dem
+   ersten Bauplan passt dort nicht mehr neben eine Unterzeile.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-wetter,
+#seite-dashboard #card-screentime2,
+#seite-dashboard #card-kalorien,
+#seite-dashboard #card-timer {
+  padding: clamp(10px, .85vw, 14px) clamp(12px, 1vw, 17px);
+}
+#seite-dashboard #card-wetter .card-head,
+#seite-dashboard #card-screentime2 .card-head,
+#seite-dashboard #card-kalorien .card-head,
+#seite-dashboard #card-timer .card-head {
+  margin-bottom: clamp(4px, .4vw, 7px);
+}
+#seite-dashboard #card-wetter .cal-value,
+#seite-dashboard #card-wetter .weather-temp,
+#seite-dashboard #card-screentime2 .stz-zahl,
+#seite-dashboard #card-kalorien .cal-value {
+  font-size: clamp(20px, 1.75vw, 28px);
+}
+#seite-dashboard #card-wetter .weather-temp small,
+#seite-dashboard #card-screentime2 .stz-zahl small,
+#seite-dashboard #card-kalorien .cal-value small {
+  font-size: clamp(10px, .78vw, 12.5px);
+}
+#seite-dashboard #card-wetter .weather-desc,
+#seite-dashboard #card-screentime2 .stz-gestern,
+#seite-dashboard #card-screentime2 .stz-limit,
+#seite-dashboard #card-kalorien .cal-sub {
+  margin-top: 2px;
+  font-size: clamp(9.5px, .72vw, 11.5px);
+  line-height: 1.25;
+}
+#seite-dashboard #card-screentime2 .stz-balken {
+  margin-top: 5px; height: 6px;
+}
+#seite-dashboard #card-screentime2 .stz-limit { margin-top: 3px; }
+
+/* Wetter: das Symbol schrumpft mit */
+#seite-dashboard #card-wetter .weather-icon {
+  width: clamp(26px, 2.1vw, 34px);
+  height: clamp(26px, 2.1vw, 34px);
+}
+#seite-dashboard #card-wetter .weather-main { gap: clamp(7px, .7vw, 11px); }
+#seite-dashboard #card-wetter .weather-desc { -webkit-line-clamp: 2; }
+
+/* Kalorien: der Ring passt sich an, der Knopf tritt zurueck */
+#seite-dashboard #card-kalorien .cal-ring-area {
+  width:  clamp(38px, 3.2vw, 52px);
+  height: clamp(38px, 3.2vw, 52px);
+}
+#seite-dashboard #card-kalorien > .card-body { gap: clamp(8px, .8vw, 12px); }
+#seite-dashboard #card-kalorien .ghost-btn { display: none; }
+#seite-dashboard #card-kalorien { cursor: pointer; }
+#seite-dashboard .cal-flamme { margin-top: 4px; padding: 2px 8px 2px 5px; }
+#seite-dashboard .cal-flamme svg { width: 11px; height: 11px; }
+
+/* ----------------------------------------------------------
+   2  DER TIMER — Block 10
+   ---------------------------------------------------------- */
+#seite-dashboard #card-timer > .card-body {
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: column; justify-content: center;
+  gap: 0;
+}
+#seite-dashboard .tm-zeit {
+  font-family: var(--sans);
+  font-size: clamp(21px, 1.85vw, 30px);
+  font-weight: 700; letter-spacing: -.035em; line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+/* Abgelaufen: die Null soll auffallen, ohne zu blinken */
+#seite-dashboard .tm-zeit.aus { color: var(--red-ink); }
+
+#seite-dashboard .tm-spur {
+  margin-top: 6px; height: 6px;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  box-shadow: var(--sunken);
+  overflow: hidden; flex: 0 0 auto;
+}
+#seite-dashboard .tm-spur i {
+  display: block; height: 100%; border-radius: 999px;
+  background: var(--accent-active);
+  transition: width .25s linear;
+}
+
+#seite-dashboard .tm-reihe {
+  margin-top: 7px;
+  display: flex; align-items: center; gap: 5px;
+  flex-wrap: nowrap;
+}
+#seite-dashboard .tm-reihe[hidden] { display: none; }
+
+#seite-dashboard .tm-vor,
+#seite-dashboard .tm-knopf {
+  flex: 1 1 0; min-width: 0;
+  padding: 4px 6px;
+  border: none; border-radius: 999px;
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+  font-family: var(--sans);
+  font-size: clamp(10px, .74vw, 11.5px);
+  font-weight: 600;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: background var(--t-base) var(--ease-soft),
+              color var(--t-base) var(--ease-soft),
+              transform var(--t-fast) var(--ease);
+}
+#seite-dashboard .tm-vor:hover,
+#seite-dashboard .tm-knopf:hover {
+  background: var(--surface-dark); color: var(--text-inverse);
+}
+#seite-dashboard .tm-vor:active,
+#seite-dashboard .tm-knopf:active { transform: scale(.94); }
+
+/* ----------------------------------------------------------
+   3  DER TAGESPLAN — Block 9
+   Links die Uhrzeit, daneben eine Linie mit einem Punkt je
+   Eintrag, rechts die Sache mit ihrem Balken.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-tagesplan > .card-body {
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: column; gap: 3px;
+  overflow-y: auto; overflow-x: hidden;
+  scrollbar-width: none;
+}
+#seite-dashboard #card-tagesplan > .card-body::-webkit-scrollbar { display: none; }
+
+#seite-dashboard .tp-punkt {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: clamp(9px, .9vw, 13px);
+  padding: clamp(4px, .45vw, 7px) 0 clamp(4px, .45vw, 7px) 0;
+  flex: 0 0 auto;
+}
+
+#seite-dashboard .tp-uhr {
+  padding-left: 15px;
+  font-size: clamp(10px, .74vw, 12px);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+/* Die Linie laeuft durch alle Punkte hindurch */
+#seite-dashboard .tp-punkt::before {
+  content: "";
+  position: absolute;
+  left: 4px; top: 0; bottom: 0;
+  width: 2px;
+  background: var(--surface-sunken);
+}
+#seite-dashboard .tp-punkt:first-child::before { top: 50%; }
+#seite-dashboard .tp-punkt:last-child::before  { bottom: 50%; }
+
+/* Der Punkt auf der Linie */
+#seite-dashboard .tp-punkt::after {
+  content: "";
+  position: absolute;
+  left: 0; top: clamp(9px, .95vw, 13px);
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 2px var(--text-muted);
+}
+#seite-dashboard .tp-punkt.vorbei::after {
+  background: var(--status-green);
+  box-shadow: inset 0 0 0 2px var(--status-green);
+}
+#seite-dashboard .tp-punkt.laeuft::after {
+  background: var(--accent-active);
+  box-shadow: inset 0 0 0 2px var(--accent-active),
+              0 0 0 4px var(--tint-blue);
+}
+
+#seite-dashboard .tp-inhalt { min-width: 0; }
+#seite-dashboard .tp-sache {
+  font-size: clamp(11.5px, .9vw, 14px);
+  font-weight: 650; letter-spacing: -.02em;
+  line-height: 1.25;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#seite-dashboard .tp-zusatz {
+  font-size: clamp(9.5px, .72vw, 11.5px);
+  color: var(--text-muted);
+  line-height: 1.3;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#seite-dashboard .tp-balken {
+  margin-top: 4px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  overflow: hidden;
+}
+#seite-dashboard .tp-balken i {
+  display: block; height: 100%; border-radius: 999px;
+  background: var(--text-muted);
+  transition: width .5s cubic-bezier(.32,.72,0,1);
+}
+#seite-dashboard .tp-punkt.laeuft .tp-balken i { background: var(--accent-active); }
+#seite-dashboard .tp-punkt.vorbei .tp-balken i { background: var(--status-green); }
+
+/* Was schon vorbei ist, tritt zurueck */
+#seite-dashboard .tp-punkt.vorbei .tp-sache { color: var(--text-muted); font-weight: 500; }
+
+/* ----------------------------------------------------------
+   4  DIE KLAUSUR IST BREITER GEWORDEN
+   Fuenf Spalten auf zwei Reihen — dort ist Platz fuer den Titel
+   in einer Zeile und ein ruhigeres Verhaeltnis.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-klausur .kw-fach { -webkit-line-clamp: 1; }
+
+/* ----------------------------------------------------------
+   5  HABITS STEHEN JETZT HOCH UND SCHMAL
+   Zwei Spalten, drei Reihen. Die Perlenreihe passt neben dem
+   Namen nicht mehr — sie rueckt darunter.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-habits .hb-zeile {
+  flex-wrap: wrap;
+  min-height: 0;
+  padding: clamp(6px, .6vw, 9px) clamp(7px, .7vw, 10px);
+  gap: clamp(6px, .6vw, 9px);
+}
+#seite-dashboard #card-habits .i-rechts {
+  width: 100%; margin-left: 0;
+  justify-content: space-between;
+}
+#seite-dashboard #card-habits .hb-liste { gap: clamp(5px, .5vw, 8px); }
+
+/* ----------------------------------------------------------
+   6  HANDY
+   Der Bauplan gilt fuer den Schreibtisch. Auf dem Telefon bleibt
+   es bei einer Spalte, und der Timer steht oben — er ist das
+   einzige, was man dort im Vorbeigehen braucht.
+   ---------------------------------------------------------- */
+@media (max-width: 999px) {
+  #seite-dashboard #card-timer     { order: -1; min-height: 130px; }
+  #seite-dashboard #card-tagesplan { min-height: 240px; }
+}
+
+
+/* ----------------------------------------------------------
+   ZULETZT: DIE KURVE IST NICHT MEHR IM BAUPLAN
+   Sie muss ganz am Ende stehen — die Kapselform-Gruppe weiter
+   oben setzt jede der Karten wieder auf display: flex.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-screentime { display: none; }
+
+/* Die einreihigen Kacheln sind 115 Pixel hoch — davon nimmt die
+   Kopfzeile ihren Teil. Was darunter steht, muss ohne Rest
+   hineinpassen; abgeschnitten war zuletzt die Knopfreihe des
+   Timers und die Limitzeile der Bildschirmzeit. */
+#seite-dashboard #card-timer .tm-spur[hidden] { display: none; }
+#seite-dashboard #card-timer .tm-reihe { margin-top: 6px; }
+#seite-dashboard #card-timer .tm-vor,
+#seite-dashboard #card-timer .tm-knopf { padding: 3px 5px; }
+#seite-dashboard #card-timer .tm-spur { margin-top: 5px; }
+
+/* Hoechst- und Tiefstwert neben der Temperatur */
+#seite-dashboard .weather-spanne {
+  margin-left: 7px;
+  font-size: clamp(9.5px, .72vw, 12px);
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+#seite-dashboard #card-wetter .weather-desc { -webkit-line-clamp: 1; }
+
+/* Die Wetterkachel stand vier Pixel ueber. Symbol, Zahl und Zeile
+   ruecken enger zusammen, statt dass etwas wegfaellt. */
+#seite-dashboard #card-wetter .weather-temp {
+  font-size: clamp(18px, 1.55vw, 25px);
+}
+#seite-dashboard #card-wetter .weather-desc {
+  margin-top: 1px;
+  line-height: 1.2;
+}
+#seite-dashboard #card-wetter .card-head { margin-bottom: 3px; }
+#seite-dashboard #card-wetter .weather-icon {
+  width: clamp(24px, 1.95vw, 31px);
+  height: clamp(24px, 1.95vw, 31px);
+}
