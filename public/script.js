@@ -408,10 +408,10 @@
      der letzten 21 Tage sorgt dafür, dass die Tages-Kästchen und die
      Streak nicht leer starten. */
   const HABIT_LIMIT = 6;
-  /* Auf dem Dashboard ist die Karte zwei Rasterreihen hoch. Mehr als
-     drei Zeilen passen dort nicht, ohne dass die letzte abgeschnitten
-     wird. Die Habits-Seite zeigt weiterhin alle. */
-  const DASH_HABITS = 3;
+  /* Seit dem zweiten Bauplan steht die Kachel hoch und schmal —
+     zwei Spalten, drei Rasterreihen. Dort ist Platz fuer fuenf
+     Zeilen. Die Habits-Seite zeigt weiterhin alle. */
+  const DASH_HABITS = 5;
   const DEFAULT_HABITS = [
     { id: "sport",  name: "Sport"   },
     { id: "lesen",  name: "Lesen"   },
@@ -1785,11 +1785,11 @@
       });
     });
 
-    /* Feierabend: erst wenn der Tag sonst zu Ende waere */
+    /* Schlafen gehen: erst wenn der Tag sonst zu Ende waere */
     const schluss = uhrInMin(settings.schlafen || "22:30");
     if (schluss !== null && (!punkte.length || schluss > punkte[punkte.length - 1].bis)) {
-      punkte.push({ von: schluss, bis: schluss + 30, sache: "Feierabend",
-                    zusatz: "Tag zu Ende", ton: "grau" });
+      punkte.push({ von: schluss, bis: schluss + 30, sache: "Schlafen gehen",
+                    zusatz: "Gute Nacht", ton: "grau" });
     }
 
     return punkte.sort((a, b) => a.von - b.von);
@@ -3482,7 +3482,7 @@
      und Terminen. */
   [
     ["settingAufstehen", "aufstehen", "Aufstehzeit"],
-    ["settingSchlafen",  "schlafen",  "Feierabend"]
+    ["settingSchlafen",  "schlafen",  "Schlafenszeit"]
   ].forEach(([feld, schluessel, wort]) => {
     const knopf = $(feld + "Save");
     if (!knopf) return;
