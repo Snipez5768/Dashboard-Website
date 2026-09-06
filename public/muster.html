@@ -1,0 +1,844 @@
+<title>Kontrollzentrum</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ==========================================================
+   TOKENS
+   Aus dem Redesign-Prompt. Der helle Modus steht dort wörtlich;
+   der dunkle spiegelt ihn, weil er bleiben soll.
+   ========================================================== */
+:root {
+  color-scheme: light dark;
+
+  --bg-page:              #EAEAEC;
+  --surface-card:         #FFFFFF;
+  --surface-sunken:       #E1E1E4;   /* Mulden: Spuren, Eingaben */
+  --surface-dark:         #17171A;
+  --surface-dark-elevated:#1F1F23;
+
+  --text-primary: #17171A;
+  --text-inverse: #FFFFFF;
+  --text-muted:   #8A8A8E;
+
+  --accent-active: #0A84FF;
+  --status-red:    #FF3B30;
+  --status-green:  #34C759;
+  --status-orange: #FF9500;
+
+  /* Als Schrift auf hellem Grund brauchen die Signaltöne mehr Tiefe.
+     Orange bei 2,3:1 ist als Fläche gut und als Text unlesbar. */
+  --red-ink:    #C81E14;
+  --green-ink:  #1E7A35;
+  --orange-ink: #B45309;
+  --blue-ink:   #0064D8;
+
+  --tint-red:    rgba(255,  59,  48, .12);
+  --tint-green:  rgba( 52, 199,  89, .14);
+  --tint-orange: rgba(255, 149,   0, .15);
+  --tint-blue:   rgba( 10, 132, 255, .12);
+
+  /* Weich und diffus, nie eine harte Kontur */
+  --shadow-1: 0 1px 2px rgba(0,0,0,.04), 0 2px 6px rgba(0,0,0,.05);
+  --shadow-2: 0 2px 6px rgba(0,0,0,.05), 0 8px 22px rgba(0,0,0,.07);
+  --shadow-3: 0 4px 12px rgba(0,0,0,.06), 0 18px 44px rgba(0,0,0,.09);
+  --shadow-dark: 0 2px 8px rgba(0,0,0,.28), 0 10px 26px rgba(0,0,0,.20);
+  --sheen: inset 0 1px 0 rgba(255,255,255,.10);
+  --sunken: inset 0 1px 2px rgba(0,0,0,.07);
+
+  --r-pill: 999px;
+  --r-card: 26px;
+  --r-icon: 12px;
+
+  --sans: 'Inter', -apple-system, 'Segoe UI', system-ui, sans-serif;
+
+  --t-fast: 90ms;
+  --t-base: 170ms;
+  --t-glide: 280ms;
+  --ease: cubic-bezier(.32, .72, 0, 1);
+  --ease-soft: cubic-bezier(.4, 0, .2, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-thema="hell"]) {
+    --bg-page:              #000000;
+    --surface-card:         #131316;
+    --surface-sunken:       #0A0A0C;
+    --surface-dark:         #FFFFFF;   /* gespiegelt: das Feste ist hell */
+    --surface-dark-elevated:#F2F2F5;
+
+    --text-primary: #F7F7F9;
+    --text-inverse: #17171A;
+    --text-muted:   #9A9AA0;
+
+    --accent-active: #0A84FF;
+    --status-red:    #FF453A;
+    --status-green:  #30D158;
+    --status-orange: #FF9F0A;
+
+    --red-ink:    #FF6961;
+    --green-ink:  #32D74B;
+    --orange-ink: #FFB340;
+    --blue-ink:   #409CFF;
+
+    --tint-red:    rgba(255,  69,  58, .18);
+    --tint-green:  rgba( 48, 209,  88, .18);
+    --tint-orange: rgba(255, 159,  10, .18);
+    --tint-blue:   rgba( 10, 132, 255, .20);
+
+    --shadow-1: 0 1px 3px rgba(0,0,0,.6);
+    --shadow-2: 0 2px 10px rgba(0,0,0,.7);
+    --shadow-3: 0 6px 20px rgba(0,0,0,.75), 0 20px 48px rgba(0,0,0,.5);
+    --shadow-dark: 0 2px 12px rgba(255,255,255,.10);
+    --sheen: inset 0 1px 0 rgba(255,255,255,.07);
+    --sunken: inset 0 1px 2px rgba(0,0,0,.5);
+  }
+}
+:root[data-thema="dunkel"] {
+  --bg-page:              #000000;
+  --surface-card:         #131316;
+  --surface-sunken:       #0A0A0C;
+  --surface-dark:         #FFFFFF;
+  --surface-dark-elevated:#F2F2F5;
+  --text-primary: #F7F7F9;
+  --text-inverse: #17171A;
+  --text-muted:   #9A9AA0;
+  --accent-active: #0A84FF;
+  --status-red:    #FF453A;
+  --status-green:  #30D158;
+  --status-orange: #FF9F0A;
+  --red-ink:    #FF6961;
+  --green-ink:  #32D74B;
+  --orange-ink: #FFB340;
+  --blue-ink:   #409CFF;
+  --tint-red:    rgba(255,  69,  58, .18);
+  --tint-green:  rgba( 48, 209,  88, .18);
+  --tint-orange: rgba(255, 159,  10, .18);
+  --tint-blue:   rgba( 10, 132, 255, .20);
+  --shadow-1: 0 1px 3px rgba(0,0,0,.6);
+  --shadow-2: 0 2px 10px rgba(0,0,0,.7);
+  --shadow-3: 0 6px 20px rgba(0,0,0,.75), 0 20px 48px rgba(0,0,0,.5);
+  --shadow-dark: 0 2px 12px rgba(255,255,255,.10);
+  --sheen: inset 0 1px 0 rgba(255,255,255,.07);
+  --sunken: inset 0 1px 2px rgba(0,0,0,.5);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+.sheet { max-width: 1120px; margin: 0 auto; padding: 34px 24px 90px; }
+
+h1 { margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -.03em; }
+h2 { margin: 0 0 4px; font-size: 17px; font-weight: 600; letter-spacing: -.02em; }
+.lead { margin: 4px 0 0; color: var(--text-muted); max-width: 56ch; }
+.part { margin-bottom: 40px; }
+.note { margin: 0 0 16px; color: var(--text-muted); font-size: 13px; max-width: 68ch; }
+.row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.row + .row { margin-top: 14px; }
+.stack { display: flex; flex-direction: column; gap: 10px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; }
+
+/* ==========================================================
+   1  KNÖPFE
+   Pillen ohne Ausnahme. Die Haupthandlung ist gefüllt, alles
+   andere liegt hell auf und hebt sich beim Annähern.
+   ========================================================== */
+.btn {
+  appearance: none; border: 0;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px 22px;
+  border-radius: var(--r-pill);
+  font: inherit; font-size: 14px; font-weight: 600;
+  cursor: pointer; white-space: nowrap;
+  transition: transform var(--t-base) var(--ease),
+              box-shadow var(--t-base) var(--ease-soft),
+              background var(--t-base) var(--ease-soft),
+              color var(--t-base) var(--ease-soft);
+}
+.btn svg { width: 16px; height: 16px; }
+.btn:active { transform: scale(.97); transition-duration: var(--t-fast); }
+.btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--tint-blue), 0 0 0 1.5px var(--accent-active); }
+.btn:disabled { opacity: .38; pointer-events: none; }
+
+/* Haupthandlung: dunkle Pille, weißer Text, dezenter Glanz oben */
+.btn-primary {
+  background: var(--surface-dark);
+  color: var(--text-inverse);
+  box-shadow: var(--shadow-dark), var(--sheen);
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,0,0,.3), 0 14px 32px rgba(0,0,0,.22), var(--sheen); }
+
+/* Nebenhandlung: weiße Pille */
+.btn-secondary {
+  background: var(--surface-card);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-1);
+}
+.btn-secondary:hover { transform: translateY(-1px); box-shadow: var(--shadow-2); }
+
+/* Still: liegt flach im Grund */
+.btn-quiet { background: transparent; color: var(--text-muted); }
+.btn-quiet:hover { background: var(--surface-card); color: var(--text-primary); box-shadow: var(--shadow-1); }
+
+/* Farbe sitzt im Ruhezustand nur in der Schrift und füllt erst beim
+   Annähern. So bleibt Rot ein Warnsignal statt Zierde. */
+.btn-danger  { background: var(--surface-card); color: var(--red-ink);    box-shadow: var(--shadow-1); }
+.btn-danger:hover  { background: var(--status-red);    color: #fff; transform: translateY(-1px); box-shadow: var(--shadow-2); }
+.btn-success { background: var(--surface-card); color: var(--green-ink);  box-shadow: var(--shadow-1); }
+.btn-success:hover { background: var(--status-green);  color: #fff; transform: translateY(-1px); box-shadow: var(--shadow-2); }
+.btn-warn    { background: var(--surface-card); color: var(--orange-ink); box-shadow: var(--shadow-1); }
+.btn-warn:hover    { background: var(--status-orange); color: #fff; transform: translateY(-1px); box-shadow: var(--shadow-2); }
+
+/* Symbolknopf: kleinerer Radius, dunkel gefüllt, weißes Zeichen */
+.btn-icon {
+  width: 40px; height: 40px; padding: 0;
+  border-radius: var(--r-icon);
+  background: var(--surface-card); color: var(--text-muted);
+  box-shadow: var(--shadow-1);
+}
+.btn-icon:hover { color: var(--text-primary); transform: translateY(-1px); box-shadow: var(--shadow-2); }
+.btn-icon.on { background: var(--surface-dark); color: var(--text-inverse); box-shadow: var(--shadow-dark), var(--sheen); }
+.btn-icon svg { width: 18px; height: 18px; }
+
+/* Zustandsschau */
+.states { display: flex; flex-wrap: wrap; gap: 24px; }
+.state { text-align: center; }
+.state-label { margin-top: 8px; font-size: 11px; color: var(--text-muted); }
+.is-hover { transform: translateY(-1px); box-shadow: var(--shadow-2) !important; }
+.is-press { transform: scale(.97); box-shadow: var(--shadow-1) !important; }
+.is-focus { box-shadow: 0 0 0 3px var(--tint-blue), 0 0 0 1.5px var(--accent-active) !important; }
+
+/* ==========================================================
+   2  SEGMENTED CONTROL — die Pille gleitet
+   ========================================================== */
+.seg {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 2px;
+  padding: 5px;
+  border-radius: var(--r-pill);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-2);
+  max-width: 100%;
+}
+.seg-thumb {
+  position: absolute; top: 5px; left: 0;
+  border-radius: var(--r-pill);
+  background: var(--surface-dark);
+  box-shadow: var(--shadow-dark), var(--sheen);
+  transition: transform var(--t-glide) var(--ease), width var(--t-glide) var(--ease);
+  z-index: 0;
+}
+.seg-thumb.mute { transition: none; }
+.seg-item {
+  position: relative; z-index: 1;
+  appearance: none; border: 0; background: none;
+  padding: 10px 22px;
+  border-radius: var(--r-pill);
+  font: inherit; font-size: 14px; font-weight: 500;
+  color: var(--text-muted); cursor: pointer; white-space: nowrap;
+  transition: color var(--t-base) var(--ease-soft);
+}
+.seg-item:hover { color: var(--text-primary); }
+.seg-item.on { color: var(--text-inverse); font-weight: 600; }
+
+/* ==========================================================
+   3  PAGINATION — runde nummerierte Pillen
+   ========================================================== */
+.pager { display: inline-flex; align-items: center; gap: 5px; padding: 6px;
+  border-radius: 22px; background: var(--surface-card); box-shadow: var(--shadow-2); }
+.page {
+  appearance: none; border: 0;
+  width: 42px; height: 42px;
+  border-radius: var(--r-icon);
+  background: var(--surface-sunken); color: var(--text-muted);
+  font: inherit; font-size: 15px; font-weight: 500; font-variant-numeric: tabular-nums;
+  display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+  transition: background var(--t-base) var(--ease-soft), color var(--t-base) var(--ease-soft),
+              transform var(--t-base) var(--ease), box-shadow var(--t-base) var(--ease-soft);
+}
+.page:hover  { color: var(--text-primary); transform: translateY(-1px); box-shadow: var(--shadow-1); }
+.page:active { transform: scale(.94); transition-duration: var(--t-fast); }
+.page.on { background: var(--surface-dark); color: var(--text-inverse); font-weight: 600; box-shadow: var(--shadow-dark), var(--sheen); }
+.page.arrow { background: transparent; }
+.page.arrow:hover { background: var(--surface-sunken); }
+.page svg { width: 17px; height: 17px; }
+
+/* ==========================================================
+   4  HÄKCHEN
+   ========================================================== */
+.checks { display: inline-flex; gap: 6px; padding: 6px; border-radius: 22px;
+  background: var(--surface-card); box-shadow: var(--shadow-2); }
+.check {
+  appearance: none; border: 0; background: none;
+  display: inline-flex; align-items: center; gap: 11px;
+  padding: 7px 18px 7px 7px; border-radius: 17px;
+  font: inherit; font-size: 14px; font-weight: 500; color: var(--text-muted); cursor: pointer;
+  transition: background var(--t-base) var(--ease-soft), color var(--t-base) var(--ease-soft);
+}
+.check:hover { background: var(--surface-sunken); color: var(--text-primary); }
+.check.on { color: var(--text-primary); }
+.check-box {
+  width: 34px; height: 34px; flex-shrink: 0;
+  border-radius: var(--r-icon);
+  background: var(--surface-sunken); color: var(--text-muted);
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: background var(--t-base) var(--ease-soft), color var(--t-base) var(--ease-soft),
+              transform var(--t-base) var(--ease), box-shadow var(--t-base) var(--ease-soft);
+}
+.check.on .check-box { background: var(--surface-dark); color: var(--text-inverse); box-shadow: var(--shadow-dark), var(--sheen); }
+.check:active .check-box { transform: scale(.9); transition-duration: var(--t-fast); }
+.check-box svg { width: 18px; height: 18px; }
+
+/* ==========================================================
+   5  EINGABEN UND SUCHE
+   ========================================================== */
+.field {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 6px 0 18px;
+  border-radius: var(--r-pill);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-1);
+  min-width: 0;
+}
+.field svg { width: 17px; height: 17px; color: var(--text-muted); flex-shrink: 0; }
+.field input {
+  flex: 1; min-width: 0;
+  border: 0; background: none; outline: none;
+  padding: 13px 0; font: inherit; font-size: 14px; color: var(--text-primary);
+}
+.field input::placeholder { color: var(--text-muted); }
+.field:focus-within { box-shadow: var(--shadow-2), 0 0 0 3px var(--tint-blue); }
+
+.drop {
+  appearance: none; border: 0;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 16px 11px 18px;
+  border-radius: var(--r-pill);
+  background: var(--surface-card); color: var(--text-primary);
+  font: inherit; font-size: 14px; font-weight: 500; cursor: pointer;
+  box-shadow: var(--shadow-1);
+  transition: transform var(--t-base) var(--ease), box-shadow var(--t-base) var(--ease-soft);
+}
+.drop:hover { transform: translateY(-1px); box-shadow: var(--shadow-2); }
+.drop svg { width: 14px; height: 14px; color: var(--text-muted); }
+.reset { border: 0; background: none; padding: 8px 4px; font: inherit; font-size: 13.5px;
+  color: var(--text-muted); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.reset:hover { color: var(--text-primary); }
+
+/* ==========================================================
+   6  STATUS-PILLEN im Dynamic-Island-Stil
+   Immer dunkel, auch im hellen Modus — das ist ihr Wesen.
+   ========================================================== */
+.island {
+  display: inline-flex; align-items: center; gap: 11px;
+  padding: 10px 18px 10px 11px;
+  border-radius: var(--r-pill);
+  background: #17171A;
+  color: #fff;
+  box-shadow: var(--shadow-dark), var(--sheen);
+  max-width: 100%;
+}
+.island-mark {
+  width: 34px; height: 34px; flex-shrink: 0;
+  border-radius: var(--r-pill);
+  display: grid; place-items: center;
+  background: #2A2A2F; color: #fff;
+}
+.island-mark svg { width: 18px; height: 18px; }
+.island-mark.red    { background: rgba(255,59,48,.22);  color: #FF6961; }
+.island-mark.green  { background: rgba(52,199,89,.22);  color: #32D74B; }
+.island-mark.orange { background: rgba(255,149,0,.22);  color: #FFB340; }
+.island-mark.blue   { background: rgba(10,132,255,.24); color: #64B0FF; }
+.island-text { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.island-what { font-size: 11.5px; color: rgba(255,255,255,.62); white-space: nowrap; }
+.island-value { font-size: 15px; font-weight: 600; letter-spacing: -.02em;
+  font-variant-numeric: tabular-nums; white-space: nowrap; }
+.island-right { margin-left: auto; padding-left: 8px; font-size: 14px; font-weight: 600;
+  font-variant-numeric: tabular-nums; flex-shrink: 0; }
+.island-right.red { color: #FF6961; }
+.island-right.green { color: #32D74B; }
+.island-right.orange { color: #FFB340; }
+.island-right.blue { color: #64B0FF; }
+.island.slim { padding: 8px 16px 8px 9px; }
+.island.slim .island-mark { width: 26px; height: 26px; }
+.island.slim .island-mark svg { width: 14px; height: 14px; }
+.island.slim .island-value { font-size: 13.5px; }
+
+/* ==========================================================
+   7  KARTEN
+   ========================================================== */
+.card {
+  padding: 20px;
+  border-radius: var(--r-card);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-3);
+  transition: transform var(--t-glide) var(--ease), box-shadow var(--t-glide) var(--ease-soft);
+}
+.card:hover { transform: translateY(-2px); }
+.card-top { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.card-name { font-size: 13px; font-weight: 500; color: var(--text-muted); margin-right: auto; }
+.big { font-size: 38px; font-weight: 700; letter-spacing: -.035em; line-height: 1;
+  font-variant-numeric: tabular-nums; }
+.big small { font-size: 16px; font-weight: 500; color: var(--text-muted); letter-spacing: -.01em; }
+.sub { margin-top: 6px; font-size: 13px; color: var(--text-muted); }
+
+.chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 11px;
+  border-radius: var(--r-pill); font-size: 11.5px; font-weight: 600;
+  background: var(--surface-sunken); color: var(--text-muted); }
+.chip.red    { background: var(--tint-red);    color: var(--red-ink); }
+.chip.green  { background: var(--tint-green);  color: var(--green-ink); }
+.chip.orange { background: var(--tint-orange); color: var(--orange-ink); }
+.chip.blue   { background: var(--tint-blue);   color: var(--blue-ink); }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+.bar { height: 8px; border-radius: var(--r-pill); background: var(--surface-sunken);
+  box-shadow: var(--sunken); overflow: hidden; }
+.bar i { display: block; height: 100%; border-radius: var(--r-pill); }
+
+.ring { width: 74px; height: 74px; flex-shrink: 0; }
+.ring circle { fill: none; stroke-linecap: round; }
+.ring .track { stroke: var(--surface-sunken); }
+
+/* ==========================================================
+   8  ZEITSTRAHL mit Tagesleiste und Avataren
+   ========================================================== */
+.days { display: flex; gap: 4px; margin-bottom: 18px; }
+.day {
+  appearance: none; border: 0; background: none;
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 8px 2px 10px;
+  border-radius: 18px;
+  font: inherit; cursor: pointer;
+  transition: background var(--t-base) var(--ease-soft);
+}
+.day:hover { background: var(--surface-sunken); }
+.day-name { font-size: 11.5px; color: var(--text-muted); }
+.day-num {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  transition: background var(--t-base) var(--ease-soft), color var(--t-base) var(--ease-soft);
+}
+.day.on .day-name { color: var(--accent-active); font-weight: 600; }
+.day.on .day-num  { background: var(--accent-active); color: #fff; }
+
+.line { position: relative; padding-left: 30px; }
+.line::before {
+  content: ""; position: absolute; left: 6px; top: 14px; bottom: 14px;
+  width: 2px; border-radius: 2px;
+  background: linear-gradient(180deg,
+    var(--surface-sunken) 0%,
+    var(--accent-active) var(--now, 46%),
+    var(--surface-sunken) 100%);
+}
+.step { position: relative; padding: 5px 0; }
+.node {
+  position: absolute; left: -30px; top: 50%; transform: translateY(-50%);
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--bg-page);
+  box-shadow: inset 0 0 0 2px var(--surface-sunken);
+}
+.step.done .node { background: var(--status-green); box-shadow: inset 0 0 0 2px var(--status-green); }
+.step.now .node  { background: var(--bg-page); box-shadow: inset 0 0 0 4px var(--accent-active), 0 0 0 5px var(--tint-blue); }
+
+.entry {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 18px;
+  border-radius: 20px;
+  background: var(--surface-sunken);
+  cursor: pointer;
+  transition: transform var(--t-base) var(--ease), background var(--t-base) var(--ease-soft),
+              box-shadow var(--t-base) var(--ease-soft);
+}
+.entry:hover { transform: translateX(3px); background: var(--surface-card); box-shadow: var(--shadow-2); }
+.entry-main { min-width: 0; flex: 1; }
+.entry-title { font-size: 15px; font-weight: 600; letter-spacing: -.015em; }
+.entry-sub { margin-top: 2px; font-size: 12.5px; color: var(--text-muted); }
+.entry-time { font-size: 13px; font-weight: 500; color: var(--text-muted);
+  font-variant-numeric: tabular-nums; flex-shrink: 0; }
+.step.now .entry {
+  background: var(--accent-active);
+  box-shadow: 0 4px 16px var(--tint-blue), 0 14px 34px var(--tint-blue);
+}
+.step.now .entry-title { color: #fff; }
+.step.now .entry-sub, .step.now .entry-time { color: rgba(255,255,255,.82); }
+.step.done .entry-title { color: var(--text-muted); text-decoration: line-through;
+  text-decoration-color: var(--surface-sunken); }
+
+.faces { display: flex; margin-top: 8px; }
+.face {
+  width: 26px; height: 26px; border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: 11px; font-weight: 700; color: #fff;
+  box-shadow: 0 0 0 2px var(--accent-active);
+  margin-left: -7px;
+}
+.face:first-child { margin-left: 0; }
+
+/* ==========================================================
+   9  FARBTAFEL
+   ========================================================== */
+.swatches { display: grid; grid-template-columns: repeat(auto-fit, minmax(146px, 1fr)); gap: 12px; }
+.swatch { padding: 14px; border-radius: 18px; background: var(--surface-card); box-shadow: var(--shadow-1); }
+.blob { height: 44px; border-radius: 13px; margin-bottom: 10px; }
+.sw-name { font-size: 13px; font-weight: 600; }
+.sw-hex  { font-size: 11.5px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.sw-use  { font-size: 11.5px; color: var(--text-muted); margin-top: 5px; }
+
+.hint { padding: 14px 17px; border-radius: 18px; background: var(--tint-orange);
+  color: var(--text-primary); font-size: 13px; line-height: 1.55; }
+.hint b { font-weight: 600; }
+
+@media (prefers-reduced-motion: reduce) { * { transition-duration: .01ms !important; } }
+@media (max-width: 620px) { .sheet { padding: 22px 14px 70px; } h1 { font-size: 23px; } }
+</style>
+
+<div class="sheet">
+
+  <div class="row" style="justify-content:space-between;align-items:flex-end;margin-bottom:30px">
+    <div>
+      <h1>Kontrollzentrum</h1>
+      <p class="lead">Alle Bausteine im neuen Stil: dunkle Pillen auf hellem Grau,
+         weiche Schatten statt Konturen, volle Rundung.</p>
+    </div>
+    <div class="seg" id="themeSeg" role="group" aria-label="Erscheinungsbild">
+      <div class="seg-thumb mute"></div>
+      <button type="button" class="seg-item" data-thema="auto">Automatisch</button>
+      <button type="button" class="seg-item" data-thema="hell">Hell</button>
+      <button type="button" class="seg-item" data-thema="dunkel">Dunkel</button>
+    </div>
+  </div>
+
+  <!-- ============ KOPFLEISTE ============ -->
+  <div class="part">
+    <h2>Kopfleiste</h2>
+    <p class="note">Titel links, Haupthandlung rechts. Darunter Suche, Filter und die
+       Ansichtsumschalter — alles in Pillenform.</p>
+    <div class="card">
+      <div class="row" style="justify-content:space-between;margin-bottom:16px">
+        <div style="font-size:21px;font-weight:700;letter-spacing:-.025em">Termine</div>
+        <button class="btn btn-primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Neuer Termin
+        </button>
+      </div>
+      <div class="row">
+        <div class="field" style="flex:1;min-width:200px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <input type="search" placeholder="Suchen …">
+        </div>
+        <button class="drop">Alle Fächer
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+        <button class="drop">Diese Woche
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+        <button class="reset">Zurücksetzen</button>
+        <div class="checks" style="padding:5px;gap:4px" data-single>
+          <button class="btn-icon" aria-label="Liste">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+          </button>
+          <button class="btn-icon on" aria-label="Raster">
+            <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3.5" y="3.5" width="7.5" height="7.5" rx="2.2"/><rect x="13" y="3.5" width="7.5" height="7.5" rx="2.2"/><rect x="3.5" y="13" width="7.5" height="7.5" rx="2.2"/><rect x="13" y="13" width="7.5" height="7.5" rx="2.2"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ KNÖPFE ============ -->
+  <div class="part">
+    <h2>Knöpfe</h2>
+    <p class="note">Farbe liegt im Ruhezustand nur in der Schrift. Erst beim Annähern füllt sie
+       den Knopf — so bleibt Rot ein Warnsignal und wird nicht zur Dekoration.</p>
+    <div class="row">
+      <button class="btn btn-primary">Speichern</button>
+      <button class="btn btn-secondary">Bearbeiten</button>
+      <button class="btn btn-quiet">Abbrechen</button>
+      <button class="btn btn-success">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Abhaken</button>
+      <button class="btn btn-warn">Verschieben</button>
+      <button class="btn btn-danger">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>Löschen</button>
+      <button class="btn btn-secondary" disabled>Gesperrt</button>
+    </div>
+    <div class="row" style="margin-top:18px">
+      <button class="btn btn-icon" aria-label="Einstellungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg></button>
+      <button class="btn btn-icon" aria-label="Neu laden"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-3-6.7M21 4v5h-5"/></svg></button>
+      <button class="btn btn-icon" aria-label="Mehr"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button>
+    </div>
+    <div style="margin-top:26px">
+      <div class="sw-use" style="margin-bottom:12px">Die vier Zustände nebeneinander</div>
+      <div class="states">
+        <div class="state"><button class="btn btn-secondary">Ruhe</button><div class="state-label">RUHE</div></div>
+        <div class="state"><button class="btn btn-secondary is-hover">Annähern</button><div class="state-label">MAUS DARÜBER</div></div>
+        <div class="state"><button class="btn btn-secondary is-press">Drücken</button><div class="state-label">GEDRÜCKT</div></div>
+        <div class="state"><button class="btn btn-secondary is-focus">Tastatur</button><div class="state-label">TASTATUR</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ UI-KIT ============ -->
+  <div class="part">
+    <h2>Auswahl, Blättern, Häkchen</h2>
+    <p class="note">Ausgewählt heißt: dunkel gefüllt mit weißer Schrift. Nie eine Farbe —
+       die bleibt der Bedeutung vorbehalten.</p>
+    <div class="stack" style="gap:16px">
+      <div><div class="seg" data-seg>
+        <div class="seg-thumb mute"></div>
+        <button class="seg-item on">Speicher</button>
+        <button class="seg-item">Inaktiv</button>
+        <button class="seg-item">Inaktiv</button>
+      </div></div>
+      <div><div class="pager" data-pager>
+        <button class="page arrow" aria-label="Zurück"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <button class="page on">1</button><button class="page">2</button>
+        <button class="page">3</button><button class="page">4</button><button class="page">5</button>
+      </div></div>
+      <div><div class="checks">
+        <button class="check on" data-check>
+          <span class="check-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>Erledigt</button>
+        <button class="check" data-check>
+          <span class="check-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>Offen</button>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- ============ STATUS-PILLEN ============ -->
+  <div class="part">
+    <h2>Status-Pillen</h2>
+    <p class="note">Der Dynamic-Island-Stil aus dem Referenzbild: immer dunkel, auch im hellen
+       Modus. Ein Symbol, eine Sache, ein Wert — für Kurzstatus und Live-Werte.</p>
+    <div class="row">
+      <span class="island">
+        <span class="island-mark orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M11 18.5h2"/></svg></span>
+        <span class="island-text"><span class="island-what">Bildschirmzeit heute</span><span class="island-value">4 h 12 min</span></span>
+        <span class="island-right orange">+18 %</span>
+      </span>
+      <span class="island">
+        <span class="island-mark red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 8v5M12 16.5v.01"/><circle cx="12" cy="12" r="9"/></svg></span>
+        <span class="island-text"><span class="island-what">Klausur Physik</span><span class="island-value">in 3 Tagen</span></span>
+      </span>
+      <span class="island slim">
+        <span class="island-mark green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+        <span class="island-value">3 von 5</span>
+      </span>
+      <span class="island slim">
+        <span class="island-mark blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+        <span class="island-value">Physik LK</span>
+        <span class="island-right blue">09:00</span>
+      </span>
+    </div>
+  </div>
+
+  <!-- ============ ZEITSTRAHL ============ -->
+  <div class="part">
+    <h2>Zeitstrahl</h2>
+    <p class="note">Tagesleiste mit dem gewählten Tag als blauem Kreis, darunter die Einträge an
+       einer Linie. Das Laufende ist eine vollflächige blaue Karte.</p>
+    <div class="card" style="max-width:560px">
+      <div class="days" data-days>
+        <button class="day"><span class="day-name">Mo</span><span class="day-num">4</span></button>
+        <button class="day"><span class="day-name">Di</span><span class="day-num">5</span></button>
+        <button class="day"><span class="day-name">Mi</span><span class="day-num">6</span></button>
+        <button class="day"><span class="day-name">Do</span><span class="day-num">7</span></button>
+        <button class="day"><span class="day-name">Fr</span><span class="day-num">8</span></button>
+        <button class="day on"><span class="day-name">Sa</span><span class="day-num">9</span></button>
+        <button class="day"><span class="day-name">So</span><span class="day-num">10</span></button>
+      </div>
+      <div class="line" style="--now:50%">
+        <div class="step done"><span class="node"></span>
+          <div class="entry"><div class="entry-main"><div class="entry-title">Aufstehen</div>
+            <div class="entry-sub">Früh raus, kurz frisch machen</div></div><span class="entry-time">07:00</span></div></div>
+        <div class="step done"><span class="node"></span>
+          <div class="entry"><div class="entry-main"><div class="entry-title">Schulweg</div>
+            <div class="entry-sub">Bus 142</div></div><span class="entry-time">07:40</span></div></div>
+        <div class="step now"><span class="node"></span>
+          <div class="entry"><div class="entry-main"><div class="entry-title">Physik LK</div>
+            <div class="entry-sub">Raum 214 · Elektrische Felder</div>
+            <div class="faces">
+              <span class="face" style="background:#FF9500">L</span>
+              <span class="face" style="background:#34C759">M</span>
+              <span class="face" style="background:#FF3B30">T</span>
+              <span class="face" style="background:#5856D6">+4</span>
+            </div></div><span class="entry-time">09:00</span></div></div>
+        <div class="step"><span class="node"></span>
+          <div class="entry"><div class="entry-main"><div class="entry-title">Mathe</div>
+            <div class="entry-sub">Raum 108</div></div><span class="entry-time">10:45</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ WIDGETS ============ -->
+  <div class="part">
+    <h2>Widgets</h2>
+    <p class="note">Der Inhalt trägt die Karte, nicht die Umrandung. Große Zahlen mit
+       Tabellenziffern, damit sie beim Hochzählen nicht wackeln.</p>
+    <div class="grid">
+      <div class="card">
+        <div class="card-top"><span class="card-name">Kalorien</span><span class="chip green"><span class="dot"></span>heute</span></div>
+        <div class="row" style="gap:16px;flex-wrap:nowrap">
+          <svg class="ring" viewBox="0 0 100 100">
+            <circle class="track" cx="50" cy="50" r="40" stroke-width="11"></circle>
+            <circle cx="50" cy="50" r="40" stroke-width="11" stroke="var(--status-green)"
+                    stroke-dasharray="251.3" stroke-dashoffset="70" transform="rotate(-90 50 50)"></circle>
+          </svg>
+          <div><div class="big">1820<small> kcal</small></div>
+            <div class="sub">von 2400 · 580 übrig</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-top"><span class="card-name">Bildschirmzeit</span><span class="chip orange"><span class="dot"></span>+18 %</span></div>
+        <div class="big">4<small> h</small> 12<small> min</small></div>
+        <div class="sub" style="margin-bottom:14px">gestern 3 h 34 min</div>
+        <div class="bar"><i style="width:72%;background:var(--status-orange)"></i></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><span class="card-name">Wetter · Berlin</span></div>
+        <div class="row" style="gap:14px;flex-wrap:nowrap">
+          <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="var(--status-orange)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17a4 4 0 010-8 5.5 5.5 0 0110.5 1.5A3.5 3.5 0 0117 17z"/></svg>
+          <div><div class="big">18<small>°</small></div><div class="sub">Bedeckt · 15° bis 20°</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-top"><span class="card-name">Nächste Klausur</span><span class="chip red"><span class="dot"></span>in 3 Tagen</span></div>
+        <div style="font-size:19px;font-weight:650;letter-spacing:-.02em">Physik</div>
+        <div class="sub" style="margin-bottom:14px">Elektrische Felder · 2 von 4 Portionen</div>
+        <div class="bar"><i style="width:50%;background:var(--status-red)"></i></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ FARBEN ============ -->
+  <div class="part">
+    <h2>Farben</h2>
+    <p class="note">Vier Signaltöne für Flächen, dazu je eine dunklere Fassung für Schrift.
+       Orange liegt auf Weiß bei 2,3:1 — als Fläche gut, als Text unlesbar.</p>
+    <div class="swatches">
+      <div class="swatch"><div class="blob" style="background:var(--surface-dark)"></div>
+        <div class="sw-name">Fest</div><div class="sw-hex">#17171A</div><div class="sw-use">Auswahl, Haupthandlung</div></div>
+      <div class="swatch"><div class="blob" style="background:var(--status-red)"></div>
+        <div class="sw-name">Rot</div><div class="sw-hex">#FF3B30</div><div class="sw-use">Überfällig, löschen</div></div>
+      <div class="swatch"><div class="blob" style="background:var(--status-green)"></div>
+        <div class="sw-name">Grün</div><div class="sw-hex">#34C759</div><div class="sw-use">Erledigt, im Plan</div></div>
+      <div class="swatch"><div class="blob" style="background:var(--status-orange)"></div>
+        <div class="sw-name">Orange</div><div class="sw-hex">#FF9500</div><div class="sw-use">Wird knapp, Achtung</div></div>
+      <div class="swatch"><div class="blob" style="background:var(--accent-active)"></div>
+        <div class="sw-name">Blau</div><div class="sw-hex">#0A84FF</div><div class="sw-use">Läuft gerade, gewählter Tag</div></div>
+    </div>
+    <div class="hint" style="margin-top:16px">
+      <b>Warum Orange und nicht Gelb:</b> Gelb liegt auf weißem Grund bei 1,9:1 und brauchte
+      bisher drei Abstufungen, damit es überhaupt als Schrift taugte. Orange kommt mit zweien
+      aus und ist als Warnsignal genauso eindeutig.
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  const root = document.documentElement;
+
+  function moveThumb(seg, target, instant) {
+    const thumb = seg.querySelector(".seg-thumb");
+    if (!thumb || !target) return;
+    thumb.classList.toggle("mute", !!instant);
+    thumb.style.width  = target.offsetWidth + "px";
+    thumb.style.height = target.offsetHeight + "px";
+    thumb.style.transform = "translate(" + target.offsetLeft + "px, 0)";
+    if (instant) requestAnimationFrame(() => thumb.classList.remove("mute"));
+  }
+
+  /* ---- Erscheinungsbild ---- */
+  const themeSeg = document.getElementById("themeSeg");
+  function setTheme(v, instant) {
+    if (v === "auto") root.removeAttribute("data-thema");
+    else root.setAttribute("data-thema", v);
+    try { localStorage.setItem("muster_thema", v); } catch (e) {}
+    themeSeg.querySelectorAll(".seg-item").forEach(b => {
+      const on = b.dataset.thema === v;
+      b.classList.toggle("on", on);
+      if (on) moveThumb(themeSeg, b, instant);
+    });
+  }
+  themeSeg.addEventListener("click", e => {
+    const b = e.target.closest(".seg-item");
+    if (b) setTheme(b.dataset.thema, false);
+  });
+
+  /* ---- Segmentierte Auswahl ---- */
+  document.querySelectorAll("[data-seg]").forEach(seg => {
+    seg.addEventListener("click", e => {
+      const b = e.target.closest(".seg-item");
+      if (!b) return;
+      seg.querySelectorAll(".seg-item").forEach(x => x.classList.remove("on"));
+      b.classList.add("on");
+      moveThumb(seg, b, false);
+    });
+    const on = seg.querySelector(".seg-item.on");
+    if (on) moveThumb(seg, on, true);
+  });
+
+  /* ---- Blättern ---- */
+  document.querySelectorAll("[data-pager]").forEach(p => {
+    p.addEventListener("click", e => {
+      const b = e.target.closest(".page");
+      if (!b || b.classList.contains("arrow")) return;
+      p.querySelectorAll(".page").forEach(x => x.classList.remove("on"));
+      b.classList.add("on");
+    });
+  });
+
+  /* ---- Häkchen ---- */
+  document.querySelectorAll("[data-check]").forEach(c =>
+    c.addEventListener("click", () => c.classList.toggle("on")));
+
+  /* ---- Ansichtsumschalter: genau einer ---- */
+  document.querySelectorAll("[data-single]").forEach(g => {
+    g.addEventListener("click", e => {
+      const b = e.target.closest(".btn-icon");
+      if (!b) return;
+      g.querySelectorAll(".btn-icon").forEach(x => x.classList.remove("on"));
+      b.classList.add("on");
+    });
+  });
+
+  /* ---- Tagesleiste ---- */
+  document.querySelectorAll("[data-days]").forEach(d => {
+    d.addEventListener("click", e => {
+      const b = e.target.closest(".day");
+      if (!b) return;
+      d.querySelectorAll(".day").forEach(x => x.classList.remove("on"));
+      b.classList.add("on");
+    });
+  });
+
+  let start = "auto";
+  try { start = localStorage.getItem("muster_thema") || "auto"; } catch (e) {}
+  setTheme(start, true);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => {
+      setTheme(start, true);
+      document.querySelectorAll("[data-seg]").forEach(s => {
+        const on = s.querySelector(".seg-item.on"); if (on) moveThumb(s, on, true);
+      });
+    });
+  }
+  window.addEventListener("resize", () => {
+    setTheme(root.getAttribute("data-thema") || "auto", true);
+    document.querySelectorAll("[data-seg]").forEach(s => {
+      const on = s.querySelector(".seg-item.on"); if (on) moveThumb(s, on, true);
+    });
+  });
+})();
+</script>

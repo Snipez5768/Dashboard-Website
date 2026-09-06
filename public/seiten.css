@@ -1,0 +1,1193 @@
+/* ==========================================================
+   ==========================================================
+   DIE UEBRIGEN SEITEN
+
+   Das Dashboard spricht die Sprache der Musterseite: Karte mit
+   20 Pixeln Polster und 26 Radius, Name klein in Grau, Abzeichen
+   als Pille mit Punkt, grosse Zahlen mit Tabellenziffern, Listen
+   als Kapseln. Diese Datei traegt dieselben Werte auf die neun
+   anderen Seiten.
+
+   Sie laedt nach dashboard.css, gewinnt also bei gleicher
+   Spezifitaet — ohne dass irgendwo ein !important noetig waere.
+   Was hier steht, gilt ausdruecklich nicht fuer das Dashboard:
+   jede Regel haengt an .seite:not(#seite-dashboard).
+   ========================================================== */
+
+/* ----------------------------------------------------------
+   1  DER SEITENKOPF
+   Titel gross, darunter die Zahlen des Tages in Grau — er bleibt,
+   wie er ist, bekommt aber den Abstand der Musterseite.
+   ---------------------------------------------------------- */
+.seite:not(#seite-dashboard) .seiten-kopf {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: clamp(14px, 1.4vw, 22px);
+}
+.seite:not(#seite-dashboard) .seiten-titel {
+  font-family: var(--sans);
+  font-size: clamp(24px, 2.1vw, 33px);
+  font-weight: 700;
+  letter-spacing: -.03em;
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+.seite:not(#seite-dashboard) .seiten-sub {
+  font-size: clamp(11.5px, .9vw, 13.5px);
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+/* ----------------------------------------------------------
+   2  DER BLOCK — das Gegenstueck zur Kachel
+   ---------------------------------------------------------- */
+.seite:not(#seite-dashboard) .block {
+  padding: clamp(15px, 1.3vw, 21px);
+  border: none;
+  border-radius: 26px;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-3);
+}
+
+/* Die Kopfzeile: Name klein in Grau, Abzeichen rechts als Pille.
+   Bisher stand dort eine Ueberschrift in 15 Pixeln und Halbfett —
+   auf der Musterseite traegt der Inhalt die Karte, nicht ihr
+   Titel. */
+.seite:not(#seite-dashboard) .block-kopf {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 21px;
+  margin-bottom: clamp(11px, 1vw, 16px);
+}
+.seite:not(#seite-dashboard) .block-kopf > h3,
+.seite:not(#seite-dashboard) .block-kopf > h2 {
+  margin: 0;
+  margin-right: auto;
+  font-family: var(--sans);
+  font-size: clamp(11.5px, .82vw, 13px);
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-muted);
+}
+
+.seite:not(#seite-dashboard) .block-zahl {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: 0 0 auto;
+  padding: 3px 10px;
+  border: none;
+  border-radius: 999px;
+  font-size: clamp(10px, .73vw, 11.5px);
+  font-weight: 600;
+  line-height: 1.25;
+  white-space: nowrap;
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+}
+.seite:not(#seite-dashboard) .block-zahl::before {
+  content: "";
+  width: 6px; height: 6px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: currentColor;
+}
+.seite:not(#seite-dashboard) .block-zahl.rot   { background: var(--tint-red);    color: var(--red-ink); }
+.seite:not(#seite-dashboard) .block-zahl.gruen { background: var(--tint-green);  color: var(--green-ink); }
+.seite:not(#seite-dashboard) .block-zahl.gelb  { background: var(--tint-orange); color: var(--orange-ink); }
+.seite:not(#seite-dashboard) .block-zahl.blau  { background: var(--tint-blue);   color: var(--blue-ink); }
+
+/* Die Unterzeile eines Blocks */
+.seite:not(#seite-dashboard) .block-unter {
+  margin-top: 6px;
+  font-size: clamp(11px, .82vw, 13px);
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+/* ----------------------------------------------------------
+   3  DIE LISTEN
+   Eine Zeile ist eine Kapsel, wie im Zeitstrahl der Musterseite.
+   ---------------------------------------------------------- */
+.seite:not(#seite-dashboard) .voll-liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.seite:not(#seite-dashboard) .voll-zeile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 13px;
+  border: none;
+  border-radius: 18px;
+  background: var(--surface-sunken);
+  transition: transform var(--t-base) var(--ease),
+              background var(--t-base) var(--ease-soft),
+              box-shadow var(--t-base) var(--ease-soft);
+}
+.seite:not(#seite-dashboard) .voll-zeile:hover {
+  transform: translateX(2px);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-2);
+}
+.seite:not(#seite-dashboard) .vz-titel {
+  font-size: clamp(13px, 1vw, 15px);
+  font-weight: 650;
+  letter-spacing: -.02em;
+  line-height: 1.25;
+}
+.seite:not(#seite-dashboard) .vz-sub {
+  font-size: clamp(10.5px, .8vw, 12px);
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+.seite:not(#seite-dashboard) .vz-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: clamp(10px, .76vw, 11.5px);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ----------------------------------------------------------
+   4  HABITS & STREAKS
+   Jede Habit-Kachel wird eine Kapsel, wie die Zeilen im
+   Zeitstrahl. Das Jahresraster bekommt Kreise statt Quadrate —
+   auf dem Dashboard stehen dort dieselben Perlen — und Gruen
+   statt Blau: Blau heisst in dieser Sprache "laeuft gerade",
+   ein abgehakter Tag ist erledigt.
+   ---------------------------------------------------------- */
+#seite-habits .hk-block {
+  padding: clamp(11px, 1vw, 15px);
+  border: none;
+  border-radius: 20px;
+  background: var(--surface-sunken);
+  transition: transform var(--t-base) var(--ease),
+              box-shadow var(--t-base) var(--ease-soft);
+}
+#seite-habits .hk-block:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-2);
+}
+
+#seite-habits .hk-kopf {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-bottom: clamp(9px, .9vw, 13px);
+}
+#seite-habits .hk-name {
+  font-size: clamp(13px, 1.05vw, 16px);
+  font-weight: 650;
+  letter-spacing: -.02em;
+  line-height: 1.25;
+  color: var(--text-primary);
+}
+#seite-habits .hk-stand {
+  font-size: clamp(10.5px, .8vw, 12px);
+  font-weight: 500;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+#seite-habits .hk-serie {
+  font-size: clamp(10px, .76vw, 11.5px);
+  color: var(--text-muted);
+}
+#seite-habits .hk-ziel {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: clamp(10px, .76vw, 11.5px);
+  color: var(--text-muted);
+}
+
+/* Das Raster: Kreise, und was erledigt ist, ist gruen */
+#seite-habits .hk-feld {
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--text-muted) 16%, transparent);
+}
+#seite-habits .hk-feld.done {
+  background: var(--accent-active);
+}
+#seite-habits .hk-gitter { gap: 4px; }
+
+/* ----------------------------------------------------------
+   5  DIE STREAK-ZEILEN
+   Sie tragen schon die Insel vom Dashboard — hier nur die
+   Groessen, damit sie auf der eigenen Seite nicht gedrungen
+   wirken.
+   ---------------------------------------------------------- */
+#seite-habits .streak-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+#seite-habits .streak-row {
+  flex: 1 1 190px;
+  min-width: 0;
+  border-radius: 20px;
+  min-height: 54px;
+}
+
+/* ----------------------------------------------------------
+   6  DIE HABIT-KACHELN BRAUCHEN MEHR BREITE
+   Der Container gab feste Spalten von 130 Pixeln vor. Darin ist
+   der Auswahlkasten fuer das Wochenziel 152 Pixel breit — er lief
+   also 36 Pixel ueber den Rand hinaus, und die Kreise darunter
+   wurden auf 11 Pixel gequetscht. Jetzt bestimmt eine Mindest-
+   breite die Aufteilung; auf breiten Bildschirmen wachsen die
+   Kacheln nicht ins Unendliche, weil sie sich den Platz teilen.
+   ---------------------------------------------------------- */
+#seite-habits .habit-kalender {
+  grid-template-columns: repeat(auto-fit, minmax(186px, 1fr));
+  justify-content: stretch;
+  gap: 12px;
+}
+
+/* Der Auswahlkasten darf schrumpfen, statt die Kachel zu sprengen */
+#seite-habits .hk-ziel {
+  min-width: 0;
+  width: 100%;
+}
+#seite-habits .hk-ziel .aw {
+  min-width: 0;
+  flex: 1 1 auto;
+  max-width: 100%;
+}
+#seite-habits .hk-ziel .aw-knopf {
+  width: 100%;
+  min-width: 0;
+  justify-content: space-between;
+}
+#seite-habits .hk-ziel .aw-wert {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Das Raster darf den gewonnenen Platz nutzen */
+#seite-habits .hk-gitter {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
+  width: 100%;
+}
+#seite-habits .hk-feld {
+  width: auto;
+  height: auto;
+  aspect-ratio: 1;
+}
+
+/* ==========================================================
+   ==========================================================
+   DIE BAUSTEINE DER EINZELNEN SEITEN
+
+   Drei davon kommen mehrfach vor und werden zuerst behandelt:
+   die Kennzahl (Kalorien, Bildschirmzeit, Analyse), die
+   Balkenzeile (Bildschirmzeit, Analyse) und die Eingabezeile
+   (Projekte, Automation). Danach folgt, was jede Seite fuer
+   sich hat.
+   ========================================================== */
+
+/* ----------------------------------------------------------
+   7  DIE KENNZAHL
+   Label klein in Grau, Zahl gross mit Tabellenziffern, Zusatz
+   darunter — genau der Aufbau der Widgets auf der Musterseite.
+   ---------------------------------------------------------- */
+.seite:not(#seite-dashboard) .kennzahl-reihe {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: clamp(10px, 1vw, 16px);
+}
+.seite:not(#seite-dashboard) .kennzahl {
+  padding: clamp(12px, 1.1vw, 17px) clamp(13px, 1.2vw, 18px);
+  border: none;
+  border-radius: 20px;
+  background: var(--surface-sunken);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+.seite:not(#seite-dashboard) .kz-label {
+  font-size: clamp(10.5px, .78vw, 12.5px);
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0;
+  text-transform: none;
+  margin-bottom: 5px;
+}
+.seite:not(#seite-dashboard) .kz-wert {
+  font-family: var(--sans);
+  font-size: clamp(21px, 1.85vw, 30px);
+  font-weight: 700;
+  letter-spacing: -.035em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+.seite:not(#seite-dashboard) .kz-wert small,
+.seite:not(#seite-dashboard) .kz-wert span.einheit {
+  font-size: clamp(11px, .85vw, 14px);
+  font-weight: 500;
+  color: var(--text-muted);
+}
+.seite:not(#seite-dashboard) .kz-zusatz {
+  margin-top: 5px;
+  font-size: clamp(10.5px, .78vw, 12.5px);
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+/* ----------------------------------------------------------
+   8  DIE BALKENZEILE
+   Name links, Balken in der Mitte, Wert rechts. Der Balken ist
+   acht Pixel hoch wie ueberall.
+   ---------------------------------------------------------- */
+.seite:not(#seite-dashboard) .bt-zeile,
+.seite:not(#seite-dashboard) .app-zeile,
+.seite:not(#seite-dashboard) .au-zeile {
+  display: flex;
+  align-items: center;
+  gap: clamp(9px, .9vw, 13px);
+  padding: clamp(8px, .8vw, 11px) clamp(10px, 1vw, 14px);
+  border: none;
+  border-radius: 16px;
+  background: var(--surface-sunken);
+  transition: transform var(--t-base) var(--ease),
+              background var(--t-base) var(--ease-soft);
+}
+.seite:not(#seite-dashboard) .bt-zeile:hover,
+.seite:not(#seite-dashboard) .app-zeile:hover,
+.seite:not(#seite-dashboard) .au-zeile:hover {
+  transform: translateX(2px);
+  background: color-mix(in srgb, var(--surface-sunken) 60%, var(--surface-card));
+}
+
+.seite:not(#seite-dashboard) .bt-name,
+.seite:not(#seite-dashboard) .app-name,
+.seite:not(#seite-dashboard) .au-name {
+  font-size: clamp(12px, .92vw, 14px);
+  font-weight: 600;
+  letter-spacing: -.015em;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.seite:not(#seite-dashboard) .an-neben,
+.seite:not(#seite-dashboard) .au-domain {
+  font-size: clamp(10px, .74vw, 11.5px);
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+/* Die Spur */
+.seite:not(#seite-dashboard) .bt-spur,
+.seite:not(#seite-dashboard) .app-spur,
+.seite:not(#seite-dashboard) .au-spur {
+  flex: 1 1 auto;
+  min-width: 40px;
+  height: 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-muted) 18%, transparent);
+  box-shadow: none;
+  overflow: hidden;
+}
+.seite:not(#seite-dashboard) .bt-fuellung,
+.seite:not(#seite-dashboard) .app-spur > i,
+.seite:not(#seite-dashboard) .au-spur > i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent-active);
+  transition: width .6s cubic-bezier(.32,.72,0,1);
+}
+/* Wo eine Grenze ueberschritten ist, sagt die Farbe es */
+.seite:not(#seite-dashboard) .bt-fuellung.schlecht { background: var(--status-red); }
+.seite:not(#seite-dashboard) .bt-fuellung.gut      { background: var(--status-green); }
+
+.seite:not(#seite-dashboard) .bt-wert,
+.seite:not(#seite-dashboard) .app-zeit,
+.seite:not(#seite-dashboard) .app-anteil,
+.seite:not(#seite-dashboard) .au-zeit {
+  flex: 0 0 auto;
+  font-size: clamp(11px, .84vw, 13px);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.seite:not(#seite-dashboard) .app-rang {
+  flex: 0 0 auto;
+  width: 22px; height: 22px;
+  display: grid; place-items: center;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--text-muted) 14%, transparent);
+  font-size: 10.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+/* ----------------------------------------------------------
+   9  DIE EINGABEZEILE — Projekte und Automation
+   ---------------------------------------------------------- */
+.seite:not(#seite-dashboard) .zeilen-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+.seite:not(#seite-dashboard) .zeilen-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 9px 14px;
+  border: none;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  color: var(--text-primary);
+  font-family: var(--sans);
+  font-size: clamp(12px, .92vw, 14px);
+}
+.seite:not(#seite-dashboard) .zeilen-input::placeholder { color: var(--text-muted); }
+.seite:not(#seite-dashboard) .zeilen-input:focus-visible {
+  outline: 2px solid var(--accent-active);
+  outline-offset: 1px;
+}
+.seite:not(#seite-dashboard) .zeilen-btn {
+  flex: 0 0 auto;
+  padding: 9px 17px;
+  border: none;
+  border-radius: 999px;
+  background: var(--surface-dark);
+  color: var(--text-inverse);
+  font-family: var(--sans);
+  font-size: clamp(11.5px, .88vw, 13px);
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform var(--t-fast) var(--ease),
+              filter var(--t-base) var(--ease-soft);
+}
+.seite:not(#seite-dashboard) .zeilen-btn:hover  { filter: brightness(1.15); }
+.seite:not(#seite-dashboard) .zeilen-btn:active { transform: scale(.96); }
+
+/* ----------------------------------------------------------
+   10  KALENDER & SCHULE
+   Der Monat bleibt ein Raster — nur runder, und die Termine
+   darin werden Pillen statt gefuellter Balken.
+   ---------------------------------------------------------- */
+#seite-kalender .monat-tag {
+  border-radius: 14px;
+  border: none;
+  background: var(--surface-sunken);
+  transition: background var(--t-base) var(--ease-soft);
+}
+#seite-kalender .monat-tag:hover { background: color-mix(in srgb, var(--surface-sunken) 55%, var(--surface-card)); }
+#seite-kalender .monat-tag.wochenende { background: color-mix(in srgb, var(--surface-sunken) 55%, transparent); }
+#seite-kalender .monat-tag.heute {
+  background: var(--tint-blue);
+  box-shadow: inset 0 0 0 1.5px var(--accent-active);
+}
+#seite-kalender .mt-zahl {
+  font-size: clamp(10.5px, .8vw, 12.5px);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+#seite-kalender .monat-tag.heute .mt-zahl { color: var(--blue-ink); }
+
+#seite-kalender .mt-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: clamp(9.5px, .72vw, 11px);
+  font-weight: 600;
+  line-height: 1.3;
+  background: var(--surface-card);
+  color: var(--text-primary);
+  overflow: hidden;
+}
+#seite-kalender .mt-chip .mt-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#seite-kalender .mt-punkt {
+  flex: 0 0 auto;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent-active);
+}
+#seite-kalender .mt-chip.termin  .mt-punkt { background: var(--accent-active); }
+#seite-kalender .mt-chip.klausur .mt-punkt { background: var(--status-red); }
+
+/* Der Stundenplan: jede Stunde eine Kapsel */
+#seite-kalender .plan-fach {
+  border-radius: 14px;
+  border: none;
+  padding: 7px 10px;
+  background: var(--surface-sunken);
+}
+#seite-kalender .pf-name {
+  font-size: clamp(11px, .85vw, 13px);
+  font-weight: 650;
+  letter-spacing: -.015em;
+}
+#seite-kalender .pf-raum,
+#seite-kalender .plan-uhr {
+  font-size: clamp(9.5px, .72vw, 11px);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+#seite-kalender .plan-leer {
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--text-muted) 6%, transparent);
+}
+
+/* ----------------------------------------------------------
+   11  LERNEN
+   Die Reiter sind ein Segmentschalter wie auf der Musterseite.
+   ---------------------------------------------------------- */
+#seite-lernen .lr-tab {
+  padding: 7px 15px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--sans);
+  font-size: clamp(11.5px, .88vw, 13px);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--t-base) var(--ease-soft),
+              color var(--t-base) var(--ease-soft);
+}
+#seite-lernen .lr-tab:hover { color: var(--text-primary); }
+#seite-lernen .lr-tab.aktiv,
+#seite-lernen .lr-tab.active {
+  background: var(--surface-dark);
+  color: var(--text-inverse);
+}
+#seite-lernen .lern-panel {
+  border-radius: 20px;
+  border: none;
+  background: var(--surface-sunken);
+  padding: clamp(11px, 1vw, 15px);
+}
+#seite-lernen .dauer-punkt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 16px;
+  background: var(--surface-sunken);
+}
+#seite-lernen .dauer-name {
+  font-size: clamp(12px, .92vw, 14px);
+  font-weight: 600;
+}
+#seite-lernen .dauer-lang {
+  font-size: clamp(10px, .76vw, 11.5px);
+  color: var(--text-muted);
+}
+
+/* ----------------------------------------------------------
+   12  PROJEKTE UND AUTOMATION
+   ---------------------------------------------------------- */
+#seite-projekte .pj-spalte,
+#seite-planung .pj-spalte {
+  border-radius: 20px;
+  border: none;
+  background: var(--surface-sunken);
+  padding: clamp(11px, 1vw, 15px);
+}
+#seite-projekte .pj-raum,
+#seite-planung .pj-raum {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: clamp(10px, 1vw, 15px);
+}
+
+/* ----------------------------------------------------------
+   13  LICHT
+   ---------------------------------------------------------- */
+#seite-licht .licht-kopf-knoepfe {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+#seite-licht .li-kopfknopf {
+  padding: 7px 15px;
+  border: none;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+  font-family: var(--sans);
+  font-size: clamp(11.5px, .88vw, 13px);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--t-base) var(--ease-soft),
+              color var(--t-base) var(--ease-soft),
+              transform var(--t-fast) var(--ease);
+}
+#seite-licht .li-kopfknopf:hover  { background: var(--surface-dark); color: var(--text-inverse); }
+#seite-licht .li-kopfknopf:active { transform: scale(.96); }
+#seite-licht .licht-gitter {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: clamp(10px, 1vw, 15px);
+}
+#seite-licht .ll-titel {
+  font-size: clamp(13px, 1vw, 15px);
+  font-weight: 650;
+  letter-spacing: -.02em;
+}
+#seite-licht .ll-text {
+  margin-top: 5px;
+  font-size: clamp(11px, .82vw, 13px);
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* ----------------------------------------------------------
+   14  ANALYSE
+   Die Saeulen bekommen runde Kanten und die Akzentfarbe.
+   ---------------------------------------------------------- */
+#seite-analyse .an-saeule-spur {
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-muted) 14%, transparent);
+  overflow: hidden;
+}
+#seite-analyse .an-saeule-fuell {
+  border-radius: 999px;
+  background: var(--accent-active);
+  transition: height .6s cubic-bezier(.32,.72,0,1);
+}
+#seite-analyse .an-saeule-fuss {
+  margin-top: 5px;
+  font-size: clamp(9px, .7vw, 10.5px);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+#seite-analyse .an-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: clamp(10px, .74vw, 11.5px);
+  font-weight: 600;
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+}
+#seite-analyse .an-trend.gut     { background: var(--tint-green); color: var(--green-ink); }
+#seite-analyse .an-trend.schlecht{ background: var(--tint-red);   color: var(--red-ink); }
+
+/* ----------------------------------------------------------
+   15  DER RING AUF DER KALORIEN-SEITE
+   Er zeigt dasselbe wie der im Dashboard-Widget und sieht jetzt
+   auch so aus. Der alte Strichring bleibt im Aufbau stehen, damit
+   seine Zeichenfunktion weiterlaeuft — zu sehen ist er nicht mehr.
+   ---------------------------------------------------------- */
+#seite-kalorien .kal-ring-gross { position: relative; }
+#seite-kalorien .cal-gauge { display: none; }
+#seite-kalorien .cal-ring {
+  width: 100%; height: 100%; display: block;
+}
+#seite-kalorien .cal-ring circle { fill: none; stroke-linecap: round; }
+#seite-kalorien .cal-ring-spur   { stroke: color-mix(in srgb, var(--text-muted) 16%, transparent); }
+#seite-kalorien .cal-ring-wert   { transition: stroke-dashoffset .7s cubic-bezier(.32,.72,0,1); }
+#seite-kalorien .cal-center {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 2px; padding-top: 0;
+}
+#seite-kalorien .cal-value {
+  font-family: var(--sans);
+  font-size: clamp(26px, 2.3vw, 38px);
+  font-weight: 700; letter-spacing: -.035em; line-height: 1;
+  font-variant-numeric: tabular-nums;
+  animation: none;
+}
+#seite-kalorien .cal-sub {
+  font-size: clamp(11px, .82vw, 13px);
+  color: var(--text-muted);
+}
+
+/* ----------------------------------------------------------
+   16  DIE BILDSCHIRMZEIT-STATISTIK
+
+   Zwei Geraete, zwei Toene: das Handy traegt das Blau der Seite,
+   der Rechner ein neutrales Grau. Die Unterscheidung ist keine
+   Bewertung, also hat sie auch keine Signalfarbe verdient — das
+   Diagramm im Dashboard macht es schon so.
+
+   Zuvor stand hier Violett gegen Altblau, beides hart im Code und
+   die einzigen Farben der Seite ausserhalb des Kanons. Und
+   --violet, --blue und --blue-soft zeigten inzwischen alle auf
+   dasselbe Blau: die beiden Geraete waren gar nicht mehr zu
+   unterscheiden.
+   ---------------------------------------------------------- */
+#seite-bildschirmzeit .st-line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* Die Gesamtlinie traegt das Blau, das Handy darunter das Grau */
+#seite-bildschirmzeit .st-line.pc    { stroke: #0A84FF; }
+#seite-bildschirmzeit .st-line.phone { stroke: #8E8E93; }
+#seite-bildschirmzeit .st-dot.pc     { fill: #0A84FF; }
+#seite-bildschirmzeit .st-dot.phone  { fill: #8E8E93; }
+#seite-bildschirmzeit .legend-dot.pc {
+  background: #0A84FF; box-shadow: none; animation: none;
+}
+#seite-bildschirmzeit .legend-dot.phone {
+  background: #8E8E93; box-shadow: none; animation: none;
+}
+
+/* Die Achsen: waagerechtes Raster ganz zurueckhaltend, die beiden
+   Achsen selbst eine Spur kraeftiger. Beschriftung klein, grau und
+   mit Tabellenziffern, damit die Zahlen untereinander stehen. */
+#seite-bildschirmzeit .st-raster {
+  stroke: color-mix(in srgb, var(--text-muted) 15%, transparent);
+  stroke-width: 1;
+}
+#seite-bildschirmzeit .st-achse-x,
+#seite-bildschirmzeit .st-achse-y-linie {
+  stroke: color-mix(in srgb, var(--text-muted) 34%, transparent);
+  stroke-width: 1;
+}
+#seite-bildschirmzeit .st-achse-y {
+  font-family: var(--sans);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  fill: var(--text-muted);
+}
+#seite-bildschirmzeit .st-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 7px;
+}
+#seite-bildschirmzeit .st-axis span {
+  font-family: var(--sans);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+#seite-bildschirmzeit .st-axis span.jetzt {
+  color: var(--blue-ink);
+  font-weight: 600;
+}
+
+/* Die Fuehrungslinie beim Ueberfahren */
+#seite-bildschirmzeit .st-guide {
+  stroke: color-mix(in srgb, var(--text-muted) 40%, transparent);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+/* Die Legende als Pillen, wie ueberall sonst */
+#seite-bildschirmzeit .gross-legende {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+#seite-bildschirmzeit .gross-legende .legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 11px;
+  border: none;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+  font-family: var(--sans);
+  font-size: clamp(10.5px, .78vw, 12px);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--t-base) var(--ease-soft);
+}
+#seite-bildschirmzeit .gross-legende .legend-item:hover {
+  background: color-mix(in srgb, var(--surface-sunken) 55%, var(--surface-card));
+}
+
+/* ==========================================================
+   DER KASTEN BEIM UEBERFAHREN
+
+   Er stand in Schreibmaschinenschrift bei elf Pixeln, alle Werte
+   in einer Zeile hintereinander — man musste ihn lesen statt ihn
+   zu erfassen. Jetzt eine Zeile je Wert, mit dem Punkt der
+   zugehoerigen Kurve davor und den Zahlen rechtsbuendig
+   untereinander.
+
+   Er steht ausserdem im Diagramm statt darueber. Die Regeln
+   gelten fuer beide Diagramme, deshalb ohne Seiten-Praefix.
+   ========================================================== */
+.chart-tooltip {
+  padding: 9px 12px;
+  border: none;
+  border-radius: 14px;
+  background: var(--surface-dark);
+  color: var(--text-inverse);
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.35;
+  white-space: nowrap;
+  transform: translate(-50%, 0);
+  box-shadow: 0 6px 20px rgba(0,0,0,.28), 0 2px 6px rgba(0,0,0,.18);
+}
+
+.chart-tooltip .ct-kopf {
+  margin-bottom: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  opacity: .62;
+}
+
+.chart-tooltip .ct-zeile {
+  display: grid;
+  grid-template-columns: 8px auto 1fr;
+  align-items: center;
+  gap: 7px;
+  font-variant-numeric: tabular-nums;
+}
+.chart-tooltip .ct-zeile + .ct-zeile { margin-top: 3px; }
+
+.chart-tooltip .ct-punkt {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  display: block;
+}
+.chart-tooltip .ct-punkt.phone { background: #8E8E93; }
+.chart-tooltip .ct-punkt.pc    { background: #0A84FF; }
+
+.chart-tooltip .ct-wort { opacity: .72; }
+.chart-tooltip .ct-wert {
+  text-align: right;
+  font-weight: 700;
+  padding-left: 14px;
+}
+
+/* Die Gesamtzeile hat keinen Punkt und ruecht auf die Spalte des
+   Wortes ein — sie summiert, sie ist keine eigene Kurve. */
+.chart-tooltip .ct-zeile.gesamt {
+  grid-template-columns: auto 1fr;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(128,128,138,.28);
+}
+
+/* ==========================================================
+   REZEPTE UND KOCHEN
+   ========================================================== */
+
+/* ---- Die Liste ---- */
+#seite-kalorien .rezept-zeile { cursor: pointer; }
+#seite-kalorien .rezept-zeile.offen {
+  background: var(--tint-blue);
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--accent-active) 40%, transparent);
+}
+#seite-kalorien .rezept-zeile.offen .vz-titel { color: var(--blue-ink); }
+#seite-kalorien .rezept-zeile .vz-haupt { flex: 1 1 auto; min-width: 0; }
+
+#seite-kalorien .rz-start {
+  flex: 0 0 auto;
+  padding: 6px 15px;
+  border: none;
+  border-radius: 999px;
+  background: var(--surface-dark);
+  color: var(--text-inverse);
+  font-family: var(--sans);
+  font-size: clamp(11px, .84vw, 12.5px);
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform var(--t-fast) var(--ease), filter var(--t-base) var(--ease-soft);
+}
+#seite-kalorien .rz-start:hover:not(:disabled)  { filter: brightness(1.15); }
+#seite-kalorien .rz-start:active:not(:disabled) { transform: scale(.95); }
+#seite-kalorien .rz-start:disabled {
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+  cursor: default;
+}
+
+/* ---- Die Bearbeitung ---- */
+#seite-kalorien .rz-zu {
+  width: 28px; height: 28px;
+  display: grid; place-items: center;
+  padding: 0; border: none; border-radius: 50%;
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background var(--t-base) var(--ease-soft), color var(--t-base) var(--ease-soft);
+}
+#seite-kalorien .rz-zu svg { width: 14px; height: 14px; }
+#seite-kalorien .rz-zu:hover { background: var(--surface-dark); color: var(--text-inverse); }
+
+#seite-kalorien .rz-felder {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+#seite-kalorien .rz-feld {
+  display: flex; flex-direction: column; gap: 5px;
+  font-size: clamp(10.5px, .78vw, 12.5px);
+  color: var(--text-muted);
+}
+
+#seite-kalorien .rz-spalten {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: clamp(12px, 1.2vw, 20px);
+}
+#seite-kalorien .rz-unter {
+  margin-bottom: 8px;
+  font-size: clamp(10.5px, .78vw, 12.5px);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+#seite-kalorien .rz-liste {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  display: flex; flex-direction: column; gap: 6px;
+  counter-reset: schritt;
+}
+#seite-kalorien .rz-eintrag {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px 8px 12px;
+  border-radius: 14px;
+  background: var(--surface-sunken);
+  font-size: clamp(11.5px, .88vw, 13.5px);
+  line-height: 1.35;
+}
+
+/* Die Schritte tragen ihre Nummer — bei Zutaten waere sie sinnlos */
+#seite-kalorien .rz-schritte .rz-eintrag { counter-increment: schritt; }
+#seite-kalorien .rz-schritte .rz-eintrag::before {
+  content: counter(schritt);
+  flex: 0 0 auto;
+  width: 20px; height: 20px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: var(--accent-active);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+#seite-kalorien .rz-text { flex: 1 1 auto; min-width: 0; }
+#seite-kalorien .rz-weg {
+  flex: 0 0 auto;
+  width: 22px; height: 22px;
+  display: grid; place-items: center;
+  padding: 0; border: none; border-radius: 50%;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--t-base) var(--ease-soft),
+              background var(--t-base) var(--ease-soft),
+              color var(--t-base) var(--ease-soft);
+}
+#seite-kalorien .rz-weg svg { width: 12px; height: 12px; }
+#seite-kalorien .rz-eintrag:hover .rz-weg { opacity: 1; }
+#seite-kalorien .rz-weg:hover { background: var(--status-red); color: #fff; }
+
+/* Auf dem Telefon gibt es kein Ueberfahren */
+@media (hover: none) {
+  #seite-kalorien .rz-weg { opacity: 1; }
+}
+
+#seite-kalorien .rz-fuss {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 16px;
+}
+#seite-kalorien .rz-kochen {
+  padding: 10px 22px;
+  border: none; border-radius: 999px;
+  background: var(--accent-active);
+  color: #fff;
+  font-family: var(--sans);
+  font-size: clamp(12px, .92vw, 14px);
+  font-weight: 650;
+  cursor: pointer;
+  transition: transform var(--t-fast) var(--ease), filter var(--t-base) var(--ease-soft);
+}
+#seite-kalorien .rz-kochen:hover  { filter: brightness(1.08); }
+#seite-kalorien .rz-kochen:active { transform: scale(.96); }
+#seite-kalorien .rz-loeschen {
+  margin-left: auto;
+  padding: 8px 15px;
+  border: none; border-radius: 999px;
+  background: none;
+  color: var(--text-muted);
+  font-family: var(--sans);
+  font-size: clamp(11px, .84vw, 12.5px);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--t-base) var(--ease-soft), color var(--t-base) var(--ease-soft);
+}
+#seite-kalorien .rz-loeschen:hover { background: var(--tint-red); color: var(--red-ink); }
+
+/* ==========================================================
+   DER KOCHSCHIRM
+
+   Ein Schritt fuellt den Schirm. Beim Kochen hat man die Haende
+   voll und schaut nur kurz hin — da hilft keine Liste, sondern ein
+   grosser Satz und ein Knopf.
+   ========================================================== */
+.koch-schirm {
+  position: fixed;
+  inset: 0;
+  z-index: 950;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(20px, 3vw, 48px);
+  background: var(--bg-page);
+}
+.koch-schirm[hidden] { display: none; }
+body.koch-laeuft { overflow: hidden; }
+
+.koch-kopf {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 0 0 auto;
+}
+.koch-name {
+  margin-right: auto;
+  font-size: clamp(15px, 1.3vw, 19px);
+  font-weight: 650;
+  letter-spacing: -.02em;
+}
+.koch-zu {
+  width: 38px; height: 38px;
+  display: grid; place-items: center;
+  padding: 0; border: none; border-radius: 50%;
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background var(--t-base) var(--ease-soft), color var(--t-base) var(--ease-soft);
+}
+.koch-zu svg { width: 17px; height: 17px; }
+.koch-zu:hover { background: var(--surface-dark); color: var(--text-inverse); }
+
+.koch-spur {
+  margin-top: 18px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+.koch-spur i {
+  display: block; height: 100%;
+  border-radius: 999px;
+  background: var(--accent-active);
+  transition: width .35s cubic-bezier(.32,.72,0,1);
+}
+.koch-zahl {
+  margin-top: 9px;
+  font-size: clamp(11px, .84vw, 13px);
+  font-weight: 600;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  flex: 0 0 auto;
+}
+
+.koch-mitte {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+}
+.koch-text {
+  margin: 0;
+  max-width: 22em;
+  font-size: clamp(22px, 3.4vw, 46px);
+  font-weight: 650;
+  letter-spacing: -.025em;
+  line-height: 1.25;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.koch-zutaten {
+  flex: 0 0 auto;
+  margin-bottom: 16px;
+  padding: 14px 18px;
+  border-radius: 20px;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-2);
+}
+.koch-zutaten[hidden] { display: none; }
+.koch-zutaten-kopf {
+  margin-bottom: 8px;
+  font-size: clamp(10.5px, .78vw, 12.5px);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.koch-zutaten ul {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-wrap: wrap; gap: 7px;
+}
+.koch-zutaten li {
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  font-size: clamp(11.5px, .88vw, 13.5px);
+}
+
+.koch-fuss {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 10px;
+}
+.koch-knopf {
+  padding: 15px 26px;
+  border: none; border-radius: 999px;
+  font-family: var(--sans);
+  font-size: clamp(13px, 1.05vw, 16px);
+  font-weight: 650;
+  cursor: pointer;
+  transition: transform var(--t-fast) var(--ease), filter var(--t-base) var(--ease-soft);
+}
+.koch-knopf.weiter {
+  flex: 1 1 auto;
+  background: var(--accent-active);
+  color: #fff;
+}
+.koch-knopf.zurueck {
+  flex: 0 0 auto;
+  background: var(--surface-sunken);
+  color: var(--text-primary);
+}
+.koch-knopf:hover:not(:disabled)  { filter: brightness(1.08); }
+.koch-knopf:active:not(:disabled) { transform: scale(.97); }
+.koch-knopf:disabled { opacity: .4; cursor: default; }

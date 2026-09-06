@@ -58,6 +58,12 @@
     lat: 52.52,
     lon: 13.405,
     calGoal: 0,
+    /* Tagesziel fuer die Bildschirmzeit in Minuten. Es faerbt den
+       Balken im Dashboard-Widget. */
+    screenLimit: 240,
+    /* Eckpunkte des Tagesplans */
+    aufstehen: "06:00",
+    schlafen: "22:30",
     /* Profilbild als eingebettete Datenadresse, auf 256 Kanten
        gestutzt — so reist es mit den Einstellungen zum iPad. */
     bild: ""
@@ -402,6 +408,10 @@
      der letzten 21 Tage sorgt dafür, dass die Tages-Kästchen und die
      Streak nicht leer starten. */
   const HABIT_LIMIT = 6;
+  /* Seit dem zweiten Bauplan steht die Kachel hoch und schmal —
+     zwei Spalten, drei Rasterreihen. Dort ist Platz fuer fuenf
+     Zeilen. Die Habits-Seite zeigt weiterhin alle. */
+  const DASH_HABITS = 5;
   const DEFAULT_HABITS = [
     { id: "sport",  name: "Sport"   },
     { id: "lesen",  name: "Lesen"   },
@@ -508,22 +518,22 @@
 
   /* ---------- Icons ---------- */
   const ICONS = {
-    gmail: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="3" y="5.4" width="18" height="13.2" rx="2.6"/><path d="m4 6.8 8 5.8 8-5.8"/></svg>`,
-    spotify: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="8.6"/><path d="M7.6 9.8c2.9-1 6.3-.9 8.8.5M8.1 13c2.3-.7 4.8-.6 6.9.4M8.6 15.8c1.7-.5 3.6-.4 5.2.3"/></svg>`,
-    youtube: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="2.8" y="5.8" width="18.4" height="12.4" rx="3.4"/><path d="M10.8 9.9v4.2l3.7-2.1-3.7-2.1Z" fill="currentColor" stroke="none"/></svg>`,
+    gmail: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><rect x="3" y="5.4" width="18" height="13.2" rx="2.6"/><path d="m4 6.8 8 5.8 8-5.8"/></svg>`,
+    spotify: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.6"/><path d="M7.6 9.8c2.9-1 6.3-.9 8.8.5M8.1 13c2.3-.7 4.8-.6 6.9.4M8.6 15.8c1.7-.5 3.6-.4 5.2.3"/></svg>`,
+    youtube: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><rect x="2.8" y="5.8" width="18.4" height="12.4" rx="3.4"/><path d="M10.8 9.9v4.2l3.7-2.1-3.7-2.1Z" fill="currentColor" stroke="none"/></svg>`,
     tiktok: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3.8v10.4a3.4 3.4 0 1 1-2.7-3.33"/><path d="M14 3.8c.35 2.1 1.9 3.7 4.1 4.05"/></svg>`,
-    school: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 4 2.6 8.8 12 13.6l9.4-4.8L12 4Z"/><path d="M6.4 11.2v4.6c0 1.1 2.6 2.4 5.6 2.4s5.6-1.3 5.6-2.4v-4.6"/></svg>`,
-    link: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M9.6 14.4 14.4 9.6"/><path d="M11.2 6.6 12.5 5.3a3.6 3.6 0 1 1 5.1 5.1l-1.3 1.3M12.8 17.4l-1.3 1.3a3.6 3.6 0 1 1-5.1-5.1l1.3-1.3"/></svg>`
+    school: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><path d="M12 4 2.6 8.8 12 13.6l9.4-4.8L12 4Z"/><path d="M6.4 11.2v4.6c0 1.1 2.6 2.4 5.6 2.4s5.6-1.3 5.6-2.4v-4.6"/></svg>`,
+    link: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.6 14.4 14.4 9.6"/><path d="M11.2 6.6 12.5 5.3a3.6 3.6 0 1 1 5.1 5.1l-1.3 1.3M12.8 17.4l-1.3 1.3a3.6 3.6 0 1 1-5.1-5.1l1.3-1.3"/></svg>`
   };
   const iconSVG = name => ICONS[name] || ICONS.link;
 
   const WEATHER_ICONS = {
-    sun: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4.6"/><path d="M12 2.4v2.4M12 19.2v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.4 12h2.4M19.2 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/></svg>`,
-    cloud: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M7 18h10a4 4 0 0 0 .5-8 5.5 5.5 0 0 0-10.7 1.5A3.5 3.5 0 0 0 7 18Z"/></svg>`,
-    fog: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 8h16M3 12h18M4 16h16M6.5 20h11"/></svg>`,
-    rain: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 15h9.5a3.8 3.8 0 0 0 .4-7.6A5 5 0 0 0 7.4 9.4 3.3 3.3 0 0 0 7 15Z"/><path d="m8 18.6-1 2M12 18.6l-1 2M16 18.6l-1 2"/></svg>`,
-    snow: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 15h9.5a3.8 3.8 0 0 0 .4-7.6A5 5 0 0 0 7.4 9.4 3.3 3.3 0 0 0 7 15Z"/><path d="M9 19v.01M12 20v.01M15 19v.01"/></svg>`,
-    storm: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 13h9.5a3.8 3.8 0 0 0 .4-7.6A5 5 0 0 0 7.4 7.4 3.3 3.3 0 0 0 7 13Z"/><path d="m13 13-2.5 4h3L11 21"/></svg>`
+    sun: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.6"/><path d="M12 2.4v2.4M12 19.2v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.4 12h2.4M19.2 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/></svg>`,
+    cloud: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><path d="M7 18h10a4 4 0 0 0 .5-8 5.5 5.5 0 0 0-10.7 1.5A3.5 3.5 0 0 0 7 18Z"/></svg>`,
+    fog: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16M3 12h18M4 16h16M6.5 20h11"/></svg>`,
+    rain: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 15h9.5a3.8 3.8 0 0 0 .4-7.6A5 5 0 0 0 7.4 9.4 3.3 3.3 0 0 0 7 15Z"/><path d="m8 18.6-1 2M12 18.6l-1 2M16 18.6l-1 2"/></svg>`,
+    snow: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 15h9.5a3.8 3.8 0 0 0 .4-7.6A5 5 0 0 0 7.4 9.4 3.3 3.3 0 0 0 7 15Z"/><path d="M9 19v.01M12 20v.01M15 19v.01"/></svg>`,
+    storm: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 13h9.5a3.8 3.8 0 0 0 .4-7.6A5 5 0 0 0 7.4 7.4 3.3 3.3 0 0 0 7 13Z"/><path d="m13 13-2.5 4h3L11 21"/></svg>`
   };
   function weatherCodeInfo(code) {
     if (code === 0) return { icon: "sun", text: "Klarer Himmel" };
@@ -581,8 +591,8 @@
   let wetterAnsicht = store.get("lifeos_wetter_ansicht", "jetzt");   // "jetzt" | "woche"
   let wetterDaten = null;
 
-  const TROPFEN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">' +
-    '<path d="M12 3.5c3.2 3.8 5.5 6.6 5.5 9.4a5.5 5.5 0 0 1-11 0c0-2.8 2.3-5.6 5.5-9.4Z"/></svg>';
+  const TROPFEN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">' +
+    '<path d="M12 3.4c3.3 4 5.6 6.8 5.6 9.6a5.6 5.6 0 1 1-11.2 0c0-2.8 2.3-5.6 5.6-9.6Z"/></svg>';
 
   async function loadWeather(force) {
     $("weatherCityLabel").textContent = settings.city || "—";
@@ -648,30 +658,27 @@
       const max = data.daily?.temperature_2m_max?.[0];
       const regen = data.daily?.precipitation_probability_max?.[0];
       const tempText = `${Math.round(cur.temperature_2m)}°`;
+      /* Hoechst- und Tiefstwert stehen neben der Temperatur, nicht in
+         der Textzeile: in einer Kachel von zwei Spalten waere die
+         Zeile sonst zweizeilig und stiesse unten an. */
+      const spanne = (min !== undefined && max !== undefined)
+        ? `<span class="weather-spanne">${Math.round(min)}° / ${Math.round(max)}°</span>` : "";
       body.innerHTML = `
         <div class="weather-main">
           <div class="weather-icon">${WEATHER_ICONS[info.icon]}</div>
           <div class="weather-werte">
-            <div class="weather-temp" style="--zeichen:${tempText.length}">${tempText}</div>
-            <div class="weather-desc">${info.text}</div>
+            <div class="weather-temp">${Math.round(cur.temperature_2m)}<small>°</small>${spanne}</div>
+            <div class="weather-desc">${escapeHTML(info.text)}</div>
           </div>
         </div>
-        ${max !== undefined ? `
-        <div class="weather-minmax">
-          <span class="wmm min" title="Tiefstwert heute">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6.5 12.5 12 19l5.5-6.5"/></svg>
-            ${Math.round(min)}°
-          </span>
-          <span class="wmm max" title="Höchstwert heute">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6.5 11.5 12 5l5.5 6.5"/></svg>
-            ${Math.round(max)}°
-          </span>
-        </div>` : ""}
-        ${regen !== undefined ? `
-        <div class="weather-regen${regen >= 30 ? " hoch" : ""}" title="Regenwahrscheinlichkeit heute">
-          ${TROPFEN_SVG}<span>${regen}%</span>
-        </div>` : ""}`;
+        `;
     }
+
+    /* Die Vorhersage-Kachel haengt an denselben Daten. Sie wurde
+       bisher nur beim allgemeinen Neuzeichnen gefuellt — kamen die
+       Wetterdaten spaeter, blieb dort "Noch keine Vorhersage"
+       stehen, waehrend nebenan schon Zahlen standen. */
+    spaet(() => renderVorhersage(), null);
   }
 
   /* Umschalter: aktuelles Wetter oder 7-Tage-Vorhersage */
@@ -757,6 +764,52 @@
       el.classList.toggle("on", i < filled);
       el.classList.toggle("over", over && i < filled);
     });
+
+    /* Bauplan Block 1: was der Tag noch hergibt. Ueber dem Ziel
+       zaehlt es nicht weiter nach unten, sondern sagt, um wie viel
+       es darueber ist. */
+    const rest = $("calRest"), restWort = $("calRestWort");
+    if (rest) {
+      if (isEmpty) {
+        rest.textContent = "—";
+        restWort.textContent = "kein Ziel gesetzt";
+      } else if (over) {
+        rest.textContent = (consumed - goal).toLocaleString("de-DE");
+        restWort.textContent = "darüber";
+      } else {
+        rest.textContent = (goal - consumed).toLocaleString("de-DE");
+        restWort.textContent = "übrig";
+      }
+      rest.parentElement.classList.toggle("drueber", over);
+    }
+
+    /* Der glatte Ring der Musterseite. Sein Umfang ist 2·π·40 =
+       251,33 — davon bleibt der ungefuellte Teil als Versatz. */
+    /* Derselbe Ring steht auf der Kalorien-Seite — beide zeigen
+       dasselbe, also werden sie zusammen gefuellt. */
+    [$("calRingWert"), $("pgCalRingWert")].forEach(ring => {
+      if (!ring) return;
+      ring.style.strokeDashoffset = (251.33 * (1 - pct)).toFixed(1);
+      ring.style.stroke = over ? "var(--status-red)" : "var(--accent-active)";
+    });
+
+    /* Die Flamme zaehlt die Tage am Stueck, an denen ueberhaupt
+       etwas eingetragen wurde — getrackt zu haben ist das, was
+       hier eine Serie ausmacht. */
+    const fl = $("calFlamme"), flTage = $("calFlammeTage"), flMal = $("calFlammeMal");
+    if (fl && flTage) {
+      const verlauf = spaet(() => kalVerlauf, null) || {};
+      let tage = 0;
+      for (let i = 0; i < 400; i++) {
+        const d = new Date(); d.setDate(d.getDate() - i);
+        const wert = i === 0 ? consumed : Number(verlauf[dateKey(d)]) || 0;
+        if (wert > 0) tage++; else break;
+      }
+      flTage.textContent = tage;
+      if (flMal && !flMal.innerHTML) flMal.innerHTML = spaet(() => FLAMME_SVG, "");
+      fl.hidden = tage < 2;   /* ein einzelner Tag ist noch keine Serie */
+    }
+
       refreshVorschlag();
   }
   /* Licht einmal über den kompletten Bogen laufen lassen */
@@ -919,13 +972,19 @@
     // Farbverläufe
     const defs = el("defs", {});
     defs.innerHTML = `
+      <!-- Zwei Geraete, zwei Toene. Handy traegt das Blau, der Rechner
+           ein neutrales Grau: die Unterscheidung ist hier keine
+           Bewertung, deshalb hat sie auch keine Signalfarbe verdient.
+           Feste Werte statt Variablen — ein stop-color ist ein
+           Praesentationsattribut und kennt kein var(). Beide Toene
+           tragen auf schwarzem wie auf weissem Grund. -->
       <linearGradient id="stGradPhone" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#5b8cff" stop-opacity="0.55"/>
-        <stop offset="100%" stop-color="#5b8cff" stop-opacity="0.04"/>
+        <stop offset="0%" stop-color="#007AFF" stop-opacity="0.55"/>
+        <stop offset="100%" stop-color="#007AFF" stop-opacity="0.04"/>
       </linearGradient>
       <linearGradient id="stGradPc" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.45"/>
-        <stop offset="100%" stop-color="#a78bfa" stop-opacity="0.03"/>
+        <stop offset="0%" stop-color="#8E8E93" stop-opacity="0.45"/>
+        <stop offset="100%" stop-color="#8E8E93" stop-opacity="0.03"/>
       </linearGradient>`;
     svg.appendChild(defs);
 
@@ -1020,13 +1079,16 @@
     dotPc.setAttribute("cx", px); dotPc.setAttribute("cy", stGeometrie.y(p.phone + p.pc));
     $("stChart").classList.add("aktiv");
 
-    chartTooltip.innerHTML =
-      `${p.tooltipLabel}<br>Handy ${formatMinutes(p.phone)} · PC ${formatMinutes(p.pc)}` +
-      `<br>Gesamt ${formatMinutes(p.phone + p.pc)}`;
-    const cx = box.left + px;
-    chartTooltip.style.left = cx + "px";
-    chartTooltip.style.top = (box.top - 10) + "px";
-    chartTooltip.classList.add("visible");
+    /* Dieselbe Darstellung wie in der grossen Statistik */
+    const zeile = (klasse, wort, wert) =>
+      `<div class="ct-zeile"><i class="ct-punkt ${klasse}"></i>` +
+      `<span class="ct-wort">${wort}</span>` +
+      `<span class="ct-wert">${formatMinutes(wert)}</span></div>`;
+    tooltipZeigen(box, px,
+      `<div class="ct-kopf">${escapeHTML(p.tooltipLabel)}</div>` +
+      zeile("phone", "Handy", p.phone) + zeile("pc", "PC", p.pc) +
+      `<div class="ct-zeile gesamt"><span class="ct-wort">Gesamt</span>` +
+      `<span class="ct-wert">${formatMinutes(p.phone + p.pc)}</span></div>`);
   }
 
   function stHoverEnde() {
@@ -1281,23 +1343,26 @@
     return zahl;
   }
 
-  /* Mit "iso" rechnet die Pille in Schultagen — das ist für alles
-     Schulische die ehrlichere Zahl. Ohne "iso" bleibt es beim
-     Kalendertag, denn ein Zahnarzttermin schert sich nicht um
-     Ferien. */
-  const badgeFor = (diff, iso) => {
+  /* Alles zaehlt in Kalendertagen — eine Klausur genauso wie ein
+     Zahnarzttermin. Die Rechnung in Schultagen war fuer Schulisches
+     gedacht, las sich aber neben den Terminen wie eine andere
+     Einheit. Der zweite Wert bleibt in der Reihenfolge stehen,
+     damit die Aufrufe unveraendert weiterlaufen.
+     schultageBis() gibt es weiterhin; die Lernseite braucht es
+     fuer die Frage, wie oft man bis dahin noch im Fach sitzt. */
+  const badgeFor = (diff) => {
     if (diff < 0) return diff === -1 ? "seit gestern" : `seit ${-diff} Tagen`;
     if (diff === 0) return "HEUTE";
     if (diff === 1) return "morgen";
-    if (!iso) return `in ${diff} Tagen`;
-    const schul = schultageBis(iso);
-    if (schul === 0) return "erst nach den Ferien";
-    return `in ${schul} ${schul === 1 ? "Schultag" : "Schultagen"}`;
+    return `in ${diff} Tagen`;
   };
 
-  const SYM_KALENDER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3.2v3.6M16 3.2v3.6"/></svg>';
-  const SYM_WECKER   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="7.4"/><path d="M12 9.6V13l2.4 1.5M5.2 4.2 3 6.4M18.8 4.2 21 6.4"/></svg>';
-  const SYM_LERNEN   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7.3C10.4 5.9 8.4 5.2 5.6 5.2c-.9 0-1.6.7-1.6 1.6v9.7c0 .9.7 1.6 1.6 1.6 2.8 0 4.8.7 6.4 2.1 1.6-1.4 3.6-2.1 6.4-2.1.9 0 1.6-.7 1.6-1.6V6.8c0-.9-.7-1.6-1.6-1.6-2.8 0-4.8.7-6.4 2.1Z"/><path d="M12 7.3v13"/></svg>';
+  /* Der Pfeil sagt "hier geht es weiter" — er ersetzt das doppelte
+     Seitensymbol, das vorher im Malzeichen und im Knopf stand. */
+  const SYM_PFEIL_RECHTS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.4 6l6 6-6 6"/></svg>';
+  const SYM_KALENDER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.4" y="5.2" width="17.2" height="15.4" rx="3"/><path d="M3.4 10h17.2"/><path d="M8.2 3.4v3.4M15.8 3.4v3.4"/></svg>';
+  const SYM_WECKER   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13.4" r="7.6"/><path d="M12 9.4v4l2.8 1.7"/><path d="M5.4 4.2 3.2 6.4M18.6 4.2l2.2 2.2"/></svg>';
+  const SYM_LERNEN   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7.6C10.3 6.1 8.2 5.4 5.4 5.4c-.9 0-1.6.7-1.6 1.6v9.4c0 .9.7 1.6 1.6 1.6 2.8 0 4.9.7 6.6 2.2"/><path d="M12 7.6c1.7-1.5 3.8-2.2 6.6-2.2.9 0 1.6.7 1.6 1.6v9.4c0 .9-.7 1.6-1.6 1.6-2.8 0-4.9.7-6.6 2.2"/><path d="M12 7.6v12.6"/></svg>';
 
   /* Farbe nach Restzeit — ab acht Tagen gruen, vier bis sieben gelb,
      drei oder weniger rot. Eine Stelle, damit alle Listen gleich
@@ -1318,7 +1383,10 @@
   }
 
   /* Wie viele Einträge sollen höchstens erscheinen */
-  const NAECHSTE_LIMIT = 5;
+  /* Vier Eintraege. Mehr passen nicht in die Kachel, ohne dass die
+     Zeilen so flach werden, dass man sie nicht mehr auseinanderhaelt.
+     Alles Weitere steht im Kalender. */
+  const NAECHSTE_LIMIT = 4;
 
   /* Termine und Klausuren in einer Liste, nach Datum sortiert.
      Vergangenes fällt raus, angezeigt wird nur, was noch kommt. */
@@ -1375,8 +1443,533 @@
     renderNaechste();
   }
 
+
+  /* ==========================================================
+     DIE VIER NEUEN DASHBOARD-WIDGETS
+
+     Sie stammen aus Lucas Bauplan. Keins von ihnen legt eigene
+     Daten an — sie lesen, was ohnehin schon da ist, und stellen es
+     anders dar. Einzige Ausnahme ist das Bildschirmzeit-Limit; das
+     ist eine neue Einstellung und war abgestimmt.
+     ========================================================== */
+
+  /* Wie viele Minuten an einem Tag zusammenkamen */
+  /* Ruft eine Funktion auf, die vielleicht weiter unten in der Datei
+     steht. Bei einem const wirft schon der Zugriff, wenn die Zeile noch
+     nicht gelaufen ist — typeof hilft dagegen nicht. */
+  function spaet(fn, ersatz) {
+    try { return fn(); } catch (f) { return ersatz; }
+  }
+
+  function stTagesSumme(key) {
+    const e = screentime && screentime.history && screentime.history[key];
+    if (!e) return null;
+    return (Number(e.phone) || 0) + (Number(e.pc) || 0);
+  }
+
+  /* ----------------------------------------------------------
+     BLOCK 4 — WETTER · VORHERSAGE
+     Das erste Wetter-Widget zeigt jetzt, dieses die kommenden Tage.
+     Heute selbst faellt weg: es steht schon nebenan.
+     ---------------------------------------------------------- */
+  function renderVorhersage() {
+    const body = $("vorhersageBody");
+    if (!body) return;
+    const d = wetterDaten && wetterDaten.daily;
+    if (!d || !d.time || !d.time.length) {
+      body.innerHTML = '<div class="muted-line">Noch keine Vorhersage</div>';
+      return;
+    }
+    const heute = todayStr();
+    let zeilen = "";
+    for (let i = 0; i < d.time.length && zeilen.split("vh-tag").length <= 5; i++) {
+      if (d.time[i] === heute) continue;          /* heute steht nebenan */
+      const datum = new Date(d.time[i] + "T00:00:00");
+      const info = weatherCodeInfo(d.weather_code[i]);
+      const regen = d.precipitation_probability_max?.[i] ?? 0;
+      zeilen += `
+        <div class="vh-tag" title="${fmtDate(d.time[i])} · ${escapeHTML(info.text)}">
+          <span class="vh-name">${WOCHENTAGE_KURZ[datum.getDay()]}</span>
+          <span class="vh-icon">${WEATHER_ICONS[info.icon]}</span>
+          <span class="vh-regen${regen >= 30 ? " hoch" : ""}">${regen}%</span>
+          <span class="vh-min">${Math.round(d.temperature_2m_min[i])}°</span>
+          <span class="vh-max">${Math.round(d.temperature_2m_max[i])}°</span>
+        </div>`;
+    }
+    body.innerHTML = zeilen || '<div class="muted-line">Noch keine Vorhersage</div>';
+  }
+
+  /* ----------------------------------------------------------
+     BLOCK 5 — BILDSCHIRMZEIT · ZAHL
+     Heute gross, gestern klein darunter, Balken zum Limit. Die
+     Kurve traegt das andere Widget.
+     ---------------------------------------------------------- */
+  function renderStZahl() {
+    const body = $("stZahlBody");
+    if (!body) return;
+
+    const heute = stTagesSumme(todayStr());
+    const gestern = stTagesSumme(dateKey(new Date(Date.now() - 86400000)));
+    if (heute === null) {
+      body.innerHTML = '<div class="muted-line">Noch nichts erfasst</div>';
+      return;
+    }
+
+    const limit = Number(settings.screenLimit) || 240;
+    const anteil = Math.min(100, Math.round((heute / limit) * 100));
+    /* Die Farbe sagt, wo man steht: unter der Haelfte gruen, gegen
+       das Limit gelb, darueber rot. */
+    const ton = anteil >= 100 ? "var(--status-red)"
+              : anteil >= 70  ? "var(--status-orange)"
+              : "var(--status-green)";
+
+    const vergleich = gestern === null ? "" : "gestern " + dauerText(gestern) + " · ";
+
+    /* Stunden und Minuten gross, die Einheiten klein daneben —
+       so steht es auf der Musterseite. */
+    const std = Math.floor(heute / 60), rest = heute % 60;
+    const gross = (std ? std + '<small> h</small> ' : '') + rest + '<small> min</small>';
+
+    /* Der Vergleich zu gestern als Abzeichen in der Kopfzeile */
+    const marke = $("stZahlTrend");
+    if (marke) {
+      if (gestern) {
+        const p = Math.round(((heute - gestern) / gestern) * 100);
+        marke.textContent = (p > 0 ? "+" : "") + p + " %";
+        marke.className = "card-badge " + (p > 15 ? "rot" : p > 0 ? "gelb" : "gruen");
+        marke.hidden = false;
+      } else { marke.hidden = true; }
+    }
+
+    body.innerHTML = `
+      <div class="stz-zahl">${gross}</div>
+      <div class="stz-gestern">${vergleich}${anteil}% von ${dauerText(limit)}</div>
+      <div class="stz-balken"><i style="width:${anteil}%;background:${ton}"></i></div>`;
+  }
+
+  /* ----------------------------------------------------------
+     BLOCK 6 — NAECHSTE KLAUSUR
+     Faellt keine an, tritt der naechste Termin an ihre Stelle. Ein
+     leeres Widget sagt nichts; eines mit dem naechsten Termin sagt
+     immerhin, was als Naechstes ansteht.
+     ---------------------------------------------------------- */
+  /* badgeFor schreibt ganze Saetze. In den schmalen Dashboard-Karten
+     ist dafuer kein Platz, also hier die knappe Fassung. */
+  function fristKurz(tage, datum) {
+    if (tage === 0) return 'heute';
+    if (tage === 1) return 'morgen';
+    if (tage <= 6) return tage + ' Tage';
+    const d = new Date(datum + 'T00:00:00');
+    return d.getDate() + '.' + (d.getMonth() + 1) + '.';
+  }
+
+  function fristTon(tage) {
+    if (tage === null || tage === undefined) return "";
+    if (tage <= 2)  return "rot";
+    if (tage <= 7)  return "gelb";
+    return "gruen";
+  }
+
+  function renderKlausurWidget() {
+    const body = $("klausurBody");
+    const marke = $("klausurFrist");
+    if (!body) return;
+
+    /* Die Ueberschrift geht mit dem Inhalt: ohne Klausur steht in
+       der Karte der naechste Termin, und dann waere "Nächste
+       Klausur" schlicht falsch. */
+    const titel = $("card-klausur") && $("card-klausur").querySelector(".card-title");
+
+    const naechste = spaet(() => geplanteKlausuren(), klausuren || [])
+      .filter(k => k && k.date && daysUntil(k.date) >= 0)
+      .sort((a, b) => a.date.localeCompare(b.date))[0];
+
+    if (naechste) {
+      if (titel) titel.textContent = "Nächste Klausur";
+      const tage = daysUntil(naechste.date);
+      const ton = fristTon(tage);
+      if (marke) { marke.textContent = badgeFor(tage, naechste.date); marke.className = "card-badge " + ton; }
+
+      /* Vorbereitungsstand: wie viele Karten dieser Klausur schon in
+         einem hoeheren Fach liegen. Ohne Karten bleibt der Balken leer. */
+      const karten = spaet(() => alleKartenVon(naechste.id) || [], []);
+      const sitzt = karten.filter(c => spaet(() => karteStufe(c), 0) >= 3).length;
+      const anteil = karten.length ? Math.round((sitzt / karten.length) * 100) : 0;
+      const balkenTon = anteil >= 70 ? "var(--status-green)"
+                      : anteil >= 30 ? "var(--status-orange)"
+                      : "var(--status-red)";
+
+      const fach = naechste.fach ? fachInfo(naechste.fach).kurz : "";
+      /* Ohne Fach traegt der Titel die Ueberschrift — dann darf er
+         nicht noch einmal als Thema darunter stehen. */
+      const kopf = fach || naechste.title || "Klausur";
+      const thema = fach
+        ? (naechste.title || spaet(() => klausurZusatz(naechste), "") || fmtDate(naechste.date))
+        : fmtDate(naechste.date);
+      body.innerHTML = `
+        <div class="kw-fach">${escapeHTML(kopf)}</div>
+        <div class="kw-thema">${escapeHTML(thema)}</div>
+        <div class="kw-stand">${karten.length
+          ? sitzt + " von " + karten.length + " Karten sitzen"
+          : "Noch keine Karteikarten"}</div>
+        <div class="kw-balken"><i style="width:${anteil}%;background:${balkenTon}"></i></div>`;
+      return;
+    }
+
+    /* Keine Klausur: der naechste Termin im Detail */
+    const termin = spaet(() => naechsteEintraege(), [])
+      .filter(e => e && e.date && daysUntil(e.date) >= 0)
+      .sort((a, b) => a.date.localeCompare(b.date))[0];
+
+    if (!termin) {
+      if (titel) titel.textContent = "Nächster Termin";
+      if (marke) { marke.textContent = "—"; marke.className = "card-badge"; }
+      body.innerHTML = '<div class="muted-line">Keine Klausur, kein Termin</div>';
+      return;
+    }
+
+    if (titel) titel.textContent = "Nächster Termin";
+
+    const tage = daysUntil(termin.date);
+    if (marke) { marke.textContent = badgeFor(tage, termin.date); marke.className = "card-badge " + fristTon(tage); }
+    const wann = tage === 0 ? "heute" : tage === 1 ? "morgen" : "in " + tage + " Tagen";
+    const teile = [fmtDate(termin.date)];
+    if (termin.time) teile.push(termin.time + " Uhr");
+    if (termin.ort) teile.push(escapeHTML(termin.ort));
+    body.innerHTML = `
+      <div class="kw-fach">${escapeHTML(termin.title || "Termin")}</div>
+      <div class="kw-thema">${teile.join(" · ")}</div>
+      <div class="kw-stand">${wann}${termin.ort ? "" : " · keine Klausur geplant"}</div>`;
+  }
+
+  /* ----------------------------------------------------------
+     BLOCK 9 — SCHULE
+     Nur Schulisches: Hausaufgaben, Klausuren, Tests. Ist nichts da,
+     tritt der naechste Termin ein, damit die Karte nicht leer steht.
+     ---------------------------------------------------------- */
+  function renderSchuleWidget() {
+    const liste = $("schuleDashList");
+    const zahl = $("schuleZahl");
+    if (!liste) return;
+
+    const alle = spaet(() => naechsteEintraege(), [])
+      .filter(e => e && e.date && daysUntil(e.date) >= 0
+                && (e.art === "klausur" || e.art === "hausaufgabe" || e.art === "thema"))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    if (zahl) zahl.textContent = String(alle.length);
+
+    const zeigen = alle.slice(0, 4);
+    if (!zeigen.length) {
+      liste.innerHTML = '<div class="muted-line">Nichts Anstehendes</div>';
+      return;
+    }
+
+    liste.innerHTML = zeigen.map(e => {
+      const tage = daysUntil(e.date);
+      const ton = fristTon(tage);
+      const was = e.art === "klausur" ? pruefungWort(e)
+                : e.art === "hausaufgabe" ? "Hausaufgabe" : "Thema";
+      const fach = e.fach ? " · " + fachInfo(e.fach).kurz : "";
+      return `<li class="insel entry-item ${e.art}" data-id="${e.id}" data-art="${e.art}">
+          <span class="i-mal ${ton}">${e.art === "hausaufgabe" ? SYM_LERNEN : SYM_LERNEN}</span>
+          <div class="i-text">
+            <div class="i-sache">${escapeHTML(was + fach)} · ${fmtDate(e.date)}</div>
+            <div class="i-wert">${escapeHTML(e.title || "")}</div>
+          </div>
+          <span class="i-rechts"><span class="marke ${ton}">${fristKurz(tage, e.date)}</span></span>
+        </li>`;
+    }).join("");
+
+    /* Auch hier fuehrt die Zeile zur passenden Seite. */
+    liste.querySelectorAll(".entry-item").forEach(li => {
+      li.addEventListener("click", () => {
+        const art = li.dataset.art, id = li.dataset.id;
+        if (art === "klausur") lernenZeigen(id);
+        else if (art === "hausaufgabe") hausaufgabenZeigen(id);
+        else if (art === "thema") themaZeigen(id);
+      });
+    });
+  }
+
+  /* Alle vier haengen an denselben Daten wie der Rest des
+     Dashboards — sie werden mitgezeichnet, wenn sich etwas aendert. */
+  function renderNeueWidgets() {
+    try { renderVorhersage(); }      catch (f) { console.error("[Vorhersage]", f); }
+    try { renderStZahl(); }          catch (f) { console.error("[Bildschirmzeit-Zahl]", f); }
+    try { renderKlausurWidget(); }   catch (f) { console.error("[Klausur-Widget]", f); }
+    try { renderSchuleWidget(); }    catch (f) { console.error("[Schule-Widget]", f); }
+    try { spaet(() => renderTagesplan(), null); } catch (f) { console.error("[Tagesplan]", f); }
+  }
+
+
+  /* ==========================================================
+     BLOCK 9 — DER TAGESPLAN
+
+     Er wird gebaut, nicht eingetragen: Aufstehen kommt aus den
+     Einstellungen, die Schulzeit aus dem Stundenplan von heute, der
+     Rest aus den Kalenderterminen mit Uhrzeit. Jeder Punkt traegt
+     einen Balken, der zeigt, wie weit er ist — vorbei, laufend oder
+     noch nicht dran.
+     ========================================================== */
+
+  /* "08:30" -> 510 Minuten seit Mitternacht */
+  function uhrInMin(s) {
+    const m = /^(\d{1,2}):(\d{2})/.exec(String(s || ""));
+    return m ? Number(m[1]) * 60 + Number(m[2]) : null;
+  }
+  function minInUhr(m) {
+    m = Math.max(0, Math.round(m));
+    return String(Math.floor(m / 60) % 24).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0");
+  }
+
+  /* Die Schulstunden von heute, zu einem Block zusammengefasst. Vier
+     Einzelstunden hintereinander sind kein Tagesplan, sondern eine
+     Liste — die steht auf der Schulseite. */
+  function schuleHeute() {
+    const plan = spaet(() => STUNDENPLAN, []) || [];
+    const stunden = spaet(() => STUNDEN, []) || [];
+    if (!plan.length || !stunden.length) return null;
+
+    /* tag 1 ist Montag; getDay() zaehlt ab Sonntag */
+    const wt = new Date().getDay();
+    const heute = plan.filter(s => s && Number(s.tag) === wt);
+    if (!heute.length) return null;
+
+    let erste = Infinity, letzte = -Infinity;
+    for (const s of heute) {
+      const a = stunden.find(x => x.nr === Number(s.von));
+      const b = stunden.find(x => x.nr === Number(s.bis)) || a;
+      if (!a || !b) continue;
+      erste = Math.min(erste, uhrInMin(a.von));
+      letzte = Math.max(letzte, uhrInMin(b.bis));
+    }
+    if (!isFinite(erste) || !isFinite(letzte)) return null;
+    return { von: erste, bis: letzte, zahl: heute.length };
+  }
+
+  function tagesplanPunkte() {
+    const punkte = [];
+
+    /* Aufstehen — die Uhrzeit steht in den Einstellungen */
+    const auf = uhrInMin(settings.aufstehen || "06:00");
+    const schule = schuleHeute();
+
+    if (auf !== null) {
+      punkte.push({
+        von: auf,
+        bis: schule ? Math.min(schule.von, auf + 120) : auf + 60,
+        sache: "Aufstehen",
+        zusatz: "Start in den Tag",
+        ton: "gelb"
+      });
+    }
+
+    if (schule) {
+      punkte.push({
+        von: schule.von, bis: schule.bis,
+        sache: "Schule",
+        zusatz: schule.zahl + (schule.zahl === 1 ? " Stunde" : " Stunden")
+                + " · bis " + minInUhr(schule.bis),
+        ton: "blau"
+      });
+    }
+
+    /* Kalendertermine von heute, sofern sie eine Uhrzeit tragen */
+    const heuteKey = todayStr();
+    (spaet(() => termine, []) || []).forEach(t => {
+      if (!t || t.date !== heuteKey) return;
+      const start = uhrInMin(t.time);
+      if (start === null) return;
+      punkte.push({
+        von: start,
+        bis: start + (Number(t.dauer) || 60),
+        sache: t.title || "Termin",
+        zusatz: t.ort ? t.ort : minInUhr(start),
+        ton: "gruen"
+      });
+    });
+
+    /* Schlafen gehen: erst wenn der Tag sonst zu Ende waere */
+    const schluss = uhrInMin(settings.schlafen || "22:30");
+    if (schluss !== null && (!punkte.length || schluss > punkte[punkte.length - 1].bis)) {
+      punkte.push({ von: schluss, bis: schluss + 30, sache: "Schlafen gehen",
+                    zusatz: "Gute Nacht", ton: "grau" });
+    }
+
+    return punkte.sort((a, b) => a.von - b.von);
+  }
+
+  function renderTagesplan() {
+    const body = $("tagesplanBody");
+    const marke = $("tagesplanMarke");
+    if (!body) return;
+
+    const punkte = tagesplanPunkte();
+    const jetzt = new Date();
+    const min = jetzt.getHours() * 60 + jetzt.getMinutes();
+
+    if (!punkte.length) {
+      if (marke) marke.textContent = "—";
+      body.innerHTML = '<div class="muted-line">Für heute nichts eingeplant</div>';
+      return;
+    }
+
+    /* Was gerade laeuft, steht im Abzeichen */
+    const laufend = punkte.find(p => min >= p.von && min < p.bis);
+    if (marke) {
+      marke.textContent = laufend ? laufend.sache : minInUhr(min);
+      marke.className = "card-badge" + (laufend ? " blau" : "");
+    }
+
+    body.innerHTML = punkte.map(p => {
+      const dauer = Math.max(1, p.bis - p.von);
+      const anteil = min <= p.von ? 0
+                   : min >= p.bis ? 100
+                   : Math.round(((min - p.von) / dauer) * 100);
+      const zustand = anteil >= 100 ? "vorbei" : anteil > 0 ? "laeuft" : "offen";
+      return `
+        <div class="tp-punkt ${zustand}">
+          <span class="tp-uhr">${minInUhr(p.von)}</span>
+          <div class="tp-inhalt">
+            <div class="tp-sache">${escapeHTML(p.sache)}</div>
+            <div class="tp-zusatz">${escapeHTML(p.zusatz || "")}</div>
+            <div class="tp-balken"><i style="width:${anteil}%"></i></div>
+          </div>
+        </div>`;
+    }).join("");
+  }
+
+  /* ==========================================================
+     BLOCK 10 — DER TIMER
+
+     Er laeuft an einer Zielzeit, nicht an einem Zaehler: schlaeft
+     der Rechner ein oder steht der Reiter im Hintergrund, stimmt
+     die Restzeit beim Zurueckkommen trotzdem.
+     ========================================================== */
+  let timerZiel = Number(store.get("lifeos_timer_ziel", 0)) || 0;
+  let timerRest = Number(store.get("lifeos_timer_rest", 0)) || 0;   /* bei Pause */
+  let timerGanz = Number(store.get("lifeos_timer_ganz", 0)) || 0;
+  let timerTakt = null;
+
+  function timerSichern() {
+    store.set("lifeos_timer_ziel", timerZiel);
+    store.set("lifeos_timer_rest", timerRest);
+    store.set("lifeos_timer_ganz", timerGanz);
+  }
+
+  function timerSekunden() {
+    if (timerRest) return timerRest;                    /* angehalten */
+    if (!timerZiel) return 0;
+    return Math.max(0, Math.round((timerZiel - Date.now()) / 1000));
+  }
+
+  function renderTimer() {
+    const zeit = $("timerZeit");
+    if (!zeit) return;
+
+    /* Abgelaufen zuerst abraeumen, damit die Anzeige darunter schon
+       den Zustand danach zeigt: sonst blieben die Vorgabeknoepfe
+       verborgen und man konnte ohne Neuladen keinen neuen stellen. */
+    if (timerZiel && !timerRest && timerSekunden() === 0) {
+      timerZiel = 0; timerRest = 0; timerSichern();
+      timerAnhalten();
+      spaet(() => showToast("Timer abgelaufen.", "success"), null);
+    }
+
+    const rest     = timerSekunden();
+    const laeuft   = !!timerZiel && !timerRest;
+    const pausiert = !!timerRest;
+    /* Gestellt gewesen, aber weder laufend noch angehalten: fertig. */
+    const fertig   = !laeuft && !pausiert && timerGanz > 0;
+
+    const m = Math.floor(rest / 60), s = rest % 60;
+    zeit.textContent = String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+    zeit.classList.toggle("aus", fertig);
+
+    const fuell = $("timerFuellung");
+    if (fuell) fuell.style.width = timerGanz ? ((rest / timerGanz) * 100).toFixed(1) + "%" : "0%";
+    /* Die Leiste tritt an die Stelle der Vorgabeknoepfe — beide
+       liegen im selben Fach, damit die Kachel gleich hoch bleibt. */
+    const spur = $("timerSpur");
+    if (spur) spur.hidden = !(laeuft || pausiert);
+
+    const marke = $("timerMarke");
+    if (marke) {
+      marke.hidden = !(laeuft || pausiert || fertig);
+      marke.textContent = fertig ? "fertig" : laeuft ? "läuft" : "Pause";
+      marke.className = "card-badge " + (fertig ? "rot" : laeuft ? "gruen" : "gelb");
+    }
+
+    /* Die Vorgaben stehen bereit, sobald nichts mehr laeuft — auch
+       neben einem abgelaufenen Timer. */
+    const vorgaben = $("timerVorgaben"), steuerung = $("timerSteuerung");
+    if (vorgaben)  vorgaben.hidden  = laeuft || pausiert;
+    if (steuerung) steuerung.hidden = !(laeuft || pausiert);
+    const halten = $("timerHalten");
+    if (halten) {
+      halten.innerHTML = laeuft ? "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"7\" y=\"5\" width=\"3.5\" height=\"14\" rx=\"1.4\"/><rect x=\"13.5\" y=\"5\" width=\"3.5\" height=\"14\" rx=\"1.4\"/></svg>" : "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M8 5.6v12.8c0 .9 1 1.4 1.7.9l9.2-6.4a1.1 1.1 0 000-1.8L9.7 4.7c-.7-.5-1.7 0-1.7.9Z\"/></svg>";
+      halten.title = laeuft ? "Pause" : "Weiter";
+      halten.setAttribute("aria-label", halten.title);
+    }
+  }
+
+  function timerLaufen() {
+    if (timerTakt) return;
+    timerTakt = setInterval(renderTimer, 250);
+  }
+  function timerAnhalten() {
+    if (timerTakt) { clearInterval(timerTakt); timerTakt = null; }
+  }
+
+  function timerStellen(minuten) {
+    timerGanz = minuten * 60;
+    timerRest = 0;
+    timerZiel = Date.now() + timerGanz * 1000;
+    timerSichern();
+    timerLaufen();
+    renderTimer();
+  }
+
+  document.querySelectorAll("#timerVorgaben .tm-vor").forEach(b => {
+    b.addEventListener("click", () => timerStellen(Number(b.dataset.min) || 5));
+  });
+
+  if ($("timerHalten")) {
+    $("timerHalten").addEventListener("click", () => {
+      if (timerRest) {                      /* weiter */
+        timerZiel = Date.now() + timerRest * 1000;
+        timerRest = 0;
+        timerLaufen();
+      } else {                              /* anhalten */
+        timerRest = timerSekunden();
+        timerZiel = 0;
+        timerAnhalten();
+      }
+      timerSichern();
+      renderTimer();
+    });
+  }
+
+  if ($("timerAus")) {
+    $("timerAus").addEventListener("click", () => {
+      timerZiel = 0; timerRest = 0; timerGanz = 0;
+      timerSichern();
+      timerAnhalten();
+      renderTimer();
+    });
+  }
+
+  if (timerZiel || timerRest) timerLaufen();
+  renderTimer();
+
+  /* Der Tagesplan geht mit der Uhr weiter — einmal pro Minute reicht,
+     die Balken bewegen sich nicht schneller. */
+  renderTagesplan();
+  setInterval(renderTagesplan, 60000);
   function renderNaechste() {
-    const alle = naechsteEintraege();
+    renderNeueWidgets();   /* die vier aus dem Bauplan haengen an denselben Daten */
+    const alle = naechsteEintraege().filter(e => e.art === "termin");
     const list = $("naechsteList");
     const widget = $("naechsteWidget");
     list.innerHTML = "";
@@ -1393,24 +1986,41 @@
       const diff = daysUntil(e.date);
       const li = document.createElement("li");
       const frist = e.art === "hausaufgabe" ? hausFrist(diff) : fristKlasse(diff);
-      li.className = "entry-item " + e.art + " " + frist
+      /* Nach Bild 1 eine Kapsel, nach Bild 2 an einem Strahl:
+         links das Malzeichen mit der Farbe der Frist, in der Mitte
+         Sache und Zusammenhang, rechts die Frist als Marke.
+         Der Punkt am Strahl entsteht in der style.css aus diesen
+         Zustandsklassen — heute, bald, sonst. */
+      li.className = "insel entry-item " + e.art + " " + frist
                    + (diff === 0 ? " today" : diff <= 3 ? " soon" : "");
+      const ton = diff <= 1 ? " rot" : diff <= 6 ? " gelb" : " gruen";
       li.innerHTML = `
-        <span class="entry-accent"></span>
-        <div class="entry-main">
-          <div class="entry-title">${escapeHTML(e.title)}</div>
-          <div class="entry-sub">${
+        <span class="i-mal${ton}">${e.art === "termin" ? SYM_KALENDER : SYM_LERNEN}</span>
+        <div class="i-text">
+          <div class="i-sache">${
             e.art === "klausur" ? (klausurZusatz(e) || pruefungWort(e)) + " · "
             : e.art === "hausaufgabe"
               ? "Hausaufgabe" + (e.fach ? " " + fachInfo(e.fach).kurz : "") + " · "
             : e.art === "thema" ? "Thema · "
               : ""}${fmtDate(e.date)}${e.time ? " · " + e.time : ""}</div>
+          <div class="i-wert">${escapeHTML(e.title)}</div>
         </div>
-        <span class="entry-badge">${badgeFor(diff, e.art === "termin" ? null : e.date)}</span>
-        <button class="entry-go" data-id="${e.id}" data-art="${e.art}"
-          title="${e.art === "termin" ? "Zum Kalender" : "Zur Lernseite"}"
-          aria-label="${e.art === "termin" ? "Zum Kalender" : "Zur Lernseite"}">${
-          e.art === "termin" ? SYM_KALENDER : SYM_LERNEN}</button>`;
+        <span class="i-rechts">
+          <span class="marke${ton}">${fristKurz(diff, e.date)}</span>
+          <button class="entry-go" data-id="${e.id}" data-art="${e.art}"
+            title="${e.art === "termin" ? "Zum Kalender" : "Zur Lernseite"}"
+            aria-label="${e.art === "termin" ? "Zum Kalender" : "Zur Lernseite"}">${SYM_PFEIL_RECHTS}</button>
+        </span>`;
+      /* Der Pfeil hat in der schmalen Karte keinen Platz mehr. Damit
+         der Weg zur passenden Seite nicht verloren geht, traegt ihn
+         jetzt die ganze Zeile. */
+      li.addEventListener("click", ev => {
+        if (ev.target.closest(".entry-go")) return;   /* der Knopf macht es selbst */
+        if (e.art === "klausur") lernenZeigen(e.id);
+        else if (e.art === "hausaufgabe") hausaufgabenZeigen(e.id);
+        else if (e.art === "thema") themaZeigen(e.id);
+        else kalenderZeigen(e.date);
+      });
       list.appendChild(li);
     });
 
@@ -1655,6 +2265,13 @@
   }
 
   function glutZeigen(punkt, stufe) {
+    /* Der Lichtschein beim Abhaken ist entfernt — auf Wunsch, und er
+       passt auch nicht mehr: er lag hinter den Karten und schien durch
+       sie hindurch. Die Karten sind jetzt feste Flaechen, eine Scheibe
+       die nichts durchlaesst kann auch nichts zeigen. Die Funktion
+       bleibt als leere Huelle, damit die zwei Aufrufstellen nichts
+       wissen muessen. */
+    return;
     const plan = GLUT[stufe];
     if (!plan || !punkt) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -1734,17 +2351,25 @@
       const row = document.createElement("button");
       row.type = "button";
       const dringend = !heuteErledigt && tagNeigtSich;
-      row.className = "streak-row" + (heuteErledigt ? " erledigt stufe-" + stufe : " offen") + (dringend ? " dringend" : "");
+      row.className = "insel streak-row" + (heuteErledigt ? " erledigt stufe-" + stufe : " offen") + (dringend ? " dringend" : "");
       row.style.setProperty("--reihe", reihe);
       row.dataset.habit = eintrag.id;
       row.title = `${eintrag.name}: ${eintrag.tage} ${eintrag.tage === 1 ? "Tag" : "Tage"} am Stück` +
                   ` (Bestwert ${streakBest(eintrag.id)}) — zum Abhaken klicken` +
                   (dringend ? " · heute noch offen!" : "");
+      /* Nach Bild 1: links das Malzeichen mit der Flamme, in der
+         Mitte die Zahl als Aussage und darueber der Zusammenhang,
+         rechts nur noch eine Marke, wenn es etwas zu melden gibt.
+         Vorher trug die Flamme die Aussage und die Zahl stand klein
+         daneben — genau andersherum gewichtet. */
       row.innerHTML = `
-        <span class="sr-name">${escapeHTML(eintrag.name)}</span>
-        <span class="sr-wert">
-          <b>${eintrag.tage}</b>
-          <span class="sr-flamme${entfaltenId === eintrag.id && heuteErledigt ? " entfalten" : ""}">${FLAMME_SVG}${dringend ? '<i class="sr-warnung" aria-hidden="true">!</i>' : ""}</span>
+        <span class="i-mal${dringend ? " rot" : heuteErledigt ? " gelb" : ""} sr-flamme${entfaltenId === eintrag.id && heuteErledigt ? " entfalten" : ""}">${FLAMME_SVG}</span>
+        <span class="i-text">
+          <span class="i-sache">${escapeHTML(eintrag.name)}</span>
+          <span class="i-wert">${eintrag.tage}<small> ${eintrag.tage === 1 ? "Tag" : "Tage"}</small></span>
+        </span>
+        <span class="i-rechts">
+          ${dringend ? '<span class="marke rot"><span class="punkt"></span>offen</span>' : heuteErledigt ? '<span class="marke gruen"><span class="punkt"></span>heute</span>' : ''}
         </span>`;
       row.addEventListener("click", e => toggleStreak(eintrag.id, e));
       wrap.appendChild(row);
@@ -1758,13 +2383,13 @@
      Wird bei jeder Datenänderung neu berechnet.
      ========================================================== */
   const V_ICONS = {
-    flame: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 3.2c1.1 3.2-2.1 4.2-2.1 7.6a4.1 4.1 0 0 0 8.2 0c0-1.3-.6-2.4-1.1-2.5.3 2.4-1 3.5-2.2 3.5-1.6 0-2.2-1.5-1.1-3.5.9-1.7.5-3.7-1.7-5.1Z"/></svg>`,
-    screen: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="13" rx="2.4"/><path d="M8.5 20.5h7"/></svg>`,
-    book: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 4 2.6 8.8 12 13.6l9.4-4.8L12 4Z"/><path d="M6.4 11.2v4.6c0 1.1 2.6 2.4 5.6 2.4s5.6-1.3 5.6-2.4v-4.6"/></svg>`,
-    calendar: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3.8" y="5.4" width="16.4" height="14.8" rx="2.6"/><path d="M3.8 10h16.4M8.2 3.4v3.4M15.8 3.4v3.4"/></svg>`,
-    check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>`,
-    settings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3.3"/><path d="M12 2.6v3M12 18.4v3M21.4 12h-3M5.6 12h-3M18.6 5.4l-2.1 2.1M7.5 16.5l-2.1 2.1M18.6 18.6l-2.1-2.1M7.5 7.5 5.4 5.4"/></svg>`,
-    sun: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="4.4"/><path d="M12 2.6v2.2M12 19.2v2.2M4.4 4.4l1.6 1.6M18 18l1.6 1.6M2.6 12h2.2M19.2 12h2.2M4.4 19.6 6 18M18 6l1.6-1.6"/></svg>`
+    flame: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><path d="M12 3.2c1.1 3.2-2.1 4.2-2.1 7.6a4.1 4.1 0 0 0 8.2 0c0-1.3-.6-2.4-1.1-2.5.3 2.4-1 3.5-2.2 3.5-1.6 0-2.2-1.5-1.1-3.5.9-1.7.5-3.7-1.7-5.1Z"/></svg>`,
+    screen: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="13" rx="2.4"/><path d="M8.5 20.5h7"/></svg>`,
+    book: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><path d="M12 4 2.6 8.8 12 13.6l9.4-4.8L12 4Z"/><path d="M6.4 11.2v4.6c0 1.1 2.6 2.4 5.6 2.4s5.6-1.3 5.6-2.4v-4.6"/></svg>`,
+    calendar: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.8" y="5.4" width="16.4" height="14.8" rx="2.6"/><path d="M3.8 10h16.4M8.2 3.4v3.4M15.8 3.4v3.4"/></svg>`,
+    check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>`,
+    settings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.3"/><path d="M12 2.6v3M12 18.4v3M21.4 12h-3M5.6 12h-3M18.6 5.4l-2.1 2.1M7.5 16.5l-2.1 2.1M18.6 18.6l-2.1-2.1M7.5 7.5 5.4 5.4"/></svg>`,
+    sun: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.4"/><path d="M12 2.6v2.2M12 19.2v2.2M4.4 4.4l1.6 1.6M18 18l1.6 1.6M2.6 12h2.2M19.2 12h2.2M4.4 19.6 6 18M18 6l1.6-1.6"/></svg>`
   };
 
   function buildSuggestions() {
@@ -2023,9 +2648,15 @@
     if (aktuelleSeite === "habits") baueHabits();
   }
 
+  /* Ein abgehakter Tag ist ein erledigter Tag — und Erledigtes ist in
+     dieser App gruen. Frueher stand hier ein Violettverlauf mit fest
+     eingebauten Kanalwerten; der liess sich weder dem Modus noch der
+     Farblogik anpassen. Jetzt traegt der Ton die Bedeutung, und nur
+     die Deckkraft erzaehlt das Alter: je frischer der Tag, desto
+     kraeftiger der Punkt. */
   function punktFarbe(alterAnteil) {
-    const hell = 1 - alterAnteil * 0.6;
-    return `rgba(${Math.round(168 + 62 * (1 - alterAnteil))}, ${Math.round(85 + 28 * (1 - alterAnteil))}, 247, ${0.32 + hell * 0.68})`;
+    const deckung = 0.32 + (1 - alterAnteil * 0.6) * 0.68;
+    return `color-mix(in srgb, var(--accent-active) ${Math.round(deckung * 100)}%, transparent)`;
   }
 
   /* Das Widget kann statt der letzten Tage das ganze Jahr zeigen:
@@ -2089,8 +2720,8 @@
   }
 
   const HAKEN_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ` +
-    `stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">` +
-    `<path d="m5 12.5 4.6 4.6L19 7.2"/></svg>`;
+    `stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">` +
+    `<path d="m5.4 12.6 4.4 4.4 9-9.4"/></svg>`;
 
   /* ==========================================================
      HABITS im Widget
@@ -2105,6 +2736,22 @@
      fielen dann in sich zusammen und die Serie riss die Zeile
      auseinander. Eine gemessene Zahl kann das nicht passieren. */
   function habitMasse() {
+    /* STILLGELEGT.
+
+       Diese Funktion rechnete die Hoehe jeder Habit-Zeile aus der
+       Hoehe ihres Widgets und schrieb sie als Inline-Stil. Das war
+       richtig, solange die Zeilen sich eine feste Kartenhoehe aus
+       dem alten 24-Spalten-Raster teilen mussten.
+
+       Jetzt traegt jede Zeile ihre eigene Hoehe aus der CSS, und die
+       Karte waechst mit ihrem Inhalt. Eine gerechnete Hoehe als
+       Inline-Stil laesst sich davon nicht mehr ueberstimmen — sie
+       gewinnt gegen jede Regel und hat das Dashboard daran
+       gehindert, die Proportionen der Musterseite anzunehmen.
+
+       Die Funktion bleibt als leere Huelle stehen, damit die fuenf
+       Aufrufstellen und der ResizeObserver nichts wissen muessen. */
+    return;
     document.querySelectorAll(".habit-list").forEach(wrap => {
       const innen = wrap.querySelector(".hb-liste");
       if (!innen) return;
@@ -2193,7 +2840,7 @@
       return;
     }
 
-    const zeilen = sichtbar.map(h => {
+    const zeileVon = (h) => {
       const fertig = habitErledigt(h.id, heute);
       const serie = habitSerie(h.id);
 
@@ -2213,27 +2860,54 @@
       const diese = habitWoche(h.id);
       const erfuellt = diese >= ziel;
 
-      return `<button type="button" class="hb-zeile${fertig ? " erledigt" : ""}${erfuellt ? " woche-voll" : ""}"
+      /* Acht Felder: die sieben vergangenen Tage und heute, das
+         aeusserste rechts. Vierzehn Striche waeren in einer Kapsel
+         kein Verlauf mehr, sondern ein Muster. */
+      const perlen = tage.slice(-8).map(t => {
+        const voll = habitErledigt(h.id, t.key);
+        return `<i class="perle${voll ? " voll" : ""}${t.key === heute ? " heute" : ""}"
+                  title="${fmtDate(t.key)} · ${voll ? "erledigt" : "offen"}"></i>`;
+      }).join("");
+
+      /* Das Malzeichen traegt den Anfangsbuchstaben. Ein Symbol
+         muesste erst erfunden werden und saehe bei "Lesen" und
+         "Lernen" gleich aus. */
+      const zeichen = escapeHTML((h.name || "?").trim().charAt(0).toUpperCase());
+
+      return `<button type="button" class="insel hb-zeile${fertig ? " erledigt" : ""}${erfuellt ? " woche-voll" : ""}"
                 data-habit="${h.id}"
                 title="${escapeHTML(h.name)} — heute ${fertig ? "erledigt" : "offen"} · diese Woche ${diese} von ${ziel} · ${serie} ${serie === 1 ? "Tag" : "Tage"} am Stück"
                 aria-pressed="${fertig}">
-          <span class="hb-knopf">${HAKEN_SVG}</span>
-          <span class="hb-mitte">
-            <span class="hb-name">${escapeHTML(h.name)}</span>
-            <span class="hb-spur">${spur}</span>
+          <span class="i-mal${erfuellt ? " gruen" : ""}">${zeichen}</span>
+          <span class="i-text">
+            <span class="i-sache">${erfuellt ? "geschafft" : diese + " von " + ziel}</span>
+            <span class="i-wert">${escapeHTML(h.name)}</span>
           </span>
-          <span class="hb-woche">${erfuellt
-            ? `<b>✓</b><i>${diese}</i>`
-            : `<b>${diese}</b><i>/${ziel}</i>`}</span>
+          <span class="i-rechts">
+            <span class="perlen">${perlen}</span>
+            <span class="hb-knopf">${HAKEN_SVG}</span>
+          </span>
         </button>`;
-    }).join("");
+    };
+
+    /* Abgehaktes tritt zurueck, faellt aber nicht weg: es rutscht
+       ans Ende. Ausgeblendet blieben sonst nur die offenen uebrig,
+       und bei drei erledigten von fuenf stuenden nur noch zwei da. */
+    const dashAuswahl = sichtbar.slice()
+      .sort((a, b) => (habitErledigt(a.id, heute) ? 1 : 0) - (habitErledigt(b.id, heute) ? 1 : 0))
+      .slice(0, DASH_HABITS);
+
+    const zeilen     = sichtbar.map(zeileVon).join("");
+    const zeilenDash = dashAuswahl.map(zeileVon).join("");
 
     document.querySelectorAll(".habit-list").forEach(wrap => {
-      wrap.style.setProperty("--reihen", String(sichtbar.length));
+      const imDash = !!wrap.closest("#seite-dashboard");
+      const menge  = imDash ? dashAuswahl : sichtbar;
+      wrap.style.setProperty("--reihen", String(menge.length));
       /* Die Zeilen sitzen in einem eigenen Kasten: Maße in cqh gehen
          immer auf den nächsten Container darüber — ein Element kann
          seine eigene Höhe nicht abfragen. */
-      wrap.innerHTML = '<div class="hb-liste">' + zeilen + '</div>';
+      wrap.innerHTML = '<div class="hb-liste">' + (imDash ? zeilenDash : zeilen) + '</div>';
       wrap.querySelectorAll(".hb-zeile").forEach(z => {
         z.addEventListener("click", e => toggleHabit(z.dataset.habit, e));
       });
@@ -2376,7 +3050,7 @@
     add.className = "quick-tile add-tile";
     add.title = "Link hinzufügen";
     add.setAttribute("aria-label", "Link hinzufügen");
-    add.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 5.5v13M5.5 12h13"/></svg>`;
+    add.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5.5v13M5.5 12h13"/></svg>`;
     add.addEventListener("click", openSettings);
     grid.appendChild(add);
   }
@@ -2411,14 +3085,487 @@
        sonst drei Abrufe für einen, den man sehen will. */
     if (name === "konto")      kontoZeichnen();
     if (name === "google")     gkStandHolen();
-    if (name === "app")        offZeichnen();
+    if (name === "app")      { offZeichnen(); themaZeichnen(); }
     if (name === "papierkorb") papierkorbZeichnen();
   }
+
+  /* ==========================================================
+     HELL ODER DUNKEL
+
+     Drei Stellungen. "Automatisch" heisst: kein Attribut setzen,
+     dann entscheidet die Medienabfrage in style.css nach der
+     Einstellung des Geraets. "Hell" und "Dunkel" setzen das
+     Attribut und stechen die Geraeteeinstellung.
+
+     Die Wahl liegt bewusst nur im Browserspeicher dieses Geraets und
+     wird nicht mit dem Server abgeglichen: sonst wuerde das Handy,
+     das abends auf Dunkel geht, den Rechner mitziehen.
+
+     Gesetzt wird das Attribut schon im Kopf der index.html, vor dem
+     ersten Bildaufbau — hier geht es nur noch um den Umschalter und
+     um die Farbe der Statusleiste.
+     ========================================================== */
+  const THEMA = "lifeos_thema";
+
+  const themaWahl = () => {
+    try { const w = localStorage.getItem(THEMA); return (w === "hell" || w === "dunkel") ? w : "auto"; }
+    catch (f) { return "auto"; }
+  };
+
+  /* Welcher Modus am Ende wirklich gilt */
+  const themaEcht = () => {
+    const w = themaWahl();
+    if (w !== "auto") return w;
+    return matchMedia("(prefers-color-scheme: dark)").matches ? "dunkel" : "hell";
+  };
+
+  /* iOS faerbt die Statusleiste nach diesem Wert. Bleibt er auf dem
+     alten Navy stehen, sitzt im Hellen ein dunkler Balken ueber der
+     Seite. */
+  function statusleisteFaerben() {
+    const dunkel = themaEcht() === "dunkel";
+    const marke = document.querySelector('meta[name="theme-color"]');
+    if (marke) marke.setAttribute("content", dunkel ? "#000000" : "#EDEDEF");
+    const ios = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+    if (ios) ios.setAttribute("content", dunkel ? "black" : "default");
+  }
+
+  function themaSetzen(wahl) {
+    if (wahl === "hell" || wahl === "dunkel") {
+      document.documentElement.setAttribute("data-thema", wahl);
+      try { localStorage.setItem(THEMA, wahl); } catch (f) { /* dann nur fuer jetzt */ }
+    } else {
+      document.documentElement.removeAttribute("data-thema");
+      try { localStorage.removeItem(THEMA); } catch (f) { /* egal */ }
+    }
+    statusleisteFaerben();
+    themaZeichnen();
+  }
+
+  function themaZeichnen() {
+    const leiste = $("themaWahl");
+    if (!leiste) return;
+    const jetzt = themaWahl();
+    leiste.querySelectorAll("button[data-thema]").forEach(k =>
+      k.classList.toggle("active", k.dataset.thema === jetzt));
+    if (!leiste.dataset.gebunden) {
+      leiste.dataset.gebunden = "1";
+      leiste.addEventListener("click", e => {
+        const k = e.target.closest("button[data-thema]");
+        if (k) themaSetzen(k.dataset.thema);
+      });
+    }
+  }
+
+  /* ----------------------------------------------------------
+     KACHELN AUS GLAS
+     Ein Versuch auf Widerruf. Alles daran haengt an einem Attribut
+     am Wurzelelement — steht es auf Aus, ist der Effekt restlos
+     weg, und die Kacheln sehen aus wie zuvor.
+     ---------------------------------------------------------- */
+  function glasWahl() {
+    /* Zum Ausprobieren steht Glas an — nur ein ausdrueckliches Aus
+       schaltet es ab. */
+    return localStorage.getItem("lifeos_glas") === "aus" ? "aus" : "an";
+  }
+
+  function glasSetzen(wert) {
+    if (wert === "an") document.documentElement.setAttribute("data-glas", "an");
+    else                document.documentElement.removeAttribute("data-glas");
+    try { localStorage.setItem("lifeos_glas", wert); } catch (f) {}
+    const leiste = $("glasWahl");
+    if (!leiste) return;
+    leiste.querySelectorAll("button[data-glas]").forEach(k =>
+      k.classList.toggle("active", k.dataset.glas === wert));
+  }
+
+  (function glasBinden() {
+    const leiste = $("glasWahl");
+    if (!leiste) return;
+    leiste.addEventListener("click", e => {
+      const k = e.target.closest("button[data-glas]");
+      if (k) glasSetzen(k.dataset.glas);
+    });
+    glasSetzen(glasWahl());
+  })();
+
+
+  /* ==========================================================
+     KACHELN ORDNEN — nur auf dem Tablet
+
+     Verschieben, Breite aendern, ausblenden. Mit Knoepfen statt
+     Ziehen: auf dem iPad trifft man einen Knopf sicherer als eine
+     Ziehflaeche, und es geht auch mit der Maus.
+
+     Die Anordnung gilt ausdruecklich nur fuer die Tablet-Breite.
+     Am Rechner steht die Aufteilung aus Lucas Bauplan, und die
+     soll unangetastet bleiben — deshalb wird beim Anwenden die
+     Fensterbreite geprueft und beim Verlassen alles zurueckgesetzt,
+     was hier gesetzt wurde.
+     ========================================================== */
+  /* Dieselbe Bedingung wie im Stylesheet — als Abfrage, nicht als
+     zweite Zahlenreihe: sonst laufen beide irgendwann auseinander.
+     Ein iPad Pro im Querformat ist 1194 oder 1366 Pixel breit und
+     fiel bei einer festen Grenze von 1180 heraus. Ein Laptop mit
+     derselben Breite hat einen feinen Zeiger, ein iPad nicht. */
+  const ORD_BEDINGUNG =
+    "(min-width: 700px) and (max-width: 1250px)," +
+    "(min-width: 700px) and (max-width: 1400px) and (pointer: coarse)";
+  /* Die Grundordnung — dieselbe wie im Stylesheet, sonst springt
+     die Aufteilung beim ersten Laden. */
+  const ORD_KACHELN = [
+    "card-klausur", "card-screentime2", "card-kalorien", "card-timer",
+    "card-habits", "card-naechste", "card-tagesplan", "card-schule",
+    "card-wetter", "card-wetter2"
+  ];
+
+  /* Das Wetter steht auf dem iPad ausgeblendet — aber ueber den
+     Plan, nicht ueber das Stylesheet. Nur so kann man es im
+     Ordnen-Modus wiederholen. */
+  const ORD_ANFANGS_WEG = ["card-wetter", "card-wetter2"];
+
+  /* Vier Breiten und vier Hoehen. Die Breiten rechnen die Luecke
+     mit: bei drei Kacheln nebeneinander liegen zwei Luecken von je
+     zwoelf Pixeln dazwischen, also acht je Kachel. */
+  const ORD_BREITEN = [
+    { wort: "1/3", felder: 2 },
+    { wort: "1/2", felder: 3 },
+    { wort: "2/3", felder: 4 },
+    { wort: "1/1", felder: 6 }
+  ];
+  /* Die Hoehen in Pixeln, nicht in Anteilen: eine Kachel mit einer
+     Zahl darin braucht dieselbe Hoehe, ob sie ein Drittel oder die
+     ganze Breite hat. */
+  /* 5, 8, 10 und 13 Zeilen ergeben 108, 180, 228 und 300 Pixel.
+     Die Zahlen sind so gewaehlt, dass Stapel aufgehen: zwei S
+     uebereinander sind genau ein L, S und M zusammen ein XL. Damit
+     schliessen zwei niedrige Kacheln buendig mit der hohen daneben
+     ab, statt eine Luecke zu lassen. */
+  const ORD_HOEHEN = [
+    { wort: "S",  felder: 5 },
+    { wort: "M",  felder: 8 },
+    { wort: "L",  felder: 10 },
+    { wort: "XL", felder: 13 }
+  ];
+
+  /* Womit eine Kachel anfaengt, wenn nichts eingestellt wurde */
+  const ORD_VORGABE = {
+    "card-klausur":     { b: 3, h: 1 },
+    "card-screentime2": { b: 1, h: 0 },
+    "card-kalorien":    { b: 1, h: 0 },
+    "card-timer":       { b: 1, h: 0 },
+    "card-habits":      { b: 1, h: 3 },
+    "card-naechste":    { b: 3, h: 3 },
+    "card-tagesplan":   { b: 1, h: 1 },
+    "card-schule":      { b: 1, h: 1 },
+    "card-wetter":      { b: 1, h: 0 },
+    "card-wetter2":     { b: 1, h: 2 }
+  };
+  function ordStufe(id, feld) {
+    const eigen = feld === "b" ? ordPlan.breit[id] : ordPlan.hoehe[id];
+    if (Number.isInteger(eigen)) return eigen;
+    const v = ORD_VORGABE[id];
+    return v ? v[feld] : (feld === "b" ? 1 : 1);
+  }
+
+  let ordPlan = store.get("lifeos_ipad_plan", null);
+  /* Beim allerersten Mal gilt die Vorgabe: Wetter aus. Danach
+     zaehlt nur noch, was hier eingestellt wurde. */
+  if (!ordPlan || typeof ordPlan !== "object") {
+    ordPlan = { reihe: [], breit: {}, hoehe: {}, weg: ORD_ANFANGS_WEG.slice() };
+  }
+  if (!Array.isArray(ordPlan.reihe)) ordPlan.reihe = [];
+  if (!Array.isArray(ordPlan.weg))   ordPlan.weg = [];
+  if (!ordPlan.breit || typeof ordPlan.breit !== "object") ordPlan.breit = {};
+  if (!ordPlan.hoehe || typeof ordPlan.hoehe !== "object") ordPlan.hoehe = {};
+
+  let ordModus = false;
+
+  function ordTablet() {
+    return matchMedia(ORD_BEDINGUNG).matches;
+  }
+  function ordSichern() { store.set("lifeos_ipad_plan", ordPlan); }
+
+  /* Die gespeicherte Reihenfolge, ergaenzt um alles, was noch nicht
+     darin steht — so tauchen neue Kacheln hinten auf, statt zu
+     verschwinden. */
+  function ordReihenfolge() {
+    const bekannt = ordPlan.reihe.filter(id => ORD_KACHELN.includes(id));
+    const rest = ORD_KACHELN.filter(id => !bekannt.includes(id));
+    return bekannt.concat(rest);
+  }
+
+  function ordAnwenden() {
+    const tablet = ordTablet();
+    const folge = ordReihenfolge();
+
+    ORD_KACHELN.forEach(id => {
+      const k = $(id);
+      if (!k) return;
+
+      if (!tablet) {
+        /* Am Rechner und auf dem Telefon zaehlt nichts davon */
+        k.style.removeProperty("order");
+        k.style.removeProperty("flex");
+        k.style.removeProperty("max-width");
+        k.style.removeProperty("min-height");
+        k.style.removeProperty("height");
+        k.style.removeProperty("grid-column");
+        k.style.removeProperty("grid-row");
+        k.style.removeProperty("display");
+        return;
+      }
+
+      k.style.order = folge.indexOf(id);
+
+      if (ordPlan.weg.includes(id)) {
+        k.style.display = "none";
+        return;
+      }
+      k.style.removeProperty("display");
+
+      const b = ORD_BREITEN[ordStufe(id, "b")] || ORD_BREITEN[1];
+      const h = ORD_HOEHEN[ordStufe(id, "h")]  || ORD_HOEHEN[1];
+      k.style.gridColumn = "span " + b.felder;
+      k.style.gridRow = "span " + h.felder;
+      k.style.height = "auto";
+      k.style.minHeight = "0";
+    });
+
+    /* Der Knopf steht nur da, wo er etwas bewirkt */
+    const leiste = $("ordLeiste");
+    if (leiste) leiste.hidden = !tablet;
+    if (!tablet && ordModus) ordBeenden();
+  }
+
+  /* ---------- Die Griffe an jeder Kachel ---------- */
+  function ordGriffeSetzen() {
+    ORD_KACHELN.forEach(id => {
+      const k = $(id);
+      if (!k) return;
+      let griff = k.querySelector(".ord-griffe");
+
+      if (!ordModus) { if (griff) griff.remove(); k.classList.remove("ordnet"); return; }
+
+      k.classList.add("ordnet");
+      if (griff) return;   /* schon da */
+
+      griff = document.createElement("div");
+      griff.className = "ord-griffe";
+      const bw = (ORD_BREITEN[ordStufe(id, "b")] || ORD_BREITEN[1]).wort;
+      const hw = (ORD_HOEHEN[ordStufe(id, "h")]  || ORD_HOEHEN[1]).wort;
+      const weg = ordPlan.weg.includes(id);
+      griff.innerHTML = `
+        <button type="button" data-ord="hoch" title="Nach vorn" aria-label="Nach vorn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14l6-6 6 6"/></svg>
+        </button>
+        <button type="button" data-ord="runter" title="Nach hinten" aria-label="Nach hinten">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10l6 6 6-6"/></svg>
+        </button>
+        <button type="button" data-ord="breite" class="ord-stufe" title="Breite: ${bw}"
+          aria-label="Breite ändern">${bw}</button>
+        <button type="button" data-ord="hoehe" class="ord-stufe" title="Höhe: ${hw}"
+          aria-label="Höhe ändern">${hw}</button>
+        <button type="button" data-ord="weg" class="ord-weg" title="${weg ? "Wieder zeigen" : "Ausblenden"}"
+          aria-label="Ausblenden">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 6.6 17.4 17.4M17.4 6.6 6.6 17.4"/></svg>
+        </button>`;
+
+      griff.addEventListener("click", ev => {
+        const b = ev.target.closest("[data-ord]");
+        if (!b) return;
+        ev.stopPropagation();
+        ordHandlung(id, b.dataset.ord);
+      });
+      k.appendChild(griff);
+    });
+  }
+
+  function ordHandlung(id, was) {
+    const folge = ordReihenfolge();
+    const i = folge.indexOf(id);
+
+    if (was === "hoch" && i > 0) {
+      folge.splice(i - 1, 0, folge.splice(i, 1)[0]);
+      ordPlan.reihe = folge;
+    } else if (was === "runter" && i < folge.length - 1) {
+      folge.splice(i + 1, 0, folge.splice(i, 1)[0]);
+      ordPlan.reihe = folge;
+    } else if (was === "breite") {
+      ordPlan.breit[id] = (ordStufe(id, "b") + 1) % ORD_BREITEN.length;
+    } else if (was === "hoehe") {
+      ordPlan.hoehe[id] = (ordStufe(id, "h") + 1) % ORD_HOEHEN.length;
+    } else if (was === "weg") {
+      const w = ordPlan.weg.indexOf(id);
+      if (w >= 0) ordPlan.weg.splice(w, 1); else ordPlan.weg.push(id);
+    }
+
+    ordSichern();
+    ordAnwenden();
+    /* Die Griffe tragen den Zustand im Titel — neu setzen */
+    ORD_KACHELN.forEach(k2 => { const el = $(k2); const g = el && el.querySelector(".ord-griffe"); if (g) g.remove(); });
+    ordGriffeSetzen();
+  }
+
+  /* Ausgeblendete Kacheln bleiben im Ordnen-Modus sichtbar, sonst
+     kaeme man nie wieder an sie heran. */
+  function ordAusgeblendeteZeigen() {
+    ORD_KACHELN.forEach(id => {
+      const k = $(id);
+      if (!k) return;
+      const weg = ordPlan.weg.includes(id);
+      k.classList.toggle("ord-verborgen", ordModus && weg);
+      if (ordModus && weg) k.style.removeProperty("display");
+    });
+  }
+
+  function ordStarten() {
+    if (!ordTablet()) return;
+    ordModus = true;
+    document.body.classList.add("ordnet");
+    $("ordStart").hidden = true;
+    $("ordAktiv").hidden = false;
+    ordAnwenden();
+    ordAusgeblendeteZeigen();
+    ordGriffeSetzen();
+  }
+
+  function ordBeenden() {
+    ordModus = false;
+    document.body.classList.remove("ordnet");
+    const s = $("ordStart"), a = $("ordAktiv");
+    if (s) s.hidden = false;
+    if (a) a.hidden = true;
+    ordGriffeSetzen();
+    ordAusgeblendeteZeigen();
+    ordAnwenden();
+  }
+
+  (function ordBinden() {
+    const start = $("ordStart");
+    if (!start) return;
+    start.addEventListener("click", ordStarten);
+    $("ordFertig").addEventListener("click", ordBeenden);
+    $("ordZurueck").addEventListener("click", () => {
+      ordPlan = { reihe: [], breit: {}, hoehe: {}, weg: ORD_ANFANGS_WEG.slice() };
+      ordSichern();
+      ordAnwenden();
+      ordAusgeblendeteZeigen();
+      ORD_KACHELN.forEach(id => { const el = $(id); const g = el && el.querySelector(".ord-griffe"); if (g) g.remove(); });
+      ordGriffeSetzen();
+    });
+
+    /* Dreht man das iPad, wechselt die Breite — dann gilt die
+       Anordnung womoeglich nicht mehr. */
+    addEventListener("resize", ordAnwenden);
+    ordAnwenden();
+  })();
+
+  /* Steht der Schalter auf "Automatisch", muss die Seite mitwechseln,
+     wenn das Geraet abends umstellt — ohne Neuladen. */
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+    if (themaWahl() === "auto") statusleisteFaerben();
+  });
+  statusleisteFaerben();
+
+  /* ==========================================================
+     DIE SCHWEBENDE LEISTE AUF DEM HANDY
+
+     Zehn Seiten passen nicht nebeneinander in eine Pille, also
+     wischt man seitlich. Damit man das ueberhaupt merkt, verlaeuft
+     der Rand weich — aber nur auf der Seite, auf der wirklich noch
+     etwas liegt. Ein Verlauf, der auch am Anfang steht, wuerde ueber
+     den ersten Eintrag waschen und Weiterlaufen behaupten, wo
+     Schluss ist.
+     ========================================================== */
+
+  /* ==========================================================
+     DIE KARTE IST DER WEG ZUR SEITE
+
+     Bisher trug jedes Widget seine Bedienung mit sich herum: Knoepfe,
+     Umschalter, Leerzustaende. Bei acht bis zwoelf Dingen pro Karte
+     bleibt kein Platz mehr fuer das, was die Karte eigentlich sagen
+     will — die Zahl, den naechsten Termin, den Stand.
+
+     Jetzt zeigt jede Karte ihre Kernaussage, und ein Klick auf sie
+     fuehrt zur vollen Seite. Verloren geht nichts, es rueckt nur eine
+     Ebene tiefer.
+
+     Klicks auf echte Bedienelemente laufen weiter wie bisher: wer ein
+     Habit abhakt, will nicht auf die Habit-Seite geschickt werden.
+     ========================================================== */
+  (function kartenAlsWeg() {
+    const ZIEL = {
+      "card-kalorien":   "kalorien",
+      "card-screentime": "bildschirmzeit",
+      "card-wetter":     "kalender",
+      "card-naechste":   "kalender",
+      "card-streaks":    "habits",
+      "card-habits":     "habits"
+    };
+
+    Object.entries(ZIEL).forEach(([id, seite]) => {
+      const karte = document.getElementById(id);
+      if (!karte) return;
+
+      karte.classList.add("karte-fuehrt");
+      karte.setAttribute("role", "link");
+      karte.setAttribute("tabindex", "0");
+
+      const hin = e => {
+        /* Alles, was selbst etwas tut, behaelt sein Verhalten. Sonst
+           koennte man kein Habit mehr abhaken, ohne die Seite zu
+           wechseln. */
+        if (e.target.closest("button, a, input, select, textarea, [role=button], [role=tab], svg[data-klick]")) return;
+        /* Wer Text markiert, will lesen, nicht navigieren. */
+        const auswahl = window.getSelection();
+        if (auswahl && String(auswahl).length > 0) return;
+        location.hash = "#/" + seite;
+      };
+
+      karte.addEventListener("click", hin);
+      karte.addEventListener("keydown", e => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); location.hash = "#/" + seite; }
+      });
+    });
+  })();
+
+  (function leisteRaender() {
+    const leiste = document.querySelector(".sidebar");
+    const bahn = document.querySelector(".nav-scroll");
+    if (!leiste || !bahn) return;
+
+    function raender() {
+      const rest = bahn.scrollWidth - bahn.clientWidth - bahn.scrollLeft;
+      leiste.classList.toggle("mehr-links", bahn.scrollLeft > 2);
+      leiste.classList.toggle("mehr-rechts", rest > 2);
+    }
+    bahn.addEventListener("scroll", raender, { passive: true });
+    window.addEventListener("resize", raender);
+    raender();
+
+    /* Der gewaehlte Punkt zieht sich in Sicht, damit er nicht halb
+       hinter dem Rand klemmt. */
+    bahn.addEventListener("click", e => {
+      const k = e.target.closest(".nav-link");
+      if (k) setTimeout(() => {
+        k.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+      }, 40);
+    });
+  })();
+
 
   function openSettings(bereich) {
     $("settingName").value = settings.name || "";
     $("settingCity").value = settings.city || "";
     $("settingCalGoal").value = settings.calGoal || "";
+    /* dauerText schreibt "4 h" — das liest parseDurationToMinutes
+       nicht zurueck. Also im selben Format wie der Platzhalter. */
+    const stl = Number(settings.screenLimit) || 240;
+    $("settingStLimit").value =
+      Math.floor(stl / 60) + ":" + String(stl % 60).padStart(2, "0");
+    $("settingAufstehen").value = settings.aufstehen || "06:00";
+    $("settingSchlafen").value  = settings.schlafen  || "22:30";
     $("settingCalConsumed").value = kalorien.consumed || "";
     const t = getDayEntry(todayStr());
     $("settingStPhone").value = t.phone ? formatMinutes(t.phone) : "";
@@ -2592,6 +3739,39 @@
     setDayEntry(todayStr(), { pc: min });
     renderScreenTime();
     showToast("PC-Bildschirmzeit gespeichert.", "success");
+  });
+
+  /* Das Tagesziel fuer die Bildschirmzeit. Es faerbt den Balken im
+     Dashboard-Widget: bis siebzig Prozent gruen, darueber gelb, ab
+     dem Ziel rot. */
+  $("settingStLimitSave").addEventListener("click", () => {
+    const input = $("settingStLimit");
+    const min = parseDurationToMinutes(input.value);
+    if (min === null || min <= 0) { input.placeholder = "Format z.B. 4:00 oder 4h30"; return; }
+    settings.screenLimit = min;
+    store.set("lifeos_settings", settings);
+    renderScreenTime();
+    renderNeueWidgets();
+    showToast("Tagesziel gespeichert: " + dauerText(min) + ".", "success");
+  });
+
+  /* Die beiden Eckpunkte des Tagesplans. Sie sagen, wo der Tag
+     anfaengt und aufhoert — dazwischen baut er sich aus Stundenplan
+     und Terminen. */
+  [
+    ["settingAufstehen", "aufstehen", "Aufstehzeit"],
+    ["settingSchlafen",  "schlafen",  "Schlafenszeit"]
+  ].forEach(([feld, schluessel, wort]) => {
+    const knopf = $(feld + "Save");
+    if (!knopf) return;
+    knopf.addEventListener("click", () => {
+      const wert = $(feld).value;
+      if (!/^\d{2}:\d{2}$/.test(wert)) return;
+      settings[schluessel] = wert;
+      store.set("lifeos_settings", settings);
+      spaet(() => renderTagesplan(), null);
+      showToast(wort + " gespeichert: " + wert + ".", "success");
+    });
   });
 
   $("settingCitySave").addEventListener("click", async () => {
@@ -3481,14 +4661,11 @@
     const tage = daysUntil(e.date);
     if (tage < 0) return { zahl: Math.abs(tage), einheit: Math.abs(tage) === 1 ? "Tag über" : "Tage über", ton: "rot" };
     if (tage === 0) return { zahl: "heute", einheit: "", ton: "rot" };
-    /* Für Schulisches zählen Schultage: bis zu einer Klausur ist
-       nicht die Zahl der Kalendertage die Frage, sondern wie oft man
-       bis dahin noch in dem Fach sitzt. */
-    if (e.art !== "termin" && tage >= 2) {
-      const schul = schultageBis(e.date);
-      if (schul === 0) return { zahl: "nach", einheit: "den Ferien", ton: "ruhig" };
-      return { zahl: schul, einheit: schul === 1 ? "Schultag" : "Schultage",
-               ton: tage <= 3 ? "gelb" : "ruhig" };
+    /* Auch hier Kalendertage, damit ueberall dieselbe Einheit steht.
+       Liegt bis dahin alles in den Ferien, ist das trotzdem eine
+       Ansage wert. */
+    if (e.art !== "termin" && tage >= 2 && schultageBis(e.date) === 0) {
+      return { zahl: "nach", einheit: "den Ferien", ton: "ruhig" };
     }
     return { zahl: tage, einheit: tage === 1 ? "Tag" : "Tage", ton: tage <= 3 ? "gelb" : "ruhig" };
   }
@@ -3828,11 +5005,14 @@
      lässt, bleibt ehrlich unter "Sonstiges" stehen.
      ========================================================== */
   const KATEGORIEN = [
-    { id: "produktiv", titel: "Produktivität", ton: "#34d399" },
-    { id: "youtube",   titel: "YouTube",       ton: "#fb7185" },
-    { id: "tiktok",    titel: "TikTok",        ton: "#22d3ee" },
-    { id: "spiele",    titel: "Videospiele",   ton: "#a78bfa" },
-    { id: "rest",      titel: "Sonstiges",     ton: "#8c97b0" }
+    /* Diese Toene landen als stroke-Attribut im SVG und koennen darum
+       keine Variablen sein. Sie kommen aus derselben Palette wie der
+       Rest und sind so gewaehlt, dass sie auf beiden Gruenden tragen. */
+    { id: "produktiv", titel: "Produktivität", ton: "#34C759" },
+    { id: "youtube",   titel: "YouTube",       ton: "#FF3B30" },
+    { id: "tiktok",    titel: "TikTok",        ton: "#0A84FF" },
+    { id: "spiele",    titel: "Videospiele",   ton: "#FFB800" },
+    { id: "rest",      titel: "Sonstiges",     ton: "#8E8E93" }
   ];
 
   const KAT_BROWSER = ["chrome", "msedge", "firefox", "brave", "opera", "operagx",
@@ -4257,7 +5437,7 @@
       zeile.classList.add("aufklappbar");
       zeile.insertAdjacentHTML("beforeend",
         `<span class="app-pfeil" aria-hidden="true">
-           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
              stroke-linecap="round" stroke-linejoin="round"><path d="M6 9.5 12 15.5 18 9.5"/></svg>
          </span>`);
 
@@ -4604,12 +5784,17 @@
     const y = v => H - padY - (v / maxWert) * (H - padY * 2);
 
     const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+    /* Feste Werte statt Variablen — ein stop-color ist ein
+       Praesentationsattribut und kennt kein var(). Beide Toene
+       tragen auf schwarzem wie auf weissem Grund. */
     defs.innerHTML =
       `<linearGradient id="pgGradPc" x1="0" y1="0" x2="0" y2="1">
-         <stop offset="0%" stop-color="rgba(167,139,250,0.42)"/><stop offset="100%" stop-color="rgba(167,139,250,0)"/>
+         <stop offset="0%" stop-color="#0A84FF" stop-opacity="0.45"/>
+         <stop offset="100%" stop-color="#0A84FF" stop-opacity="0.02"/>
        </linearGradient>
        <linearGradient id="pgGradPhone" x1="0" y1="0" x2="0" y2="1">
-         <stop offset="0%" stop-color="rgba(91,140,255,0.42)"/><stop offset="100%" stop-color="rgba(91,140,255,0)"/>
+         <stop offset="0%" stop-color="#8E8E93" stop-opacity="0.45"/>
+         <stop offset="100%" stop-color="#8E8E93" stop-opacity="0.03"/>
        </linearGradient>`;
     svg.appendChild(defs);
 
@@ -4617,13 +5802,19 @@
        gezeichnet, damit die Flaechen darueber liegen. */
     marken.forEach(wert => {
       const yy = y(wert);
-      svg.appendChild(svgEl("line", { class: "st-raster",
+      /* Die Nulllinie ist die X-Achse und wird staerker gezeichnet
+         als das Raster darueber. */
+      svg.appendChild(svgEl("line", { class: wert === 0 ? "st-achse-x" : "st-raster",
         x1: padL, y1: yy, x2: W, y2: yy }));
       const beschriftung = svgEl("text", { class: "st-achse-y",
         x: padL - 8, y: yy + 3.5, "text-anchor": "end" });
       beschriftung.textContent = achsenText(wert);
       svg.appendChild(beschriftung);
     });
+
+    /* Die Y-Achse als senkrechte Linie am linken Rand */
+    svg.appendChild(svgEl("line", { class: "st-achse-y-linie",
+      x1: padL, y1: padY, x2: padL, y2: y(0) }));
 
     /* Ohne Handy-Kurve waere eine gestapelte Gesamtlinie irrefuehrend:
        sie enthielte die Telefonzeit, ohne sie zu zeigen. Dann wird
@@ -4676,6 +5867,24 @@
   }
 
   /* Naechstgelegener Punkt zur Zeigerposition */
+  /* Der Kasten beim Ueberfahren.
+
+     Er sass ueber dem Diagramm und ragte oben heraus — auf dem
+     Dashboard bis in die Kopfzeile der Kachel. Jetzt liegt er
+     innerhalb, mit vierzehn Pixeln Abstand zur Oberkante, und
+     haelt sich seitlich an den Rand, statt herauszulaufen. */
+  function tooltipZeigen(box, px, html) {
+    chartTooltip.innerHTML = html;
+    chartTooltip.classList.add("visible");
+    /* Erst zeigen, dann messen: eine verborgene Box misst null. */
+    const halb = chartTooltip.offsetWidth / 2;
+    const links = Math.min(
+      Math.max(box.left + px, box.left + halb + 6),
+      box.right - halb - 6);
+    chartTooltip.style.left = links + "px";
+    chartTooltip.style.top  = (box.top + 14) + "px";
+  }
+
   let pgGeometrie = null;
 
   function pgHover(ev) {
@@ -4703,14 +5912,20 @@
     $("pgDotPc").setAttribute("cy", pgGeometrie.y(ST_HANDY ? p.phone + p.pc : p.pc));
     $("pgStChart").classList.add("aktiv");
 
-    chartTooltip.innerHTML = `${escapeHTML(p.tip || p.label || "")}<br>`
-      + (ST_HANDY
-          ? `Handy ${formatMinutes(p.phone)} \u00b7 PC ${formatMinutes(p.pc)}`
-            + `<br>Gesamt ${formatMinutes(p.phone + p.pc)}`
-          : `PC ${formatMinutes(p.pc)}`);
-    chartTooltip.style.left = (box.left + px) + "px";
-    chartTooltip.style.top = (box.top - 10) + "px";
-    chartTooltip.classList.add("visible");
+    /* Eine Zeile je Wert, mit dem Punkt der zugehoerigen Kurve —
+       so ist ohne Nachdenken klar, welche Zahl wohin gehoert. */
+    const zeile = (klasse, wort, wert) =>
+      `<div class="ct-zeile"><i class="ct-punkt ${klasse}"></i>` +
+      `<span class="ct-wort">${wort}</span>` +
+      `<span class="ct-wert">${formatMinutes(wert)}</span></div>`;
+
+    const kopf = `<div class="ct-kopf">${escapeHTML(p.tip || p.label || "")}</div>`;
+    const leib = ST_HANDY
+      ? zeile("phone", "Handy", p.phone) + zeile("pc", "PC", p.pc)
+        + `<div class="ct-zeile gesamt"><span class="ct-wort">Gesamt</span>`
+        + `<span class="ct-wert">${formatMinutes(p.phone + p.pc)}</span></div>`
+      : zeile("pc", "PC", p.pc);
+    tooltipZeigen(box, px, kopf + leib);
   }
 
   function pgHoverEnde() {
@@ -7831,7 +9046,7 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
           </div>
           <button type="button" class="li-stift" data-stift="${escapeHTML(g.ip)}"
                   aria-expanded="${bearbeitet}" aria-label="Name und Gruppe">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M16.4 4.6a2 2 0 0 1 2.8 2.8L8.5 18.1l-3.7.9.9-3.7Z"/>
             </svg>
@@ -9967,16 +11182,17 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
   const SYM_PAPIERKORB =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
     + 'stroke-linecap="round" stroke-linejoin="round">'
-    + '<path d="M4 6.5h16"/><path d="M9.5 6.5V4.8A1.3 1.3 0 0 1 10.8 3.5h2.4a1.3 1.3 0 0 1 1.3 1.3v1.7"/>'
-    + '<path d="M6.2 6.5 7 19.2a1.6 1.6 0 0 0 1.6 1.5h6.8a1.6 1.6 0 0 0 1.6-1.5l.8-12.7"/>'
-    + '<path d="M10.3 10.2v6.6M13.7 10.2v6.6"/></svg>';
+    + '<path d="M3.8 6.4h16.4"/>'
+    + '<path d="M9.4 6.4V4.8c0-.8.6-1.4 1.4-1.4h2.4c.8 0 1.4.6 1.4 1.4v1.6"/>'
+    + '<path d="M6.4 6.4l.8 12.8c.1.9.8 1.6 1.7 1.6h6.2c.9 0 1.6-.7 1.7-1.6l.8-12.8"/>'
+    + '<path d="M10.2 10.4v6.4M13.8 10.4v6.4"/></svg>';
 
   const SYM_RUECKBLICK =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
     + 'stroke-linecap="round" stroke-linejoin="round">'
-    + '<path d="M3.6 8.6V4.4"/><path d="M3.6 8.6h4.2"/>'
-    + '<path d="M4.2 8.4A8.4 8.4 0 1 1 3.7 14"/>'
-    + '<path d="M12 7.6V12l3 1.9"/></svg>';
+    + '<path d="M3.4 4.4v4.4h4.4"/>'
+    + '<path d="M3.9 8.8A8.4 8.4 0 1 1 3.6 13.6"/>'
+    + '<path d="M12 7.4V12l3.2 2"/></svg>';
 
   /* Eine Stelle für beide Quellen — sonst muss man an sechs Orten
      daran denken. */
@@ -10947,21 +12163,283 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
       <div class="kennzahl"><div class="kz-label">Schnitt (14 Tage)</div><div class="kz-wert">${schnitt || "—"}</div>
         <div class="kz-zusatz">${mitWerten.length} Tage erfasst</div></div>`;
 
-    const liste = $("pgKalTage");
-    liste.innerHTML = "";
-    const max = Math.max(1, ziel, ...tage.map(t => t.wert));
-    [...tage].reverse().forEach(t => {
-      const ueber = ziel > 0 && t.wert > ziel;
-      liste.appendChild(zeile(
-        `<span class="vz-punkt ${t.wert ? (ueber ? "" : "erledigt") : ""}"></span>
-         <div class="vz-haupt">
-           <div class="vz-titel">${t.tag}, ${fmtDate(t.key)}</div>
-           <div class="vz-sub">${t.wert ? (ziel ? Math.round(t.wert / ziel * 100) + " % vom Ziel" : "erfasst") : "nichts getrackt"}</div>
-         </div>
-         <div class="bt-spur" style="max-width:200px"><div class="bt-fuellung" style="width:${Math.round(t.wert / max * 100)}%"></div></div>
-         <span class="vz-wert">${t.wert || "—"}</span>`, ueber ? "bald" : ""));
+    /* Die Liste der letzten vierzehn Tage steht nicht mehr auf der
+       Seite — an ihrer Stelle sind die Rezepte. Der Schnitt aus
+       diesen Tagen bleibt als Kennzahl oben stehen, dafuer wird
+       oberhalb weiter gerechnet. */
+  }
+
+
+  /* ==========================================================
+     REZEPTE
+
+     Anlegen, Zutaten und Schritte eintragen, dann Schritt fuer
+     Schritt kochen. Beim Kochen fuellt ein Schritt den Schirm: man
+     hat die Haende voll und schaut nur kurz hin — da hilft keine
+     Liste, sondern ein grosser Satz und ein Knopf.
+
+     Am Ende wandern die Kalorien in den Tag, ohne dass man sie noch
+     einmal tippt. Das ist der Grund, warum die Rezepte auf dieser
+     Seite stehen und nicht auf einer eigenen.
+     ========================================================== */
+  let rezepte = store.get("lifeos_rezepte", []);
+  if (!Array.isArray(rezepte)) rezepte = [];
+  let rezeptOffen = null;      /* id des aufgeklappten Rezepts */
+
+  function rezepteSichern() { store.set("lifeos_rezepte", rezepte); }
+  function rezeptVon(id) { return rezepte.find(r => r && r.id === id) || null; }
+
+  function renderRezepte() {
+    const liste = $("rezeptListe");
+    const zahl = $("rezeptZahl");
+    if (!liste) return;
+
+    if (zahl) zahl.textContent = String(rezepte.length);
+
+    if (!rezepte.length) {
+      liste.innerHTML = '<li class="muted-line">Noch kein Rezept angelegt</li>';
+    } else {
+      liste.innerHTML = rezepte.map(r => {
+        const schritte = (r.schritte || []).length;
+        const zutaten = (r.zutaten || []).length;
+        const teile = [];
+        if (zutaten)  teile.push(zutaten + (zutaten === 1 ? " Zutat" : " Zutaten"));
+        if (schritte) teile.push(schritte + (schritte === 1 ? " Schritt" : " Schritte"));
+        if (r.kcal)   teile.push(r.kcal + " kcal");
+        return `
+          <li class="voll-zeile rezept-zeile${rezeptOffen === r.id ? " offen" : ""}" data-rezept="${r.id}">
+            <div class="vz-haupt">
+              <div class="vz-titel">${escapeHTML(r.name || "Ohne Namen")}</div>
+              <div class="vz-sub">${teile.length ? escapeHTML(teile.join(" · ")) : "noch nichts eingetragen"}</div>
+            </div>
+            <button type="button" class="rz-start" data-kochen="${r.id}"
+              ${schritte ? "" : "disabled title='Erst Schritte eintragen'"}>Kochen</button>
+          </li>`;
+      }).join("");
+    }
+
+    liste.querySelectorAll("[data-rezept]").forEach(el => {
+      el.addEventListener("click", ev => {
+        if (ev.target.closest("[data-kochen]")) return;   /* der Knopf kocht */
+        rezeptOeffnen(el.dataset.rezept);
+      });
+    });
+    liste.querySelectorAll("[data-kochen]").forEach(el => {
+      el.addEventListener("click", () => kochenStarten(el.dataset.kochen));
     });
   }
+
+  /* ---------- Ein Rezept bearbeiten ---------- */
+  function rezeptOeffnen(id) {
+    const r = rezeptVon(id);
+    const kasten = $("rezeptDetail");
+    if (!kasten) return;
+
+    /* Noch einmal auf dasselbe: wieder zu. */
+    if (rezeptOffen === id) { rezeptSchliessen(); return; }
+
+    rezeptOffen = id;
+    kasten.hidden = false;
+    $("rezeptDetailName").textContent = r ? (r.name || "Rezept") : "Rezept";
+    $("rezeptKcal").value = r && r.kcal ? r.kcal : "";
+    $("rezeptPortionen").value = r && r.portionen ? r.portionen : "";
+    rezeptTeileZeichnen();
+    renderRezepte();
+    kasten.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  function rezeptSchliessen() {
+    rezeptOffen = null;
+    const kasten = $("rezeptDetail");
+    if (kasten) kasten.hidden = true;
+    renderRezepte();
+  }
+
+  /* Zutaten und Schritte stehen nebeneinander und werden gleich
+     behandelt — dieselbe Funktion zeichnet beide. */
+  function rezeptTeileZeichnen() {
+    const r = rezeptVon(rezeptOffen);
+    if (!r) return;
+
+    const male = (ziel, feld, leer) => {
+      const el = $(ziel);
+      if (!el) return;
+      const werte = r[feld] || [];
+      if (!werte.length) { el.innerHTML = `<li class="muted-line">${leer}</li>`; return; }
+      el.innerHTML = werte.map((wert, i) => `
+        <li class="rz-eintrag">
+          <span class="rz-text">${escapeHTML(wert)}</span>
+          <button type="button" class="rz-weg" data-feld="${feld}" data-nr="${i}"
+            aria-label="Entfernen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
+        </li>`).join("");
+      el.querySelectorAll(".rz-weg").forEach(k => {
+        k.addEventListener("click", () => {
+          r[k.dataset.feld].splice(Number(k.dataset.nr), 1);
+          rezepteSichern();
+          rezeptTeileZeichnen();
+          renderRezepte();
+        });
+      });
+    };
+
+    male("rezeptZutaten", "zutaten", "Noch keine Zutat");
+    male("rezeptSchritte", "schritte", "Noch kein Schritt");
+  }
+
+  /* ---------- Kochen ---------- */
+  let kochRezept = null, kochNr = 0;
+
+  function kochenStarten(id) {
+    const r = rezeptVon(id);
+    if (!r || !(r.schritte || []).length) return;
+    kochRezept = r;
+    kochNr = 0;
+    const schirm = $("kochSchirm");
+    if (!schirm) return;
+    schirm.hidden = false;
+    document.body.classList.add("koch-laeuft");
+    kochZeichnen();
+  }
+
+  function kochBeenden() {
+    kochRezept = null;
+    const schirm = $("kochSchirm");
+    if (schirm) schirm.hidden = true;
+    document.body.classList.remove("koch-laeuft");
+  }
+
+  function kochZeichnen() {
+    if (!kochRezept) return;
+    const schritte = kochRezept.schritte || [];
+    const letzter = kochNr >= schritte.length - 1;
+
+    $("kochName").textContent = kochRezept.name || "Rezept";
+    $("kochText").textContent = schritte[kochNr] || "";
+    $("kochZahl").textContent = "Schritt " + (kochNr + 1) + " von " + schritte.length;
+    $("kochFuellung").style.width =
+      Math.round(((kochNr + 1) / schritte.length) * 100) + "%";
+
+    $("kochZurueck").disabled = kochNr === 0;
+    /* Der letzte Schritt fuehrt nicht weiter, sondern schliesst ab —
+       und traegt dabei gleich die Kalorien ein. */
+    $("kochWeiter").textContent = letzter
+      ? (kochRezept.kcal ? "Fertig · " + kochRezept.kcal + " kcal eintragen" : "Fertig")
+      : "Weiter";
+
+    /* Die Zutaten stehen nur beim ersten Schritt — danach hat man
+       sie beisammen und braucht den Platz fuer den Text. */
+    const kasten = $("kochZutaten");
+    const zutaten = kochRezept.zutaten || [];
+    if (kasten) {
+      kasten.hidden = kochNr !== 0 || !zutaten.length;
+      if (!kasten.hidden) {
+        $("kochZutatenListe").innerHTML =
+          zutaten.map(z => `<li>${escapeHTML(z)}</li>`).join("");
+      }
+    }
+  }
+
+  function kochWeiter() {
+    if (!kochRezept) return;
+    const schritte = kochRezept.schritte || [];
+    if (kochNr < schritte.length - 1) { kochNr++; kochZeichnen(); return; }
+
+    /* Fertig: die Kalorien des Rezepts kommen zum heutigen Stand
+       dazu, statt ihn zu ersetzen — es kann ja noch etwas anderes
+       gegessen worden sein. */
+    const kcal = Number(kochRezept.kcal) || 0;
+    if (kcal > 0) {
+      setCaloriesConsumed((kalorien.consumed || 0) + kcal);
+      spaet(() => kalorienMerken(), null);
+      /* setCaloriesConsumed zeichnet das Widget neu, nicht die Seite —
+         die steht daneben und zeigte sonst weiter den alten Stand. */
+      spaet(() => baueKalorien(), null);
+      spaet(() => showToast(kcal + " kcal eingetragen.", "success"), null);
+    }
+    kochBeenden();
+  }
+
+  /* ---------- Die Bedienung ---------- */
+  (function rezepteBinden() {
+    const form = $("rezeptForm");
+    if (!form) return;
+
+    form.addEventListener("submit", e => {
+      e.preventDefault();
+      const name = $("rezeptName").value.trim();
+      if (!name) return;
+      const id = "rz" + Date.now().toString(36);
+      rezepte.push({ id, name, kcal: 0, portionen: 1, zutaten: [], schritte: [] });
+      rezepteSichern();
+      $("rezeptName").value = "";
+      rezeptOeffnen(id);
+    });
+
+    /* Zutat und Schritt laufen ueber dieselbe Mechanik */
+    [["zutatForm", "zutatText", "zutaten"],
+     ["schrittForm", "schrittText", "schritte"]].forEach(([f, feld, ziel]) => {
+      const el = $(f);
+      if (!el) return;
+      el.addEventListener("submit", e => {
+        e.preventDefault();
+        const r = rezeptVon(rezeptOffen);
+        const wert = $(feld).value.trim();
+        if (!r || !wert) return;
+        if (!Array.isArray(r[ziel])) r[ziel] = [];
+        r[ziel].push(wert);
+        rezepteSichern();
+        $(feld).value = "";
+        rezeptTeileZeichnen();
+        renderRezepte();
+      });
+    });
+
+    /* Kalorien und Portionen werden beim Tippen gemerkt */
+    [["rezeptKcal", "kcal"], ["rezeptPortionen", "portionen"]].forEach(([f, feld]) => {
+      const el = $(f);
+      if (!el) return;
+      el.addEventListener("input", () => {
+        const r = rezeptVon(rezeptOffen);
+        if (!r) return;
+        r[feld] = Math.max(0, Number(el.value) || 0);
+        rezepteSichern();
+        renderRezepte();
+      });
+    });
+
+    $("rezeptZu").addEventListener("click", rezeptSchliessen);
+
+    $("rezeptKochen").addEventListener("click", () => {
+      if (rezeptOffen) kochenStarten(rezeptOffen);
+    });
+
+    $("rezeptLoeschen").addEventListener("click", () => {
+      const r = rezeptVon(rezeptOffen);
+      if (!r) return;
+      rezepte = rezepte.filter(x => x.id !== r.id);
+      rezepteSichern();
+      rezeptSchliessen();
+    });
+
+    $("kochZu").addEventListener("click", kochBeenden);
+    $("kochWeiter").addEventListener("click", kochWeiter);
+    $("kochZurueck").addEventListener("click", () => {
+      if (kochNr > 0) { kochNr--; kochZeichnen(); }
+    });
+
+    /* Beim Kochen liegt das Telefon auf der Arbeitsplatte — die
+       Pfeiltasten sind fuer den Rechner gedacht. */
+    document.addEventListener("keydown", e => {
+      if (!kochRezept) return;
+      if (e.key === "Escape")      { kochBeenden(); }
+      else if (e.key === "ArrowRight") { kochWeiter(); }
+      else if (e.key === "ArrowLeft" && kochNr > 0) { kochNr--; kochZeichnen(); }
+    });
+
+    renderRezepte();
+  })();
 
   $("kalForm").addEventListener("submit", e => {
     e.preventDefault();
@@ -11278,10 +12756,10 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
     popDatum.innerHTML = `
       <div class="kal-kopf">
         <button type="button" class="kal-pfeil" data-schritt="-1" aria-label="Vorheriger Monat">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M14.5 5.5 8.5 12l6 6.5"/></svg></button>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 5.5 8.5 12l6 6.5"/></svg></button>
         <div class="kal-monat">${MONTHS[monat]} ${jahr}</div>
         <button type="button" class="kal-pfeil" data-schritt="1" aria-label="Nächster Monat">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9.5 5.5 15.5 12l-6 6.5"/></svg></button>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 5.5 15.5 12l-6 6.5"/></svg></button>
       </div>
       ${fachZeile}
       <div class="kal-wochentage"><span>Mo</span><span>Di</span><span>Mi</span><span>Do</span><span>Fr</span><span>Sa</span><span>So</span></div>
@@ -13077,6 +14555,11 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
                                 } },
     lifeos_kalorien:     w => { kalorien = w;   renderCalories(); renderVorschlag(true); },
     lifeos_kalorien_verlauf: w => { kalVerlauf = w; },
+    /* Ohne diesen Eintrag kommen die Rezepte zwar vom Server an,
+       landen aber nirgends: die Liste blieb leer, obwohl gespeichert
+       war. */
+    lifeos_rezepte:      w => { rezepte = Array.isArray(w) ? w : [];
+                                spaet(() => renderRezepte(), null); },
     lifeos_screentime:   w => { screentime = w; renderScreenTime(); },
     lifeos_projekte:     w => { projekte = w;   bereichZeichnen(BEREICHE.projekt); },
     lifeos_planung:      w => { planung = w;    bereichZeichnen(BEREICHE.planung); },

@@ -30,8 +30,37 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect x=%2210%22 y=%2210%22 width=%2280%22 height=%2280%22 rx=%2224%22 fill=%22%23070a12%22 stroke=%22%235b8cff%22 stroke-width=%228%22/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<!-- Nach style.css: das Dashboard hat eine eigene Stilvorlage, damit
+     seine Regeln nicht gegen die rund 2400 aelteren ankaempfen muessen.
+     Bei gleicher Staerke gewinnt die spaeter geladene Datei. -->
+<link rel="stylesheet" href="dashboard.css">
+<link rel="stylesheet" href="seiten.css">
+
+<!-- ============ HELL ODER DUNKEL ============
+     Das muss vor dem ersten Bildaufbau geschehen, nicht erst in
+     script.js: sonst malt der Browser eine Zehntelsekunde lang den
+     falschen Modus und blendet ihn dann um. Genau dieses Aufblitzen
+     faellt beim Oeffnen am staerksten auf.
+     Ohne Eintrag bleibt das Attribut weg — dann entscheidet die
+     Einstellung des Geraets ueber die Medienabfrage in style.css.
+     ========================================================= -->
+<script>
+  (function () {
+    try {
+      var wahl = localStorage.getItem("lifeos_thema");
+      if (wahl === "hell" || wahl === "dunkel") {
+        document.documentElement.setAttribute("data-thema", wahl);
+      }
+      /* Glas gehoert in denselben Vorlauf: kaeme es erst mit dem
+         Skript, blitzten die Kacheln kurz undurchsichtig auf. */
+      if (localStorage.getItem("lifeos_glas") !== "aus") {
+        document.documentElement.setAttribute("data-glas", "an");
+      }
+    } catch (f) { /* Kein Speicher: dann eben nach Geraeteeinstellung */ }
+  })();
+</script>
 
 <!-- ============ WELCHES GERÄT? ============
      Safari lädt auf dem iPad Seiten standardmäßig in Desktop-Breite.
@@ -159,7 +188,7 @@
         <span class="brand-name">Life OS</span>
       </a>
       <button class="collapse-btn" id="sidebarToggle" title="Sidebar ein-/ausklappen" aria-label="Sidebar ein-/ausklappen">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 5.5 8.5 12l6 6.5"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.6 6 8.6 12l6 6"/></svg>
       </button>
     </div>
 
@@ -177,43 +206,43 @@
       <div class="nav-group">
         <ul class="nav-list">
           <li><a href="#/dashboard" class="nav-link active" data-seite="dashboard">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.8 9.6V20h4.4v-5.6h3.6V20h4.4V9.6"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.6 10.5 12 4l8.4 6.5"/><path d="M5.6 9.4v9.2c0 .9.7 1.6 1.6 1.6h9.6c.9 0 1.6-.7 1.6-1.6V9.4"/><path d="M9.7 20.2v-5.1c0-.6.5-1.1 1.1-1.1h2.4c.6 0 1.1.5 1.1 1.1v5.1"/></svg>
             <span>Dashboard</span>
           </a></li>
           <li><a href="#/kalender" class="nav-link" data-seite="kalender">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3.2v3.6M16 3.2v3.6"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.4" y="5.2" width="17.2" height="15.4" rx="3"/><path d="M3.4 10h17.2"/><path d="M8.2 3.4v3.4M15.8 3.4v3.4"/></svg>
             <span>Kalender<span class="nav-lang"> &amp; Schule</span></span>
           </a></li>
           <li><a href="#/habits" class="nav-link" data-seite="habits">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 6.5 10 17l-5-4.7"/><path d="M3.5 19.5h17"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.4"/><path d="M8.2 12.2 10.9 15l4.9-5.4"/></svg>
             <span>Habits<span class="nav-lang"> &amp; Streaks</span></span>
           </a></li>
           <li><a href="#/kalorien" class="nav-link" data-seite="kalorien">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2c1.1 3.2-2.1 4.2-2.1 7.6a4.1 4.1 0 0 0 8.2 0c0-1.3-.6-2.4-1.1-2.5.3 2.4-1 3.5-2.2 3.5-1.6 0-2.2-1.5-1.1-3.5.9-1.7.5-3.7-1.7-5.1Z"/><path d="M8.3 14.4a3.7 3.7 0 0 0 7.4 0"/></svg>
-            <span>Kalorien</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.4c.6 2.4-.9 3.5-2.1 4.9-1.3 1.5-2.4 3-2.4 5.2a6.5 6.5 0 0 0 13 0c0-2.5-1.3-4.2-2.7-5.6.2 1.9-.6 3-1.6 3.3.5-2.9-.9-5.8-4.2-7.8Z"/></svg>
+            <span>Kalorien &amp; Rezepte</span>
           </a></li>
           <li><a href="#/bildschirmzeit" class="nav-link" data-seite="bildschirmzeit">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.8" y="4" width="18.4" height="12.5" rx="2.2"/><path d="M9 20.5h6M12 16.5v4"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.8" y="4.2" width="18.4" height="12.6" rx="2.6"/><path d="M12 16.8v3.4M8.6 20.2h6.8"/></svg>
             <span>Bildschirmzeit</span>
           </a></li>
           <li><a href="#/lernen" class="nav-link" data-seite="lernen">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7.3C10.4 5.9 8.4 5.2 5.6 5.2c-.9 0-1.6.7-1.6 1.6v9.7c0 .9.7 1.6 1.6 1.6 2.8 0 4.8.7 6.4 2.1 1.6-1.4 3.6-2.1 6.4-2.1.9 0 1.6-.7 1.6-1.6V6.8c0-.9-.7-1.6-1.6-1.6-2.8 0-4.8.7-6.4 2.1Z"/><path d="M12 7.3v13"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7.6C10.3 6.1 8.2 5.4 5.4 5.4c-.9 0-1.6.7-1.6 1.6v9.4c0 .9.7 1.6 1.6 1.6 2.8 0 4.9.7 6.6 2.2"/><path d="M12 7.6c1.7-1.5 3.8-2.2 6.6-2.2.9 0 1.6.7 1.6 1.6v9.4c0 .9-.7 1.6-1.6 1.6-2.8 0-4.9.7-6.6 2.2"/><path d="M12 7.6v12.6"/></svg>
             <span>Lernen</span>
           </a></li>
           <li><a href="#/planung" class="nav-link" data-seite="planung">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.6"/><path d="M12 7.4V12l3.1 1.9"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.4"/><path d="M12 7.2V12l3.3 2"/></svg>
             <span>Automation</span>
           </a></li>
           <li><a href="#/projekte" class="nav-link" data-seite="projekte">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.2c0-1.2 1-2.2 2.2-2.2h3.1l2 2.4h7.5c1.2 0 2.2 1 2.2 2.2v7.6c0 1.2-1 2.2-2.2 2.2H5.7a2.2 2.2 0 0 1-2.2-2.2Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.6 7.4c0-1.2 1-2.2 2.2-2.2h3.4l1.8 2.4h7.2c1.2 0 2.2 1 2.2 2.2v7.4c0 1.2-1 2.2-2.2 2.2H5.8c-1.2 0-2.2-1-2.2-2.2Z"/></svg>
             <span>Projekte</span>
           </a></li>
           <li><a href="#/licht" class="nav-link" data-seite="licht">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.2 18h5.6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.5.4.8 1 .8 1.6v.6h5.6v-.6c0-.6.3-1.2.8-1.6A6 6 0 0 0 12 3Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.4a6.2 6.2 0 0 0-3.7 11.2c.5.4.8 1 .8 1.6v.4h5.8v-.4c0-.6.3-1.2.8-1.6A6.2 6.2 0 0 0 12 3.4Z"/><path d="M9.4 19.2h5.2"/><path d="M10.4 21.4h3.2"/></svg>
             <span>Licht</span>
           </a></li>
           <li><a href="#/analyse" class="nav-link" data-seite="analyse">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5V12M9.3 19.5V6.5M14.7 19.5v-8M20 19.5V9"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.2 19.8v-5.4"/><path d="M9.4 19.8V9.2"/><path d="M14.6 19.8v-7.6"/><path d="M19.8 19.8V5.6"/></svg>
             <span>Analyse</span>
           </a></li>
         </ul>
@@ -225,11 +254,11 @@
            man festhalten will, will man sofort festhalten, ohne die
            Seite zu wechseln. -->
       <button class="nav-link" id="notizBtn" type="button" title="Notizen (Taste n)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h9L20 9.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5Z"/><path d="M14 4v6h6"/><path d="M8.5 13.5h7M8.5 16.5h4"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5.6c0-.9.7-1.6 1.6-1.6h7L19.4 9.4v9c0 .9-.7 1.6-1.6 1.6H6.6c-.9 0-1.6-.7-1.6-1.6Z"/><path d="M13.4 4v4c0 .8.6 1.4 1.4 1.4h4.6"/><path d="M8.6 13.6h6.8M8.6 16.6h4.4"/></svg>
         <span>Notizen</span>
       </button>
       <button class="nav-link" id="settingsBtn" type="button" title="Einstellungen">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3.3"/><path d="M19.2 13.4a1.7 1.7 0 0 0 .34 1.86l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.04 1.56v.17a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.1-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.04H2.6a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.25 8.9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.08A1.7 1.7 0 0 0 9.72 3v-.17a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1.04 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.08a1.7 1.7 0 0 0 1.56 1.04h.17a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.56 1.04Z"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.1"/><path d="M12 2.6v2.6M12 18.8v2.6M21.4 12h-2.6M5.2 12H2.6M18.6 5.4l-1.8 1.8M7.2 16.8l-1.8 1.8M18.6 18.6l-1.8-1.8M7.2 7.2 5.4 5.4"/></svg>
         <span>Einstellungen</span>
       </button>
     </div>
@@ -255,13 +284,13 @@
         </div>
 
         <form id="captureForm" class="search" autocomplete="off">
-          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.4"/><path d="m16 16 4 4"/></svg>
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.8" cy="10.8" r="6.6"/><path d="m15.6 15.6 4.2 4.2"/></svg>
           <input id="captureInput" class="search-input" type="text"
             placeholder="Suchen — oder Termin / Klausur eintragen …">
           <button type="submit" class="search-btn">
             <span class="search-btn-wort">Suchen</span>
             <svg class="search-btn-lupe" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2.1" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.4"/><path d="m16 16 4 4"/></svg>
+              stroke-width="2" stroke-linecap="round" aria-hidden="true" stroke-linejoin="round"><circle cx="11" cy="11" r="6.4"/><path d="m16 16 4 4"/></svg>
           </button>
         </form>
 
@@ -271,6 +300,23 @@
 
       <!-- ============ SEITE: DASHBOARD ============ -->
       <section class="seite aktiv" id="seite-dashboard">
+
+        <!-- ============ KACHELN ORDNEN ============
+             Nur auf dem Tablet sichtbar. Verschieben, Breite
+             aendern und ausblenden — mit Knoepfen statt Ziehen:
+             auf dem iPad trifft man einen Knopf sicherer als
+             eine Ziehflaeche, und es geht auch mit der Maus. -->
+        <div class="ord-leiste" id="ordLeiste">
+          <button type="button" class="ord-start" id="ordStart">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.4" y="3.4" width="7.6" height="7.6" rx="2.2"/><rect x="13" y="3.4" width="7.6" height="7.6" rx="2.2"/><rect x="3.4" y="13" width="7.6" height="7.6" rx="2.2"/><rect x="13" y="13" width="7.6" height="7.6" rx="2.2"/></svg>
+            <span>Kacheln ordnen</span>
+          </button>
+          <div class="ord-aktiv" id="ordAktiv" hidden>
+            <span class="ord-hinweis">Verschieben, Gr&#246;&#223;e &#228;ndern, ausblenden</span>
+            <button type="button" class="ord-zurueck" id="ordZurueck">Zur&#252;cksetzen</button>
+            <button type="button" class="ord-fertig" id="ordFertig">Fertig</button>
+          </div>
+        </div>
       <!-- WIDGET-RASTER: Anordnung und Größe stehen in lifeos_layout -->
       <div class="widget-grid" id="widgetGrid">
 
@@ -279,9 +325,9 @@
           <div class="card-head">
             <div class="tab-bar" id="cardTabs" role="tablist">
               <button type="button" class="tab" data-tab="habits" role="tab">Habits</button>
-              <button type="button" class="tab" data-tab="kalender" role="tab">Kalender</button>
+              <button type="button" class="tab" data-tab="kalender" role="tab">Termine</button>
               <button type="button" class="tab" data-tab="schule" role="tab">Schule</button>
-              <button type="button" class="tab active" data-tab="vorschlag" role="tab">Vorschlag</button>
+              <button type="button" class="tab active" data-tab="vorschlag" role="tab">Tipp</button>
             </div>
           </div>
 
@@ -305,7 +351,7 @@
               <div class="vorschlag-foot">
                 <div class="vorschlag-dots" id="vorschlagDots"></div>
                 <button type="button" class="icon-btn" id="vorschlagNext" title="Nächster Vorschlag">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-13.7-5.7L3.5 8"/><path d="M3.5 4v4h4"/><path d="M4 13a8 8 0 0 0 13.7 5.7l2.8-2.7"/><path d="M20.5 20v-4h-4"/></svg>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.2 11.2a8.2 8.2 0 0 0-14-5.5L3.6 8.2"/><path d="M3.6 3.8v4.4h4.4"/><path d="M3.8 12.8a8.2 8.2 0 0 0 14 5.5l2.6-2.5"/><path d="M20.4 20.2v-4.4H16"/></svg>
                 </button>
               </div>
             </div>
@@ -315,11 +361,18 @@
         <!-- KALORIEN -->
         <section class="card" id="card-kalorien">
           <div class="card-head">
+            <span class="i-mal gruen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.4c.6 2.4-.9 3.5-2.1 4.9-1.3 1.5-2.4 3-2.4 5.2a6.5 6.5 0 0 0 13 0c0-2.5-1.3-4.2-2.7-5.6.2 1.9-.6 3-1.6 3.3.5-2.9-.9-5.8-4.2-7.8Z"/></svg></span>
             <span class="card-title">Kalorien</span>
             <span class="card-badge">Heute</span>
           </div>
           <div class="card-body cal-body" id="calWidget">
             <div class="cal-ring-area">
+              <!-- Der glatte Ring der Musterseite -->
+              <svg class="cal-ring" viewBox="0 0 100 100" aria-hidden="true">
+                <circle class="cal-ring-spur" cx="50" cy="50" r="40" stroke-width="11"></circle>
+                <circle class="cal-ring-wert" id="calRingWert" cx="50" cy="50" r="40" stroke-width="11"
+                        stroke-dasharray="251.33" stroke-dashoffset="251.33" transform="rotate(-90 50 50)"></circle>
+              </svg>
               <div class="cal-gauge-wrap">
                 <svg class="cal-gauge" viewBox="0 0 200 200" aria-hidden="true">
                   <defs>
@@ -331,12 +384,15 @@
                   </defs>
                   <g id="calGaugeTicks"></g>
                 </svg>
-                <div class="cal-center">
-                  <div class="cal-value"><span id="calConsumed">0</span></div>
-                  <div class="cal-sub"><span class="cal-slash">/</span><span id="calGoalDisplay">0</span> kcal</div>
-                </div>
               </div>
+            </div>
+            <div class="cal-neben" id="calNeben">
+              <div class="cal-value"><span id="calConsumed">0</span><small> kcal</small></div>
+              <div class="cal-sub">von <span id="calGoalDisplay">0</span> · <span id="calRest">—</span> <span id="calRestWort">übrig</span></div>
               <div class="cal-empty">Noch nichts getrackt</div>
+              <div class="cal-flamme" id="calFlamme" hidden>
+                <span class="cal-flamme-mal" id="calFlammeMal"></span><span id="calFlammeTage">0</span>
+              </div>
             </div>
             <button type="button" class="ghost-btn" id="calDetailsBtn">Details anzeigen</button>
           </div>
@@ -345,6 +401,7 @@
         <!-- BILDSCHIRMZEIT -->
         <section class="card card-wide" id="card-screentime">
           <div class="card-head">
+            <span class="i-mal gelb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6.4" y="2.6" width="11.2" height="18.8" rx="3"/><path d="M10.8 18.4h2.4"/></svg></span>
             <span class="card-title">Bildschirmzeit</span>
             <div class="legend" id="stLegend">
               <button type="button" class="legend-item" data-series="phone">
@@ -374,10 +431,11 @@
         <!-- WETTER -->
         <section class="card" id="card-wetter">
           <div class="card-head">
+            <span class="i-mal blau"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7.4 18.4a4.4 4.4 0 0 1-.5-8.8 5.9 5.9 0 0 1 11.3 1.4 3.8 3.8 0 0 1-.6 7.4Z"/></svg></span>
             <span class="card-title">Wetter</span>
             <span class="card-badge" id="weatherCityLabel">—</span>
             <button type="button" class="icon-btn" id="weatherViewToggle" title="7-Tage-Vorhersage anzeigen">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/><path d="M8.5 4.5v15"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6.4h11.4M9 12h11.4M9 17.6h11.4"/><path d="M4.4 6.4h.01M4.4 12h.01M4.4 17.6h.01"/></svg>
             </button>
           </div>
           <div class="card-body weather" id="weatherBody">
@@ -401,6 +459,108 @@
         </section>
 
         <!-- STREAKS (zieht später mit auf die Habits-Seite um) -->
+
+        <!-- ============ WETTER · VORHERSAGE ============
+             Block 4 des Bauplans. Das erste Wetter-Widget zeigt
+             jetzt, dieses die kommenden Tage. -->
+        <!-- ============ TIMER ============
+             Block 10 des zweiten Bauplans. Einen Timer stellen,
+             der hier laeuft. -->
+        <section class="card" id="card-timer">
+          <div class="card-head">
+            <span class="card-title">Timer</span>
+            <span class="card-badge" id="timerMarke" hidden>läuft</span>
+          </div>
+          <div class="card-body timer" id="timerBody">
+            <div class="tm-kopf">
+              <div class="tm-zeit" id="timerZeit">00:00</div>
+              <div class="tm-tasten" id="timerSteuerung" hidden>
+                <button type="button" class="tm-icon" id="timerHalten" title="Pause" aria-label="Pause">
+                  <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="7.4" y="5.4" width="3.4" height="13.2" rx="1.5"/><rect x="13.2" y="5.4" width="3.4" height="13.2" rx="1.5"/></svg>
+                </button>
+                <button type="button" class="tm-icon" id="timerAus" title="Stopp" aria-label="Stopp">
+                  <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6.6" y="6.6" width="10.8" height="10.8" rx="2.8"/></svg>
+                </button>
+              </div>
+            </div>
+            <!-- Ein Fach fester Hoehe: die Leiste tritt an die Stelle
+                 der Vorgaben, damit die Kachel gleich hoch bleibt. -->
+            <div class="tm-fach">
+              <div class="tm-reihe" id="timerVorgaben">
+                <button type="button" class="tm-vor" data-min="5">5</button>
+                <button type="button" class="tm-vor" data-min="10">10</button>
+                <button type="button" class="tm-vor" data-min="25">25</button>
+                <button type="button" class="tm-vor" data-min="45">45</button>
+              </div>
+              <div class="tm-spur" id="timerSpur" hidden><i id="timerFuellung"></i></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ TAGESPLAN ============
+             Block 9. Der Ablauf des Tages an einer Zeitleiste, mit
+             einem Balken je Punkt, der zeigt, wie weit er ist. -->
+        <section class="card" id="card-tagesplan">
+          <div class="card-head">
+            <span class="card-title">Tagesplan</span>
+            <span class="card-badge" id="tagesplanMarke">—</span>
+          </div>
+          <div class="card-body tagesplan" id="tagesplanBody">
+            <div class="muted-line">Lade Tagesplan …</div>
+          </div>
+        </section>
+
+        <section class="card" id="card-wetter2">
+          <div class="card-head">
+            <span class="i-mal blau"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7.4 18.4a4.4 4.4 0 0 1-.5-8.8 5.9 5.9 0 0 1 11.3 1.4 3.8 3.8 0 0 1-.6 7.4Z"/></svg></span>
+            <span class="card-title">Vorhersage</span>
+          </div>
+          <div class="card-body vorhersage" id="vorhersageBody">
+            <div class="muted-line">Lade Vorhersage …</div>
+          </div>
+        </section>
+
+        <!-- ============ BILDSCHIRMZEIT · ZAHL ============
+             Block 5. Heute gross, gestern klein darunter, Balken zum
+             Limit. Das andere Bildschirmzeit-Widget traegt die Kurve. -->
+        <section class="card" id="card-screentime2">
+          <div class="card-head">
+            <span class="i-mal gelb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6.4" y="2.6" width="11.2" height="18.8" rx="3"/><path d="M10.8 18.4h2.4"/></svg></span>
+            <span class="card-title">Bildschirmzeit</span>
+            <span class="card-badge" id="stZahlTrend" hidden>—</span>
+          </div>
+          <div class="card-body stzahl" id="stZahlBody">
+            <div class="muted-line">—</div>
+          </div>
+        </section>
+
+        <!-- ============ NAECHSTE KLAUSUR ============
+             Block 6. Faellt keine an, tritt der naechste Termin
+             an ihre Stelle — ein leeres Widget sagt nichts. -->
+        <section class="card" id="card-klausur">
+          <div class="card-head">
+            <span class="i-mal rot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5.4 4.6c0-.9.7-1.6 1.6-1.6h11.6v15.4H7c-.9 0-1.6.7-1.6 1.6Z"/><path d="M5.4 20v-1.6h13.2V21H7c-.9 0-1.6-.4-1.6-1Z"/></svg></span>
+            <span class="card-title">Nächste Klausur</span>
+            <span class="card-badge" id="klausurFrist">—</span>
+          </div>
+          <div class="card-body klausur" id="klausurBody">
+            <div class="muted-line">—</div>
+          </div>
+        </section>
+
+        <!-- ============ SCHULE ============
+             Block 9. Nur Schulisches: Hausaufgaben, Klausuren, Tests. -->
+        <section class="card" id="card-schule">
+          <div class="card-head">
+            <span class="i-mal gruen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 8 12 3.6 21.2 8 12 12.4Z"/><path d="M6.8 10.2v4.6c0 1.6 2.3 2.8 5.2 2.8s5.2-1.2 5.2-2.8v-4.6"/><path d="M21.2 8v5"/></svg></span>
+            <span class="card-title">Schule</span>
+            <span class="card-badge" id="schuleZahl">0</span>
+          </div>
+          <div class="card-body schule" id="schuleBody">
+            <ul class="entry-list" id="schuleDashList"></ul>
+          </div>
+        </section>
+
         <section class="card" id="card-streaks">
           <div class="card-head">
             <span class="card-title">Streaks</span>
@@ -455,11 +615,11 @@
         <div class="block">
           <div class="monat-kopf">
             <button type="button" class="monat-pfeil" data-monat="-1" aria-label="Vorheriger Monat">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M14.5 5.5 8.5 12l6 6.5"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.6 6 8.6 12l6 6"/></svg>
             </button>
             <h3 class="monat-titel" id="pgMonatTitel">&#8212;</h3>
             <button type="button" class="monat-pfeil" data-monat="1" aria-label="N&#228;chster Monat">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9.5 5.5 15.5 12l-6 6.5"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.4 6l6 6-6 6"/></svg>
             </button>
             <button type="button" class="monat-heute" data-monat="heute">Heute</button>
             <span class="block-zahl" id="pgMonatZahl">0</span>
@@ -526,12 +686,18 @@
       <!-- ============ SEITE: KALORIEN ============ -->
       <section class="seite" id="seite-kalorien">
         <div class="seiten-kopf">
-          <h2 class="seiten-titel">Kalorien</h2>
+          <h2 class="seiten-titel">Kalorien &amp; Rezepte</h2>
           <span class="seiten-sub" id="kalorienSub">&#8212;</span>
         </div>
         <div class="block">
           <div class="kal-oben">
             <div class="kal-ring-gross">
+              <!-- Der glatte Ring, wie im Dashboard-Widget -->
+              <svg class="cal-ring" viewBox="0 0 100 100" aria-hidden="true">
+                <circle class="cal-ring-spur" cx="50" cy="50" r="40" stroke-width="9"></circle>
+                <circle class="cal-ring-wert" id="pgCalRingWert" cx="50" cy="50" r="40" stroke-width="9"
+                        stroke-dasharray="251.33" stroke-dashoffset="251.33" transform="rotate(-90 50 50)"></circle>
+              </svg>
               <svg class="cal-gauge" viewBox="0 0 200 200" aria-hidden="true">
                 <defs>
                   <linearGradient id="pgCalGrad" x1="0%" y1="100%" x2="100%" y2="0%">
@@ -556,9 +722,66 @@
             </div>
           </div>
         </div>
+        <!-- ============ REZEPTE ============
+             Anlegen, Zutaten und Schritte eintragen, dann Schritt
+             fuer Schritt kochen. Am Ende wandern die Kalorien in
+             den Tag, ohne dass man sie noch einmal tippt. -->
         <div class="block">
-          <div class="block-kopf"><h3>Die letzten 14 Tage</h3></div>
-          <ul class="voll-liste" id="pgKalTage"></ul>
+          <div class="block-kopf">
+            <h3>Rezepte</h3>
+            <span class="block-zahl" id="rezeptZahl">0</span>
+          </div>
+          <div class="block-unter">Schritt f&#252;r Schritt kochen &#8212; die Kalorien wandern danach in den Tag.</div>
+          <form class="zeilen-form" id="rezeptForm" autocomplete="off">
+            <input class="zeilen-input" id="rezeptName" type="text" placeholder="Neues Rezept &#8230;" maxlength="80">
+            <button class="zeilen-btn" type="submit">Anlegen</button>
+          </form>
+          <ul class="voll-liste rezept-liste" id="rezeptListe"></ul>
+        </div>
+
+        <!-- Die Bearbeitung eines Rezepts -->
+        <div class="block" id="rezeptDetail" hidden>
+          <div class="block-kopf">
+            <h3 id="rezeptDetailName">Rezept</h3>
+            <button type="button" class="rz-zu" id="rezeptZu" aria-label="Schlie&#223;en">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 6.6 17.4 17.4M17.4 6.6 6.6 17.4"/></svg>
+            </button>
+          </div>
+
+          <div class="rz-felder">
+            <label class="rz-feld">
+              <span>Kalorien je Portion</span>
+              <input class="zeilen-input" id="rezeptKcal" type="number" min="0" step="10" placeholder="z.B. 620">
+            </label>
+            <label class="rz-feld">
+              <span>Portionen</span>
+              <input class="zeilen-input" id="rezeptPortionen" type="number" min="1" step="1" placeholder="1">
+            </label>
+          </div>
+
+          <div class="rz-spalten">
+            <div class="rz-spalte">
+              <div class="rz-unter">Zutaten</div>
+              <ul class="rz-liste" id="rezeptZutaten"></ul>
+              <form class="zeilen-form" id="zutatForm" autocomplete="off">
+                <input class="zeilen-input" id="zutatText" type="text" placeholder="Zutat hinzuf&#252;gen &#8230;" maxlength="120">
+                <button class="zeilen-btn" type="submit">+</button>
+              </form>
+            </div>
+            <div class="rz-spalte">
+              <div class="rz-unter">Schritte</div>
+              <ol class="rz-liste rz-schritte" id="rezeptSchritte"></ol>
+              <form class="zeilen-form" id="schrittForm" autocomplete="off">
+                <input class="zeilen-input" id="schrittText" type="text" placeholder="Schritt hinzuf&#252;gen &#8230;" maxlength="240">
+                <button class="zeilen-btn" type="submit">+</button>
+              </form>
+            </div>
+          </div>
+
+          <div class="rz-fuss">
+            <button type="button" class="rz-kochen" id="rezeptKochen">Kochen</button>
+            <button type="button" class="rz-loeschen" id="rezeptLoeschen">Rezept l&#246;schen</button>
+          </div>
         </div>
       </section>
 
@@ -643,8 +866,8 @@
             <button type="button" class="lr-tab" data-lreiter="themen" role="tab">Sonstiges</button>
           </div>
           <button type="button" class="lr-plus" id="lernPlus" title="Neu anlegen" aria-label="Neu anlegen">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-                 stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" aria-hidden="true" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
           </button>
         </div>
         <!-- Unterfenster: eine einzelne Klausur im Detail -->
@@ -780,6 +1003,36 @@
 </div>
 
 <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+<!-- ============ KOCHEN ============
+     Ein Schritt fuellt den Schirm. Beim Kochen hat man die Haende
+     voll und schaut nur kurz hin — da hilft keine Liste, sondern
+     ein grosser Satz und ein Knopf. -->
+<div class="koch-schirm" id="kochSchirm" hidden>
+  <div class="koch-kopf">
+    <div class="koch-name" id="kochName">Rezept</div>
+    <button type="button" class="koch-zu" id="kochZu" aria-label="Kochen beenden">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 6.6 17.4 17.4M17.4 6.6 6.6 17.4"/></svg>
+    </button>
+  </div>
+
+  <div class="koch-spur"><i id="kochFuellung"></i></div>
+  <div class="koch-zahl" id="kochZahl">Schritt 1 von 1</div>
+
+  <div class="koch-mitte">
+    <p class="koch-text" id="kochText">&#8212;</p>
+  </div>
+
+  <div class="koch-zutaten" id="kochZutaten" hidden>
+    <div class="koch-zutaten-kopf">Zutaten</div>
+    <ul id="kochZutatenListe"></ul>
+  </div>
+
+  <div class="koch-fuss">
+    <button type="button" class="koch-knopf zurueck" id="kochZurueck">Zur&#252;ck</button>
+    <button type="button" class="koch-knopf weiter" id="kochWeiter">Weiter</button>
+  </div>
+</div>
+
 <div class="chart-tooltip" id="chartTooltip" role="tooltip"></div>
 <div class="kat-tipp" id="katTipp" role="tooltip" aria-hidden="true"></div>
 
@@ -814,31 +1067,31 @@
     <h3 class="kp-titel" id="kpTitel">&#8212;</h3>
     <div class="kp-felder">
   <button type="button" class="kp-knopf nur-schule" data-feld="fach" id="kpFach">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.2A1.7 1.7 0 0 1 5.7 3.5H19v14.2H5.7A1.7 1.7 0 0 0 4 19.4Z"/><path d="M4 19.4a1.7 1.7 0 0 0 1.7 1.7H19"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.2A1.7 1.7 0 0 1 5.7 3.5H19v14.2H5.7A1.7 1.7 0 0 0 4 19.4Z"/><path d="M4 19.4a1.7 1.7 0 0 0 1.7 1.7H19"/></svg>
     <span>Fach</span>
   </button>
   <button type="button" class="kp-knopf nur-schule nur-stunde" data-feld="stunde" id="kpStunde">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5"/><path d="M3.5 9h17M9 9v11.5"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5"/><path d="M3.5 9h17M9 9v11.5"/></svg>
     <span>Stunde</span>
   </button>
   <button type="button" class="kp-knopf" data-feld="datum" id="kpDatum">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3.2v3.6M16 3.2v3.6"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3.2v3.6M16 3.2v3.6"/></svg>
     <span>Datum</span>
   </button>
   <button type="button" class="kp-knopf nur-ha" data-feld="wichtig" id="kpWichtig">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 21V4.2M5.5 4.6h11l-2 3.6 2 3.6h-11"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 21V4.2M5.5 4.6h11l-2 3.6 2 3.6h-11"/></svg>
     <span>Wichtigkeit</span>
   </button>
   <button type="button" class="kp-knopf nur-termin" data-feld="ganztags" id="kpGanztags">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 12.5 9.5 18 20 6.5"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9.5 18 20 6.5"/></svg>
     <span>Ganzt&#228;gig</span>
   </button>
   <button type="button" class="kp-knopf nur-zeit" data-feld="start" id="kpStart">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.2V12l3.2 2"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.2V12l3.2 2"/></svg>
     <span>Start</span>
   </button>
   <button type="button" class="kp-knopf nur-zeit" data-feld="ende" id="kpEnde">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.2V12l3.2 2"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.2V12l3.2 2"/></svg>
     <span>Ende</span>
   </button>
     </div>
@@ -883,7 +1136,7 @@
     <div class="modal-head">
       <span class="card-title" id="tastenTitel">Tastenkürzel</span>
       <button class="icon-btn" id="tastenZu" aria-label="Schließen">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m6.5 6.5 11 11M17.5 6.5l-11 11"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 6.6 17.4 17.4M17.4 6.6 6.6 17.4"/></svg>
       </button>
     </div>
     <div class="ts-raster" id="tastenRaster"></div>
@@ -933,7 +1186,7 @@
   <div class="kop-inhalt">
     <button class="kop-zu" id="kopZu" type="button" aria-label="Schließen">
       <span class="kop-zu-kreis">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m7 7 10 10M17 7 7 17"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 6.6 17.4 17.4M17.4 6.6 6.6 17.4"/></svg>
       </span>
       <span class="kop-zu-text">ESC</span>
     </button>
@@ -1061,6 +1314,27 @@
             <input type="text" id="settingStPc" placeholder="PC (z.B. 5:30)">
             <button id="settingStPcSave" type="button">Speichern</button>
           </div>
+          <p class="kop-hinweis">Das Tagesziel steht auf dem Dashboard als Balken hinter
+            der heutigen Zeit. Leer heißt vier Stunden.</p>
+          <div class="row">
+            <input type="text" id="settingStLimit" placeholder="Tagesziel (z.B. 4:00)">
+            <button id="settingStLimitSave" type="button">Speichern</button>
+          </div>
+        </div>
+
+        <div class="kop-abschnitt">
+          <h3 class="kop-unter">Tagesplan</h3>
+          <p class="kop-hinweis">Die beiden Eckpunkte des Tages. Was dazwischen liegt,
+            baut sich von selbst: die Schulzeit aus dem Stundenplan, der Rest aus
+            deinen Terminen mit Uhrzeit.</p>
+          <div class="row">
+            <input type="time" id="settingAufstehen">
+            <button id="settingAufstehenSave" type="button">Aufstehen</button>
+          </div>
+          <div class="row">
+            <input type="time" id="settingSchlafen">
+            <button id="settingSchlafenSave" type="button">Schlafen</button>
+          </div>
         </div>
       </section>
 
@@ -1115,6 +1389,33 @@
            unterwegs ist und nichts mehr geht. -->
       <section class="kop-bereich" data-bereich="app" hidden>
         <h2 class="kop-titel">App &amp; Offline</h2>
+
+        <!-- Die Wahl gilt nur auf diesem Geraet. Sie wandert absichtlich
+             nicht ueber den Server: sonst wuerde das Handy den Rechner
+             abends mit umstellen. -->
+        <div class="kop-abschnitt">
+          <h3 class="kop-unter">Erscheinungsbild</h3>
+          <div class="seg-toggle thema-wahl" id="themaWahl" role="group" aria-label="Erscheinungsbild">
+            <button type="button" data-thema="auto">Automatisch</button>
+            <button type="button" data-thema="hell">Hell</button>
+            <button type="button" data-thema="dunkel">Dunkel</button>
+          </div>
+          <p class="kop-hinweis" id="themaHinweis">Automatisch folgt der Einstellung deines
+            Geräts und wechselt abends von selbst. Die Wahl gilt nur hier, nicht auf deinen
+            anderen Geräten.</p>
+
+          <!-- Ein Versuch auf Widerruf. Steht der Schalter auf Aus,
+               ist der Glaseffekt vollstaendig weg. -->
+          <h3 class="kop-unter" style="margin-top:18px">Kacheln aus Glas</h3>
+          <div class="seg-toggle thema-wahl" id="glasWahl" role="group" aria-label="Kacheln aus Glas">
+            <button type="button" data-glas="aus">Aus</button>
+            <button type="button" data-glas="an">An</button>
+          </div>
+          <p class="kop-hinweis">Zum Ausprobieren: die Kacheln werden durchscheinend und
+            verwischen, was hinter ihnen liegt. Gefällt es nicht, steht hier wieder Aus —
+            sonst ändert sich nichts.</p>
+        </div>
+
         <div class="kop-abschnitt">
           <div class="gk-kasten" id="offKasten">
             <div class="gk-lade">Wird geprüft …</div>

@@ -1,0 +1,3143 @@
+/* ==========================================================
+   DASHBOARD — eigene Stilvorlage
+
+   Warum eine eigene Datei und nicht wieder ein Block am Ende der
+   style.css: dort liegen rund 2400 Regeln aus der Zeit davor, und
+   jede Aenderung musste sich gegen sie durchsetzen. Ueber die
+   Sitzung sind daraus Schichten geworden, die sich gegenseitig
+   aufheben — das ist der Grund, warum Aenderungen halb ankamen.
+
+   Diese Datei wird NACH style.css geladen. Bei gleicher Staerke
+   gewinnt sie damit von allein, ohne !important und ohne
+   Wettruesten bei den Selektoren.
+
+   Die Werte stammen wortgleich aus der Musterseite:
+     Karte       26 px Radius, 20 px Polsterung, --shadow-3
+     Titel       13 px, 500, --text-muted
+     Grosse Zahl 38 px, 700, -0.035em, Tabellenziffern
+     Abzeichen   4/11 px, 11,5 px, 600, volle Rundung
+   ========================================================== */
+
+/* ----------------------------------------------------------
+   1  DIE SEITE
+
+   Die Widgets tragen die Groesse aus der Demo. Sechs davon passen
+   damit nicht auf eine Bildschirmhoehe — also rollt die Seite.
+   Das war die abgestimmte Entscheidung: lieber wie die Demo
+   aussehen und rollen, als alles sehen und gedrueckt wirken.
+   ---------------------------------------------------------- */
+#seite-dashboard.aktiv {
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+}
+
+#seite-dashboard .widget-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: none;
+  grid-auto-rows: auto;
+  grid-auto-flow: row;
+  gap: 14px;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+}
+
+@media (min-width: 1000px) {
+  #seite-dashboard .widget-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #seite-dashboard #card-screentime { grid-column: 1 / -1; }
+}
+
+/* Die festen Rasterplaetze aus der style.css gelten nicht mehr:
+   sie stammen aus dem alten 24-Spalten-Raster und wuerden die
+   Karten hier uebereinanderschieben. */
+#seite-dashboard .widget-grid > .card {
+  grid-area: auto;
+  grid-column: auto;
+  grid-row: auto;
+}
+@media (min-width: 1000px) {
+  #seite-dashboard #card-screentime { grid-column: 1 / -1; }
+}
+
+/* Reihenfolge: oben, was heute noch etwas von dir will */
+#seite-dashboard #card-naechste   { order: 1; }
+#seite-dashboard #card-habits     { order: 2; }
+#seite-dashboard #card-streaks    { order: 3; }
+#seite-dashboard #card-kalorien   { order: 4; }
+#seite-dashboard #card-wetter     { order: 5; }
+#seite-dashboard #card-screentime { order: 6; }
+#seite-dashboard #card-vorschlag,
+#seite-dashboard #card-quick      { display: none; }
+
+/* ----------------------------------------------------------
+   2  DIE KARTE
+   Werte wortgleich aus der Musterseite.
+   ---------------------------------------------------------- */
+#seite-dashboard .widget-grid > .card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  padding: 20px;
+  border: none;
+  border-radius: 26px;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-3);
+  overflow: hidden;
+  transition: transform 280ms cubic-bezier(.32,.72,0,1),
+              box-shadow 280ms cubic-bezier(.4,0,.2,1);
+}
+#seite-dashboard .widget-grid > .card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-4);
+}
+
+/* Kopfzeile: Name links, Abzeichen rechts — wie in der Demo.
+   Ich hatte beides einmal ausgeblendet; genau das war der
+   sichtbarste Unterschied zur Musterseite. */
+#seite-dashboard .card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 0;
+}
+#seite-dashboard .card-title {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-muted);
+  margin-right: auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#seite-dashboard .card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 0;
+  padding: 4px 11px;
+  border: none;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+  font-family: var(--sans);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+#seite-dashboard .card-body {
+  flex: 1;
+  min-height: 0;
+  height: auto;
+  max-height: none;
+  overflow: visible;
+}
+
+/* ----------------------------------------------------------
+   3  DIE GROSSEN ZAHLEN
+   ---------------------------------------------------------- */
+#seite-dashboard .cal-value,
+#seite-dashboard .weather-temp {
+  font-family: var(--sans);
+  font-size: 38px;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  animation: none;
+}
+#seite-dashboard .cal-value small,
+#seite-dashboard .weather-temp small {
+  font-size: 16px; font-weight: 500; color: var(--text-muted); letter-spacing: -0.01em;
+}
+#seite-dashboard .cal-sub,
+#seite-dashboard .weather-desc {
+  font-family: var(--sans);
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+#seite-dashboard #card-wetter .weather,
+#seite-dashboard #card-kalorien .cal-body {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 92px;
+}
+#seite-dashboard #card-screentime .st-chart { min-height: 170px; }
+
+/* ----------------------------------------------------------
+   4  DIE ZEILEN — Habits, Streaks, Termine
+
+   Jede Zeile ist eine Insel in ihrer Karte, nicht mehr eine
+   eigene Kachel im Raster. Damit hoert das Strecken auf: die
+   Zeile traegt ihre eigene Hoehe.
+   ---------------------------------------------------------- */
+#seite-dashboard .habit-list,
+#seite-dashboard .hb-liste,
+#seite-dashboard .streak-list,
+#seite-dashboard .entry-list,
+#seite-dashboard .naechste {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 8px;
+  height: auto;
+  max-height: none;
+  min-height: 0;
+  padding: 0;
+  overflow: visible;
+  background: none;
+  box-shadow: none;
+  border: none;
+}
+
+#seite-dashboard .hb-zeile,
+#seite-dashboard .streak-row,
+#seite-dashboard .entry-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  grid-column: auto;
+  grid-row: auto;
+  flex: 0 0 auto;
+  width: 100%;
+  height: auto;
+  min-height: 60px;
+  padding: 11px 16px 11px 11px;
+  border: none;
+  border-radius: 20px;
+  background: var(--surface-sunken);
+  cursor: pointer;
+  transition: transform 170ms cubic-bezier(.32,.72,0,1),
+              background 170ms cubic-bezier(.4,0,.2,1),
+              box-shadow 170ms cubic-bezier(.4,0,.2,1);
+}
+#seite-dashboard .hb-zeile:hover,
+#seite-dashboard .streak-row:hover,
+#seite-dashboard .entry-item:hover {
+  transform: translateX(3px);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-2);
+}
+
+/* Was heute ansteht, ist eine vollflaechige blaue Karte —
+   der laufende Eintrag aus der Musterseite. */
+#seite-dashboard .entry-item.today {
+  background: var(--accent-active);
+  box-shadow: 0 4px 16px var(--tint-blue), 0 14px 34px var(--tint-blue);
+}
+#seite-dashboard .entry-item.today .i-wert   { color: #fff; }
+#seite-dashboard .entry-item.today .i-sache  { color: rgba(255,255,255,.82); }
+#seite-dashboard .entry-item.today .i-mal    { background: rgba(255,255,255,.20); color: #fff; }
+#seite-dashboard .entry-item.today .marke    { background: rgba(255,255,255,.22); color: #fff; }
+#seite-dashboard .entry-item.today .entry-go { color: rgba(255,255,255,.78); }
+
+/* ----------------------------------------------------------
+   5  DIE BAUSTEINE IN DEN ZEILEN
+   ---------------------------------------------------------- */
+#seite-dashboard .i-mal {
+  width: 38px; height: 38px;
+  flex-shrink: 0;
+  border-radius: 13px;
+  display: grid; place-items: center;
+  background: var(--surface-card);
+  color: var(--text-muted);
+  font-size: 15px; font-weight: 700; letter-spacing: -0.02em;
+}
+#seite-dashboard .i-mal svg { width: 19px; height: 19px; }
+#seite-dashboard .i-mal.gruen { background: var(--tint-green);  color: var(--green-ink); }
+#seite-dashboard .i-mal.rot   { background: var(--tint-red);    color: var(--red-ink); }
+#seite-dashboard .i-mal.gelb  { background: var(--tint-orange); color: var(--orange-ink); }
+#seite-dashboard .i-mal.blau  { background: var(--tint-blue);   color: var(--blue-ink); }
+
+#seite-dashboard .i-text  { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 1px; }
+#seite-dashboard .i-sache { display: block; font-size: 12px; font-weight: 500; color: var(--text-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#seite-dashboard .i-wert  { display: block; font-size: 16px; font-weight: 700; letter-spacing: -0.025em;
+  line-height: 1.2; font-variant-numeric: tabular-nums;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#seite-dashboard .i-wert small { font-size: 12.5px; font-weight: 500; color: var(--text-muted); }
+#seite-dashboard .i-rechts { margin-left: auto; flex-shrink: 0; display: flex; align-items: center; gap: 10px; }
+
+#seite-dashboard .marke {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 11px; border-radius: 999px;
+  font-size: 11.5px; font-weight: 600; white-space: nowrap;
+  background: var(--surface-card); color: var(--text-muted);
+}
+#seite-dashboard .marke.gruen { background: var(--tint-green);  color: var(--green-ink); }
+#seite-dashboard .marke.rot   { background: var(--tint-red);    color: var(--red-ink); }
+#seite-dashboard .marke.gelb  { background: var(--tint-orange); color: var(--orange-ink); }
+#seite-dashboard .marke.blau  { background: var(--tint-blue);   color: var(--blue-ink); }
+
+#seite-dashboard .perlen { display: flex; gap: 4px; align-items: center; }
+#seite-dashboard .perle  { width: 8px; height: 8px; border-radius: 50%;
+  background: var(--surface-card); flex-shrink: 0; }
+#seite-dashboard .perle.voll  { background: var(--accent-active); }
+#seite-dashboard .perle.heute { box-shadow: 0 0 0 2px var(--kontur-2); }
+
+#seite-dashboard .hb-knopf {
+  width: 28px; height: 28px; flex-shrink: 0;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--kontur-2);
+  color: #fff;
+}
+#seite-dashboard .hb-knopf svg { width: 60%; height: 60%; opacity: 0; transform: scale(.4);
+  transition: opacity .16s ease, transform .24s cubic-bezier(.34,1.6,.64,1); }
+#seite-dashboard .erledigt .hb-knopf,
+#seite-dashboard .hb-zeile.erledigt .hb-knopf {
+  background: var(--status-green);
+  box-shadow: inset 0 0 0 2px var(--status-green);
+}
+#seite-dashboard .erledigt .hb-knopf svg { opacity: 1; transform: none; }
+
+#seite-dashboard .entry-go {
+  width: 28px; height: 28px; flex-shrink: 0;
+  border: none; background: none; border-radius: 50%;
+  color: var(--text-muted);
+  display: grid; place-items: center; cursor: pointer;
+}
+#seite-dashboard .entry-go:hover { background: var(--surface-card); color: var(--text-primary); }
+#seite-dashboard .entry-go svg { width: 16px; height: 16px; }
+
+/* ----------------------------------------------------------
+   6  DER STRAHL
+   Der Punkt sitzt in der Polsterung links, nicht in der Kapsel —
+   sonst muesste jede Zeile Platz dafuer freihalten.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-naechste .entry-list { position: relative; padding-left: 28px; }
+#seite-dashboard #card-naechste .entry-list::before {
+  content: "";
+  position: absolute; left: 6px; top: 18px; bottom: 18px;
+  width: 2px; border-radius: 2px;
+  background: linear-gradient(180deg,
+    var(--accent-active) 0%,
+    color-mix(in srgb, var(--accent-active) 40%, transparent) 34%,
+    var(--surface-sunken) 80%);
+}
+#seite-dashboard #card-naechste .entry-item { position: relative; }
+#seite-dashboard #card-naechste .entry-item::before {
+  content: "";
+  position: absolute; left: -22px; top: 50%;
+  transform: translateY(-50%);
+  width: 13px; height: 13px; border-radius: 50%;
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 2px var(--kontur-2);
+}
+#seite-dashboard #card-naechste .entry-item.today::before {
+  box-shadow: inset 0 0 0 4px var(--accent-active), 0 0 0 5px var(--tint-blue);
+}
+#seite-dashboard #card-naechste .entry-item.soon::before {
+  box-shadow: inset 0 0 0 3px var(--status-orange);
+}
+
+/* ----------------------------------------------------------
+   7  RUHE
+   Ein Dashboard, auf dem staendig etwas atmet, laesst sich nicht
+   ueberfliegen — das Auge folgt jeder Bewegung, auch der
+   bedeutungslosen.
+   ---------------------------------------------------------- */
+#seite-dashboard .st-lauflicht { display: none; }
+#seite-dashboard .card-title,
+#seite-dashboard .card-badge,
+#seite-dashboard .cal-value,
+#seite-dashboard .weather-temp { animation: none; }
+
+#seite-dashboard .cal-empty,
+#seite-dashboard .naechste-empty,
+#seite-dashboard .streak-leer {
+  border: none; background: none; padding: 16px 4px;
+  color: var(--text-muted); font-size: 13px; text-align: center;
+}
+
+/* ----------------------------------------------------------
+   8  HANDY
+   ---------------------------------------------------------- */
+@media (max-width: 700px) {
+  #seite-dashboard .widget-grid { gap: 10px; }
+  #seite-dashboard .widget-grid > .card { padding: 16px; border-radius: 22px; }
+  #seite-dashboard .cal-value,
+  #seite-dashboard .weather-temp { font-size: 32px; }
+}
+
+/* ----------------------------------------------------------
+   NACHTRAG: die alten Rasterplaetze mit gleicher Staerke loeschen
+
+   Die Regeln in style.css heissen "#seite-dashboard #card-wetter"
+   — zwei Kennungen, das wiegt schwerer als jede Klassenregel. Mein
+   Zuruecksetzen ueber ".widget-grid > .card" konnte sie deshalb
+   nicht erreichen, und die Karten lagen weiter auf ihren alten
+   Plaetzen uebereinander.
+
+   Hier steht dieselbe Staerke, nur spaeter. Kein !important noetig.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-naechste,
+#seite-dashboard #card-habits,
+/* Ohne Platz im Bauplan: die Kurve bleibt auf ihrer eigenen Seite */
+#seite-dashboard #card-screentime,
+#seite-dashboard #card-streaks,
+#seite-dashboard #card-kalorien,
+#seite-dashboard #card-wetter,
+#seite-dashboard #card-screentime {
+  grid-area: auto;
+  grid-column: auto;
+  grid-row: auto;
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  width: auto;
+}
+@media (min-width: 1000px) {
+  #seite-dashboard #card-screentime { grid-column: 1 / -1; }
+}
+
+/* Auch die Listen-Behaelter waren zwischenzeitlich auf
+   display: contents gesetzt — dann laegen ihre Zeilen wieder
+   direkt im Raster statt in ihrer Karte. */
+#seite-dashboard #card-habits,
+#seite-dashboard #card-habits > .card-body,
+#seite-dashboard #card-habits .habit-list,
+#seite-dashboard #card-habits .hb-liste,
+#seite-dashboard #card-streaks,
+#seite-dashboard #card-streaks > .card-body,
+#seite-dashboard #card-streaks .streak-list {
+  display: flex;
+  flex-direction: column;
+}
+#seite-dashboard #card-habits,
+#seite-dashboard #card-streaks {
+  background: var(--surface-card);
+  box-shadow: var(--shadow-3);
+  padding: 20px;
+  border-radius: 26px;
+}
+
+/* Die Karten waren auf overflow: hidden und schnitten ihre Liste ab
+   — bei sechs Habits sah man einen. Jetzt waechst die Karte mit
+   ihrem Inhalt; die Seite rollt, nicht die Karte. Das war die
+   abgestimmte Entscheidung. */
+#seite-dashboard .widget-grid > .card,
+#seite-dashboard #card-habits,
+#seite-dashboard #card-streaks,
+#seite-dashboard #card-naechste,
+#seite-dashboard #card-kalorien,
+#seite-dashboard #card-wetter,
+#seite-dashboard #card-screentime { overflow: visible; }
+
+#seite-dashboard .card-body,
+#seite-dashboard .habit-list,
+#seite-dashboard .hb-liste,
+#seite-dashboard .streak-list,
+#seite-dashboard .entry-list,
+#seite-dashboard .naechste,
+#seite-dashboard .tab-panel {
+  height: auto;
+  max-height: none;
+  min-height: 0;
+  overflow: visible;
+  flex: 0 0 auto;
+}
+
+/* Die Kopfzeile im Habits-Widget traegt noch Umschalter aus der
+   alten Fassung. Sie duerfen bleiben, aber nicht die Zeile sprengen. */
+#seite-dashboard .card-head { flex-wrap: wrap; row-gap: 6px; }
+#seite-dashboard .card-head .seg-toggle { padding: 3px; }
+#seite-dashboard .card-head .seg-toggle button { padding: 5px 10px; font-size: 11px; }
+
+
+/* align-items: start waere hier falsch: es haelt die Karte zwar auf
+   ihrer eigenen Hoehe, verhindert aber, dass die Rasterreihe von ihr
+   gemessen wird — die Karte laeuft dann in die naechste Reihe hinein.
+   Mit dem Standardwert stretch bestimmt die hoechste Karte die
+   Reihenhoehe, und nichts ueberlappt. */
+#seite-dashboard .widget-grid { align-items: stretch; }
+
+/* ----------------------------------------------------------
+   GEMESSEN, NICHT GERATEN
+
+   .habit-list stand auf 95 Pixel mit overflow: hidden, waehrend ihr
+   Inhalt 412 Pixel hoch war — von sechs Habits sah man einen. Die
+   Klemme sass also nicht an der Karte, sondern an der Liste darin.
+
+   Meine Regel dafuer hatte die Form "#seite-dashboard .habit-list".
+   Dagegen steht in style.css "#card-habits .habit-list" — ebenfalls
+   eine Kennung, aber spaeter in der Datei. Hier stehen jetzt beide
+   Kennungen, damit die Sache eindeutig ist.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-habits .habit-list,
+#seite-dashboard #card-habits .hb-liste,
+#seite-dashboard #card-streaks .streak-list,
+#seite-dashboard #card-naechste .entry-list,
+#seite-dashboard #card-naechste .naechste,
+#seite-dashboard #card-habits .card-body,
+#seite-dashboard #card-streaks .card-body,
+#seite-dashboard #card-naechste .card-body {
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  flex: 0 0 auto;
+  overflow: visible;
+  justify-content: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ----------------------------------------------------------
+   KEIN RASTER MEHR
+
+   Gemessen: die Rasterreihen standen auf 135 Pixel, obwohl die
+   Habit-Karte 554 braucht. Woher die Festlegung kam, liess sich
+   nicht eindeutig zuordnen — in style.css stehen mehrere Regeln
+   mit Kennungen, die sich um die Reihenhoehe streiten.
+
+   Statt weiter dagegen anzuschreiben: Flex statt Raster. Ein
+   Flex-Behaelter kennt keine Reihen, an denen sich etwas klemmen
+   koennte; jede Karte traegt schlicht ihre eigene Hoehe. Derselbe
+   Kniff hat schon einmal funktioniert, als das alte 24-Spalten-
+   Raster im Weg stand.
+   ---------------------------------------------------------- */
+#seite-dashboard .widget-grid {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 14px;
+  height: auto;
+}
+#seite-dashboard .widget-grid > .card {
+  width: 100%;
+  height: auto;
+  flex: 0 0 auto;
+}
+
+@media (min-width: 1000px) {
+  #seite-dashboard .widget-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: flex-start;
+  }
+  #seite-dashboard .widget-grid > .card { width: calc(50% - 7px); }
+  #seite-dashboard #card-screentime { width: 100%; }
+}
+
+/* ----------------------------------------------------------
+   DIE BREITEN
+
+   Auf dem echten Bildschirm richteten sich die Karten nach ihrem
+   Inhalt statt nach Spalten: Streaks wurde so schmal, dass
+   "Schritte" zu "Sc…" wurde, und rechts blieb Platz leer. Die
+   Regel ueber ".widget-grid > .card" hat die Breite nicht
+   durchgesetzt.
+
+   Hier steht sie je Karte mit ihrer Kennung — eindeutig, und die
+   Aufteilung ist gleich mitgedacht: was Zeilen hat, bekommt die
+   halbe Breite; was eine Zahl zeigt, ein Viertel; was eine Kurve
+   ist, die ganze.
+   ---------------------------------------------------------- */
+@media (min-width: 1000px) {
+  #seite-dashboard #card-naechste   { width: calc(50% - 7px); }
+  #seite-dashboard #card-habits     { width: calc(50% - 7px); }
+  #seite-dashboard #card-streaks    { width: calc(50% - 7px); }
+  #seite-dashboard #card-kalorien   { width: calc(25% - 11px); }
+  #seite-dashboard #card-wetter     { width: calc(25% - 11px); }
+  #seite-dashboard #card-screentime { width: 100%; }
+}
+@media (max-width: 999px) {
+  #seite-dashboard .widget-grid > .card,
+  #seite-dashboard #card-naechste,
+  #seite-dashboard #card-habits,
+  #seite-dashboard #card-streaks,
+  #seite-dashboard #card-kalorien,
+  #seite-dashboard #card-wetter,
+  #seite-dashboard #card-screentime { width: 100%; }
+}
+
+/* Die Streak-Zeile hatte zu wenig Platz fuer ihren Namen. Mit der
+   halben Breite passt er — und der Wert darf nicht mehr schrumpfen. */
+#seite-dashboard .streak-row .i-text  { min-width: 0; flex: 1; }
+#seite-dashboard .streak-row .i-sache,
+#seite-dashboard .streak-row .i-wert  { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#seite-dashboard .streak-row .i-rechts { flex-shrink: 0; }
+
+/* Die Kurve der Bildschirmzeit nahm 250 Pixel ein und stand fast
+   leer. Eine Kurve braucht Breite, nicht Hoehe. */
+#seite-dashboard #card-screentime .st-chart { min-height: 0; height: 150px; }
+#seite-dashboard #card-screentime .card-body { height: auto; }
+
+/* Kalorien und Wetter sind schmal — dort traegt die Zahl allein,
+   ohne Ring daneben. */
+#seite-dashboard #card-kalorien .cal-body,
+#seite-dashboard #card-wetter .weather {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-height: 0;
+}
+
+/* ==========================================================
+   NACH DEINEM BILDSCHIRMFOTO
+
+   Drei Befunde, alle drei belegt statt vermutet.
+   ========================================================== */
+
+/* 1  DIE VOLLE BREITE
+   Das Raster war auf 1180 Pixel begrenzt und mittig gesetzt —
+   rechts und links blieben rund 20 Prozent ungenutzt. Auf einer
+   Uebersichtsseite ist das verschenkter Platz. */
+#seite-dashboard .widget-grid {
+  max-width: none;
+  margin: 0;
+  width: 100%;
+}
+#seite-dashboard.aktiv,
+#seite-dashboard .layout { padding-left: 0; padding-right: 0; }
+
+/* 2  DIE ZAHL LAG UEBER DER KOPFZEILE
+   .cal-center steht auf position: absolute mit inset: 0 — es fuellte
+   damit die ganze Karte und legte sich ueber "Kalorien Heute". Das
+   war richtig, solange es einen Ring zu zentrieren galt; in der
+   schmalen Kachel gibt es keinen mehr. */
+#seite-dashboard #card-kalorien .cal-center,
+#seite-dashboard #card-wetter .weather-kern {
+  position: static;
+  inset: auto;
+  padding-top: 0;
+  align-items: flex-start;
+}
+#seite-dashboard #card-kalorien .cal-ring-area,
+#seite-dashboard #card-kalorien .cal-gauge-wrap {
+  position: static;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+}
+#seite-dashboard #card-kalorien .cal-gauge { display: none; }
+
+/* 3  DIE STREAK-LISTE LIEF AUS IHRER KARTE
+   Von fuenf Streaks sass einer in der Karte, die uebrigen lagen
+   darunter auf der Bildschirmzeit. Dieselbe Klemme wie zuvor bei
+   den Habits, nur eine Ebene tiefer. */
+#seite-dashboard #card-streaks,
+#seite-dashboard #card-streaks .card-body,
+#seite-dashboard #card-streaks .streaks,
+#seite-dashboard #card-streaks .streak-list {
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  overflow: visible;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 8px;
+}
+#seite-dashboard #card-streaks .streak-row {
+  position: static;
+  flex: 0 0 auto;
+  height: auto;
+  min-height: 60px;
+}
+
+/* ----------------------------------------------------------
+   NACH DEM ZWEITEN BILDSCHIRMFOTO
+   ---------------------------------------------------------- */
+
+/* "/2100 kcal" klebte am unteren Rand — der Karte fehlte unten Luft,
+   weil die Zahl aus dem absoluten Zustand kam und keine hatte. */
+#seite-dashboard #card-kalorien .cal-body { padding-bottom: 4px; gap: 2px; }
+#seite-dashboard #card-kalorien .cal-sub  { margin-top: 2px; }
+
+/* Die Seite liess sich noch rollen. Die Hoehe kam aus drei Stellen:
+   der Terminkarte, die unter "Alle 10 zeigen" leer weiterlief, der
+   Kurve, und den Abstaenden. */
+#seite-dashboard #card-naechste .naechste,
+#seite-dashboard #card-naechste .entry-list { flex: 0 0 auto; }
+#seite-dashboard #card-naechste { align-self: flex-start; }
+#seite-dashboard #card-habits   { align-self: flex-start; }
+
+#seite-dashboard .widget-grid { gap: 10px; }
+#seite-dashboard .widget-grid > .card { padding: 16px 18px; }
+#seite-dashboard #card-screentime .st-chart { height: 120px; }
+#seite-dashboard .hb-zeile,
+#seite-dashboard .streak-row,
+#seite-dashboard .entry-item { min-height: 54px; padding: 8px 14px 8px 8px; }
+
+@media (min-width: 1000px) {
+  #seite-dashboard #card-kalorien   { width: calc(25% - 8px); }
+  #seite-dashboard #card-wetter     { width: calc(25% - 8px); }
+  #seite-dashboard #card-naechste,
+  #seite-dashboard #card-habits,
+  #seite-dashboard #card-streaks    { width: calc(50% - 5px); }
+}
+
+/* Die Streak-Liste mass weiter 0 bei 332 Pixeln Inhalt, obwohl sie
+   auf display: flex steht und ihre Zeilen im Fluss sind. Woher die
+   Null kommt, liess sich nicht eindeutig zuordnen — in style.css
+   streiten sich mehrere Regeln um die Hoehe dieser Kette.
+
+   fit-content beendet den Streit: die Box misst, was in ihr steht. */
+#seite-dashboard #card-streaks,
+#seite-dashboard #card-streaks .card-body,
+#seite-dashboard #card-streaks .streaks,
+#seite-dashboard #card-streaks .streak-list,
+#seite-dashboard #card-habits,
+#seite-dashboard #card-habits .card-body,
+#seite-dashboard #card-habits .habit-list,
+#seite-dashboard #card-habits .hb-liste {
+  height: fit-content;
+  min-height: fit-content;
+}
+
+/* ==========================================================
+   ALLES AUF EINE SEITE — UND KARTEN WIE IN DER DEMO
+
+   Zwei Anforderungen, die sich bisher widersprochen haben: die
+   Karten sollen aussehen wie im Muster, und die Seite soll nicht
+   rollen. Beides geht, wenn nicht die SEITE rollt, sondern die
+   LISTE in ihrer Karte.
+
+   Damit loest sich auch der Streak-Fehler von selbst: eine Liste,
+   die ihre Hoehe vom Behaelter bekommt statt sie ihm aufzuzwingen,
+   kann nicht mehr aus ihrer Karte laufen. Ich habe drei Anlaeufe
+   gebraucht, um zu sehen, dass das der Weg ist.
+   ========================================================== */
+#seite-dashboard.aktiv { overflow: hidden; }
+
+#seite-dashboard .widget-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  grid-auto-flow: row;
+  gap: 12px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#seite-dashboard .widget-grid > .card,
+#seite-dashboard #card-naechste,
+#seite-dashboard #card-habits,
+#seite-dashboard #card-streaks,
+#seite-dashboard #card-kalorien,
+#seite-dashboard #card-wetter,
+#seite-dashboard #card-screentime {
+  width: auto;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 18px 20px;
+  border-radius: 26px;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-3);
+}
+
+/* Zwei Reihen, drei Spalten */
+#seite-dashboard #card-naechste   { grid-area: 1 / 1 / 2 / 2; }
+#seite-dashboard #card-habits     { grid-area: 1 / 2 / 2 / 3; }
+#seite-dashboard #card-streaks    { grid-area: 1 / 3 / 2 / 4; }
+#seite-dashboard #card-kalorien   { grid-area: 2 / 1 / 3 / 2; }
+#seite-dashboard #card-wetter     { grid-area: 2 / 2 / 3 / 3; }
+#seite-dashboard #card-screentime { grid-area: 2 / 3 / 3 / 4; }
+
+/* Der Kopf bleibt stehen, der Inhalt darunter rollt */
+#seite-dashboard .card-head { flex: 0 0 auto; margin-bottom: 12px; }
+#seite-dashboard .card-body,
+#seite-dashboard .naechste,
+#seite-dashboard .streaks {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  max-height: none;
+  overflow: hidden;
+}
+#seite-dashboard .entry-list,
+#seite-dashboard .habit-list,
+#seite-dashboard .hb-liste,
+#seite-dashboard .streak-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  max-height: none;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 7px;
+}
+#seite-dashboard .entry-list::-webkit-scrollbar,
+#seite-dashboard .habit-list::-webkit-scrollbar,
+#seite-dashboard .hb-liste::-webkit-scrollbar,
+#seite-dashboard .streak-list::-webkit-scrollbar { display: none; }
+
+/* Die Zeilen behalten ihre Hoehe, statt sich zu teilen */
+#seite-dashboard .hb-zeile,
+#seite-dashboard .streak-row,
+#seite-dashboard .entry-item {
+  flex: 0 0 auto;
+  height: auto;
+  min-height: 54px;
+}
+
+/* Kalorien, Wetter und die Kurve fuellen ihre Karte */
+#seite-dashboard #card-kalorien .cal-body,
+#seite-dashboard #card-wetter .weather {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 4px;
+  min-height: 0;
+}
+#seite-dashboard #card-screentime .st-chart {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+}
+
+@media (max-width: 999px) {
+  #seite-dashboard.aktiv { overflow-y: auto; }
+  #seite-dashboard .widget-grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    grid-auto-rows: minmax(190px, auto);
+    height: auto;
+    overflow: visible;
+  }
+  #seite-dashboard .widget-grid > .card { grid-area: auto; height: auto; }
+}
+
+/* Der letzte Eintrag einer rollenden Liste klebte am Kartenrand —
+   beim Rollen sieht das aus, als waere er abgeschnitten. Ein paar
+   Pixel Auslauf unten machen sichtbar, dass die Liste zu Ende ist. */
+#seite-dashboard .habit-list,
+#seite-dashboard .hb-liste,
+#seite-dashboard .streak-list,
+#seite-dashboard .entry-list { padding-bottom: 4px; }
+
+/* ==========================================================
+   ==========================================================
+   DEIN BAUPLAN
+
+   Zwoelf Spalten, sechs Reihen, neun Bloecke — die Werte stammen
+   unveraendert aus dem Bauplan-Editor. Keine geschaetzten Groessen
+   mehr; jede Zahl hier hast du selbst gezogen.
+   ========================================================== */
+#seite-dashboard .widget-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: repeat(6, minmax(0, 1fr));
+  grid-auto-flow: row;
+  gap: 10px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Der zweite Bauplan — zehn Bloecke, alle 72 Felder belegt.
+   Die grosse Bildschirmzeit-Kurve steht nicht mehr darin; sie
+   bleibt ueber das Menue erreichbar. */
+#seite-dashboard #card-wetter      { grid-area: 1 / 1 / 2 / 3;  }  /* jetzt        2×1 */
+#seite-dashboard #card-screentime2 { grid-area: 1 / 3 / 2 / 6;  }  /* Zahl         3×1 */
+#seite-dashboard #card-habits      { grid-area: 1 / 6 / 4 / 8;  }  /*              2×3 */
+#seite-dashboard #card-klausur     { grid-area: 1 / 8 / 3 / 13; }  /*              5×2 */
+#seite-dashboard #card-wetter2     { grid-area: 2 / 1 / 4 / 4;  }  /* Vorhersage   3×2 */
+#seite-dashboard #card-kalorien    { grid-area: 2 / 4 / 3 / 6;  }  /*              2×1 */
+#seite-dashboard #card-timer       { grid-area: 3 / 4 / 4 / 6;  }  /*              2×1 */
+#seite-dashboard #card-naechste    { grid-area: 3 / 8 / 7 / 13; }  /*              5×4 */
+#seite-dashboard #card-schule      { grid-area: 4 / 1 / 7 / 4;  }  /*              3×3 */
+#seite-dashboard #card-tagesplan   { grid-area: 4 / 4 / 7 / 8;  }  /*              4×3 */
+
+/* Streaks faellt weg: die Serie erscheint als kleine Flamme bei den
+   Kalorien. Geloescht ist nichts — die volle Uebersicht steht weiter
+   auf der Seite "Habits & Streaks". */
+#seite-dashboard #card-streaks,
+#seite-dashboard #card-vorschlag,
+#seite-dashboard #card-quick { display: none; }
+
+/* Alle neun tragen dieselbe Kapselform */
+#seite-dashboard #card-wetter,
+#seite-dashboard #card-wetter2,
+#seite-dashboard #card-screentime,
+#seite-dashboard #card-screentime2,
+#seite-dashboard #card-kalorien,
+#seite-dashboard #card-klausur,
+#seite-dashboard #card-habits,
+#seite-dashboard #card-schule,
+#seite-dashboard #card-naechste {
+  width: auto;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 15px 17px;
+  border-radius: 24px;
+  border: none;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-3);
+}
+
+/* Auf dem Handy passt kein Raster mit zwoelf Spalten. Dort steht
+   alles untereinander, und die Seite darf rollen. */
+@media (max-width: 999px) {
+  #seite-dashboard.aktiv { overflow-y: auto; }
+  #seite-dashboard .widget-grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    grid-auto-rows: minmax(150px, auto);
+    height: auto;
+    overflow: visible;
+  }
+  #seite-dashboard .widget-grid > .card { grid-area: auto; height: auto; }
+  #seite-dashboard #card-screentime { min-height: 190px; }
+}
+
+/* ==========================================================
+   DIE VIER NEUEN WIDGETS
+   ========================================================== */
+
+/* ---- Wetter · Vorhersage ---- */
+#seite-dashboard #card-wetter2 > .card-body {
+  display: flex; flex-direction: column; gap: 2px;
+  flex: 1; min-height: 0; overflow-y: auto;
+  scrollbar-width: none;
+}
+#seite-dashboard #card-wetter2 > .card-body::-webkit-scrollbar { display: none; }
+#seite-dashboard .vh-tag {
+  display: grid;
+  grid-template-columns: 30px 24px 1fr auto auto;
+  align-items: center; gap: 8px;
+  padding: 5px 4px;
+  border-radius: 12px;
+  font-size: 12.5px;
+  transition: background var(--t-base) var(--ease-soft);
+}
+#seite-dashboard .vh-tag:hover { background: var(--surface-sunken); }
+#seite-dashboard .vh-name { color: var(--text-muted); font-weight: 500; }
+#seite-dashboard .vh-icon svg { width: 20px; height: 20px; }
+#seite-dashboard .vh-icon { color: var(--status-orange); display: grid; place-items: center; }
+#seite-dashboard .vh-regen { font-size: 11px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+#seite-dashboard .vh-regen.hoch { color: var(--blue-ink); font-weight: 600; }
+#seite-dashboard .vh-min { color: var(--text-muted); font-variant-numeric: tabular-nums; min-width: 30px; text-align: right; }
+#seite-dashboard .vh-max { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 32px; text-align: right; }
+
+/* ---- Bildschirmzeit · Zahl ---- */
+#seite-dashboard #card-screentime2 > .card-body {
+  display: flex; flex-direction: column; justify-content: center; gap: 3px;
+  flex: 1; min-height: 0;
+}
+#seite-dashboard .stz-zahl {
+  font-size: clamp(22px, 3vw, 32px); font-weight: 700;
+  letter-spacing: -.035em; line-height: 1; font-variant-numeric: tabular-nums;
+}
+#seite-dashboard .stz-gestern { font-size: 12px; color: var(--text-muted); }
+#seite-dashboard .stz-balken {
+  margin-top: 8px; height: 7px; border-radius: 999px;
+  background: var(--surface-sunken); box-shadow: var(--sunken); overflow: hidden;
+}
+#seite-dashboard .stz-balken i { display: block; height: 100%; border-radius: 999px;
+  transition: width .6s cubic-bezier(.32,.72,0,1); }
+#seite-dashboard .stz-limit { font-size: 11px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+
+/* ---- Nächste Klausur ---- */
+#seite-dashboard #card-klausur > .card-body {
+  display: flex; flex-direction: column; justify-content: center; gap: 3px;
+  flex: 1; min-height: 0;
+}
+#seite-dashboard .kw-fach {
+  font-size: clamp(17px, 2vw, 22px); font-weight: 700; letter-spacing: -.025em;
+  line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#seite-dashboard .kw-thema {
+  font-size: 12.5px; color: var(--text-muted); line-height: 1.35;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+}
+#seite-dashboard .kw-stand { margin-top: 4px; font-size: 11.5px; color: var(--text-muted); }
+#seite-dashboard .kw-balken {
+  margin-top: 7px; height: 7px; border-radius: 999px;
+  background: var(--surface-sunken); box-shadow: var(--sunken); overflow: hidden;
+}
+#seite-dashboard .kw-balken i { display: block; height: 100%; border-radius: 999px;
+  transition: width .6s cubic-bezier(.32,.72,0,1); }
+
+/* Das Abzeichen oben rechts traegt die Ampelfarbe der Frist */
+#seite-dashboard .card-badge.rot   { background: var(--tint-red);    color: var(--red-ink); }
+#seite-dashboard .card-badge.gelb  { background: var(--tint-orange); color: var(--orange-ink); }
+#seite-dashboard .card-badge.gruen { background: var(--tint-green);  color: var(--green-ink); }
+
+/* ---- Schule ---- */
+#seite-dashboard #card-schule > .card-body { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+#seite-dashboard #card-schule .entry-list {
+  flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none;
+  display: flex; flex-direction: column; gap: 6px; list-style: none; margin: 0; padding: 0 0 4px;
+}
+#seite-dashboard #card-schule .entry-list::-webkit-scrollbar { display: none; }
+#seite-dashboard #card-schule .entry-item::before { content: none; }
+
+/* ----------------------------------------------------------
+   SCHMALE KARTEN
+   Schule und Naechste Termine sind drei von zwoelf Rasterspalten
+   breit. Icon, Titel, Abzeichen und Pfeil passen dort nicht alle
+   nebeneinander — der Titel wurde auf null gedrueckt. Also faellt
+   der Pfeil weg und das Abzeichen wird knapp.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-schule .entry-go,
+#seite-dashboard #card-naechste .entry-go { display: none; }
+
+#seite-dashboard #card-schule .entry-item,
+#seite-dashboard #card-naechste .entry-item {
+  gap: 9px;
+  padding: 8px 10px 8px 8px;
+  min-height: 48px;
+}
+#seite-dashboard #card-schule .i-mal,
+#seite-dashboard #card-naechste .i-mal { width: 30px; height: 30px; border-radius: 10px; }
+#seite-dashboard #card-schule .i-mal svg,
+#seite-dashboard #card-naechste .i-mal svg { width: 16px; height: 16px; }
+
+/* Der Titel bekommt den Platz, das Abzeichen nur so viel wie noetig */
+#seite-dashboard #card-schule .i-text,
+#seite-dashboard #card-naechste .i-text { flex: 1 1 auto; min-width: 0; }
+#seite-dashboard #card-schule .i-rechts,
+#seite-dashboard #card-naechste .i-rechts { flex: 0 1 auto; min-width: 0; gap: 5px; }
+#seite-dashboard #card-schule .marke,
+#seite-dashboard #card-naechste .marke {
+  font-size: 10px; padding: 2.5px 7px; line-height: 1.35;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 84px;
+}
+#seite-dashboard #card-schule .i-sache,
+#seite-dashboard #card-naechste .i-sache { font-size: 10.5px; }
+#seite-dashboard #card-schule .i-wert,
+#seite-dashboard #card-naechste .i-wert { font-size: 13.5px; }
+
+/* Die Zeile traegt jetzt den Weg zur Seite, also zeigt sie das auch */
+#seite-dashboard #card-schule .entry-item,
+#seite-dashboard #card-naechste .entry-item { cursor: pointer; }
+
+/* ----------------------------------------------------------
+   HABITS AUF DEM DASHBOARD
+   Die Karte ist zwei Rasterreihen hoch. Drei Zeilen passen dort nur
+   in kompakter Form; auf kleinen Fenstern rollt die Liste, statt die
+   letzte Zeile abzuschneiden.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-habits > .card-body {
+  flex: 1; min-height: 0; overflow: hidden;
+  display: flex; flex-direction: column;
+}
+#seite-dashboard #card-habits .habit-list {
+  flex: 1; min-height: 0; height: auto; max-height: none;
+  overflow-y: auto; overflow-x: hidden; scrollbar-width: none;
+  display: block;
+}
+#seite-dashboard #card-habits .habit-list::-webkit-scrollbar { display: none; }
+#seite-dashboard #card-habits .hb-liste {
+  display: flex; flex-direction: column; gap: 6px;
+  height: auto; min-height: 0; max-height: none; overflow: visible;
+}
+#seite-dashboard #card-habits .hb-zeile {
+  flex: 0 0 auto;
+  height: auto; min-height: 46px; max-height: none;
+  padding: 7px 10px 7px 7px;
+  gap: 9px;
+}
+#seite-dashboard #card-habits .i-mal    { width: 30px; height: 30px; border-radius: 10px; font-size: 13px; }
+#seite-dashboard #card-habits .i-sache  { font-size: 10.5px; }
+#seite-dashboard #card-habits .i-wert   { font-size: 13.5px; }
+#seite-dashboard #card-habits .i-rechts { gap: 7px; }
+#seite-dashboard #card-habits .perlen   { gap: 3px; }
+#seite-dashboard #card-habits .perle    { width: 6px; height: 6px; }
+#seite-dashboard #card-habits .hb-knopf { width: 24px; height: 24px; }
+
+/* ----------------------------------------------------------
+   KALORIEN — Bauplan Block 1
+   Der Ring war ausgeblendet, solange die Kachel schmal war. In der
+   Groesse aus dem Bauplan hat er Platz: links der Kreis mit dem
+   Verbrauch, rechts was der Tag noch hergibt und die Flamme.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-kalorien > .card-body {
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: row; flex-wrap: wrap;
+  align-items: center; justify-content: flex-start;
+  gap: 14px;
+}
+/* Feste Masse statt Inhaltsgroesse: die Flaeche stand auf 0 mal 0,
+   waehrend der Ring darin 104 Pixel mass — er quoll heraus und legte
+   sich ueber die Zahlen daneben. */
+#seite-dashboard #card-kalorien .cal-ring-area {
+  flex: 0 0 auto;
+  width:  clamp(74px, 8vw, 100px);
+  height: clamp(74px, 8vw, 100px);
+  min-width: 0; min-height: 0;
+  display: block; position: relative;
+}
+#seite-dashboard #card-kalorien .cal-gauge-wrap {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  display: block; flex: 0 0 auto;
+}
+/* Ohne Ziel steht nur der Hinweis daneben, der Ring faellt weg. */
+#seite-dashboard #card-kalorien .cal-body:not(.empty) .cal-empty { display: none; }
+#seite-dashboard #card-kalorien .cal-body.empty .cal-ring-area { display: none; }
+#seite-dashboard #card-kalorien .cal-gauge {
+  display: block; width: 100%; height: 100%;
+}
+#seite-dashboard #card-kalorien .cal-center {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 1px; padding-top: 0; text-align: center;
+}
+#seite-dashboard #card-kalorien .cal-value {
+  font-size: clamp(16px, 1.9vw, 21px); font-weight: 700;
+  letter-spacing: -.03em; line-height: 1; font-variant-numeric: tabular-nums;
+}
+#seite-dashboard #card-kalorien .cal-sub { font-size: 9.5px; line-height: 1.2; }
+
+/* Rechts vom Ring: der Rest des Tages */
+#seite-dashboard .cal-neben {
+  flex: 1 1 auto; min-width: 0;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 0;
+}
+#seite-dashboard .cal-rest {
+  font-size: clamp(19px, 2.4vw, 27px); font-weight: 700;
+  letter-spacing: -.03em; line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+  color: var(--green-ink);
+}
+#seite-dashboard .cal-rest.drueber { color: var(--red-ink); }
+#seite-dashboard .cal-rest-wort {
+  font-size: 11.5px; color: var(--text-muted); line-height: 1.3;
+}
+#seite-dashboard .cal-flamme {
+  margin-top: 7px;
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 9px 3px 6px;
+  border-radius: 999px;
+  background: var(--tint-orange); color: var(--orange-ink);
+  font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums;
+}
+#seite-dashboard .cal-flamme svg { width: 13px; height: 13px; display: block; }
+#seite-dashboard .cal-flamme[hidden] { display: none; }
+
+/* Ohne Ziel bleibt nur der Hinweis stehen */
+#seite-dashboard #card-kalorien.empty .cal-ring-area,
+#seite-dashboard #card-kalorien .cal-body.empty .cal-ring-area { display: none; }
+
+/* Der Weg zur Kalorien-Seite: ein Textlink, keine Schaltflaeche —
+   die Karte selbst ist nur zum Ansehen da. */
+#seite-dashboard #card-kalorien .ghost-btn {
+  flex: 0 0 auto; align-self: flex-end; margin-left: auto;
+  padding: 3px 9px; font-size: 11px; border-radius: 999px;
+}
+
+/* ==========================================================
+   ==========================================================
+   DIE SPRACHE DER MUSTERSEITE
+
+   Die Werte stehen so in muster.html — Karte 20 Pixel Polster und
+   26 Radius, Name 13 Pixel in Grau, Abzeichen als Pille mit Punkt,
+   grosse Zahl 38 Pixel mit kleinen Einheiten, Unterzeile 13, Balken
+   8 hoch. Weil die Karten hier verschieden gross sind, wandern die
+   festen Groessen in clamp(): bei 1600 Pixel Fensterbreite kommt
+   genau der Demo-Wert heraus, darunter schrumpft es mit.
+   ========================================================== */
+
+/* ----------------------------------------------------------
+   1  DIE KARTE
+   ---------------------------------------------------------- */
+#seite-dashboard .card {
+  padding: clamp(14px, 1.25vw, 20px);
+  border-radius: 26px;
+  border: none;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-3);
+  display: flex;
+  flex-direction: column;
+  min-width: 0; min-height: 0; height: 100%;
+  overflow: hidden;
+}
+
+/* ----------------------------------------------------------
+   2  DIE KOPFZEILE
+   Auf der Musterseite steht dort nur der Name in Grau und rechts
+   das Abzeichen. Das farbige Symbolquadrat gab es dort nicht — es
+   nahm den Platz weg, den die Zahl darunter braucht.
+   ---------------------------------------------------------- */
+#seite-dashboard .card-head > .i-mal { display: none; }
+
+#seite-dashboard .card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+  margin-bottom: clamp(9px, .9vw, 14px);
+  padding: 0;
+  border: none;
+  background: none;
+  min-height: 0;
+}
+
+#seite-dashboard .card-title {
+  font-size: clamp(11.5px, .82vw, 13px);
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-muted);
+  margin-right: auto;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+#seite-dashboard .card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: 0 0 auto;
+  padding: 4px 11px;
+  border: none;
+  border-radius: 999px;
+  font-size: clamp(10px, .73vw, 11.5px);
+  font-weight: 600;
+  line-height: 1.35;
+  white-space: nowrap;
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+}
+#seite-dashboard .card-badge::before {
+  content: "";
+  width: 6px; height: 6px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: currentColor;
+}
+#seite-dashboard .card-badge[hidden] { display: none; }
+
+/* Die vier Signaltoene der Musterseite */
+#seite-dashboard .card-badge.rot   { background: var(--tint-red);    color: var(--red-ink); }
+#seite-dashboard .card-badge.gruen { background: var(--tint-green);  color: var(--green-ink); }
+#seite-dashboard .card-badge.gelb  { background: var(--tint-orange); color: var(--orange-ink); }
+#seite-dashboard .card-badge.blau  { background: var(--tint-blue);   color: var(--blue-ink); }
+
+/* ----------------------------------------------------------
+   3  DIE GROSSE ZAHL
+   38 Pixel, Tabellenziffern, Einheiten klein daneben.
+   ---------------------------------------------------------- */
+#seite-dashboard .cal-value,
+#seite-dashboard .weather-temp,
+#seite-dashboard .stz-zahl {
+  font-family: var(--sans);
+  font-size: clamp(26px, 2.9vw, 46px);
+  font-weight: 700;
+  letter-spacing: -.035em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  animation: none;
+}
+#seite-dashboard .cal-value small,
+#seite-dashboard .weather-temp small,
+#seite-dashboard .stz-zahl small {
+  font-size: clamp(12px, 1.15vw, 19px);
+  font-weight: 500;
+  letter-spacing: -.01em;
+  color: var(--text-muted);
+}
+
+/* Die Unterzeile */
+#seite-dashboard .cal-sub,
+#seite-dashboard .weather-desc,
+#seite-dashboard .stz-gestern,
+#seite-dashboard .stz-limit,
+#seite-dashboard .kw-thema,
+#seite-dashboard .kw-stand {
+  margin-top: 6px;
+  font-family: var(--sans);
+  font-size: clamp(11.5px, .95vw, 15px);
+  font-weight: 400;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+/* Der Balken */
+#seite-dashboard .stz-balken,
+#seite-dashboard .kw-balken {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  box-shadow: var(--sunken);
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+#seite-dashboard .stz-balken i,
+#seite-dashboard .kw-balken i {
+  display: block; height: 100%; border-radius: 999px;
+  transition: width .6s cubic-bezier(.32,.72,0,1);
+}
+
+/* ----------------------------------------------------------
+   4  WETTER JETZT
+   Symbol links, Temperatur rechts, darunter eine Zeile.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-wetter > .card-body {
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: column; justify-content: center;
+  gap: 0;
+}
+#seite-dashboard .weather-main {
+  display: flex; flex-direction: row; align-items: center;
+  gap: clamp(10px, 1vw, 14px);
+  flex-wrap: nowrap;
+}
+#seite-dashboard .weather-icon {
+  flex: 0 0 auto;
+  width: clamp(40px, 4vw, 66px);
+  height: clamp(40px, 4vw, 66px);
+  display: grid; place-items: center;
+  background: none; border: none; padding: 0; border-radius: 0;
+  color: var(--status-orange);
+}
+#seite-dashboard .weather-icon svg {
+  width: 100%; height: 100%;
+  stroke: var(--status-orange); stroke-width: 1.8; fill: none;
+}
+#seite-dashboard .weather-werte { min-width: 0; }
+#seite-dashboard .weather-desc {
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* Die alten Pillenreihen sind aus dem Aufbau raus; falls doch eine
+   uebrig bleibt, nimmt sie keinen Platz mehr weg. */
+#seite-dashboard #card-wetter .weather-minmax,
+#seite-dashboard #card-wetter .weather-regen { display: none; }
+
+/* ----------------------------------------------------------
+   5  BILDSCHIRMZEIT · ZAHL
+   ---------------------------------------------------------- */
+#seite-dashboard #card-screentime2 > .card-body {
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: column; justify-content: center;
+  gap: 0;
+}
+#seite-dashboard .stz-balken { margin-top: clamp(10px, 1.1vw, 14px); }
+#seite-dashboard .stz-limit  { margin-top: 6px; }
+
+/* ----------------------------------------------------------
+   6  KALORIEN
+   Ring links, Zahlen rechts — die Aufteilung der Musterseite.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-kalorien > .card-body {
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: row; align-items: center;
+  flex-wrap: nowrap;
+  gap: clamp(11px, 1.1vw, 16px);
+}
+#seite-dashboard #card-kalorien .cal-ring-area {
+  position: relative;
+  flex: 0 0 auto;
+  width:  clamp(58px, 5.6vw, 90px);
+  height: clamp(58px, 5.6vw, 90px);
+  min-width: 0; min-height: 0;
+  display: block;
+}
+#seite-dashboard .cal-ring { width: 100%; height: 100%; display: block; }
+#seite-dashboard .cal-ring circle { fill: none; stroke-linecap: round; }
+#seite-dashboard .cal-ring-spur   { stroke: var(--surface-sunken); }
+#seite-dashboard .cal-ring-wert   { transition: stroke-dashoffset .7s cubic-bezier(.32,.72,0,1); }
+
+/* Der alte Strichring bleibt im Aufbau, damit seine Zeichenfunktion
+   weiterlaeuft — zu sehen ist er nicht mehr. */
+#seite-dashboard #card-kalorien .cal-gauge-wrap { display: none; }
+
+#seite-dashboard .cal-neben {
+  flex: 1 1 auto; min-width: 0;
+  display: flex; flex-direction: column; align-items: flex-start;
+  gap: 0;
+}
+#seite-dashboard .cal-sub.drueber,
+#seite-dashboard .cal-neben .drueber { color: var(--red-ink); }
+#seite-dashboard #card-kalorien .cal-empty {
+  display: none;
+  border: none; background: none; padding: 0;
+  margin-top: 6px;
+  font-size: clamp(11px, .82vw, 13px); color: var(--text-muted); text-align: left;
+}
+#seite-dashboard #card-kalorien .cal-body.empty .cal-empty { display: block; }
+#seite-dashboard #card-kalorien .cal-body.empty .cal-sub   { display: none; }
+
+#seite-dashboard .cal-flamme {
+  margin-top: 8px;
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 9px 3px 6px;
+  border-radius: 999px;
+  background: var(--tint-orange); color: var(--orange-ink);
+  font-size: clamp(10px, .73vw, 11.5px); font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+#seite-dashboard .cal-flamme svg { width: 13px; height: 13px; display: block; }
+#seite-dashboard .cal-flamme[hidden] { display: none; }
+
+/* Der Weg zur Kalorien-Seite: klein und unaufdringlich unten rechts */
+#seite-dashboard #card-kalorien .ghost-btn {
+  position: absolute; right: clamp(14px, 1.25vw, 20px); bottom: clamp(12px, 1.1vw, 16px);
+  padding: 3px 10px; font-size: 11px; border-radius: 999px;
+}
+#seite-dashboard #card-kalorien { position: relative; }
+
+/* ----------------------------------------------------------
+   7  NAECHSTE KLAUSUR
+   Fach gross, Thema darunter, Balken unten — wie die Klausurkarte
+   der Musterseite, nur auf die Kachelhoehe gezogen.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-klausur > .card-body {
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: column; justify-content: center;
+  gap: 0;
+}
+#seite-dashboard .kw-fach {
+  font-family: var(--sans);
+  font-size: clamp(18px, 1.9vw, 31px);
+  font-weight: 650;
+  letter-spacing: -.02em;
+  line-height: 1.15;
+  color: var(--text-primary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#seite-dashboard .kw-thema {
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+#seite-dashboard .kw-balken { margin-top: clamp(10px, 1.1vw, 14px); }
+
+/* ----------------------------------------------------------
+   8  WETTER · VORHERSAGE
+   Kein Gegenstueck auf der Musterseite — also dieselben Bausteine:
+   Zeilenhoehe aus dem Zeitstrahl, Schrift aus der Unterzeile.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-wetter2 > .card-body {
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: column; justify-content: center;
+  gap: 1px;
+  overflow-y: auto; scrollbar-width: none;
+}
+#seite-dashboard .vh-tag {
+  display: grid;
+  grid-template-columns: 26px 22px 1fr auto auto;
+  align-items: center; gap: clamp(5px, .55vw, 9px);
+  padding: clamp(3px, .45vh, 6px) 4px;
+  border-radius: 12px;
+  font-size: clamp(10.5px, .8vw, 13px);
+  transition: background var(--t-base) var(--ease-soft);
+}
+#seite-dashboard .vh-tag:hover { background: var(--surface-sunken); }
+#seite-dashboard .vh-name  { color: var(--text-muted); font-weight: 500; }
+#seite-dashboard .vh-icon  { color: var(--status-orange); display: grid; place-items: center; }
+#seite-dashboard .vh-icon svg { width: clamp(15px, 1.25vw, 20px); height: clamp(15px, 1.25vw, 20px); }
+#seite-dashboard .vh-regen { font-size: clamp(9.5px, .7vw, 11.5px); color: var(--text-muted); font-variant-numeric: tabular-nums; }
+#seite-dashboard .vh-regen.hoch { color: var(--blue-ink); font-weight: 600; }
+#seite-dashboard .vh-min { color: var(--text-muted); font-variant-numeric: tabular-nums; text-align: right; }
+#seite-dashboard .vh-max { font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
+
+/* ----------------------------------------------------------
+   9  DIE ZEILEN-KARTEN
+   Habits, Schule und Termine tragen den Zeitstrahl der
+   Musterseite: graue Kapseln, das Laufende in Blau.
+   ---------------------------------------------------------- */
+#seite-dashboard .entry-item,
+#seite-dashboard .hb-zeile {
+  border-radius: 18px;
+  background: var(--surface-sunken);
+  border: none;
+}
+#seite-dashboard .i-sache {
+  font-size: clamp(9.5px, .7vw, 11.5px);
+  font-weight: 500; color: var(--text-muted); line-height: 1.3;
+}
+#seite-dashboard .i-wert {
+  font-size: clamp(12.5px, 1.02vw, 16px);
+  font-weight: 650; letter-spacing: -.02em; line-height: 1.25;
+}
+#seite-dashboard .marke {
+  display: inline-flex; align-items: center;
+  padding: 3px 9px; border-radius: 999px;
+  font-size: clamp(9.5px, .7vw, 11px); font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ----------------------------------------------------------
+   10  DIE KURVE
+   Die grosse Karte bekommt denselben Kopf; die Legende und der
+   Umschalter bleiben, wo sie sind.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-screentime > .card-body,
+#seite-dashboard #card-screentime .st-chart {
+  flex: 1 1 auto; min-height: 0; height: auto;
+}
+#seite-dashboard #card-screentime .legend {
+  display: flex; align-items: center; gap: 10px;
+  margin-right: 10px;
+}
+#seite-dashboard #card-screentime .legend-item {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 11px; border-radius: 999px; border: none;
+  background: var(--surface-sunken); color: var(--text-muted);
+  font-size: clamp(10px, .73vw, 11.5px); font-weight: 600;
+}
+
+/* ----------------------------------------------------------
+   NICHTS WIRD ABGESCHNITTEN
+   "Teilweise bewölkt · 13° bis 20°" ist laenger als "Bedeckt ·
+   15° bis 20°" aus der Demo und stiess rechts an. Statt es zu
+   kuerzen, darf es umbrechen — Platz ist in der Kachel genug.
+   ---------------------------------------------------------- */
+#seite-dashboard .weather-desc {
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: clip;
+}
+#seite-dashboard .kw-fach {
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: clip;
+}
+/* Bricht der Titel um, ruecken Thema und Balken nach — dafuer
+   darf das Thema dann nur noch eine Zeile belegen. */
+#seite-dashboard .kw-thema { -webkit-line-clamp: 2; }
+
+/* ==========================================================
+   ==========================================================
+   DER ZWEITE BAUPLAN — was er an Gestaltung nach sich zieht
+   ========================================================== */
+
+/* ----------------------------------------------------------
+   1  DIE FLACHEN KACHELN
+   Wetter, Bildschirmzeit-Zahl, Kalorien und Timer sind nur noch
+   eine Rasterreihe hoch — rund 125 Pixel. Die 46er Zahl aus dem
+   ersten Bauplan passt dort nicht mehr neben eine Unterzeile.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-wetter,
+#seite-dashboard #card-screentime2,
+#seite-dashboard #card-kalorien,
+#seite-dashboard #card-timer {
+  padding: clamp(10px, .85vw, 14px) clamp(12px, 1vw, 17px);
+}
+#seite-dashboard #card-wetter .card-head,
+#seite-dashboard #card-screentime2 .card-head,
+#seite-dashboard #card-kalorien .card-head,
+#seite-dashboard #card-timer .card-head {
+  margin-bottom: clamp(4px, .4vw, 7px);
+}
+#seite-dashboard #card-wetter .cal-value,
+#seite-dashboard #card-wetter .weather-temp,
+#seite-dashboard #card-screentime2 .stz-zahl,
+#seite-dashboard #card-kalorien .cal-value {
+  font-size: clamp(20px, 1.75vw, 28px);
+}
+#seite-dashboard #card-wetter .weather-temp small,
+#seite-dashboard #card-screentime2 .stz-zahl small,
+#seite-dashboard #card-kalorien .cal-value small {
+  font-size: clamp(10px, .78vw, 12.5px);
+}
+#seite-dashboard #card-wetter .weather-desc,
+#seite-dashboard #card-screentime2 .stz-gestern,
+#seite-dashboard #card-screentime2 .stz-limit,
+#seite-dashboard #card-kalorien .cal-sub {
+  margin-top: 2px;
+  font-size: clamp(9.5px, .72vw, 11.5px);
+  line-height: 1.25;
+}
+#seite-dashboard #card-screentime2 .stz-balken {
+  margin-top: 5px; height: 6px;
+}
+#seite-dashboard #card-screentime2 .stz-limit { margin-top: 3px; }
+
+/* Wetter: das Symbol schrumpft mit */
+#seite-dashboard #card-wetter .weather-icon {
+  width: clamp(26px, 2.1vw, 34px);
+  height: clamp(26px, 2.1vw, 34px);
+}
+#seite-dashboard #card-wetter .weather-main { gap: clamp(7px, .7vw, 11px); }
+#seite-dashboard #card-wetter .weather-desc { -webkit-line-clamp: 2; }
+
+/* Kalorien: der Ring passt sich an, der Knopf tritt zurueck */
+#seite-dashboard #card-kalorien .cal-ring-area {
+  width:  clamp(38px, 3.2vw, 52px);
+  height: clamp(38px, 3.2vw, 52px);
+}
+#seite-dashboard #card-kalorien > .card-body { gap: clamp(8px, .8vw, 12px); }
+#seite-dashboard #card-kalorien .ghost-btn { display: none; }
+#seite-dashboard #card-kalorien { cursor: pointer; }
+#seite-dashboard .cal-flamme { margin-top: 4px; padding: 2px 8px 2px 5px; }
+#seite-dashboard .cal-flamme svg { width: 11px; height: 11px; }
+
+/* ----------------------------------------------------------
+   2  DER TIMER — Block 10
+   ---------------------------------------------------------- */
+#seite-dashboard #card-timer > .card-body {
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: column; justify-content: center;
+  gap: 0;
+}
+#seite-dashboard .tm-zeit {
+  font-family: var(--sans);
+  font-size: clamp(21px, 1.85vw, 30px);
+  font-weight: 700; letter-spacing: -.035em; line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+/* Abgelaufen: die Null soll auffallen, ohne zu blinken */
+#seite-dashboard .tm-zeit.aus { color: var(--red-ink); }
+
+#seite-dashboard .tm-spur {
+  margin-top: 6px; height: 6px;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  box-shadow: var(--sunken);
+  overflow: hidden; flex: 0 0 auto;
+}
+#seite-dashboard .tm-spur i {
+  display: block; height: 100%; border-radius: 999px;
+  background: var(--accent-active);
+  transition: width .25s linear;
+}
+
+#seite-dashboard .tm-reihe {
+  margin-top: 7px;
+  display: flex; align-items: center; gap: 5px;
+  flex-wrap: nowrap;
+}
+#seite-dashboard .tm-reihe[hidden] { display: none; }
+
+#seite-dashboard .tm-vor,
+#seite-dashboard .tm-knopf {
+  flex: 1 1 0; min-width: 0;
+  padding: 4px 6px;
+  border: none; border-radius: 999px;
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+  font-family: var(--sans);
+  font-size: clamp(10px, .74vw, 11.5px);
+  font-weight: 600;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: background var(--t-base) var(--ease-soft),
+              color var(--t-base) var(--ease-soft),
+              transform var(--t-fast) var(--ease);
+}
+#seite-dashboard .tm-vor:hover,
+#seite-dashboard .tm-knopf:hover {
+  background: var(--surface-dark); color: var(--text-inverse);
+}
+#seite-dashboard .tm-vor:active,
+#seite-dashboard .tm-knopf:active { transform: scale(.94); }
+
+/* ----------------------------------------------------------
+   3  DER TAGESPLAN — Block 9
+   Links die Uhrzeit, daneben eine Linie mit einem Punkt je
+   Eintrag, rechts die Sache mit ihrem Balken.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-tagesplan > .card-body {
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: column; gap: 3px;
+  overflow-y: auto; overflow-x: hidden;
+  scrollbar-width: none;
+}
+#seite-dashboard #card-tagesplan > .card-body::-webkit-scrollbar { display: none; }
+
+#seite-dashboard .tp-punkt {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: clamp(9px, .9vw, 13px);
+  padding: clamp(4px, .45vw, 7px) 0 clamp(4px, .45vw, 7px) 0;
+  flex: 0 0 auto;
+}
+
+#seite-dashboard .tp-uhr {
+  padding-left: 15px;
+  font-size: clamp(10px, .74vw, 12px);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+/* Die Linie laeuft durch alle Punkte hindurch */
+#seite-dashboard .tp-punkt::before {
+  content: "";
+  position: absolute;
+  left: 4px; top: 0; bottom: 0;
+  width: 2px;
+  background: var(--surface-sunken);
+}
+#seite-dashboard .tp-punkt:first-child::before { top: 50%; }
+#seite-dashboard .tp-punkt:last-child::before  { bottom: 50%; }
+
+/* Der Punkt auf der Linie */
+#seite-dashboard .tp-punkt::after {
+  content: "";
+  position: absolute;
+  left: 0; top: clamp(9px, .95vw, 13px);
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 2px var(--text-muted);
+}
+#seite-dashboard .tp-punkt.vorbei::after {
+  background: var(--status-green);
+  box-shadow: inset 0 0 0 2px var(--status-green);
+}
+#seite-dashboard .tp-punkt.laeuft::after {
+  background: var(--accent-active);
+  box-shadow: inset 0 0 0 2px var(--accent-active),
+              0 0 0 4px var(--tint-blue);
+}
+
+#seite-dashboard .tp-inhalt { min-width: 0; }
+#seite-dashboard .tp-sache {
+  font-size: clamp(11.5px, .9vw, 14px);
+  font-weight: 650; letter-spacing: -.02em;
+  line-height: 1.25;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#seite-dashboard .tp-zusatz {
+  font-size: clamp(9.5px, .72vw, 11.5px);
+  color: var(--text-muted);
+  line-height: 1.3;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#seite-dashboard .tp-balken {
+  margin-top: 4px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  overflow: hidden;
+}
+#seite-dashboard .tp-balken i {
+  display: block; height: 100%; border-radius: 999px;
+  background: var(--text-muted);
+  transition: width .5s cubic-bezier(.32,.72,0,1);
+}
+#seite-dashboard .tp-punkt.laeuft .tp-balken i { background: var(--accent-active); }
+#seite-dashboard .tp-punkt.vorbei .tp-balken i { background: var(--status-green); }
+
+/* Was schon vorbei ist, tritt zurueck */
+#seite-dashboard .tp-punkt.vorbei .tp-sache { color: var(--text-muted); font-weight: 500; }
+
+/* ----------------------------------------------------------
+   4  DIE KLAUSUR IST BREITER GEWORDEN
+   Fuenf Spalten auf zwei Reihen — dort ist Platz fuer den Titel
+   in einer Zeile und ein ruhigeres Verhaeltnis.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-klausur .kw-fach { -webkit-line-clamp: 1; }
+
+/* ----------------------------------------------------------
+   5  HABITS STEHEN JETZT HOCH UND SCHMAL
+   Zwei Spalten, drei Reihen. Die Perlenreihe passt neben dem
+   Namen nicht mehr — sie rueckt darunter.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-habits .hb-zeile {
+  flex-wrap: wrap;
+  min-height: 0;
+  padding: clamp(6px, .6vw, 9px) clamp(7px, .7vw, 10px);
+  gap: clamp(6px, .6vw, 9px);
+}
+#seite-dashboard #card-habits .i-rechts {
+  width: 100%; margin-left: 0;
+  justify-content: space-between;
+}
+#seite-dashboard #card-habits .hb-liste { gap: clamp(5px, .5vw, 8px); }
+
+/* ----------------------------------------------------------
+   6  HANDY
+   Der Bauplan gilt fuer den Schreibtisch. Auf dem Telefon bleibt
+   es bei einer Spalte, und der Timer steht oben — er ist das
+   einzige, was man dort im Vorbeigehen braucht.
+   ---------------------------------------------------------- */
+@media (max-width: 999px) {
+  #seite-dashboard #card-timer     { order: -1; min-height: 130px; }
+  #seite-dashboard #card-tagesplan { min-height: 240px; }
+}
+
+
+/* ----------------------------------------------------------
+   ZULETZT: DIE KURVE IST NICHT MEHR IM BAUPLAN
+   Sie muss ganz am Ende stehen — die Kapselform-Gruppe weiter
+   oben setzt jede der Karten wieder auf display: flex.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-screentime { display: none; }
+
+/* Die einreihigen Kacheln sind 115 Pixel hoch — davon nimmt die
+   Kopfzeile ihren Teil. Was darunter steht, muss ohne Rest
+   hineinpassen; abgeschnitten war zuletzt die Knopfreihe des
+   Timers und die Limitzeile der Bildschirmzeit. */
+#seite-dashboard #card-timer .tm-spur[hidden] { display: none; }
+#seite-dashboard #card-timer .tm-reihe { margin-top: 6px; }
+#seite-dashboard #card-timer .tm-vor,
+#seite-dashboard #card-timer .tm-knopf { padding: 3px 5px; }
+#seite-dashboard #card-timer .tm-spur { margin-top: 5px; }
+
+/* Hoechst- und Tiefstwert neben der Temperatur */
+#seite-dashboard .weather-spanne {
+  margin-left: 7px;
+  font-size: clamp(9.5px, .72vw, 12px);
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+#seite-dashboard #card-wetter .weather-desc { -webkit-line-clamp: 1; }
+
+/* Die Wetterkachel stand vier Pixel ueber. Symbol, Zahl und Zeile
+   ruecken enger zusammen, statt dass etwas wegfaellt. */
+#seite-dashboard #card-wetter .weather-temp {
+  font-size: clamp(18px, 1.55vw, 25px);
+}
+#seite-dashboard #card-wetter .weather-desc {
+  margin-top: 1px;
+  line-height: 1.2;
+}
+#seite-dashboard #card-wetter .card-head { margin-bottom: 3px; }
+#seite-dashboard #card-wetter .weather-icon {
+  width: clamp(24px, 1.95vw, 31px);
+  height: clamp(24px, 1.95vw, 31px);
+}
+
+/* ==========================================================
+   ==========================================================
+   DRITTE RUNDE — die Punkte aus Lucas Liste
+   ========================================================== */
+
+/* ----------------------------------------------------------
+   1  DER HUB BEIM UEBERFAHREN WURDE ABGESCHNITTEN
+   Das Raster fuellt die Seitenhoehe genau aus und steht auf
+   overflow: hidden. Hebt sich die oberste Kachelreihe um zwei
+   Pixel, ist genau dort kein Platz. Also bekommt das Raster
+   ringsum etwas Luft — die Kacheln bleiben gleich gross, weil
+   die Hoehe um dieselben Pixel sinkt.
+   ---------------------------------------------------------- */
+#seite-dashboard .widget-grid {
+  padding: 4px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* ----------------------------------------------------------
+   2  DIE KACHELN WERDEN DUNKLER
+   Nur im dunklen Modus — im hellen bleiben sie weiss, sonst
+   waere die Sprache der Musterseite dahin.
+   ---------------------------------------------------------- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-thema="hell"]) {
+    --surface-card:   #0E0E12;
+    --surface-sunken: #1A1A20;
+  }
+}
+:root[data-thema="dunkel"] {
+  --surface-card:   #0E0E12;
+  --surface-sunken: #1A1A20;
+}
+
+/* ----------------------------------------------------------
+   3  KEINE UMSCHALTER AUF DEM DASHBOARD
+   Habits und Wetter werden hier nur angesehen. Beide Ansichten
+   gibt es unveraendert auf ihren eigenen Seiten.
+   ---------------------------------------------------------- */
+#seite-dashboard #habitAnsicht,
+#seite-dashboard #weatherViewToggle { display: none; }
+
+/* ----------------------------------------------------------
+   4  HABITS
+   Runder, und ohne den Umschalter darueber ruecken sie nach oben.
+   Die Perlen stehen wieder neben dem Namen statt darunter.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-habits .hb-zeile {
+  flex-wrap: nowrap;
+  border-radius: 20px;
+  padding: clamp(7px, .7vw, 10px) clamp(8px, .8vw, 11px);
+  gap: clamp(7px, .7vw, 10px);
+}
+#seite-dashboard #card-habits .i-rechts {
+  width: auto;
+  margin-left: auto;
+  justify-content: flex-end;
+  gap: clamp(5px, .5vw, 8px);
+}
+#seite-dashboard #card-habits .i-mal { border-radius: 12px; }
+#seite-dashboard #card-habits .perlen { gap: 3px; }
+#seite-dashboard #card-habits .perle { width: 6px; height: 6px; }
+#seite-dashboard #card-habits .hb-knopf { width: 22px; height: 22px; }
+/* Der Inhalt beginnt oben, nicht in der Mitte */
+#seite-dashboard #card-habits > .card-body { justify-content: flex-start; }
+
+/* ----------------------------------------------------------
+   5  DER TIMER
+   Zeit links, die beiden Tasten als Symbole rechts. Darunter ein
+   Fach fester Hoehe: dort steht entweder die Reihe der Vorgaben
+   oder die Leiste — die Kachel bleibt dadurch gleich hoch.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-timer > .card-body {
+  display: flex; flex-direction: column; justify-content: center;
+  gap: 0;
+}
+#seite-dashboard .tm-kopf {
+  display: flex; align-items: center; gap: 8px;
+}
+#seite-dashboard .tm-zeit { margin-right: auto; }
+
+#seite-dashboard .tm-tasten {
+  display: flex; align-items: center; gap: 5px;
+  flex: 0 0 auto;
+}
+#seite-dashboard .tm-tasten[hidden] { display: none; }
+
+#seite-dashboard .tm-icon {
+  width: 26px; height: 26px;
+  display: grid; place-items: center;
+  padding: 0; border: none; border-radius: 50%;
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background var(--t-base) var(--ease-soft),
+              color var(--t-base) var(--ease-soft),
+              transform var(--t-fast) var(--ease);
+}
+#seite-dashboard .tm-icon svg { width: 13px; height: 13px; fill: currentColor; display: block; }
+#seite-dashboard .tm-icon:hover  { background: var(--surface-dark); color: var(--text-inverse); }
+#seite-dashboard .tm-icon:active { transform: scale(.9); }
+#seite-dashboard #timerAus:hover { background: var(--status-red); color: #fff; }
+
+/* Das Fach haelt die Hoehe, egal was darin steht */
+#seite-dashboard .tm-fach {
+  margin-top: 8px;
+  min-height: 24px;
+  display: flex; align-items: center;
+  flex: 0 0 auto;
+}
+#seite-dashboard .tm-fach > * { width: 100%; }
+#seite-dashboard .tm-reihe { margin-top: 0; }
+#seite-dashboard .tm-spur  { margin-top: 0; height: 8px; }
+#seite-dashboard .tm-spur[hidden],
+#seite-dashboard .tm-reihe[hidden] { display: none; }
+#seite-dashboard .tm-vor { padding: 4px 6px; }
+
+/* ----------------------------------------------------------
+   6  WETTER JETZT — groesser
+   Ohne den Umschalter oben rechts ist Platz fuer Symbol und Zahl.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-wetter .weather-temp {
+  font-size: clamp(22px, 2vw, 32px);
+}
+#seite-dashboard #card-wetter .weather-icon {
+  width:  clamp(30px, 2.6vw, 42px);
+  height: clamp(30px, 2.6vw, 42px);
+}
+#seite-dashboard #card-wetter .weather-desc {
+  font-size: clamp(10.5px, .8vw, 13px);
+  line-height: 1.25;
+}
+#seite-dashboard .weather-spanne {
+  font-size: clamp(10.5px, .8vw, 13px);
+}
+
+/* ----------------------------------------------------------
+   7  WETTER · VORHERSAGE — groesser und lesbarer
+   Die Kachel ist drei Spalten breit und zwei Reihen hoch; fuenf
+   Zeilen duerfen darin ruhig Platz nehmen.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-wetter2 > .card-body {
+  gap: 2px;
+  justify-content: space-around;
+}
+#seite-dashboard .vh-tag {
+  grid-template-columns: 30px 26px 1fr auto auto;
+  gap: clamp(7px, .7vw, 11px);
+  padding: clamp(4px, .5vh, 7px) 5px;
+  font-size: clamp(12px, .95vw, 15px);
+  border-radius: 13px;
+}
+#seite-dashboard .vh-icon svg {
+  width: clamp(19px, 1.55vw, 25px);
+  height: clamp(19px, 1.55vw, 25px);
+}
+#seite-dashboard .vh-name { font-size: clamp(11.5px, .9vw, 14px); font-weight: 600; }
+#seite-dashboard .vh-regen { font-size: clamp(10.5px, .82vw, 13px); }
+#seite-dashboard .vh-min { font-size: clamp(11.5px, .9vw, 14px); }
+#seite-dashboard .vh-max { font-size: clamp(12.5px, 1vw, 16px); }
+
+/* ----------------------------------------------------------
+   8  NAECHSTE TERMINE — der Strahl und die Groessen
+   Die Kachel ist fuenf Spalten breit und vier Reihen hoch. Mit
+   vier Zeilen blieb unten ein Drittel leer; die Zeilen duerfen
+   also groesser stehen und den Platz teilen.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-naechste .entry-list {
+  justify-content: space-evenly;
+  gap: clamp(6px, .7vh, 12px);
+}
+#seite-dashboard #card-naechste .entry-item {
+  min-height: clamp(52px, 6.5vh, 68px);
+  padding: clamp(9px, .9vw, 13px) clamp(11px, 1vw, 15px) clamp(9px, .9vw, 13px) clamp(9px, .9vw, 12px);
+  border-radius: 20px;
+  gap: clamp(10px, 1vw, 14px);
+}
+#seite-dashboard #card-naechste .i-mal {
+  width: clamp(32px, 2.6vw, 40px);
+  height: clamp(32px, 2.6vw, 40px);
+  border-radius: 13px;
+}
+#seite-dashboard #card-naechste .i-mal svg {
+  width: clamp(17px, 1.4vw, 21px);
+  height: clamp(17px, 1.4vw, 21px);
+}
+#seite-dashboard #card-naechste .i-sache { font-size: clamp(10.5px, .82vw, 13px); }
+#seite-dashboard #card-naechste .i-wert  { font-size: clamp(13px, 1.05vw, 17px); }
+#seite-dashboard #card-naechste .marke {
+  font-size: clamp(10px, .78vw, 12px);
+  padding: 3px 10px;
+  max-width: none;
+}
+
+/* Der Strahl: eine durchgehende Linie mit einem Punkt je Termin.
+   Er stand bisher als schmaler Streifen am Rand — jetzt traegt er
+   die Zeilen sichtbar. */
+#seite-dashboard #card-naechste .entry-list { padding-left: 22px; position: relative; }
+#seite-dashboard #card-naechste .entry-item::before {
+  content: "";
+  position: absolute;
+  left: -22px; top: 50%;
+  width: 11px; height: 11px; margin-top: -5.5px;
+  border-radius: 50%;
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 2.5px var(--text-muted);
+  z-index: 1;
+}
+#seite-dashboard #card-naechste .entry-item.today::before {
+  background: var(--accent-active);
+  box-shadow: inset 0 0 0 2.5px var(--accent-active), 0 0 0 4px var(--tint-blue);
+}
+#seite-dashboard #card-naechste .entry-item.soon::before {
+  background: var(--status-orange);
+  box-shadow: inset 0 0 0 2.5px var(--status-orange);
+}
+/* Die Linie durch alle Punkte */
+#seite-dashboard #card-naechste .entry-list::before {
+  content: "";
+  position: absolute;
+  left: 5px; top: 14px; bottom: 14px;
+  width: 2px;
+  background: var(--surface-sunken);
+}
+
+/* ----------------------------------------------------------
+   9  DIE KLAUSURKACHEL
+   Sie traegt jetzt zwei Ueberschriften, je nach Inhalt. An der
+   Gestaltung aendert das nichts — nur der Platz fuer die
+   Termindaten darunter wird gebraucht.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-klausur .kw-thema { -webkit-line-clamp: 1; }
+
+/* Die Habits-Kachel ist zwei Spalten breit — rund 180 Pixel innen.
+   Symbol, Perlen und Haken belegten davon so viel, dass fuer den
+   Namen nichts uebrig blieb: er stand auf null. Alles drumherum
+   wird kleiner, damit der Name den Platz bekommt. */
+#seite-dashboard #card-habits .hb-zeile {
+  padding: clamp(6px, .6vw, 9px);
+  gap: clamp(5px, .5vw, 7px);
+}
+#seite-dashboard #card-habits .i-mal {
+  width: clamp(24px, 2vw, 28px);
+  height: clamp(24px, 2vw, 28px);
+  border-radius: 10px;
+  font-size: clamp(11px, .85vw, 13px);
+}
+#seite-dashboard #card-habits .i-text {
+  flex: 1 1 auto;
+  min-width: clamp(38px, 3.4vw, 52px);
+}
+#seite-dashboard #card-habits .i-sache { font-size: clamp(9px, .68vw, 10.5px); }
+#seite-dashboard #card-habits .i-wert  { font-size: clamp(11.5px, .88vw, 14px); }
+#seite-dashboard #card-habits .i-rechts { gap: clamp(4px, .4vw, 6px); }
+#seite-dashboard #card-habits .perlen  { gap: 2px; }
+#seite-dashboard #card-habits .perle   { width: 5px; height: 5px; }
+#seite-dashboard #card-habits .hb-knopf {
+  width: clamp(18px, 1.5vw, 21px);
+  height: clamp(18px, 1.5vw, 21px);
+  flex: 0 0 auto;
+}
+
+/* Der Klausurtitel darf wieder zwei Zeilen nehmen — ohne Fach steht
+   dort der Terminname, und der ist selten kurz. */
+#seite-dashboard #card-klausur .kw-fach { -webkit-line-clamp: 2; }
+
+/* Der angehobene Rand samt Schatten braucht Luft nach aussen. Vier
+   Pixel Polster reichen fuer die Kachel, nicht fuer ihren Schatten —
+   der reicht zwanzig Pixel weit. Also darf das Raster ueberstehen;
+   begrenzt wird erst an der Seite. Die Kacheln selbst schneiden
+   weiterhin ab, es kann also nichts herauslaufen. */
+#seite-dashboard .widget-grid { overflow: visible; }
+#seite-dashboard.aktiv { overflow: hidden; }
+
+/* Das Fach behaelt seine Hoehe, egal ob die Vorgabeknoepfe oder die
+   Leiste darin stehen — sonst schrumpft die Kachel beim Starten um
+   acht Pixel und der ganze Inhalt springt. */
+#seite-dashboard .tm-fach {
+  height: 28px;
+  min-height: 28px;
+  box-sizing: border-box;
+}
+#seite-dashboard .tm-vor {
+  height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 6px;
+}
+#seite-dashboard .tm-reihe { align-items: center; }
+
+/* Nicht der Timer wuchs, sondern seine Kopfzeile: sobald das
+   Abzeichen "läuft" erscheint, ist sie acht Pixel hoeher als mit
+   dem Titel allein — und der Koerper darunter entsprechend
+   flacher. Eine feste Mindesthoehe haelt die Zeile ruhig, auch bei
+   den anderen Kacheln mit erscheinendem Abzeichen. */
+#seite-dashboard .card-head { min-height: 24px; }
+
+/* Die feste Kopfzeile kostet acht Pixel. In den beiden flachsten
+   Kacheln standen Wetter und Timer damit wieder ueber — beide
+   ruecken um genau diesen Betrag zusammen. */
+#seite-dashboard #card-wetter .weather-temp {
+  font-size: clamp(19px, 1.7vw, 27px);
+}
+#seite-dashboard #card-wetter .weather-icon {
+  width:  clamp(26px, 2.25vw, 36px);
+  height: clamp(26px, 2.25vw, 36px);
+}
+#seite-dashboard #card-timer .tm-zeit {
+  font-size: clamp(18px, 1.6vw, 26px);
+}
+#seite-dashboard .tm-fach { margin-top: 5px; }
+
+/* Die drei fehlenden Pixel holt die Kopfzeile selbst: ein flacheres
+   Abzeichen macht sie niedriger, und weil sie dann ueberall gleich
+   niedrig ist, bleibt sie trotzdem ruhig. */
+#seite-dashboard .card-badge {
+  padding: 3px 10px;
+  line-height: 1.25;
+}
+#seite-dashboard .card-head { min-height: 21px; }
+
+/* Und der Rest aus dem Inhalt der beiden flachsten Kacheln */
+#seite-dashboard #card-wetter .weather-desc { margin-top: 0; line-height: 1.15; }
+#seite-dashboard #card-wetter .weather-main { align-items: center; }
+#seite-dashboard .tm-fach { height: 26px; min-height: 26px; }
+#seite-dashboard .tm-vor  { height: 24px; }
+
+/* ==========================================================
+   ==========================================================
+   KACHELN AUS GLAS — ein Versuch auf Widerruf
+
+   Alles hier haengt an [data-glas="an"] am Wurzelelement. Steht
+   der Schalter im Kontopanel auf Aus, faellt der ganze Block weg
+   und die Kacheln sehen aus wie zuvor.
+
+   Glas lebt davon, dass etwas hindurchscheint. Auf reinem Schwarz
+   gibt es nichts zu brechen — also bekommt der Grund im Glasmodus
+   zwei sehr weiche Aufhellungen. Sie sind grau, nicht farbig: der
+   dunkle Modus bleibt schwarz, der helle weiss.
+   ========================================================== */
+
+/* ---- Wie dicht die Scheibe ist ----
+   Im hellen Modus liegt hinter der Kachel ein grauer Grund. Bei
+   58 Prozent Deckung scheint er durch und die weisse Kachel wirkt
+   grau — genau das, was weg sollte. Dort steht die Scheibe also
+   dichter; auf Schwarz darf sie duenner bleiben, weil Schwarz
+   nichts hineintraegt. */
+:root {
+  --glas-deckung: 90%;
+  --glas-innen:   80%;
+  --glas-kante:   7%;
+  --glas-glanz:   .60;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-thema="hell"]) {
+    --glas-deckung: 58%;
+    --glas-innen:   62%;
+    --glas-kante:   9%;
+    --glas-glanz:   .07;
+  }
+}
+:root[data-thema="dunkel"] {
+  --glas-deckung: 58%;
+  --glas-innen:   62%;
+  --glas-kante:   9%;
+  --glas-glanz:   .07;
+}
+
+/* ---- Der Grund, damit das Glas etwas zu tun hat ---- */
+:root[data-glas="an"] body {
+  background-color: var(--bg-page);
+  background-image:
+    radial-gradient(58% 44% at 18% 12%, rgba(255,255,255,.055), transparent 70%),
+    radial-gradient(52% 40% at 84% 78%, rgba(255,255,255,.038), transparent 72%);
+  background-attachment: fixed;
+}
+/* Im hellen Modus hellt der Grund auf, statt abzudunkeln — eine
+   Abdunklung faerbte durch die Scheibe hindurch und machte die
+   Kacheln grau. */
+:root[data-glas="an"][data-thema="hell"] body,
+:root[data-glas="an"]:not([data-thema="dunkel"]) body {
+  background-image:
+    radial-gradient(58% 44% at 18% 12%, rgba(255,255,255,.75), transparent 70%),
+    radial-gradient(52% 40% at 84% 78%, rgba(255,255,255,.55), transparent 72%);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-glas="an"]:not([data-thema="hell"]) body {
+    background-image:
+      radial-gradient(58% 44% at 18% 12%, rgba(255,255,255,.055), transparent 70%),
+      radial-gradient(52% 40% at 84% 78%, rgba(255,255,255,.038), transparent 72%);
+  }
+}
+:root[data-glas="an"][data-thema="dunkel"] body {
+  background-image:
+    radial-gradient(58% 44% at 18% 12%, rgba(255,255,255,.055), transparent 70%),
+    radial-gradient(52% 40% at 84% 78%, rgba(255,255,255,.038), transparent 72%);
+}
+
+/* ---- Die Kachel ----
+   Die Kapselform-Gruppe weiter oben nennt jede Kachel mit zwei
+   Kennungen. Eine Regel mit einer Kennung und einem Attribut kommt
+   dagegen nicht an, also stehen hier alle zehn einzeln. */
+[data-glas="an"] #seite-dashboard #card-wetter,
+[data-glas="an"] #seite-dashboard #card-wetter2,
+[data-glas="an"] #seite-dashboard #card-screentime2,
+[data-glas="an"] #seite-dashboard #card-kalorien,
+[data-glas="an"] #seite-dashboard #card-timer,
+[data-glas="an"] #seite-dashboard #card-klausur,
+[data-glas="an"] #seite-dashboard #card-habits,
+[data-glas="an"] #seite-dashboard #card-schule,
+[data-glas="an"] #seite-dashboard #card-naechste,
+[data-glas="an"] #seite-dashboard #card-tagesplan
+ {
+  position: relative;
+  background: color-mix(in srgb, var(--surface-card) var(--glas-deckung), transparent);
+  -webkit-backdrop-filter: blur(22px) saturate(1.5);
+  backdrop-filter: blur(22px) saturate(1.5);
+  /* Keine umlaufende Kante: die las sich als grauer Rahmen um jede
+     Kachel, und Rahmen sollte es nie geben. Die Scheibe zeigt sich
+     ueber den Glanz an der Oberkante und die Unschaerfe dahinter. */
+  border: none;
+  box-shadow: var(--shadow-3);
+}
+
+/* Der Glanz an der oberen Kante — was eine Scheibe vom Rechteck
+   unterscheidet. Er sitzt in einer eigenen Ebene, damit er den
+   Inhalt nicht anfasst. */
+[data-glas="an"] #seite-dashboard #card-wetter::after,
+[data-glas="an"] #seite-dashboard #card-wetter2::after,
+[data-glas="an"] #seite-dashboard #card-screentime2::after,
+[data-glas="an"] #seite-dashboard #card-kalorien::after,
+[data-glas="an"] #seite-dashboard #card-timer::after,
+[data-glas="an"] #seite-dashboard #card-klausur::after,
+[data-glas="an"] #seite-dashboard #card-habits::after,
+[data-glas="an"] #seite-dashboard #card-schule::after,
+[data-glas="an"] #seite-dashboard #card-naechste::after,
+[data-glas="an"] #seite-dashboard #card-tagesplan::after
+ {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(255,255,255,var(--glas-glanz)) 0,
+    transparent 42%);
+}
+
+/* ---- Was in der Kachel liegt, wird ebenfalls leichter ----
+   Volle Flaechen auf einer Scheibe sehen aus wie aufgeklebt. */
+:root[data-glas="an"] #seite-dashboard .entry-item,
+:root[data-glas="an"] #seite-dashboard .hb-zeile,
+:root[data-glas="an"] #seite-dashboard .i-mal,
+:root[data-glas="an"] #seite-dashboard .card-badge,
+:root[data-glas="an"] #seite-dashboard .tm-icon,
+:root[data-glas="an"] #seite-dashboard .tm-vor {
+  background: color-mix(in srgb, var(--surface-sunken) var(--glas-innen), transparent);
+}
+:root[data-glas="an"] #seite-dashboard .entry-item:hover,
+:root[data-glas="an"] #seite-dashboard .hb-zeile:hover {
+  background: color-mix(in srgb, var(--surface-sunken) 88%, transparent);
+}
+
+/* Das Laufende bleibt kraeftig — es ist der eine Punkt, der
+   auffallen soll. */
+:root[data-glas="an"] #seite-dashboard .entry-item.today {
+  background: var(--accent-active);
+}
+
+/* Balken und Spuren behalten ihre Kante, sonst verschwimmen sie */
+:root[data-glas="an"] #seite-dashboard .stz-balken,
+:root[data-glas="an"] #seite-dashboard .kw-balken,
+:root[data-glas="an"] #seite-dashboard .tm-spur,
+:root[data-glas="an"] #seite-dashboard .tp-balken {
+  background: color-mix(in srgb, var(--surface-sunken) 80%, transparent);
+}
+
+/* ---- Die Seitenleiste und die Kopfzeile ziehen mit ----
+   Eine Scheibe neben einer Wand sieht nach Fehler aus. */
+:root[data-glas="an"] .sidebar,
+:root[data-glas="an"] .search {
+  background: color-mix(in srgb, var(--surface-card) var(--glas-deckung), transparent);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  backdrop-filter: blur(20px) saturate(1.4);
+}
+
+/* ---- Wer keine Hintergrundunschaerfe kann, bekommt die Kachel
+        etwas dichter: sonst stuende der Text auf dem Grund ---- */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  [data-glas="an"] #seite-dashboard #card-wetter,
+[data-glas="an"] #seite-dashboard #card-wetter2,
+[data-glas="an"] #seite-dashboard #card-screentime2,
+[data-glas="an"] #seite-dashboard #card-kalorien,
+[data-glas="an"] #seite-dashboard #card-timer,
+[data-glas="an"] #seite-dashboard #card-klausur,
+[data-glas="an"] #seite-dashboard #card-habits,
+[data-glas="an"] #seite-dashboard #card-schule,
+[data-glas="an"] #seite-dashboard #card-naechste,
+[data-glas="an"] #seite-dashboard #card-tagesplan {
+    background: color-mix(in srgb, var(--surface-card) 88%, transparent);
+  }
+}
+
+/* ---- Wer Bewegung sparsam mag, bekommt keine Unschaerfe ----
+   Sie kostet auf schwachen Geraeten spuerbar Leistung. */
+@media (prefers-reduced-motion: reduce) {
+  [data-glas="an"] #seite-dashboard #card-wetter,
+[data-glas="an"] #seite-dashboard #card-wetter2,
+[data-glas="an"] #seite-dashboard #card-screentime2,
+[data-glas="an"] #seite-dashboard #card-kalorien,
+[data-glas="an"] #seite-dashboard #card-timer,
+[data-glas="an"] #seite-dashboard #card-klausur,
+[data-glas="an"] #seite-dashboard #card-habits,
+[data-glas="an"] #seite-dashboard #card-schule,
+[data-glas="an"] #seite-dashboard #card-naechste,
+[data-glas="an"] #seite-dashboard #card-tagesplan {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: color-mix(in srgb, var(--surface-card) 90%, transparent);
+  }
+}
+
+/* Der Pausenknopf faerbt sich beim Ueberfahren gelb, der Stoppknopf
+   rot — die beiden Bedeutungen tragen ihre Farbe. Das Symbol bleibt
+   dunkel: Weiss auf diesem Gelb liegt bei 2,2 zu 1, Dunkel bei 8,1.
+   Bei einem Zeichen von dreizehn Pixeln zaehlt das. */
+#seite-dashboard #timerHalten:hover {
+  background: var(--status-orange);
+  color: #17171A;
+}
+#seite-dashboard #timerAus:hover {
+  background: var(--status-red);
+  color: #fff;
+}
+
+/* ----------------------------------------------------------
+   DIE HABIT-ZEILE WIRD LESBAR
+
+   Die Kachel ist zwei Rasterspalten breit, innen rund 174 Pixel.
+   Davon nahmen Perlen und Haken 74, das Malzeichen 28 — fuer den
+   Namen blieben 52. "Meditation" wurde zu "Medit…", und groesser
+   setzen liess sich davon nichts.
+
+   Jetzt teilt sich die Zeile auf zwei Reihen: oben das Zeichen,
+   der Name und der Haken, darunter Wochenstand und Perlen. Der
+   Name bekommt damit gut das Doppelte an Breite und kann in
+   sechzehn Pixeln stehen.
+
+   Moeglich wird das durch display:contents auf .i-rechts — der
+   Kasten verschwindet aus dem Aufbau, und Perlen wie Haken werden
+   eigene Kinder der Zeile, die sich getrennt anordnen lassen.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-habits .hb-zeile {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: 3px;
+  column-gap: clamp(7px, .7vw, 10px);
+  padding: clamp(7px, .7vw, 10px) clamp(8px, .8vw, 11px);
+  min-height: 0;
+}
+
+/* Der Kasten um Perlen und Haken faellt weg; beide ordnen sich
+   jetzt selbst ein. */
+#seite-dashboard #card-habits .i-rechts { display: contents; }
+
+#seite-dashboard #card-habits .i-mal {
+  order: 1;
+  width: clamp(28px, 2.3vw, 34px);
+  height: clamp(28px, 2.3vw, 34px);
+  border-radius: 11px;
+  font-size: clamp(13px, 1vw, 15px);
+}
+
+#seite-dashboard #card-habits .i-text {
+  order: 2;
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column-reverse;   /* Name oben, Stand darunter */
+  gap: 0;
+}
+#seite-dashboard #card-habits .i-wert {
+  font-size: clamp(13.5px, 1.1vw, 16.5px);
+  font-weight: 650;
+  letter-spacing: -.02em;
+  line-height: 1.2;
+}
+#seite-dashboard #card-habits .i-sache {
+  font-size: clamp(10px, .78vw, 12px);
+  line-height: 1.25;
+}
+
+#seite-dashboard #card-habits .hb-knopf {
+  order: 3;
+  flex: 0 0 auto;
+  width: clamp(24px, 2vw, 28px);
+  height: clamp(24px, 2vw, 28px);
+}
+
+/* Die Perlen ruecken in die zweite Reihe und nehmen sie ganz ein */
+#seite-dashboard #card-habits .perlen {
+  order: 4;
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  gap: clamp(4px, .45vw, 6px);
+  padding-left: calc(clamp(28px, 2.3vw, 34px) + clamp(7px, .7vw, 10px));
+}
+#seite-dashboard #card-habits .perle {
+  width: clamp(7px, .62vw, 9px);
+  height: clamp(7px, .62vw, 9px);
+}
+
+/* Fuenf Zeilen mit dem groesseren Namen brauchten 397 Pixel, die
+   Liste hat 287 — es rollte. Der Wochenstand faellt weg: "5 von 7"
+   sagt dasselbe wie die sieben Perlen direkt darunter, nur in
+   Worten. Damit passen die fuenf, und der Name darf stehen bleiben,
+   wie er ist. Auf der Habits-Seite bleibt der Stand. */
+#seite-dashboard #card-habits .i-sache { display: none; }
+#seite-dashboard #card-habits .hb-zeile {
+  padding: 6px 9px;
+  row-gap: 2px;
+}
+#seite-dashboard #card-habits .i-mal {
+  width: clamp(26px, 2.1vw, 31px);
+  height: clamp(26px, 2.1vw, 31px);
+}
+#seite-dashboard #card-habits .hb-knopf {
+  width: clamp(23px, 1.9vw, 27px);
+  height: clamp(23px, 1.9vw, 27px);
+}
+#seite-dashboard #card-habits .perlen {
+  gap: clamp(3.5px, .4vw, 5px);
+  padding-left: calc(clamp(26px, 2.1vw, 31px) + 8px);
+}
+#seite-dashboard #card-habits .perle {
+  width: clamp(6px, .55vw, 8px);
+  height: clamp(6px, .55vw, 8px);
+}
+#seite-dashboard #card-habits .hb-liste { gap: 4px; }
+
+/* Dreiundzwanzig Pixel fehlten noch. Sie kommen aus dem Polster
+   der Zeile und dem Malzeichen — nicht aus der Schrift, denn um
+   die ging es. */
+#seite-dashboard #card-habits .hb-zeile { padding: 5px 9px; }
+#seite-dashboard #card-habits .i-mal {
+  width: clamp(25px, 2vw, 28px);
+  height: clamp(25px, 2vw, 28px);
+}
+#seite-dashboard #card-habits .perlen {
+  padding-left: calc(clamp(25px, 2vw, 28px) + 8px);
+}
+#seite-dashboard #card-habits .hb-liste { gap: 3px; }
+
+/* ----------------------------------------------------------
+   OHNE ANFANGSBUCHSTABEN
+
+   Das Malzeichen trug den ersten Buchstaben des Habits — direkt
+   neben dem ausgeschriebenen Namen. Es sagte also nichts, was
+   nicht danebenstand, und nahm 28 der 174 Pixel. Weg damit: der
+   Name bekommt den Platz, und darunter stehen die acht Tage.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-habits .i-mal { display: none; }
+
+#seite-dashboard #card-habits .hb-zeile {
+  padding: 7px 11px;
+  column-gap: 10px;
+}
+#seite-dashboard #card-habits .i-wert {
+  font-size: clamp(14px, 1.15vw, 17px);
+}
+/* Ohne Zeichen davor beginnt die Tagesreihe am linken Rand */
+#seite-dashboard #card-habits .perlen {
+  padding-left: 0;
+  gap: clamp(4px, .45vw, 6px);
+}
+#seite-dashboard #card-habits .perle {
+  width: clamp(7px, .62vw, 9px);
+  height: clamp(7px, .62vw, 9px);
+}
+/* Der heutige Tag traegt einen Ring, damit man ihn in der Reihe
+   findet, ohne zu zaehlen. */
+#seite-dashboard #card-habits .perle.heute {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--text-muted) 45%, transparent);
+}
+#seite-dashboard #card-habits .perle.voll.heute {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-active) 50%, transparent);
+}
+
+/* ----------------------------------------------------------
+   DER HAKEN STEHT MITTIG
+
+   Mit flex-wrap sass er in der oberen Reihe, also auf Hoehe des
+   Namens und nicht der Zeile. Als Raster geht er ueber beide
+   Reihen und sitzt darin mittig — Name und Tagesreihe teilen
+   sich die linke Spalte.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-habits .hb-zeile {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 10px;
+  row-gap: 3px;
+}
+#seite-dashboard #card-habits .i-text {
+  grid-column: 1;
+  grid-row: 1;
+}
+#seite-dashboard #card-habits .perlen {
+  grid-column: 1;
+  grid-row: 2;
+  width: auto;
+}
+#seite-dashboard #card-habits .hb-knopf {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  align-self: center;
+}
+
+/* ----------------------------------------------------------
+   JEDE HABIT-ZEILE ETWAS GROESSER
+
+   Fuenf Zeilen fuellten die Liste bis auf den Pixel genau — mehr
+   Hoehe je Zeile gibt es also nur, wenn woanders welche frei wird.
+   Sie kommt aus dem Polster der Kachel und der Kopfzeile: die
+   Habits-Kachel traegt dort nur Titel und Zaehler, seit der
+   Umschalter weg ist, und braucht den Abstand nicht.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-habits {
+  padding: 13px 13px 12px;
+}
+#seite-dashboard #card-habits .card-head {
+  margin-bottom: 8px;
+}
+
+#seite-dashboard #card-habits .hb-liste { gap: 4px; }
+
+#seite-dashboard #card-habits .hb-zeile {
+  padding: 8px 11px;
+  row-gap: 3px;
+  border-radius: 18px;
+}
+#seite-dashboard #card-habits .i-wert {
+  font-size: clamp(15px, 1.25vw, 18px);
+  line-height: 1.25;
+}
+#seite-dashboard #card-habits .hb-knopf {
+  width: clamp(25px, 2.1vw, 29px);
+  height: clamp(25px, 2.1vw, 29px);
+}
+#seite-dashboard #card-habits .perlen { gap: clamp(4.5px, .5vw, 7px); }
+#seite-dashboard #card-habits .perle {
+  width: clamp(8px, .68vw, 10px);
+  height: clamp(8px, .68vw, 10px);
+}
+
+/* ==========================================================
+   ==========================================================
+   HANDY UND TABLET
+
+   Dieser Block steht bewusst ganz am Ende: die Aufteilung des
+   zweiten Bauplans weiter oben nennt das Raster mit derselben
+   Staerke, und wer spaeter kommt, gewinnt. Genau daran scheiterten
+   die frueheren Regeln — auf dem iPad lagen weiter zwoelf Spalten,
+   von denen drei auf null Breite standen, und die Kacheln
+   ueberlappten.
+
+   Am Rechner aendert sich nichts: alles hier haengt an einer
+   Hoechstbreite von 1180 Pixeln.
+   ========================================================== */
+
+/* ----------------------------------------------------------
+   TABLET — 700 bis 1180 Pixel
+
+   Zwei Spalten, und die Seite darf rollen. Acht Kacheln auf eine
+   iPad-Hoehe zu zwingen hiesse, jede auf gut hundert Pixel zu
+   quetschen; dann steht ueberall eine Zahl und nirgends etwas,
+   das man lesen kann.
+   ---------------------------------------------------------- */
+@media (min-width: 700px) and (max-width: 1250px),
+       (min-width: 700px) and (max-width: 1400px) and (pointer: coarse) {
+
+  /* Die Seitenleiste nimmt 236 der 820 Pixel — fast ein Drittel.
+     Eingeklappt bleiben die Symbole, der Platz geht an den Inhalt. */
+  .sidebar {
+    width: var(--sidebar-w-collapsed);
+    min-width: var(--sidebar-w-collapsed);
+    max-width: var(--sidebar-w-collapsed);
+  }
+  .sidebar .brand-name,
+  .sidebar .profile-text,
+  .sidebar .nav-link span,
+  .sidebar .nav-group-label { display: none; }
+  .sidebar .sidebar-head { flex-direction: column; gap: 14px; padding: 20px 12px 16px; }
+  .sidebar .sidebar-profile { justify-content: center; padding: 11px 0; }
+  .sidebar .nav-link { justify-content: center; padding: 11px 0; }
+
+  /* Das Dashboard rollt und steht in zwei Spalten */
+  #seite-dashboard.aktiv { overflow-y: auto; overflow-x: hidden; }
+  #seite-dashboard .widget-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: none;
+    grid-auto-rows: minmax(0, auto);
+    gap: 12px;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    padding: 4px 4px 20px;
+  }
+
+  /* Das Wetter faellt auf dem iPad weg — aber ueber den Plan im
+     Ordnen-Modus, nicht hier. Nur so kann man es wiederholen. */
+
+  /* Jede Kachel bestimmt ihren Platz selbst; die Reihenfolge
+     kommt aus order, nicht aus der Reihenfolge im Aufbau. */
+  /* Jede Kachel einzeln: die Aufteilung des Bauplans nennt sie
+     mit zwei Kennungen, dagegen kaeme eine Sammelregel nicht an. */
+  #seite-dashboard #card-wetter,
+  #seite-dashboard #card-wetter2,
+  #seite-dashboard #card-screentime2,
+  #seite-dashboard #card-kalorien,
+  #seite-dashboard #card-timer,
+  #seite-dashboard #card-klausur,
+  #seite-dashboard #card-habits,
+  #seite-dashboard #card-schule,
+  #seite-dashboard #card-naechste,
+  #seite-dashboard #card-tagesplan,
+  #seite-dashboard #card-screentime,
+  #seite-dashboard #card-streaks,
+  #seite-dashboard #card-vorschlag,
+  #seite-dashboard #card-quick {
+    grid-area: auto;
+    grid-column: auto / span 1;
+    grid-row: auto;
+    height: auto;
+  }
+
+  #seite-dashboard #card-klausur {
+    order: 1; grid-column: span 2; min-height: 148px;
+  }
+  #seite-dashboard #card-screentime2 { order: 2; min-height: 132px; }
+  #seite-dashboard #card-kalorien    { order: 3; min-height: 132px; }
+  #seite-dashboard #card-timer       { order: 4; min-height: 132px; }
+  #seite-dashboard #card-habits      { order: 5; min-height: 132px; }
+  #seite-dashboard #card-naechste {
+    order: 6; grid-column: span 2; min-height: 300px;
+  }
+  #seite-dashboard #card-tagesplan   { order: 7; min-height: 280px; }
+  #seite-dashboard #card-schule      { order: 8; min-height: 280px; }
+
+  /* Habits stehen hier breiter als am Rechner — der Name bekommt
+     Platz, die Tagesreihe darf daneben statt darunter. */
+  #seite-dashboard #card-habits .hb-zeile {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-rows: auto;
+  }
+  #seite-dashboard #card-habits .i-text   { grid-column: 1; grid-row: 1; }
+  #seite-dashboard #card-habits .perlen   { grid-column: 2; grid-row: 1; }
+  #seite-dashboard #card-habits .hb-knopf { grid-column: 3; grid-row: 1; }
+}
+
+/* ----------------------------------------------------------
+   HANDY — bis 699 Pixel
+   Eine Spalte, alles untereinander, die Seite rollt.
+   ---------------------------------------------------------- */
+@media (max-width: 699px) {
+  #seite-dashboard.aktiv { overflow-y: auto; overflow-x: hidden; }
+  #seite-dashboard .widget-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    grid-auto-rows: minmax(0, auto);
+    gap: 10px;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    /* Unten Platz fuer die Leiste, die dort schwebt */
+    padding: 2px 2px 92px;
+  }
+  /* Auch hier jede Kachel einzeln, aus demselben Grund. */
+  #seite-dashboard #card-wetter,
+  #seite-dashboard #card-wetter2,
+  #seite-dashboard #card-screentime2,
+  #seite-dashboard #card-kalorien,
+  #seite-dashboard #card-timer,
+  #seite-dashboard #card-klausur,
+  #seite-dashboard #card-habits,
+  #seite-dashboard #card-schule,
+  #seite-dashboard #card-naechste,
+  #seite-dashboard #card-tagesplan,
+  #seite-dashboard #card-screentime,
+  #seite-dashboard #card-streaks,
+  #seite-dashboard #card-vorschlag,
+  #seite-dashboard #card-quick {
+    grid-area: auto;
+    grid-column: 1;
+    grid-row: auto;
+    height: auto;
+  }
+
+  /* Auf dem Handy bleibt das Wetter — dort ist es der Blick aus
+     dem Fenster vor dem Aufstehen. */
+  #seite-dashboard #card-wetter      { order: 1; min-height: 104px; }
+  #seite-dashboard #card-klausur     { order: 2; min-height: 138px; }
+  #seite-dashboard #card-screentime2 { order: 3; min-height: 112px; }
+  #seite-dashboard #card-kalorien    { order: 4; min-height: 112px; }
+  #seite-dashboard #card-habits      { order: 5; min-height: 300px; }
+  #seite-dashboard #card-tagesplan   { order: 6; min-height: 240px; }
+  #seite-dashboard #card-naechste    { order: 7; min-height: 280px; }
+  #seite-dashboard #card-schule      { order: 8; min-height: 200px; }
+  #seite-dashboard #card-wetter2     { order: 9; min-height: 200px; }
+  #seite-dashboard #card-timer       { order: 10; min-height: 118px; }
+
+  /* Die Kacheln haben hier die volle Breite — was am Rechner eng
+     war, darf jetzt atmen. */
+  #seite-dashboard #card-habits .hb-zeile {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-rows: auto;
+    padding: 10px 13px;
+  }
+  #seite-dashboard #card-habits .i-text   { grid-column: 1; grid-row: 1; }
+  #seite-dashboard #card-habits .perlen   { grid-column: 2; grid-row: 1; }
+  #seite-dashboard #card-habits .hb-knopf { grid-column: 3; grid-row: 1; }
+  #seite-dashboard #card-habits .i-wert   { font-size: 16px; }
+
+  /* Die Termine tragen ihren Strahl auch hier */
+  #seite-dashboard #card-naechste .entry-list { padding-left: 22px; }
+
+  /* Kein Zwang zur Kuerze mehr: die Zeilen duerfen umbrechen */
+  #seite-dashboard #card-schule .marke,
+  #seite-dashboard #card-naechste .marke { max-width: none; }
+}
+
+/* ----------------------------------------------------------
+   AUF DEM TABLET TRAEGT JEDE KACHEL IHRE EIGENE HOEHE
+
+   Sonst richtet sich die Reihe nach der hoechsten: der Timer stand
+   neben den Habits und war 229 Pixel hoch fuer eine Zeitangabe von
+   dreissig. Mit align-items: start nimmt jede nur, was sie braucht.
+
+   Und die Listen bekommen genug Hoehe, dass nichts rollen muss —
+   auf dem iPad ist Platz genug dafuer.
+   ---------------------------------------------------------- */
+@media (min-width: 700px) and (max-width: 1250px),
+       (min-width: 700px) and (max-width: 1400px) and (pointer: coarse) {
+  #seite-dashboard .widget-grid { align-items: start; }
+
+  #seite-dashboard #card-habits   { min-height: 318px; }
+  #seite-dashboard #card-naechste { min-height: 392px; }
+  #seite-dashboard #card-timer    { min-height: 128px; }
+
+  /* Die Kachelkoerper duerfen mitwachsen, statt zu rollen */
+  #seite-dashboard #card-habits .habit-list,
+  #seite-dashboard #card-naechste .entry-list,
+  #seite-dashboard #card-schule .entry-list,
+  #seite-dashboard #card-tagesplan > .card-body {
+    overflow-y: visible;
+    max-height: none;
+  }
+}
+
+/* Auf dem Tablet traegt jede Kachel ihre eigene Hoehe — dafuer muss
+   das align-self: stretch aus der Rechner-Aufteilung weichen. Es
+   steht dort mit zwei Kennungen, also hier auch. */
+@media (min-width: 700px) and (max-width: 1250px),
+       (min-width: 700px) and (max-width: 1400px) and (pointer: coarse) {
+  #seite-dashboard #card-wetter,
+  #seite-dashboard #card-wetter2,
+  #seite-dashboard #card-screentime2,
+  #seite-dashboard #card-kalorien,
+  #seite-dashboard #card-timer,
+  #seite-dashboard #card-klausur,
+  #seite-dashboard #card-habits,
+  #seite-dashboard #card-schule,
+  #seite-dashboard #card-naechste,
+  #seite-dashboard #card-tagesplan { align-self: start; }
+}
+
+/* align-items: start war der falsche Weg: das Raster rechnet die
+   Zeilenhoehe dann aus dem Inhalt und laesst die Mindesthoehe der
+   Kachel aussen vor. Die Zeilen wurden zu niedrig, und "Nächste
+   Termine" lag ueber den Habits, "Tagesplan" ueber den Terminen.
+
+   Die Zeilen tragen also wieder die Hoehe ihrer hoechsten Kachel.
+   Nur der Timer richtet sich nach oben aus — er soll neben den
+   Habits nicht auf 318 Pixel gestreckt werden, nur weil dort fuenf
+   Zeilen stehen. */
+@media (min-width: 700px) and (max-width: 1250px),
+       (min-width: 700px) and (max-width: 1400px) and (pointer: coarse) {
+  #seite-dashboard .widget-grid { align-items: stretch; }
+
+  #seite-dashboard #card-wetter,
+  #seite-dashboard #card-wetter2,
+  #seite-dashboard #card-screentime2,
+  #seite-dashboard #card-kalorien,
+  #seite-dashboard #card-klausur,
+  #seite-dashboard #card-habits,
+  #seite-dashboard #card-schule,
+  #seite-dashboard #card-naechste,
+  #seite-dashboard #card-tagesplan { align-self: stretch; }
+
+  #seite-dashboard #card-timer { align-self: start; }
+}
+
+/* ----------------------------------------------------------
+   TABLET: SPALTEN STATT RASTER
+
+   Im Raster traegt die Mindesthoehe einer Kachel nichts zur
+   Zeilenhoehe bei — die Zeile richtet sich nach dem Inhalt. Bei
+   "Nächste Termine" war der Inhalt 240 Pixel hoch, die Kachel per
+   min-height 392: sie ragte 150 Pixel in die naechste Zeile und
+   lag ueber dem Tagesplan.
+
+   Als Flexkasten zaehlt die Mindesthoehe mit. Jede Kachel bekommt
+   ihre Breite selbst, die Reihe ist so hoch wie ihre hoechste —
+   und nichts ueberlappt mehr.
+   ---------------------------------------------------------- */
+@media (min-width: 700px) and (max-width: 1250px),
+       (min-width: 700px) and (max-width: 1400px) and (pointer: coarse) {
+  #seite-dashboard .widget-grid {
+    display: flex;
+    /* Ohne diese Zeile bleibt die Richtung aus einer frueheren Regel
+       auf column stehen — dann ist die Hauptachse senkrecht, und
+       calc(50%) meint die Hoehe statt der Breite. Die Kacheln waren
+       dadurch 121 bis 281 Pixel breit statt gleichmaessig 351. */
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: stretch;
+    align-content: flex-start;
+    gap: 12px;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    padding: 4px 4px 24px;
+  }
+
+  /* Halbe Breite, abzueglich der halben Luecke */
+  #seite-dashboard #card-screentime2,
+  #seite-dashboard #card-kalorien,
+  #seite-dashboard #card-timer,
+  #seite-dashboard #card-habits,
+  #seite-dashboard #card-tagesplan,
+  #seite-dashboard #card-schule {
+    flex: 0 0 calc(50% - 6px);
+    max-width: calc(50% - 6px);
+  }
+
+  /* Ueber die volle Breite: was viel Text oder viele Zeilen traegt */
+  #seite-dashboard #card-klausur,
+  #seite-dashboard #card-naechste {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  /* Der Timer steht neben den Habits und soll nicht auf deren
+     Hoehe wachsen. */
+  #seite-dashboard #card-timer { align-self: flex-start; }
+}
+
+/* ==========================================================
+   KACHELN ORDNEN
+
+   Der Knopf steht nur auf dem Tablet — dort, wo die Anordnung
+   auch gilt. Am Rechner ist er verborgen, denn die Aufteilung
+   kommt dort aus dem Bauplan und soll so bleiben.
+   ========================================================== */
+.ord-leiste {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.ord-leiste[hidden] { display: none; }
+
+@media (min-width: 700px) and (max-width: 1250px),
+       (min-width: 700px) and (max-width: 1400px) and (pointer: coarse) {
+  .ord-leiste:not([hidden]) { display: flex; }
+}
+
+.ord-start,
+.ord-fertig,
+.ord-zurueck {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 999px;
+  font-family: var(--sans);
+  font-size: clamp(11.5px, .88vw, 13px);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--t-base) var(--ease-soft),
+              color var(--t-base) var(--ease-soft),
+              transform var(--t-fast) var(--ease);
+}
+.ord-start {
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+}
+.ord-start svg { width: 15px; height: 15px; }
+.ord-start:hover  { background: var(--surface-dark); color: var(--text-inverse); }
+.ord-start:active { transform: scale(.96); }
+
+.ord-aktiv {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+}
+.ord-aktiv[hidden] { display: none; }
+.ord-hinweis {
+  margin-right: auto;
+  font-size: clamp(11px, .84vw, 12.5px);
+  color: var(--text-muted);
+}
+.ord-fertig {
+  background: var(--accent-active);
+  color: #fff;
+}
+.ord-zurueck {
+  background: none;
+  color: var(--text-muted);
+}
+.ord-zurueck:hover { background: var(--tint-red); color: var(--red-ink); }
+.ord-fertig:active,
+.ord-zurueck:active { transform: scale(.96); }
+
+/* ---- Die Kachel im Ordnen-Modus ---- */
+#seite-dashboard .card.ordnet {
+  position: relative;
+  outline: 2px dashed color-mix(in srgb, var(--accent-active) 45%, transparent);
+  outline-offset: -2px;
+}
+/* Was ausgeblendet ist, bleibt hier sichtbar — sonst kaeme man nie
+   wieder daran. Nur eben deutlich als "aus" erkennbar. */
+#seite-dashboard .card.ord-verborgen {
+  opacity: .38;
+  outline-style: dotted;
+}
+
+.ord-griffe {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 4;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--surface-dark);
+  box-shadow: 0 4px 14px rgba(0,0,0,.28);
+}
+.ord-griffe button {
+  width: 30px; height: 30px;
+  display: grid; place-items: center;
+  padding: 0; border: none; border-radius: 50%;
+  background: none;
+  color: var(--text-inverse);
+  cursor: pointer;
+  transition: background var(--t-base) var(--ease-soft),
+              transform var(--t-fast) var(--ease);
+}
+.ord-griffe svg { width: 15px; height: 15px; }
+.ord-griffe button:hover  { background: color-mix(in srgb, var(--text-inverse) 18%, transparent); }
+.ord-griffe button:active { transform: scale(.9); }
+.ord-griffe .ord-weg:hover { background: var(--status-red); color: #fff; }
+
+/* Im Ordnen-Modus soll nichts anderes anspringen */
+body.ordnet #seite-dashboard .card { pointer-events: none; }
+body.ordnet #seite-dashboard .ord-griffe { pointer-events: auto; }
+body.ordnet #seite-dashboard .card:hover { transform: none; }
+
+/* display schlaegt das hidden-Attribut — ohne diese Zeile bleibt
+   der Startknopf im Ordnen-Modus stehen. */
+.ord-start[hidden] { display: none; }
+
+/* Die beiden Groessenknoepfe tragen ihre Stufe als Text — so sieht
+   man, wo man steht, ohne zu zaehlen. Ein Pfeilsymbol koennte das
+   nicht. */
+.ord-griffe .ord-stufe {
+  width: auto;
+  min-width: 32px;
+  padding: 0 7px;
+  border-radius: 999px;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.01em;
+}
+
+/* Im Ordnen-Modus darf der Inhalt nicht ueber die Kachel laufen,
+   wenn sie klein gestellt wird — sonst sieht man nicht, was man
+   tut. */
+body.ordnet #seite-dashboard .card { overflow: hidden; }
+
+/* ----------------------------------------------------------
+   JEDE KACHEL BEHAELT IHRE HOEHE
+
+   Im Flexkasten streckt align-items: stretch jede Kachel auf die
+   Hoehe der hoechsten in ihrer Reihe. Stellte man den Timer auf S
+   und die Habits daneben auf XL, wurde der Timer trotzdem 348
+   Pixel hoch — die eingestellte Groesse zaehlte nicht mehr.
+
+   Mit flex-start behaelt jede, was eingestellt ist. Darunter
+   bleibt dann Luft, wo die Nachbarin hoeher ist — genau wie am
+   Rechner, wo die Kacheln auch verschieden hoch sind.
+   ---------------------------------------------------------- */
+@media (min-width: 700px) and (max-width: 1250px),
+       (min-width: 700px) and (max-width: 1400px) and (pointer: coarse) {
+  #seite-dashboard .widget-grid { align-items: flex-start; }
+
+  #seite-dashboard #card-wetter,
+  #seite-dashboard #card-wetter2,
+  #seite-dashboard #card-screentime2,
+  #seite-dashboard #card-kalorien,
+  #seite-dashboard #card-timer,
+  #seite-dashboard #card-klausur,
+  #seite-dashboard #card-habits,
+  #seite-dashboard #card-schule,
+  #seite-dashboard #card-naechste,
+  #seite-dashboard #card-tagesplan { align-self: flex-start; }
+}
+
+/* ----------------------------------------------------------
+   DAS TABLET WIRD WIEDER EIN RASTER — ABER EIN FEINES
+
+   Im Flexkasten blieb unter einer kurzen Kachel Luft stehen, bis
+   die ganze Reihe umbrach: standen Klausur und Kalorien oben und
+   darunter Termine und Schule, klaffte dazwischen eine Luecke.
+
+   Sechs Spalten decken die vier Breiten ab (2, 3, 4, 6 Felder),
+   die Zeilen sind zwoelf Pixel hoch. Bei zwoelf Pixeln Abstand
+   ergibt eine Spanne von n Zeilen genau 24n-12 Pixel — die vier
+   Hoehen sind 5, 8, 11 und 15 Zeilen, also 108, 180, 252 und 348.
+
+   "dense" laesst eine spaetere Kachel in eine frueher entstandene
+   Luecke rutschen, statt sie stehen zu lassen. Genau das war
+   gewuenscht: die Kacheln schliessen oben buendig ab.
+   ---------------------------------------------------------- */
+@media (min-width: 700px) and (max-width: 1250px),
+       (min-width: 700px) and (max-width: 1400px) and (pointer: coarse) {
+  #seite-dashboard .widget-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-rows: none;
+    grid-auto-rows: 12px;
+    grid-auto-flow: row dense;
+    align-items: stretch;
+    gap: 12px;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    padding: 4px 4px 24px;
+  }
+
+  /* Die Kacheln bekommen ihre Spanne von der Ordnen-Funktion.
+     Was hier steht, gilt nur, solange sie noch nichts gesetzt hat. */
+  /* Timer und Tagesplan stapeln sich neben den Habits: 5 und 8
+     Zeilen sind zusammen genau die 13 der Habits, und der Abstand
+     dazwischen steckt schon in der Zeilenrechnung. Sie schliessen
+     unten buendig ab. */
+  #seite-dashboard #card-klausur     { grid-column: span 6; grid-row: span 8;  }
+  #seite-dashboard #card-screentime2 { grid-column: span 3; grid-row: span 5;  }
+  #seite-dashboard #card-kalorien    { grid-column: span 3; grid-row: span 5;  }
+  #seite-dashboard #card-timer       { grid-column: span 3; grid-row: span 5;  }
+  #seite-dashboard #card-habits      { grid-column: span 3; grid-row: span 13; }
+  #seite-dashboard #card-tagesplan   { grid-column: span 3; grid-row: span 8;  }
+  #seite-dashboard #card-naechste    { grid-column: span 6; grid-row: span 13; }
+  #seite-dashboard #card-schule      { grid-column: span 3; grid-row: span 8;  }
+  #seite-dashboard #card-wetter      { grid-column: span 3; grid-row: span 5;  }
+  #seite-dashboard #card-wetter2     { grid-column: span 3; grid-row: span 10; }
+
+  /* Im Raster fuellt jede Kachel ihr Feld — die Hoehe kommt aus
+     der Spanne, nicht aus dem Inhalt. */
+  #seite-dashboard #card-wetter,
+  #seite-dashboard #card-wetter2,
+  #seite-dashboard #card-screentime2,
+  #seite-dashboard #card-kalorien,
+  #seite-dashboard #card-timer,
+  #seite-dashboard #card-klausur,
+  #seite-dashboard #card-habits,
+  #seite-dashboard #card-schule,
+  #seite-dashboard #card-naechste,
+  #seite-dashboard #card-tagesplan {
+    align-self: stretch;
+    height: auto;
+    min-height: 0;
+    max-width: none;
+  }
+}
