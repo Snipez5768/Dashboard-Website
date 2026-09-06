@@ -536,3 +536,57 @@
   #seite-dashboard .widget-grid > .card { width: calc(50% - 7px); }
   #seite-dashboard #card-screentime { width: 100%; }
 }
+
+/* ----------------------------------------------------------
+   DIE BREITEN
+
+   Auf dem echten Bildschirm richteten sich die Karten nach ihrem
+   Inhalt statt nach Spalten: Streaks wurde so schmal, dass
+   "Schritte" zu "Sc…" wurde, und rechts blieb Platz leer. Die
+   Regel ueber ".widget-grid > .card" hat die Breite nicht
+   durchgesetzt.
+
+   Hier steht sie je Karte mit ihrer Kennung — eindeutig, und die
+   Aufteilung ist gleich mitgedacht: was Zeilen hat, bekommt die
+   halbe Breite; was eine Zahl zeigt, ein Viertel; was eine Kurve
+   ist, die ganze.
+   ---------------------------------------------------------- */
+@media (min-width: 1000px) {
+  #seite-dashboard #card-naechste   { width: calc(50% - 7px); }
+  #seite-dashboard #card-habits     { width: calc(50% - 7px); }
+  #seite-dashboard #card-streaks    { width: calc(50% - 7px); }
+  #seite-dashboard #card-kalorien   { width: calc(25% - 11px); }
+  #seite-dashboard #card-wetter     { width: calc(25% - 11px); }
+  #seite-dashboard #card-screentime { width: 100%; }
+}
+@media (max-width: 999px) {
+  #seite-dashboard .widget-grid > .card,
+  #seite-dashboard #card-naechste,
+  #seite-dashboard #card-habits,
+  #seite-dashboard #card-streaks,
+  #seite-dashboard #card-kalorien,
+  #seite-dashboard #card-wetter,
+  #seite-dashboard #card-screentime { width: 100%; }
+}
+
+/* Die Streak-Zeile hatte zu wenig Platz fuer ihren Namen. Mit der
+   halben Breite passt er — und der Wert darf nicht mehr schrumpfen. */
+#seite-dashboard .streak-row .i-text  { min-width: 0; flex: 1; }
+#seite-dashboard .streak-row .i-sache,
+#seite-dashboard .streak-row .i-wert  { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#seite-dashboard .streak-row .i-rechts { flex-shrink: 0; }
+
+/* Die Kurve der Bildschirmzeit nahm 250 Pixel ein und stand fast
+   leer. Eine Kurve braucht Breite, nicht Hoehe. */
+#seite-dashboard #card-screentime .st-chart { min-height: 0; height: 150px; }
+#seite-dashboard #card-screentime .card-body { height: auto; }
+
+/* Kalorien und Wetter sind schmal — dort traegt die Zahl allein,
+   ohne Ring daneben. */
+#seite-dashboard #card-kalorien .cal-body,
+#seite-dashboard #card-wetter .weather {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-height: 0;
+}
