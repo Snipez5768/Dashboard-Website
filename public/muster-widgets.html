@@ -1,0 +1,640 @@
+<title>Widgets als Inseln</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* ---------- FLÄCHEN ----------
+     Der Grund ist hellgrau, die Karten sitzen reinweiß darauf. Nur so
+     wirft eine weiße Fläche einen Schatten, den man sehen kann. */
+  --grund:      #EDEDEF;
+  --grund-tief: #E3E3E6;
+  --flaeche:    #FFFFFF;
+  --flaeche-2:  #F7F7F8;
+  --flaeche-3:  #EFEFF1;
+
+  --text:    #0A0A0B;
+  --text-2:  #6B6B70;
+  --text-3:  #A1A1A8;
+
+  --kontur:   rgba(0, 0, 0, 0.07);
+  --kontur-2: rgba(0, 0, 0, 0.13);
+
+  /* Das Gegenteil des Grundes. Trägt jede Auswahl und jede
+     Haupthandlung — nie eine Farbe, damit Farbe Bedeutung bleibt. */
+  --fest:      #0A0A0B;
+  --fest-text: #FFFFFF;
+
+  --schalter-spur:  #E3E3E6;
+  --schalter-knopf: #FFFFFF;
+
+  /* ---------- AKZENTE ----------
+     Zwei Stufen, und der Unterschied ist wichtig: die Akzente stehen in
+     dieser App zu zwei Dritteln als Schrift da, nicht als Fläche. Apples
+     Signalgrün liegt auf Weiß bei 2,2:1 und wäre damit kaum zu lesen.
+     Deshalb trägt der Grundname den lesbaren Ton, und der volle
+     Signalton heißt ausdrücklich "-voll" und wird nur dort verlangt,
+     wo er eine Fläche füllt. Im Dunkeln fallen beide zusammen — auf
+     Schwarz ist der Signalton ohnehin schon kräftig genug. */
+  --rot:        #D70015;
+  --gruen:      #248A3D;
+  --blau:       #0064D8;
+  --rot-voll:   #FF3B30;
+  --gruen-voll: #34C759;
+  --blau-voll:  #007AFF;
+
+  /* Gelb ist der Sonderfall: zu hell für Schrift auf Weiß und zu hell,
+     als dass Weiß darauf tragen würde. Daher drei Fassungen. */
+  --gelb:         #FFB800;
+  --gelb-schrift: #8A6100;
+  --gelb-tief:    #A87400;
+
+  /* Flächige Fassung derselben Töne, als Hintergrund für Abzeichen */
+  --rot-fond:   rgba(255,  59,  48, 0.11);
+  --gruen-fond: rgba( 52, 199,  89, 0.13);
+  --gelb-fond:  rgba(255, 184,   0, 0.15);
+  --blau-fond:  rgba(  0, 122, 255, 0.11);
+
+  /* ---------- AUFLAGEN ----------
+     Ein Schleier, der eine Fläche von ihrem Untergrund abhebt. Hell
+     legt sich Schwarz darüber, dunkel Weiß — dieselbe Absicht, das
+     umgekehrte Mittel. Fünf Stufen genügen für alle 277 Stellen, an
+     denen bisher ein fester Weißwert stand. */
+  --auflage-1: rgba(0, 0, 0, 0.020);
+  --auflage-2: rgba(0, 0, 0, 0.035);
+  --auflage-3: rgba(0, 0, 0, 0.055);
+  --auflage-4: rgba(0, 0, 0, 0.085);
+  --auflage-5: rgba(0, 0, 0, 0.140);
+
+  /* Die Gegenrichtung: eine Mulde statt einer Erhebung. Hell genügt
+     ein Bruchteil des Schwarz, das dunkel nötig ist — auf Weiss
+     schlägt jedes Prozent doppelt durch. */
+  --senke-1: rgba(0, 0, 0, 0.045);
+  --senke-2: rgba(0, 0, 0, 0.075);
+
+  /* Vorhang hinter Fenstern und unter Verläufen */
+  --schleier: rgba(0, 0, 0, 0.34);
+
+  /* ---------- TIEFE ----------
+     Hell arbeitet mit Schatten nach unten und einer Lichtkante oben. */
+  --heb-1: 0 1px 2px rgba(0,0,0,.05), 0 1px 1px rgba(0,0,0,.03);
+  --heb-2: 0 2px 4px rgba(0,0,0,.05), 0 4px 12px rgba(0,0,0,.05);
+  --heb-3: 0 2px 6px rgba(0,0,0,.05), 0 12px 32px rgba(0,0,0,.07);
+  --heb-4: 0 8px 20px rgba(0,0,0,.09), 0 24px 56px rgba(0,0,0,.10);
+  --lichtkante: inset 0 1px 0 rgba(255,255,255,.9);
+  --heb-fest: 0 2px 6px rgba(0,0,0,.22), 0 8px 20px rgba(0,0,0,.16);
+  --rille: inset 0 1px 2px rgba(0,0,0,.07), inset 0 0 0 1px rgba(0,0,0,.03);
+
+  /* ---------- DIE ALTEN NAMEN ----------
+     Sie bleiben bestehen und zeigen auf das neue System, damit die
+     bestehenden Verweise quer durch die Datei weitergelten. Neue
+     Regeln sollen die Namen oben benutzen. */
+  --bg:          var(--grund);
+  --bg-2:        var(--grund-tief);
+  --card:        var(--flaeche);
+  --card-hover:  var(--flaeche-2);
+  --card-inset:  var(--auflage-2);
+  --border:      var(--kontur);
+  --border-2:    var(--kontur-2);
+  --blue:        var(--blau);
+  --blue-soft:   var(--blau);
+  --violet:      var(--blau);
+  --green:       var(--gruen);
+  --amber:       var(--gelb-schrift);
+  --red:         var(--rot);
+  --text-dim:    var(--text-2);
+  --text-faint:  var(--text-3);
+
+  /* ---------- MASSE ---------- */
+  --r-card: 24px;
+  --r-el:   16px;
+  --r-pill: 999px;
+  --r-klein: 11px;
+
+  --sidebar-w: 236px;
+  --sidebar-w-collapsed: 74px;
+
+  --mono: 'Inter', ui-monospace, 'Consolas', monospace;
+  --sans: 'Inter', -apple-system, 'Segoe UI', system-ui, sans-serif;
+
+  /* ---------- BEWEGUNG ---------- */
+  --w-schnell: 90ms;
+  --w-normal:  160ms;
+  --w-gleit:   260ms;
+  --kurve:       cubic-bezier(.32, .72, 0, 1);
+  --kurve-weich: cubic-bezier(.4, 0, .2, 1);
+}
+
+/* Der dunkle Modus in zwei Fassungen, und beide werden gebraucht:
+   Die Medienabfrage greift, solange niemand von Hand gewählt hat —
+   dann steht am Wurzelelement nichts. Sobald von Hand gewählt wurde,
+   steht dort "hell" oder "dunkel". Das :not() sorgt dafür, dass eine
+   Wahl für Hell auch dann gilt, wenn das Gerät auf Dunkel steht. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-thema="hell"]) {
+  /* Echtes Schwarz. Die Tiefe kommt nicht aus Schatten — auf Schwarz
+     ist ein schwarzer Schatten unsichtbar —, sondern daraus, dass jede
+     Fläche etwas heller ist als ihr Untergrund, mit einer haardünnen
+     Lichtkante obenauf. */
+  --grund:      #000000;
+  --grund-tief: #08080A;
+  --flaeche:    #0E0E10;
+  --flaeche-2:  #161619;
+  --flaeche-3:  #1E1E22;
+
+  --text:    #FAFAFC;
+  --text-2:  #A8A8B0;
+  --text-3:  #7E7E87;
+
+  --kontur:   var(--auflage-3);
+  --kontur-2: var(--auflage-4);
+
+  --fest:      #FFFFFF;
+  --fest-text: #0A0A0B;
+
+  --schalter-spur:  #3A3A3E;
+  --schalter-knopf: #FFFFFF;
+
+  /* Auf Schwarz trägt der Signalton schon von allein — lesbarer Ton
+     und voller Ton sind hier dasselbe. */
+  --rot:        #FF453A;
+  --gruen:      #30D158;
+  --blau:       #0A84FF;
+  --rot-voll:   #FF453A;
+  --gruen-voll: #30D158;
+  --blau-voll:  #0A84FF;
+
+  --gelb:         #FFD60A;
+  --gelb-schrift: #FFD60A;
+  --gelb-tief:    #A87400;
+
+  --rot-fond:   rgba(255,  69,  58, 0.16);
+  --gruen-fond: rgba( 48, 209,  88, 0.16);
+  --gelb-fond:  rgba(255, 214,  10, 0.15);
+  --blau-fond:  rgba( 10, 132, 255, 0.16);
+
+  --auflage-1: rgba(255, 255, 255, 0.022);
+  --auflage-2: rgba(255, 255, 255, 0.042);
+  --auflage-3: rgba(255, 255, 255, 0.070);
+  --auflage-4: rgba(255, 255, 255, 0.120);
+  --auflage-5: rgba(255, 255, 255, 0.260);
+
+  --senke-1: rgba(0, 0, 0, 0.26);
+  --senke-2: rgba(0, 0, 0, 0.36);
+
+  --schleier: rgba(0, 0, 0, 0.68);
+
+  --heb-1: 0 1px 2px rgba(0,0,0,.6);
+  --heb-2: 0 2px 8px rgba(0,0,0,.7);
+  --heb-3: 0 4px 16px rgba(0,0,0,.75), 0 16px 40px rgba(0,0,0,.55);
+  --heb-4: 0 8px 28px rgba(0,0,0,.8), 0 28px 64px rgba(0,0,0,.6);
+  --lichtkante: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --heb-fest: 0 2px 10px rgba(255, 255, 255, 0.10);
+  --rille: inset 0 1px 2px rgba(0,0,0,.5);
+  }
+}
+:root[data-thema="dunkel"] {
+  /* Echtes Schwarz. Die Tiefe kommt nicht aus Schatten — auf Schwarz
+     ist ein schwarzer Schatten unsichtbar —, sondern daraus, dass jede
+     Fläche etwas heller ist als ihr Untergrund, mit einer haardünnen
+     Lichtkante obenauf. */
+  --grund:      #000000;
+  --grund-tief: #08080A;
+  --flaeche:    #0E0E10;
+  --flaeche-2:  #161619;
+  --flaeche-3:  #1E1E22;
+
+  --text:    #FAFAFC;
+  --text-2:  #A8A8B0;
+  --text-3:  #7E7E87;
+
+  --kontur:   var(--auflage-3);
+  --kontur-2: var(--auflage-4);
+
+  --fest:      #FFFFFF;
+  --fest-text: #0A0A0B;
+
+  --schalter-spur:  #3A3A3E;
+  --schalter-knopf: #FFFFFF;
+
+  /* Auf Schwarz trägt der Signalton schon von allein — lesbarer Ton
+     und voller Ton sind hier dasselbe. */
+  --rot:        #FF453A;
+  --gruen:      #30D158;
+  --blau:       #0A84FF;
+  --rot-voll:   #FF453A;
+  --gruen-voll: #30D158;
+  --blau-voll:  #0A84FF;
+
+  --gelb:         #FFD60A;
+  --gelb-schrift: #FFD60A;
+  --gelb-tief:    #A87400;
+
+  --rot-fond:   rgba(255,  69,  58, 0.16);
+  --gruen-fond: rgba( 48, 209,  88, 0.16);
+  --gelb-fond:  rgba(255, 214,  10, 0.15);
+  --blau-fond:  rgba( 10, 132, 255, 0.16);
+
+  --auflage-1: rgba(255, 255, 255, 0.022);
+  --auflage-2: rgba(255, 255, 255, 0.042);
+  --auflage-3: rgba(255, 255, 255, 0.070);
+  --auflage-4: rgba(255, 255, 255, 0.120);
+  --auflage-5: rgba(255, 255, 255, 0.260);
+
+  --senke-1: rgba(0, 0, 0, 0.26);
+  --senke-2: rgba(0, 0, 0, 0.36);
+
+  --schleier: rgba(0, 0, 0, 0.68);
+
+  --heb-1: 0 1px 2px rgba(0,0,0,.6);
+  --heb-2: 0 2px 8px rgba(0,0,0,.7);
+  --heb-3: 0 4px 16px rgba(0,0,0,.75), 0 16px 40px rgba(0,0,0,.55);
+  --heb-4: 0 8px 28px rgba(0,0,0,.8), 0 28px 64px rgba(0,0,0,.6);
+  --lichtkante: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --heb-fest: 0 2px 10px rgba(255, 255, 255, 0.10);
+  --rille: inset 0 1px 2px rgba(0,0,0,.5);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--grund);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+.blatt { max-width: 1180px; margin: 0 auto; padding: 34px 24px 90px; }
+.kopf { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-end; justify-content: space-between; margin-bottom: 30px; }
+.kopf h1 { margin: 0; font-size: 27px; font-weight: 700; letter-spacing: -0.03em; }
+.kopf p { margin: 5px 0 0; color: var(--text-2); max-width: 52ch; font-size: 13.5px; }
+
+.spur { position: relative; display: inline-flex; gap: 2px; padding: 5px;
+  border-radius: var(--r-pill); background: var(--flaeche); box-shadow: var(--heb-2), var(--lichtkante); }
+.seg { position: relative; z-index: 1; appearance: none; border: 0; background: none; padding: 9px 18px;
+  border-radius: var(--r-pill); font: inherit; font-size: 13px; font-weight: 500; color: var(--text-2); cursor: pointer;
+  transition: color var(--w-normal) var(--kurve-weich); }
+.seg.an { color: var(--fest-text); font-weight: 600; }
+.laeufer { position: absolute; top: 5px; left: 0; border-radius: var(--r-pill); background: var(--fest);
+  box-shadow: var(--heb-fest); transition: transform var(--w-gleit) var(--kurve), width var(--w-gleit) var(--kurve); z-index: 0; }
+.laeufer.stumm { transition: none; }
+
+.teil { margin-bottom: 40px; }
+.teil-kopf { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; }
+.teil-kopf h2 { margin: 0; font-size: 11.5px; font-weight: 600; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--text-3); }
+.teil > p.hin { margin: 0 0 16px; color: var(--text-2); font-size: 13px; max-width: 66ch; }
+
+/* ==========================================================
+   DIE INSEL — der einzige Baustein
+
+   Bild 1 zeigt keine Karten mit Ueberschrift. Es zeigt Kapseln:
+   jede eine abgeschlossene Aussage aus Symbol, Sache und Wert.
+   Was nichts sagt, steht nicht drin — kein Rahmen, keine
+   Bereichsueberschrift, kein Fuellwerk.
+
+   Runde: aussen 26 Pixel, innen 14. Genau dieser Abstand liegt in
+   Bild 1 zwischen Kapsel und Symbolfeld, und er sorgt dafuer, dass
+   die Ecken parallel laufen statt sich zu schneiden.
+   ========================================================== */
+.insel {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 13px 18px 13px 13px;
+  border-radius: 26px;
+  background: var(--flaeche);
+  box-shadow: var(--heb-2), var(--lichtkante);
+  min-width: 0;
+  transition: transform var(--w-normal) var(--kurve), box-shadow var(--w-normal) var(--kurve-weich);
+}
+a.insel, button.insel { border: 0; font: inherit; color: inherit; text-align: left; cursor: pointer; width: 100%; }
+.insel:hover { transform: translateY(-1px); box-shadow: var(--heb-3), var(--lichtkante); }
+.insel:active { transform: scale(.985); transition-duration: var(--w-schnell); }
+
+/* Das Symbolfeld traegt die Farbe der Insel — als einzige Flaeche.
+   So bleibt Farbe Bedeutung und ueberzieht nicht die ganze Kapsel. */
+.i-mal {
+  width: 42px; height: 42px; flex-shrink: 0;
+  border-radius: 14px;
+  display: grid; place-items: center;
+  background: var(--flaeche-3);
+  color: var(--text-2);
+}
+.i-mal svg { width: 21px; height: 21px; }
+.i-mal.gruen { background: var(--gruen-fond); color: var(--gruen); }
+.i-mal.rot   { background: var(--rot-fond);   color: var(--rot); }
+.i-mal.gelb  { background: var(--gelb-fond);  color: var(--gelb-schrift); }
+.i-mal.blau  { background: var(--blau-fond);  color: var(--blau); }
+.i-mal.fest  { background: var(--fest);       color: var(--fest-text); }
+
+.i-text { min-width: 0; flex: 1; }
+.i-sache { font-size: 12px; font-weight: 500; color: var(--text-2); letter-spacing: .005em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.i-wert { font-size: 19px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15;
+  font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.i-wert small { font-size: 12.5px; font-weight: 500; color: var(--text-3); letter-spacing: 0; }
+.i-rechts { margin-left: auto; flex-shrink: 0; display: flex; align-items: center; gap: 9px; }
+
+/* Grosse Insel: dieselbe Kapsel, nur mit der Zahl als Hauptsache */
+.insel.gross { flex-direction: column; align-items: stretch; gap: 11px; padding: 17px 18px 18px; }
+.insel.gross .i-zeile { display: flex; align-items: center; gap: 11px; }
+.insel.gross .i-zahl { font-size: 34px; font-weight: 700; letter-spacing: -0.035em; line-height: 1;
+  font-variant-numeric: tabular-nums; }
+.insel.gross .i-zahl small { font-size: 15px; font-weight: 500; color: var(--text-3); letter-spacing: -0.01em; }
+.insel.gross .i-unter { font-size: 12.5px; color: var(--text-2); }
+
+/* Marke: ein Wert, der fuer sich steht */
+.marke { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: var(--r-pill);
+  font-size: 11.5px; font-weight: 600; background: var(--flaeche-3); color: var(--text-2); }
+.marke.gruen { background: var(--gruen-fond); color: var(--gruen); }
+.marke.rot   { background: var(--rot-fond);   color: var(--rot); }
+.marke.gelb  { background: var(--gelb-fond);  color: var(--gelb-schrift); }
+.marke.blau  { background: var(--blau-fond);  color: var(--blau); }
+.punkt { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+/* Balken: eine Mulde, darin volle Farbe */
+.balken { height: 7px; border-radius: var(--r-pill); background: var(--senke-1); overflow: hidden; }
+.balken i { display: block; height: 100%; border-radius: var(--r-pill); }
+
+/* Perlen: der Verlauf einer Woche in wenigen Zeichen */
+.perlen { display: flex; gap: 4px; }
+.perle { width: 8px; height: 8px; border-radius: 50%; background: var(--senke-1); }
+.perle.voll { background: var(--gruen-voll); }
+
+.ring { width: 64px; height: 64px; flex-shrink: 0; }
+.ring circle { fill: none; stroke-linecap: round; }
+.ring .bahn { stroke: var(--senke-1); }
+
+/* Eine Gruppe von Inseln steht als Stapel, nicht als Kasten */
+.stapel { display: flex; flex-direction: column; gap: 8px; }
+.raster { display: grid; grid-template-columns: repeat(auto-fit, minmax(252px, 1fr)); gap: 12px; align-items: start; }
+.gruppe-name { font-size: 11.5px; font-weight: 600; color: var(--text-3); letter-spacing: .06em;
+  text-transform: uppercase; margin: 0 0 8px 4px; }
+
+/* ==========================================================
+   DER STRAHL — Bild 2
+   ========================================================== */
+.strahl { position: relative; padding-left: 28px; }
+.strahl::before {
+  content: ""; position: absolute; left: 5px; top: 14px; bottom: 14px; width: 2px; border-radius: 2px;
+  background: linear-gradient(180deg, var(--kontur) 0%, var(--blau-voll) var(--jetzt, 45%), var(--kontur) 100%);
+}
+.st-schritt { position: relative; padding: 4px 0; }
+.st-punkt { position: absolute; left: -28px; top: 50%; transform: translateY(-50%);
+  width: 12px; height: 12px; border-radius: 50%; background: var(--grund);
+  box-shadow: inset 0 0 0 2px var(--kontur-2); }
+.st-schritt.fertig .st-punkt { background: var(--gruen-voll); box-shadow: inset 0 0 0 2px var(--gruen-voll); }
+.st-schritt.jetzt .st-punkt { background: var(--grund); box-shadow: inset 0 0 0 4px var(--blau-voll), 0 0 0 5px var(--blau-fond); }
+.st-schritt.jetzt .insel { background: var(--blau-voll); box-shadow: 0 4px 16px var(--blau-fond), 0 12px 30px var(--blau-fond); }
+.st-schritt.jetzt .i-sache { color: rgba(255,255,255,.82); }
+.st-schritt.jetzt .i-wert  { color: #fff; }
+.st-schritt.jetzt .i-mal   { background: rgba(255,255,255,.2); color: #fff; }
+.st-schritt.fertig .i-wert { color: var(--text-3); text-decoration: line-through; text-decoration-color: var(--kontur-2); }
+
+.notiz { padding: 13px 16px; border-radius: 18px; background: var(--gelb-fond); font-size: 13px; line-height: 1.55; }
+.notiz b { font-weight: 600; }
+
+@media (prefers-reduced-motion: reduce) { * { transition-duration: .01ms !important; animation-duration: .01ms !important; } }
+@media (max-width: 620px) { .blatt { padding: 22px 14px 70px; } .kopf h1 { font-size: 22px; } }
+
+.hak { width: 30px; height: 30px; flex-shrink: 0; border-radius: 10px; display: grid; place-items: center;
+  background: var(--flaeche-3); color: var(--text-3); cursor: pointer;
+  transition: background var(--w-normal) var(--kurve-weich), color var(--w-normal) var(--kurve-weich), transform var(--w-schnell) var(--kurve); }
+.hak svg { width: 15px; height: 15px; }
+.hak.an { background: var(--gruen-voll); color: #fff; }
+.hak:active { transform: scale(.86); }
+
+</style>
+<div class="blatt">
+
+  <div class="kopf">
+    <div>
+      <h1>Widgets als Inseln</h1>
+      <p>Alle sieben Dashboard-Widgets neu zugeschnitten. Nicht Karten mit Überschrift,
+         sondern Kapseln wie in Bild 1: Symbol, Sache, Wert — und nichts sonst.</p>
+    </div>
+    <div class="spur" id="themaSpur" role="group" aria-label="Erscheinungsbild">
+      <div class="laeufer stumm" id="themaLaeufer"></div>
+      <button type="button" class="seg" data-thema="auto">Automatisch</button>
+      <button type="button" class="seg" data-thema="hell">Hell</button>
+      <button type="button" class="seg" data-thema="dunkel">Dunkel</button>
+    </div>
+  </div>
+
+  <!-- ============ NÄCHSTE TERMINE ============ -->
+  <div class="teil">
+    <div class="teil-kopf"><h2>Nächste Termine</h2></div>
+    <p class="hin">Der Strahl aus Bild 2. Erledigtes grün und durchgestrichen, das Laufende
+       als volle Insel. Man sieht auf einen Blick, wo man im Tag steht.</p>
+
+    <div style="max-width:520px">
+      <div class="strahl" style="--jetzt:52%">
+        <div class="st-schritt fertig"><span class="st-punkt"></span>
+          <div class="insel">
+            <span class="i-mal gruen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+            <div class="i-text"><div class="i-sache">Schulweg · Bus 142</div><div class="i-wert">Abfahrt</div></div>
+            <span class="i-rechts"><span class="marke">07:40</span></span>
+          </div>
+        </div>
+        <div class="st-schritt jetzt"><span class="st-punkt"></span>
+          <div class="insel">
+            <span class="i-mal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+            <div class="i-text"><div class="i-sache">Raum 214 · Elektrische Felder</div><div class="i-wert">Physik LK</div></div>
+            <span class="i-rechts"><span class="marke" style="background:rgba(255,255,255,.22);color:#fff">läuft</span></span>
+          </div>
+        </div>
+        <div class="st-schritt"><span class="st-punkt"></span>
+          <div class="insel">
+            <span class="i-mal blau"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 016.5 3H19v15.5H6.5A2.5 2.5 0 004 21z"/></svg></span>
+            <div class="i-text"><div class="i-sache">Raum 108</div><div class="i-wert">Mathe</div></div>
+            <span class="i-rechts"><span class="marke">10:45</span></span>
+          </div>
+        </div>
+        <div class="st-schritt"><span class="st-punkt"></span>
+          <div class="insel">
+            <span class="i-mal rot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 8v5M12 16.5v.01"/><circle cx="12" cy="12" r="9"/></svg></span>
+            <div class="i-text"><div class="i-sache">in 3 Tagen · 2 von 4 Portionen</div><div class="i-wert">Klausur Physik</div></div>
+            <span class="i-rechts"><span class="marke rot"><span class="punkt"></span>Mo</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ ZAHLEN-WIDGETS ============ -->
+  <div class="teil">
+    <div class="teil-kopf"><h2>Kalorien · Bildschirmzeit · Wetter</h2></div>
+    <p class="hin">Die Zahl trägt die Insel. Alles Weitere liegt einen Klick entfernt auf der
+       jeweiligen Seite — deshalb steht hier kein einziger Knopf.</p>
+
+    <div class="raster">
+      <button class="insel gross">
+        <div class="i-zeile">
+          <span class="i-mal gruen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v18M7 6v5a5 5 0 0010 0V6"/></svg></span>
+          <span class="i-sache" style="margin-right:auto">Kalorien</span>
+          <span class="marke gruen"><span class="punkt"></span>heute</span>
+        </div>
+        <div class="i-zeile">
+          <svg class="ring" viewBox="0 0 100 100">
+            <circle class="bahn" cx="50" cy="50" r="40" stroke-width="12"></circle>
+            <circle cx="50" cy="50" r="40" stroke-width="12" stroke="var(--gruen-voll)"
+                    stroke-dasharray="251.3" stroke-dashoffset="70" transform="rotate(-90 50 50)"></circle>
+          </svg>
+          <div>
+            <div class="i-zahl">1820<small> kcal</small></div>
+            <div class="i-unter">von 2400 · 580 übrig</div>
+          </div>
+        </div>
+      </button>
+
+      <button class="insel gross">
+        <div class="i-zeile">
+          <span class="i-mal gelb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M11 18.5h2"/></svg></span>
+          <span class="i-sache" style="margin-right:auto">Bildschirmzeit</span>
+          <span class="marke gelb"><span class="punkt"></span>+18 %</span>
+        </div>
+        <div class="i-zahl">4<small> h</small> 12<small> min</small></div>
+        <div class="i-unter">gestern 3 h 34 min</div>
+        <div class="balken"><i style="width:72%;background:var(--gelb)"></i></div>
+      </button>
+
+      <button class="insel gross">
+        <div class="i-zeile">
+          <span class="i-mal blau"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17a4 4 0 010-8 5.5 5.5 0 0110.5 1.5A3.5 3.5 0 0117 17z"/></svg></span>
+          <span class="i-sache" style="margin-right:auto">Wetter · Berlin</span>
+        </div>
+        <div class="i-zeile" style="gap:14px">
+          <div class="i-zahl">19<small>°</small></div>
+          <div class="i-unter" style="margin-right:auto">Regen<br>15° bis 20° · 83 %</div>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- ============ HABITS ============ -->
+  <div class="teil">
+    <div class="teil-kopf"><h2>Habits</h2></div>
+    <p class="hin">Jedes Habit eine eigene Insel. Links das Symbol, rechts der Verlauf der
+       Woche und der Knopf für heute — abhaken ohne Umweg.</p>
+
+    <div style="max-width:520px" class="stapel">
+      <div class="insel">
+        <span class="i-mal gruen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 016.5 3H19v15.5H6.5A2.5 2.5 0 004 21z"/></svg></span>
+        <div class="i-text"><div class="i-sache">4 von 5 diese Woche</div><div class="i-wert">Lesen</div></div>
+        <span class="i-rechts">
+          <span class="perlen"><i class="perle voll"></i><i class="perle voll"></i><i class="perle voll"></i><i class="perle voll"></i><i class="perle"></i></span>
+          <span class="hak an" data-hak><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+        </span>
+      </div>
+      <div class="insel">
+        <span class="i-mal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19V10M10 19V4M16 19v-6"/></svg></span>
+        <div class="i-text"><div class="i-sache">2 von 5 diese Woche</div><div class="i-wert">Sport</div></div>
+        <span class="i-rechts">
+          <span class="perlen"><i class="perle voll"></i><i class="perle voll"></i><i class="perle"></i><i class="perle"></i><i class="perle"></i></span>
+          <span class="hak" data-hak><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+        </span>
+      </div>
+      <div class="insel">
+        <span class="i-mal blau"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3s6 6.5 6 10a6 6 0 11-12 0c0-3.5 6-10 6-10z"/></svg></span>
+        <div class="i-text"><div class="i-sache">5 von 5 diese Woche</div><div class="i-wert">Wasser</div></div>
+        <span class="i-rechts">
+          <span class="perlen"><i class="perle voll"></i><i class="perle voll"></i><i class="perle voll"></i><i class="perle voll"></i><i class="perle voll"></i></span>
+          <span class="hak an" data-hak><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ STREAKS ============ -->
+  <div class="teil">
+    <div class="teil-kopf"><h2>Streaks</h2></div>
+    <p class="hin">Die Zahl ist die Aussage, die Flamme das Beiwerk. Bisher war es umgekehrt
+       gewichtet — fünf verschiedenfarbige Flammen und die Zahl daneben klein.</p>
+
+    <div class="raster">
+      <button class="insel">
+        <span class="i-mal gelb"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c2 4-1 5 0 8 1-1 2-2 2-4 3 3 4 5 4 8a6 6 0 11-12 0c0-4 4-7 6-12z"/></svg></span>
+        <div class="i-text"><div class="i-sache">Duolingo</div><div class="i-wert">30<small> Tage</small></div></div>
+        <span class="i-rechts"><span class="marke gruen">Bestwert</span></span>
+      </button>
+      <button class="insel">
+        <span class="i-mal"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c2 4-1 5 0 8 1-1 2-2 2-4 3 3 4 5 4 8a6 6 0 11-12 0c0-4 4-7 6-12z"/></svg></span>
+        <div class="i-text"><div class="i-sache">Schritte</div><div class="i-wert">14<small> Tage</small></div></div>
+      </button>
+      <button class="insel">
+        <span class="i-mal rot"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c2 4-1 5 0 8 1-1 2-2 2-4 3 3 4 5 4 8a6 6 0 11-12 0c0-4 4-7 6-12z"/></svg></span>
+        <div class="i-text"><div class="i-sache">Training · heute noch offen</div><div class="i-wert">7<small> Tage</small></div></div>
+        <span class="i-rechts"><span class="marke rot"><span class="punkt"></span>reißt</span></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ============ TIPP ============ -->
+  <div class="teil">
+    <div class="teil-kopf"><h2>Tipp</h2></div>
+    <p class="hin">Ein Satz, ein Symbol, ein Weg. Vorher standen hier 24-Pixel-Schrift auf drei
+       Zeilen, eine Unterzeile auf drei Zeilen, Symbol und Fußzeile — in einer Karte, die diese
+       Höhe nie hatte.</p>
+
+    <div style="max-width:520px">
+      <button class="insel">
+        <span class="i-mal gelb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 00-3.5 10.9V16h7v-2.1A6 6 0 0012 3z"/></svg></span>
+        <div class="i-text"><div class="i-sache">Ohne Ziel bleibt das Kalorien-Widget leer</div><div class="i-wert">Setz dein Kalorienziel</div></div>
+        <span class="i-rechts"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="color:var(--text-3)"><path d="M9 6l6 6-6 6"/></svg></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="notiz" style="max-width:760px">
+    <b>Warum keine Kästen mehr:</b> In Bild 1 gibt es keine Karte, die einen Bereich einrahmt und
+    ihn überschreibt. Es gibt nur Kapseln, und jede sagt für sich eine Sache. Eine Überschrift
+    „Habits“ über drei Zeilen, die schon „Lesen“, „Sport“ und „Wasser“ heißen, ist eine Zeile,
+    die nichts hinzufügt — sie kostet nur die Höhe, die den Zeilen darunter fehlt.
+  </div>
+
+</div>
+
+<script>
+(function () {
+  const wurzel = document.documentElement;
+  const spur = document.getElementById("themaSpur");
+
+  function laeuferSetzen(ziel, sofort) {
+    const l = spur.querySelector(".laeufer");
+    if (!l || !ziel) return;
+    l.classList.toggle("stumm", !!sofort);
+    l.style.width = ziel.offsetWidth + "px";
+    l.style.height = ziel.offsetHeight + "px";
+    l.style.transform = "translate(" + ziel.offsetLeft + "px, 0)";
+    if (sofort) requestAnimationFrame(() => l.classList.remove("stumm"));
+  }
+
+  function themaSetzen(wert, sofort) {
+    if (wert === "auto") wurzel.removeAttribute("data-thema");
+    else wurzel.setAttribute("data-thema", wert);
+    try { localStorage.setItem("muster_inseln", wert); } catch (f) { /* egal */ }
+    spur.querySelectorAll(".seg").forEach(s => {
+      const an = s.dataset.thema === wert;
+      s.classList.toggle("an", an);
+      if (an) laeuferSetzen(s, sofort);
+    });
+  }
+
+  spur.addEventListener("click", e => {
+    const s = e.target.closest(".seg");
+    if (s) themaSetzen(s.dataset.thema, false);
+  });
+
+  document.querySelectorAll("[data-hak]").forEach(h =>
+    h.addEventListener("click", e => { e.stopPropagation(); h.classList.toggle("an"); }));
+
+  let start = "auto";
+  try { start = localStorage.getItem("muster_inseln") || "auto"; } catch (f) { /* egal */ }
+  themaSetzen(start, true);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => themaSetzen(start, true));
+  window.addEventListener("resize", () => themaSetzen(wurzel.getAttribute("data-thema") || "auto", true));
+})();
+</script>
