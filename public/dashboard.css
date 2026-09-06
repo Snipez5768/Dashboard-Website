@@ -2500,3 +2500,38 @@
   padding-left: calc(clamp(25px, 2vw, 28px) + 8px);
 }
 #seite-dashboard #card-habits .hb-liste { gap: 3px; }
+
+/* ----------------------------------------------------------
+   OHNE ANFANGSBUCHSTABEN
+
+   Das Malzeichen trug den ersten Buchstaben des Habits — direkt
+   neben dem ausgeschriebenen Namen. Es sagte also nichts, was
+   nicht danebenstand, und nahm 28 der 174 Pixel. Weg damit: der
+   Name bekommt den Platz, und darunter stehen die acht Tage.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-habits .i-mal { display: none; }
+
+#seite-dashboard #card-habits .hb-zeile {
+  padding: 7px 11px;
+  column-gap: 10px;
+}
+#seite-dashboard #card-habits .i-wert {
+  font-size: clamp(14px, 1.15vw, 17px);
+}
+/* Ohne Zeichen davor beginnt die Tagesreihe am linken Rand */
+#seite-dashboard #card-habits .perlen {
+  padding-left: 0;
+  gap: clamp(4px, .45vw, 6px);
+}
+#seite-dashboard #card-habits .perle {
+  width: clamp(7px, .62vw, 9px);
+  height: clamp(7px, .62vw, 9px);
+}
+/* Der heutige Tag traegt einen Ring, damit man ihn in der Reihe
+   findet, ohne zu zaehlen. */
+#seite-dashboard #card-habits .perle.heute {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--text-muted) 45%, transparent);
+}
+#seite-dashboard #card-habits .perle.voll.heute {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-active) 50%, transparent);
+}

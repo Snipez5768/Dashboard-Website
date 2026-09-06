@@ -2860,10 +2860,10 @@
       const diese = habitWoche(h.id);
       const erfuellt = diese >= ziel;
 
-      /* Sieben Perlen: die letzte Woche, die aeusserste rechts ist
-         heute. Vierzehn Striche waeren in einer Kapsel kein Verlauf
-         mehr, sondern ein Muster. */
-      const perlen = tage.slice(-7).map(t => {
+      /* Acht Felder: die sieben vergangenen Tage und heute, das
+         aeusserste rechts. Vierzehn Striche waeren in einer Kapsel
+         kein Verlauf mehr, sondern ein Muster. */
+      const perlen = tage.slice(-8).map(t => {
         const voll = habitErledigt(h.id, t.key);
         return `<i class="perle${voll ? " voll" : ""}${t.key === heute ? " heute" : ""}"
                   title="${fmtDate(t.key)} · ${voll ? "erledigt" : "offen"}"></i>`;
