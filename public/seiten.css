@@ -239,3 +239,52 @@
   border-radius: 20px;
   min-height: 54px;
 }
+
+/* ----------------------------------------------------------
+   6  DIE HABIT-KACHELN BRAUCHEN MEHR BREITE
+   Der Container gab feste Spalten von 130 Pixeln vor. Darin ist
+   der Auswahlkasten fuer das Wochenziel 152 Pixel breit — er lief
+   also 36 Pixel ueber den Rand hinaus, und die Kreise darunter
+   wurden auf 11 Pixel gequetscht. Jetzt bestimmt eine Mindest-
+   breite die Aufteilung; auf breiten Bildschirmen wachsen die
+   Kacheln nicht ins Unendliche, weil sie sich den Platz teilen.
+   ---------------------------------------------------------- */
+#seite-habits .habit-kalender {
+  grid-template-columns: repeat(auto-fit, minmax(186px, 1fr));
+  justify-content: stretch;
+  gap: 12px;
+}
+
+/* Der Auswahlkasten darf schrumpfen, statt die Kachel zu sprengen */
+#seite-habits .hk-ziel {
+  min-width: 0;
+  width: 100%;
+}
+#seite-habits .hk-ziel .aw {
+  min-width: 0;
+  flex: 1 1 auto;
+  max-width: 100%;
+}
+#seite-habits .hk-ziel .aw-knopf {
+  width: 100%;
+  min-width: 0;
+  justify-content: space-between;
+}
+#seite-habits .hk-ziel .aw-wert {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Das Raster darf den gewonnenen Platz nutzen */
+#seite-habits .hk-gitter {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
+  width: 100%;
+}
+#seite-habits .hk-feld {
+  width: auto;
+  height: auto;
+  aspect-ratio: 1;
+}

@@ -2885,11 +2885,12 @@
         </button>`;
     };
 
-    /* Auf dem Dashboard treten abgehakte Habits zurueck, solange noch
-       etwas offen ist — nach Bauplan Block 7. Ist alles erledigt,
-       stehen wieder die ersten da, damit die Karte nicht leer bleibt. */
-    const offen = sichtbar.filter(h => !habitErledigt(h.id, heute));
-    const dashAuswahl = (offen.length ? offen : sichtbar).slice(0, DASH_HABITS);
+    /* Abgehaktes tritt zurueck, faellt aber nicht weg: es rutscht
+       ans Ende. Ausgeblendet blieben sonst nur die offenen uebrig,
+       und bei drei erledigten von fuenf stuenden nur noch zwei da. */
+    const dashAuswahl = sichtbar.slice()
+      .sort((a, b) => (habitErledigt(a.id, heute) ? 1 : 0) - (habitErledigt(b.id, heute) ? 1 : 0))
+      .slice(0, DASH_HABITS);
 
     const zeilen     = sichtbar.map(zeileVon).join("");
     const zeilenDash = dashAuswahl.map(zeileVon).join("");
