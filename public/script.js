@@ -782,7 +782,7 @@
     const ring = $("calRingWert");
     if (ring) {
       ring.style.strokeDashoffset = (251.33 * (1 - pct)).toFixed(1);
-      ring.style.stroke = over ? "var(--status-red)" : "var(--status-green)";
+      ring.style.stroke = over ? "var(--status-red)" : "var(--accent-active)";
     }
 
     /* Die Flamme zaehlt die Tage am Stueck, an denen ueberhaupt
@@ -1564,11 +1564,17 @@
     const marke = $("klausurFrist");
     if (!body) return;
 
+    /* Die Ueberschrift geht mit dem Inhalt: ohne Klausur steht in
+       der Karte der naechste Termin, und dann waere "Nächste
+       Klausur" schlicht falsch. */
+    const titel = $("card-klausur") && $("card-klausur").querySelector(".card-title");
+
     const naechste = spaet(() => geplanteKlausuren(), klausuren || [])
       .filter(k => k && k.date && daysUntil(k.date) >= 0)
       .sort((a, b) => a.date.localeCompare(b.date))[0];
 
     if (naechste) {
+      if (titel) titel.textContent = "Nächste Klausur";
       const tage = daysUntil(naechste.date);
       const ton = fristTon(tage);
       if (marke) { marke.textContent = badgeFor(tage, naechste.date); marke.className = "card-badge " + ton; }
@@ -1605,17 +1611,24 @@
       .sort((a, b) => a.date.localeCompare(b.date))[0];
 
     if (!termin) {
+      if (titel) titel.textContent = "Nächster Termin";
       if (marke) { marke.textContent = "—"; marke.className = "card-badge"; }
       body.innerHTML = '<div class="muted-line">Keine Klausur, kein Termin</div>';
       return;
     }
 
+    if (titel) titel.textContent = "Nächster Termin";
+
     const tage = daysUntil(termin.date);
     if (marke) { marke.textContent = badgeFor(tage, termin.date); marke.className = "card-badge " + fristTon(tage); }
+    const wann = tage === 0 ? "heute" : tage === 1 ? "morgen" : "in " + tage + " Tagen";
+    const teile = [fmtDate(termin.date)];
+    if (termin.time) teile.push(termin.time + " Uhr");
+    if (termin.ort) teile.push(escapeHTML(termin.ort));
     body.innerHTML = `
       <div class="kw-fach">${escapeHTML(termin.title || "Termin")}</div>
-      <div class="kw-thema">${fmtDate(termin.date)}${termin.time ? " · " + termin.time : ""}</div>
-      <div class="kw-stand">${termin.ort ? escapeHTML(termin.ort) : "Keine Klausur geplant"}</div>`;
+      <div class="kw-thema">${teile.join(" · ")}</div>
+      <div class="kw-stand">${wann}${termin.ort ? "" : " · keine Klausur geplant"}</div>`;
   }
 
   /* ----------------------------------------------------------
@@ -1865,8 +1878,10 @@
 
     const fuell = $("timerFuellung");
     if (fuell) fuell.style.width = timerGanz ? ((rest / timerGanz) * 100).toFixed(1) + "%" : "0%";
-    /* Ohne laufenden Timer nimmt die Spur nur Platz weg */
-    if (fuell && fuell.parentElement) fuell.parentElement.hidden = !(laeuft || pausiert);
+    /* Die Leiste tritt an die Stelle der Vorgabeknoepfe — beide
+       liegen im selben Fach, damit die Kachel gleich hoch bleibt. */
+    const spur = $("timerSpur");
+    if (spur) spur.hidden = !(laeuft || pausiert);
 
     const marke = $("timerMarke");
     if (marke) {
@@ -1881,7 +1896,11 @@
     if (vorgaben)  vorgaben.hidden  = laeuft || pausiert;
     if (steuerung) steuerung.hidden = !(laeuft || pausiert);
     const halten = $("timerHalten");
-    if (halten) halten.textContent = laeuft ? "Pause" : "Weiter";
+    if (halten) {
+      halten.innerHTML = laeuft ? "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"7\" y=\"5\" width=\"3.5\" height=\"14\" rx=\"1.4\"/><rect x=\"13.5\" y=\"5\" width=\"3.5\" height=\"14\" rx=\"1.4\"/></svg>" : "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M8 5.6v12.8c0 .9 1 1.4 1.7.9l9.2-6.4a1.1 1.1 0 000-1.8L9.7 4.7c-.7-.5-1.7 0-1.7.9Z\"/></svg>";
+      halten.title = laeuft ? "Pause" : "Weiter";
+      halten.setAttribute("aria-label", halten.title);
+    }
   }
 
   function timerLaufen() {

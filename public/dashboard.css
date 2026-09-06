@@ -1844,3 +1844,330 @@
   width: clamp(24px, 1.95vw, 31px);
   height: clamp(24px, 1.95vw, 31px);
 }
+
+/* ==========================================================
+   ==========================================================
+   DRITTE RUNDE — die Punkte aus Lucas Liste
+   ========================================================== */
+
+/* ----------------------------------------------------------
+   1  DER HUB BEIM UEBERFAHREN WURDE ABGESCHNITTEN
+   Das Raster fuellt die Seitenhoehe genau aus und steht auf
+   overflow: hidden. Hebt sich die oberste Kachelreihe um zwei
+   Pixel, ist genau dort kein Platz. Also bekommt das Raster
+   ringsum etwas Luft — die Kacheln bleiben gleich gross, weil
+   die Hoehe um dieselben Pixel sinkt.
+   ---------------------------------------------------------- */
+#seite-dashboard .widget-grid {
+  padding: 4px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* ----------------------------------------------------------
+   2  DIE KACHELN WERDEN DUNKLER
+   Nur im dunklen Modus — im hellen bleiben sie weiss, sonst
+   waere die Sprache der Musterseite dahin.
+   ---------------------------------------------------------- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-thema="hell"]) {
+    --surface-card:   #0E0E12;
+    --surface-sunken: #1A1A20;
+  }
+}
+:root[data-thema="dunkel"] {
+  --surface-card:   #0E0E12;
+  --surface-sunken: #1A1A20;
+}
+
+/* ----------------------------------------------------------
+   3  KEINE UMSCHALTER AUF DEM DASHBOARD
+   Habits und Wetter werden hier nur angesehen. Beide Ansichten
+   gibt es unveraendert auf ihren eigenen Seiten.
+   ---------------------------------------------------------- */
+#seite-dashboard #habitAnsicht,
+#seite-dashboard #weatherViewToggle { display: none; }
+
+/* ----------------------------------------------------------
+   4  HABITS
+   Runder, und ohne den Umschalter darueber ruecken sie nach oben.
+   Die Perlen stehen wieder neben dem Namen statt darunter.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-habits .hb-zeile {
+  flex-wrap: nowrap;
+  border-radius: 20px;
+  padding: clamp(7px, .7vw, 10px) clamp(8px, .8vw, 11px);
+  gap: clamp(7px, .7vw, 10px);
+}
+#seite-dashboard #card-habits .i-rechts {
+  width: auto;
+  margin-left: auto;
+  justify-content: flex-end;
+  gap: clamp(5px, .5vw, 8px);
+}
+#seite-dashboard #card-habits .i-mal { border-radius: 12px; }
+#seite-dashboard #card-habits .perlen { gap: 3px; }
+#seite-dashboard #card-habits .perle { width: 6px; height: 6px; }
+#seite-dashboard #card-habits .hb-knopf { width: 22px; height: 22px; }
+/* Der Inhalt beginnt oben, nicht in der Mitte */
+#seite-dashboard #card-habits > .card-body { justify-content: flex-start; }
+
+/* ----------------------------------------------------------
+   5  DER TIMER
+   Zeit links, die beiden Tasten als Symbole rechts. Darunter ein
+   Fach fester Hoehe: dort steht entweder die Reihe der Vorgaben
+   oder die Leiste — die Kachel bleibt dadurch gleich hoch.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-timer > .card-body {
+  display: flex; flex-direction: column; justify-content: center;
+  gap: 0;
+}
+#seite-dashboard .tm-kopf {
+  display: flex; align-items: center; gap: 8px;
+}
+#seite-dashboard .tm-zeit { margin-right: auto; }
+
+#seite-dashboard .tm-tasten {
+  display: flex; align-items: center; gap: 5px;
+  flex: 0 0 auto;
+}
+#seite-dashboard .tm-tasten[hidden] { display: none; }
+
+#seite-dashboard .tm-icon {
+  width: 26px; height: 26px;
+  display: grid; place-items: center;
+  padding: 0; border: none; border-radius: 50%;
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background var(--t-base) var(--ease-soft),
+              color var(--t-base) var(--ease-soft),
+              transform var(--t-fast) var(--ease);
+}
+#seite-dashboard .tm-icon svg { width: 13px; height: 13px; fill: currentColor; display: block; }
+#seite-dashboard .tm-icon:hover  { background: var(--surface-dark); color: var(--text-inverse); }
+#seite-dashboard .tm-icon:active { transform: scale(.9); }
+#seite-dashboard #timerAus:hover { background: var(--status-red); color: #fff; }
+
+/* Das Fach haelt die Hoehe, egal was darin steht */
+#seite-dashboard .tm-fach {
+  margin-top: 8px;
+  min-height: 24px;
+  display: flex; align-items: center;
+  flex: 0 0 auto;
+}
+#seite-dashboard .tm-fach > * { width: 100%; }
+#seite-dashboard .tm-reihe { margin-top: 0; }
+#seite-dashboard .tm-spur  { margin-top: 0; height: 8px; }
+#seite-dashboard .tm-spur[hidden],
+#seite-dashboard .tm-reihe[hidden] { display: none; }
+#seite-dashboard .tm-vor { padding: 4px 6px; }
+
+/* ----------------------------------------------------------
+   6  WETTER JETZT — groesser
+   Ohne den Umschalter oben rechts ist Platz fuer Symbol und Zahl.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-wetter .weather-temp {
+  font-size: clamp(22px, 2vw, 32px);
+}
+#seite-dashboard #card-wetter .weather-icon {
+  width:  clamp(30px, 2.6vw, 42px);
+  height: clamp(30px, 2.6vw, 42px);
+}
+#seite-dashboard #card-wetter .weather-desc {
+  font-size: clamp(10.5px, .8vw, 13px);
+  line-height: 1.25;
+}
+#seite-dashboard .weather-spanne {
+  font-size: clamp(10.5px, .8vw, 13px);
+}
+
+/* ----------------------------------------------------------
+   7  WETTER · VORHERSAGE — groesser und lesbarer
+   Die Kachel ist drei Spalten breit und zwei Reihen hoch; fuenf
+   Zeilen duerfen darin ruhig Platz nehmen.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-wetter2 > .card-body {
+  gap: 2px;
+  justify-content: space-around;
+}
+#seite-dashboard .vh-tag {
+  grid-template-columns: 30px 26px 1fr auto auto;
+  gap: clamp(7px, .7vw, 11px);
+  padding: clamp(4px, .5vh, 7px) 5px;
+  font-size: clamp(12px, .95vw, 15px);
+  border-radius: 13px;
+}
+#seite-dashboard .vh-icon svg {
+  width: clamp(19px, 1.55vw, 25px);
+  height: clamp(19px, 1.55vw, 25px);
+}
+#seite-dashboard .vh-name { font-size: clamp(11.5px, .9vw, 14px); font-weight: 600; }
+#seite-dashboard .vh-regen { font-size: clamp(10.5px, .82vw, 13px); }
+#seite-dashboard .vh-min { font-size: clamp(11.5px, .9vw, 14px); }
+#seite-dashboard .vh-max { font-size: clamp(12.5px, 1vw, 16px); }
+
+/* ----------------------------------------------------------
+   8  NAECHSTE TERMINE — der Strahl und die Groessen
+   Die Kachel ist fuenf Spalten breit und vier Reihen hoch. Mit
+   vier Zeilen blieb unten ein Drittel leer; die Zeilen duerfen
+   also groesser stehen und den Platz teilen.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-naechste .entry-list {
+  justify-content: space-evenly;
+  gap: clamp(6px, .7vh, 12px);
+}
+#seite-dashboard #card-naechste .entry-item {
+  min-height: clamp(52px, 6.5vh, 68px);
+  padding: clamp(9px, .9vw, 13px) clamp(11px, 1vw, 15px) clamp(9px, .9vw, 13px) clamp(9px, .9vw, 12px);
+  border-radius: 20px;
+  gap: clamp(10px, 1vw, 14px);
+}
+#seite-dashboard #card-naechste .i-mal {
+  width: clamp(32px, 2.6vw, 40px);
+  height: clamp(32px, 2.6vw, 40px);
+  border-radius: 13px;
+}
+#seite-dashboard #card-naechste .i-mal svg {
+  width: clamp(17px, 1.4vw, 21px);
+  height: clamp(17px, 1.4vw, 21px);
+}
+#seite-dashboard #card-naechste .i-sache { font-size: clamp(10.5px, .82vw, 13px); }
+#seite-dashboard #card-naechste .i-wert  { font-size: clamp(13px, 1.05vw, 17px); }
+#seite-dashboard #card-naechste .marke {
+  font-size: clamp(10px, .78vw, 12px);
+  padding: 3px 10px;
+  max-width: none;
+}
+
+/* Der Strahl: eine durchgehende Linie mit einem Punkt je Termin.
+   Er stand bisher als schmaler Streifen am Rand — jetzt traegt er
+   die Zeilen sichtbar. */
+#seite-dashboard #card-naechste .entry-list { padding-left: 22px; position: relative; }
+#seite-dashboard #card-naechste .entry-item::before {
+  content: "";
+  position: absolute;
+  left: -22px; top: 50%;
+  width: 11px; height: 11px; margin-top: -5.5px;
+  border-radius: 50%;
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 2.5px var(--text-muted);
+  z-index: 1;
+}
+#seite-dashboard #card-naechste .entry-item.today::before {
+  background: var(--accent-active);
+  box-shadow: inset 0 0 0 2.5px var(--accent-active), 0 0 0 4px var(--tint-blue);
+}
+#seite-dashboard #card-naechste .entry-item.soon::before {
+  background: var(--status-orange);
+  box-shadow: inset 0 0 0 2.5px var(--status-orange);
+}
+/* Die Linie durch alle Punkte */
+#seite-dashboard #card-naechste .entry-list::before {
+  content: "";
+  position: absolute;
+  left: 5px; top: 14px; bottom: 14px;
+  width: 2px;
+  background: var(--surface-sunken);
+}
+
+/* ----------------------------------------------------------
+   9  DIE KLAUSURKACHEL
+   Sie traegt jetzt zwei Ueberschriften, je nach Inhalt. An der
+   Gestaltung aendert das nichts — nur der Platz fuer die
+   Termindaten darunter wird gebraucht.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-klausur .kw-thema { -webkit-line-clamp: 1; }
+
+/* Die Habits-Kachel ist zwei Spalten breit — rund 180 Pixel innen.
+   Symbol, Perlen und Haken belegten davon so viel, dass fuer den
+   Namen nichts uebrig blieb: er stand auf null. Alles drumherum
+   wird kleiner, damit der Name den Platz bekommt. */
+#seite-dashboard #card-habits .hb-zeile {
+  padding: clamp(6px, .6vw, 9px);
+  gap: clamp(5px, .5vw, 7px);
+}
+#seite-dashboard #card-habits .i-mal {
+  width: clamp(24px, 2vw, 28px);
+  height: clamp(24px, 2vw, 28px);
+  border-radius: 10px;
+  font-size: clamp(11px, .85vw, 13px);
+}
+#seite-dashboard #card-habits .i-text {
+  flex: 1 1 auto;
+  min-width: clamp(38px, 3.4vw, 52px);
+}
+#seite-dashboard #card-habits .i-sache { font-size: clamp(9px, .68vw, 10.5px); }
+#seite-dashboard #card-habits .i-wert  { font-size: clamp(11.5px, .88vw, 14px); }
+#seite-dashboard #card-habits .i-rechts { gap: clamp(4px, .4vw, 6px); }
+#seite-dashboard #card-habits .perlen  { gap: 2px; }
+#seite-dashboard #card-habits .perle   { width: 5px; height: 5px; }
+#seite-dashboard #card-habits .hb-knopf {
+  width: clamp(18px, 1.5vw, 21px);
+  height: clamp(18px, 1.5vw, 21px);
+  flex: 0 0 auto;
+}
+
+/* Der Klausurtitel darf wieder zwei Zeilen nehmen — ohne Fach steht
+   dort der Terminname, und der ist selten kurz. */
+#seite-dashboard #card-klausur .kw-fach { -webkit-line-clamp: 2; }
+
+/* Der angehobene Rand samt Schatten braucht Luft nach aussen. Vier
+   Pixel Polster reichen fuer die Kachel, nicht fuer ihren Schatten —
+   der reicht zwanzig Pixel weit. Also darf das Raster ueberstehen;
+   begrenzt wird erst an der Seite. Die Kacheln selbst schneiden
+   weiterhin ab, es kann also nichts herauslaufen. */
+#seite-dashboard .widget-grid { overflow: visible; }
+#seite-dashboard.aktiv { overflow: hidden; }
+
+/* Das Fach behaelt seine Hoehe, egal ob die Vorgabeknoepfe oder die
+   Leiste darin stehen — sonst schrumpft die Kachel beim Starten um
+   acht Pixel und der ganze Inhalt springt. */
+#seite-dashboard .tm-fach {
+  height: 28px;
+  min-height: 28px;
+  box-sizing: border-box;
+}
+#seite-dashboard .tm-vor {
+  height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 6px;
+}
+#seite-dashboard .tm-reihe { align-items: center; }
+
+/* Nicht der Timer wuchs, sondern seine Kopfzeile: sobald das
+   Abzeichen "läuft" erscheint, ist sie acht Pixel hoeher als mit
+   dem Titel allein — und der Koerper darunter entsprechend
+   flacher. Eine feste Mindesthoehe haelt die Zeile ruhig, auch bei
+   den anderen Kacheln mit erscheinendem Abzeichen. */
+#seite-dashboard .card-head { min-height: 24px; }
+
+/* Die feste Kopfzeile kostet acht Pixel. In den beiden flachsten
+   Kacheln standen Wetter und Timer damit wieder ueber — beide
+   ruecken um genau diesen Betrag zusammen. */
+#seite-dashboard #card-wetter .weather-temp {
+  font-size: clamp(19px, 1.7vw, 27px);
+}
+#seite-dashboard #card-wetter .weather-icon {
+  width:  clamp(26px, 2.25vw, 36px);
+  height: clamp(26px, 2.25vw, 36px);
+}
+#seite-dashboard #card-timer .tm-zeit {
+  font-size: clamp(18px, 1.6vw, 26px);
+}
+#seite-dashboard .tm-fach { margin-top: 5px; }
+
+/* Die drei fehlenden Pixel holt die Kopfzeile selbst: ein flacheres
+   Abzeichen macht sie niedriger, und weil sie dann ueberall gleich
+   niedrig ist, bleibt sie trotzdem ruhig. */
+#seite-dashboard .card-badge {
+  padding: 3px 10px;
+  line-height: 1.25;
+}
+#seite-dashboard .card-head { min-height: 21px; }
+
+/* Und der Rest aus dem Inhalt der beiden flachsten Kacheln */
+#seite-dashboard #card-wetter .weather-desc { margin-top: 0; line-height: 1.15; }
+#seite-dashboard #card-wetter .weather-main { align-items: center; }
+#seite-dashboard .tm-fach { height: 26px; min-height: 26px; }
+#seite-dashboard .tm-vor  { height: 24px; }

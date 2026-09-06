@@ -449,17 +449,27 @@
             <span class="card-badge" id="timerMarke" hidden>läuft</span>
           </div>
           <div class="card-body timer" id="timerBody">
-            <div class="tm-zeit" id="timerZeit">00:00</div>
-            <div class="tm-spur"><i id="timerFuellung"></i></div>
-            <div class="tm-reihe" id="timerVorgaben">
-              <button type="button" class="tm-vor" data-min="5">5</button>
-              <button type="button" class="tm-vor" data-min="10">10</button>
-              <button type="button" class="tm-vor" data-min="25">25</button>
-              <button type="button" class="tm-vor" data-min="45">45</button>
+            <div class="tm-kopf">
+              <div class="tm-zeit" id="timerZeit">00:00</div>
+              <div class="tm-tasten" id="timerSteuerung" hidden>
+                <button type="button" class="tm-icon" id="timerHalten" title="Pause" aria-label="Pause">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="5" width="3.5" height="14" rx="1.4"/><rect x="13.5" y="5" width="3.5" height="14" rx="1.4"/></svg>
+                </button>
+                <button type="button" class="tm-icon" id="timerAus" title="Stopp" aria-label="Stopp">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2.6"/></svg>
+                </button>
+              </div>
             </div>
-            <div class="tm-reihe" id="timerSteuerung" hidden>
-              <button type="button" class="tm-knopf" id="timerHalten">Pause</button>
-              <button type="button" class="tm-knopf" id="timerAus">Stopp</button>
+            <!-- Ein Fach fester Hoehe: die Leiste tritt an die Stelle
+                 der Vorgaben, damit die Kachel gleich hoch bleibt. -->
+            <div class="tm-fach">
+              <div class="tm-reihe" id="timerVorgaben">
+                <button type="button" class="tm-vor" data-min="5">5</button>
+                <button type="button" class="tm-vor" data-min="10">10</button>
+                <button type="button" class="tm-vor" data-min="25">25</button>
+                <button type="button" class="tm-vor" data-min="45">45</button>
+              </div>
+              <div class="tm-spur" id="timerSpur" hidden><i id="timerFuellung"></i></div>
             </div>
           </div>
         </section>
