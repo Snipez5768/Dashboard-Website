@@ -590,3 +590,68 @@
   gap: 6px;
   min-height: 0;
 }
+
+/* ==========================================================
+   NACH DEINEM BILDSCHIRMFOTO
+
+   Drei Befunde, alle drei belegt statt vermutet.
+   ========================================================== */
+
+/* 1  DIE VOLLE BREITE
+   Das Raster war auf 1180 Pixel begrenzt und mittig gesetzt —
+   rechts und links blieben rund 20 Prozent ungenutzt. Auf einer
+   Uebersichtsseite ist das verschenkter Platz. */
+#seite-dashboard .widget-grid {
+  max-width: none;
+  margin: 0;
+  width: 100%;
+}
+#seite-dashboard.aktiv,
+#seite-dashboard .layout { padding-left: 0; padding-right: 0; }
+
+/* 2  DIE ZAHL LAG UEBER DER KOPFZEILE
+   .cal-center steht auf position: absolute mit inset: 0 — es fuellte
+   damit die ganze Karte und legte sich ueber "Kalorien Heute". Das
+   war richtig, solange es einen Ring zu zentrieren galt; in der
+   schmalen Kachel gibt es keinen mehr. */
+#seite-dashboard #card-kalorien .cal-center,
+#seite-dashboard #card-wetter .weather-kern {
+  position: static;
+  inset: auto;
+  padding-top: 0;
+  align-items: flex-start;
+}
+#seite-dashboard #card-kalorien .cal-ring-area,
+#seite-dashboard #card-kalorien .cal-gauge-wrap {
+  position: static;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+}
+#seite-dashboard #card-kalorien .cal-gauge { display: none; }
+
+/* 3  DIE STREAK-LISTE LIEF AUS IHRER KARTE
+   Von fuenf Streaks sass einer in der Karte, die uebrigen lagen
+   darunter auf der Bildschirmzeit. Dieselbe Klemme wie zuvor bei
+   den Habits, nur eine Ebene tiefer. */
+#seite-dashboard #card-streaks,
+#seite-dashboard #card-streaks .card-body,
+#seite-dashboard #card-streaks .streaks,
+#seite-dashboard #card-streaks .streak-list {
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  overflow: visible;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 8px;
+}
+#seite-dashboard #card-streaks .streak-row {
+  position: static;
+  flex: 0 0 auto;
+  height: auto;
+  min-height: 60px;
+}
