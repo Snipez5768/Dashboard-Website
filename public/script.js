@@ -1338,18 +1338,18 @@
     return zahl;
   }
 
-  /* Mit "iso" rechnet die Pille in Schultagen — das ist für alles
-     Schulische die ehrlichere Zahl. Ohne "iso" bleibt es beim
-     Kalendertag, denn ein Zahnarzttermin schert sich nicht um
-     Ferien. */
-  const badgeFor = (diff, iso) => {
+  /* Alles zaehlt in Kalendertagen — eine Klausur genauso wie ein
+     Zahnarzttermin. Die Rechnung in Schultagen war fuer Schulisches
+     gedacht, las sich aber neben den Terminen wie eine andere
+     Einheit. Der zweite Wert bleibt in der Reihenfolge stehen,
+     damit die Aufrufe unveraendert weiterlaufen.
+     schultageBis() gibt es weiterhin; die Lernseite braucht es
+     fuer die Frage, wie oft man bis dahin noch im Fach sitzt. */
+  const badgeFor = (diff) => {
     if (diff < 0) return diff === -1 ? "seit gestern" : `seit ${-diff} Tagen`;
     if (diff === 0) return "HEUTE";
     if (diff === 1) return "morgen";
-    if (!iso) return `in ${diff} Tagen`;
-    const schul = schultageBis(iso);
-    if (schul === 0) return "erst nach den Ferien";
-    return `in ${schul} ${schul === 1 ? "Schultag" : "Schultagen"}`;
+    return `in ${diff} Tagen`;
   };
 
   /* Der Pfeil sagt "hier geht es weiter" — er ersetzt das doppelte
@@ -4383,14 +4383,11 @@
     const tage = daysUntil(e.date);
     if (tage < 0) return { zahl: Math.abs(tage), einheit: Math.abs(tage) === 1 ? "Tag über" : "Tage über", ton: "rot" };
     if (tage === 0) return { zahl: "heute", einheit: "", ton: "rot" };
-    /* Für Schulisches zählen Schultage: bis zu einer Klausur ist
-       nicht die Zahl der Kalendertage die Frage, sondern wie oft man
-       bis dahin noch in dem Fach sitzt. */
-    if (e.art !== "termin" && tage >= 2) {
-      const schul = schultageBis(e.date);
-      if (schul === 0) return { zahl: "nach", einheit: "den Ferien", ton: "ruhig" };
-      return { zahl: schul, einheit: schul === 1 ? "Schultag" : "Schultage",
-               ton: tage <= 3 ? "gelb" : "ruhig" };
+    /* Auch hier Kalendertage, damit ueberall dieselbe Einheit steht.
+       Liegt bis dahin alles in den Ferien, ist das trotzdem eine
+       Ansage wert. */
+    if (e.art !== "termin" && tage >= 2 && schultageBis(e.date) === 0) {
+      return { zahl: "nach", einheit: "den Ferien", ton: "ruhig" };
     }
     return { zahl: tage, einheit: tage === 1 ? "Tag" : "Tage", ton: tage <= 3 ? "gelb" : "ruhig" };
   }
