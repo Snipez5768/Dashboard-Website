@@ -705,3 +705,132 @@
   height: fit-content;
   min-height: fit-content;
 }
+
+/* ==========================================================
+   ALLES AUF EINE SEITE — UND KARTEN WIE IN DER DEMO
+
+   Zwei Anforderungen, die sich bisher widersprochen haben: die
+   Karten sollen aussehen wie im Muster, und die Seite soll nicht
+   rollen. Beides geht, wenn nicht die SEITE rollt, sondern die
+   LISTE in ihrer Karte.
+
+   Damit loest sich auch der Streak-Fehler von selbst: eine Liste,
+   die ihre Hoehe vom Behaelter bekommt statt sie ihm aufzuzwingen,
+   kann nicht mehr aus ihrer Karte laufen. Ich habe drei Anlaeufe
+   gebraucht, um zu sehen, dass das der Weg ist.
+   ========================================================== */
+#seite-dashboard.aktiv { overflow: hidden; }
+
+#seite-dashboard .widget-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  grid-auto-flow: row;
+  gap: 12px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#seite-dashboard .widget-grid > .card,
+#seite-dashboard #card-naechste,
+#seite-dashboard #card-habits,
+#seite-dashboard #card-streaks,
+#seite-dashboard #card-kalorien,
+#seite-dashboard #card-wetter,
+#seite-dashboard #card-screentime {
+  width: auto;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 18px 20px;
+  border-radius: 26px;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-3);
+}
+
+/* Zwei Reihen, drei Spalten */
+#seite-dashboard #card-naechste   { grid-area: 1 / 1 / 2 / 2; }
+#seite-dashboard #card-habits     { grid-area: 1 / 2 / 2 / 3; }
+#seite-dashboard #card-streaks    { grid-area: 1 / 3 / 2 / 4; }
+#seite-dashboard #card-kalorien   { grid-area: 2 / 1 / 3 / 2; }
+#seite-dashboard #card-wetter     { grid-area: 2 / 2 / 3 / 3; }
+#seite-dashboard #card-screentime { grid-area: 2 / 3 / 3 / 4; }
+
+/* Der Kopf bleibt stehen, der Inhalt darunter rollt */
+#seite-dashboard .card-head { flex: 0 0 auto; margin-bottom: 12px; }
+#seite-dashboard .card-body,
+#seite-dashboard .naechste,
+#seite-dashboard .streaks {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  max-height: none;
+  overflow: hidden;
+}
+#seite-dashboard .entry-list,
+#seite-dashboard .habit-list,
+#seite-dashboard .hb-liste,
+#seite-dashboard .streak-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  max-height: none;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 7px;
+}
+#seite-dashboard .entry-list::-webkit-scrollbar,
+#seite-dashboard .habit-list::-webkit-scrollbar,
+#seite-dashboard .hb-liste::-webkit-scrollbar,
+#seite-dashboard .streak-list::-webkit-scrollbar { display: none; }
+
+/* Die Zeilen behalten ihre Hoehe, statt sich zu teilen */
+#seite-dashboard .hb-zeile,
+#seite-dashboard .streak-row,
+#seite-dashboard .entry-item {
+  flex: 0 0 auto;
+  height: auto;
+  min-height: 54px;
+}
+
+/* Kalorien, Wetter und die Kurve fuellen ihre Karte */
+#seite-dashboard #card-kalorien .cal-body,
+#seite-dashboard #card-wetter .weather {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 4px;
+  min-height: 0;
+}
+#seite-dashboard #card-screentime .st-chart {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+}
+
+@media (max-width: 999px) {
+  #seite-dashboard.aktiv { overflow-y: auto; }
+  #seite-dashboard .widget-grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    grid-auto-rows: minmax(190px, auto);
+    height: auto;
+    overflow: visible;
+  }
+  #seite-dashboard .widget-grid > .card { grid-area: auto; height: auto; }
+}
