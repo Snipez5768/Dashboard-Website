@@ -764,6 +764,42 @@
       el.classList.toggle("on", i < filled);
       el.classList.toggle("over", over && i < filled);
     });
+
+    /* Bauplan Block 1: was der Tag noch hergibt. Ueber dem Ziel
+       zaehlt es nicht weiter nach unten, sondern sagt, um wie viel
+       es darueber ist. */
+    const rest = $("calRest"), restWort = $("calRestWort");
+    if (rest) {
+      if (isEmpty) {
+        rest.textContent = "—";
+        restWort.textContent = "kein Ziel gesetzt";
+      } else if (over) {
+        rest.textContent = (consumed - goal).toLocaleString("de-DE");
+        restWort.textContent = "über dem Ziel";
+      } else {
+        rest.textContent = (goal - consumed).toLocaleString("de-DE");
+        restWort.textContent = "übrig";
+      }
+      rest.parentElement.classList.toggle("drueber", over);
+    }
+
+    /* Die Flamme zaehlt die Tage am Stueck, an denen ueberhaupt
+       etwas eingetragen wurde — getrackt zu haben ist das, was
+       hier eine Serie ausmacht. */
+    const fl = $("calFlamme"), flTage = $("calFlammeTage"), flMal = $("calFlammeMal");
+    if (fl && flTage) {
+      const verlauf = spaet(() => kalVerlauf, null) || {};
+      let tage = 0;
+      for (let i = 0; i < 400; i++) {
+        const d = new Date(); d.setDate(d.getDate() - i);
+        const wert = i === 0 ? consumed : Number(verlauf[dateKey(d)]) || 0;
+        if (wert > 0) tage++; else break;
+      }
+      flTage.textContent = tage;
+      if (flMal && !flMal.innerHTML) flMal.innerHTML = spaet(() => FLAMME_SVG, "");
+      fl.hidden = tage < 2;   /* ein einzelner Tag ist noch keine Serie */
+    }
+
       refreshVorschlag();
   }
   /* Licht einmal über den kompletten Bogen laufen lassen */

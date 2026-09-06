@@ -1077,3 +1077,85 @@
 #seite-dashboard #card-habits .perlen   { gap: 3px; }
 #seite-dashboard #card-habits .perle    { width: 6px; height: 6px; }
 #seite-dashboard #card-habits .hb-knopf { width: 24px; height: 24px; }
+
+/* ----------------------------------------------------------
+   KALORIEN — Bauplan Block 1
+   Der Ring war ausgeblendet, solange die Kachel schmal war. In der
+   Groesse aus dem Bauplan hat er Platz: links der Kreis mit dem
+   Verbrauch, rechts was der Tag noch hergibt und die Flamme.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-kalorien > .card-body {
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: row; flex-wrap: wrap;
+  align-items: center; justify-content: flex-start;
+  gap: 14px;
+}
+/* Feste Masse statt Inhaltsgroesse: die Flaeche stand auf 0 mal 0,
+   waehrend der Ring darin 104 Pixel mass — er quoll heraus und legte
+   sich ueber die Zahlen daneben. */
+#seite-dashboard #card-kalorien .cal-ring-area {
+  flex: 0 0 auto;
+  width:  clamp(74px, 8vw, 100px);
+  height: clamp(74px, 8vw, 100px);
+  min-width: 0; min-height: 0;
+  display: block; position: relative;
+}
+#seite-dashboard #card-kalorien .cal-gauge-wrap {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  display: block; flex: 0 0 auto;
+}
+/* Ohne Ziel steht nur der Hinweis daneben, der Ring faellt weg. */
+#seite-dashboard #card-kalorien .cal-body:not(.empty) .cal-empty { display: none; }
+#seite-dashboard #card-kalorien .cal-body.empty .cal-ring-area { display: none; }
+#seite-dashboard #card-kalorien .cal-gauge {
+  display: block; width: 100%; height: 100%;
+}
+#seite-dashboard #card-kalorien .cal-center {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 1px; padding-top: 0; text-align: center;
+}
+#seite-dashboard #card-kalorien .cal-value {
+  font-size: clamp(16px, 1.9vw, 21px); font-weight: 700;
+  letter-spacing: -.03em; line-height: 1; font-variant-numeric: tabular-nums;
+}
+#seite-dashboard #card-kalorien .cal-sub { font-size: 9.5px; line-height: 1.2; }
+
+/* Rechts vom Ring: der Rest des Tages */
+#seite-dashboard .cal-neben {
+  flex: 1 1 auto; min-width: 0;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 0;
+}
+#seite-dashboard .cal-rest {
+  font-size: clamp(19px, 2.4vw, 27px); font-weight: 700;
+  letter-spacing: -.03em; line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+  color: var(--green-ink);
+}
+#seite-dashboard .cal-rest.drueber { color: var(--red-ink); }
+#seite-dashboard .cal-rest-wort {
+  font-size: 11.5px; color: var(--text-muted); line-height: 1.3;
+}
+#seite-dashboard .cal-flamme {
+  margin-top: 7px;
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 9px 3px 6px;
+  border-radius: 999px;
+  background: var(--tint-orange); color: var(--orange-ink);
+  font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums;
+}
+#seite-dashboard .cal-flamme svg { width: 13px; height: 13px; display: block; }
+#seite-dashboard .cal-flamme[hidden] { display: none; }
+
+/* Ohne Ziel bleibt nur der Hinweis stehen */
+#seite-dashboard #card-kalorien.empty .cal-ring-area,
+#seite-dashboard #card-kalorien .cal-body.empty .cal-ring-area { display: none; }
+
+/* Der Weg zur Kalorien-Seite: ein Textlink, keine Schaltflaeche —
+   die Karte selbst ist nur zum Ansehen da. */
+#seite-dashboard #card-kalorien .ghost-btn {
+  flex: 0 0 auto; align-self: flex-end; margin-left: auto;
+  padding: 3px 9px; font-size: 11px; border-radius: 999px;
+}
