@@ -3043,12 +3043,22 @@
     z-index: 60;
     touch-action: none;          /* das Ziehen gehoert der Leiste */
     cursor: grab;
-    /* Der Grund verlaeuft nach oben ins Nichts, damit die Kacheln
-       darunter nicht abgeschnitten wirken.
+  }
 
-       Die Maske nimmt den Weichzeichner mit heraus. Ohne sie blieb
-       oben ein Streifen, der verwischt, aber nichts verdeckt — auf
-       dem Stundenplan standen dort helle Schlieren. */
+  /* Der Grund liegt auf einem Vorsatzelement, damit er sich
+     abschwaechen laesst: in Ruhe soll die Leiste kaum auffallen,
+     offen muss sie die Reihe tragen.
+
+     Er verlaeuft nach oben ins Nichts, damit die Kacheln darunter
+     nicht abgeschnitten wirken. Die Maske nimmt den Weichzeichner
+     mit heraus — ohne sie blieb oben ein Streifen, der verwischt,
+     aber nichts verdeckt: auf dem Stundenplan standen dort helle
+     Schlieren. */
+  :root[data-leiste="bogen"] .bogen-leiste::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
     background: linear-gradient(to top,
       var(--bg-page) 52%,
       color-mix(in srgb, var(--bg-page) 72%, transparent) 100%);
@@ -3056,7 +3066,10 @@
     backdrop-filter: blur(14px);
     -webkit-mask-image: linear-gradient(to top, #000 56%, transparent 100%);
     mask-image: linear-gradient(to top, #000 56%, transparent 100%);
+    opacity: .5;
+    transition: opacity .22s var(--ease-soft);
   }
+  :root[data-leiste="bogen"] .bogen-leiste.offen::before { opacity: 1; }
   :root[data-leiste="bogen"] .bogen-leiste:active { cursor: grabbing; }
 
   /* Die Bahn: der Nullpunkt liegt tief unten und mittig, von dort
@@ -3132,6 +3145,61 @@
   :root[data-leiste="bogen"] .bg-seite.mitte .bg-mal {
     background: rgba(255, 255, 255, .22);
   }
+
+  /* ---- In Ruhe: eine Linie mit dem Namen der Seite ----
+     Unscheinbar am unteren Rand, mehr nicht. Sie faengt keine
+     Beruehrung ab — der Griff ist die Leiste selbst, sonst muesste
+     man genau die Linie treffen. */
+  :root[data-leiste="bogen"] .bg-ruhe {
+    position: absolute;
+    left: 0; right: 0;
+    top: 92px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    pointer-events: none;
+    transition: opacity .2s var(--ease-soft);
+  }
+  :root[data-leiste="bogen"] .bogen-leiste.offen .bg-ruhe { opacity: 0; }
+
+  /* Die Striche laufen nach aussen aus, statt hart abzubrechen */
+  :root[data-leiste="bogen"] .bg-strich {
+    width: 104px; height: 1px;
+    background: linear-gradient(90deg, transparent,
+      color-mix(in srgb, var(--text-muted) 55%, transparent));
+  }
+  :root[data-leiste="bogen"] .bg-strich:last-child {
+    background: linear-gradient(90deg,
+      color-mix(in srgb, var(--text-muted) 55%, transparent), transparent);
+  }
+
+  :root[data-leiste="bogen"] .bg-hier {
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .01em;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  /* ---- Der Weg ins Kontopanel ----
+     Rechts aussen, auf der Hoehe der Reihe, in derselben Kapselform
+     wie die Eintraege. Er steht immer da, offen wie in Ruhe: die
+     Einstellungen sollen nicht hinter einer Geste liegen. */
+  :root[data-leiste="bogen"] .bg-profil {
+    position: absolute;
+    right: 22px; top: 78px;
+    display: grid; place-items: center;
+    padding: 6px;
+    border: none;
+    border-radius: 999px;
+    background: var(--surface-card);
+    box-shadow: var(--shadow-2);
+    cursor: pointer;
+    transition: transform var(--t-fast) var(--ease);
+  }
+  :root[data-leiste="bogen"] .bg-profil:active { transform: scale(.94); }
 
   /* Die Seitenleiste tritt ab, der Inhalt rueckt nach */
   :root[data-leiste="bogen"] .sidebar { display: none; }

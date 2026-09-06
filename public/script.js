@@ -3324,6 +3324,15 @@
   }
 
   $("profilKnopf").addEventListener("click", () => openSettings("konto"));
+  /* Derselbe Weg von der Bogenleiste aus — auf dem Tablet gibt es
+     die Seitenleiste nicht mehr, die ihn sonst traegt. */
+  const bogenProfil = $("bogenProfil");
+  if (bogenProfil) bogenProfil.addEventListener("click", () => {
+    /* Steht die Reihe noch offen, hat sie hinter dem Kontopanel
+       nichts mehr zu suchen. */
+    bogenOeffnen(false);
+    openSettings("konto");
+  });
   $("settingsBtn").addEventListener("click", () => openSettings("konto"));
   /* "Details anzeigen" im Kalorien-Widget meint die Felder, nicht das Konto */
   $("calDetailsBtn").addEventListener("click", () => openSettings("werte"));
@@ -3937,6 +3946,7 @@
     const name = (settings.name || "").trim();
     $("avatarName").textContent = name || "Gast";
     avatarFuellen($("avatarCircle"), name);
+    avatarFuellen($("bogenAvatar"), name);
     kpKopfZeichnen();
   }
   updateAvatar();
@@ -14348,6 +14358,17 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
   const BOGEN_SICHT = 3.8;    /* so weit reicht die Reihe zur Seite hin */
 
   let bogenSeiten = [], bogenPos = 0, bogenZieht = null;
+  /* In Ruhe steht am unteren Rand nur eine Linie mit dem Namen der
+     Seite. Die Reihe selbst erscheint erst, wenn man sie anfasst. */
+  let bogenOffen = false;
+
+  function bogenOeffnen(auf) {
+    if (bogenOffen === auf) return;
+    bogenOffen = auf;
+    const leiste = $("bogenLeiste");
+    if (leiste) leiste.classList.toggle("offen", auf);
+    bogenZeichnen();
+  }
 
   /* Dieselbe Bedingung wie fuer die Tablet-Aufteilung */
   const BOGEN_BEDINGUNG =
@@ -14399,20 +14420,22 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
         "translate(-50%, 0) translate(" + x.toFixed(1) + "px, " + y.toFixed(1) + "px) " +
         "rotate(" + grad.toFixed(2) + "deg)";
 
-      /* In Ruhe steht nur die Seite da, auf der man gerade ist. Die
-         uebrigen tauchen erst auf, wenn man zieht — sonst laege am
-         unteren Rand dauernd eine Reihe im Weg.
-
+      /* In Ruhe ist die ganze Reihe weg — dort steht dann die Linie.
          Was weit weg ist, tritt zurueck. Gemessen wird in Eintraegen
          und nicht in Grad, damit das Verblassen gleich bleibt, wenn
          man am Radius dreht. */
       const weite = Math.abs(i - bogenPos);
       const inDerMitte = weite < 0.5;
-      const fort = weite > BOGEN_SICHT || !(bogenZieht || inDerMitte);
+      const fort = weite > BOGEN_SICHT || !bogenOffen;
       el.style.opacity = fort ? "0" : String(Math.max(0.32, 1 - weite / (BOGEN_SICHT + 0.8)));
       el.classList.toggle("mitte", inDerMitte);
       el.style.pointerEvents = fort ? "none" : "auto";
     });
+
+    /* Die Linie in Ruhe traegt denselben Namen wie die Mitte */
+    const hier = $("bogenHier");
+    const nah = bogenSeiten[Math.round(bogenPos)];
+    if (hier && nah) hier.textContent = nah.querySelector(".bg-name").textContent;
   }
 
   function bogenZuSeite(seite) {
@@ -14425,7 +14448,9 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
      die Adresse zu gehen ist der sicherste Weg: jeder Wechsel
      schreibt sie, ganz gleich, wer ihn ausgeloest hat. */
   window.addEventListener("hashchange", () => {
-    if (!bogenZieht) bogenZuSeite(String(location.hash || "").slice(2));
+    if (bogenZieht) return;
+    bogenZuSeite(String(location.hash || "").slice(2));
+    bogenOeffnen(false);
   });
 
   /* ---------- Ziehen ---------- */
@@ -14437,8 +14462,13 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
 
     leiste.addEventListener("pointerdown", ev => {
       if (!bogenAn()) return;
+      /* Der Profilknopf gehoert nicht zur Reihe — wer ihn drueckt,
+         will ins Kontopanel und nicht blaettern. */
+      if (ev.target.closest && ev.target.closest(".bg-profil")) return;
       const auf = ev.target.closest && ev.target.closest(".bg-seite");
-      bogenZieht = { x: ev.clientX, start: bogenPos, bewegt: false, auf: auf };
+      bogenZieht = { x: ev.clientX, start: bogenPos, bewegt: false, auf: auf,
+                     warOffen: bogenOffen };
+      bogenOeffnen(true);
       bahn.classList.add("zieht");
       /* Der Fang haelt den Zeiger bei der Leiste, auch wenn der
          Finger darueber hinauswandert. Klappt er nicht, zieht man
@@ -14463,19 +14493,25 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
       if (!bogenZieht) return;
       const gezogen = bogenZieht.bewegt;
       const auf = bogenZieht.auf;
+      const warOffen = bogenZieht.warOffen;
       bogenZieht = null;
       bahn.classList.remove("zieht");
 
-      /* Kein Weg zurueckgelegt: das war ein Tipp. Wer daneben
-         tippt, soll nichts ausloesen. */
+      /* Kein Weg zurueckgelegt: das war ein Tipp. */
       if (!gezogen) {
-        if (auf && auf.dataset.seite !== aktuelleSeite) {
-          bogenZuSeite(auf.dataset.seite);
-          seiteZeigen(auf.dataset.seite);
+        if (auf) {
+          /* Auf einen Eintrag getippt: dorthin, und wieder zu. */
+          if (auf.dataset.seite !== aktuelleSeite) {
+            bogenZuSeite(auf.dataset.seite);
+            seiteZeigen(auf.dataset.seite);
+          }
+          bogenOeffnen(false);
+        } else {
+          /* Daneben getippt: war die Reihe zu, hat dieser Tipp sie
+             geoeffnet und soll sie offen lassen. War sie offen,
+             schliesst er sie wieder. */
+          bogenOeffnen(!warOffen);
         }
-        /* Auch ohne Seitenwechsel neu zeichnen: die Nachbarn sind
-           beim Aufsetzen aufgetaucht und muessen wieder abtreten. */
-        bogenZeichnen();
         return;
       }
 
@@ -14485,14 +14521,24 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
       bogenZeichnen();
       const seite = bogenSeiten[ziel] && bogenSeiten[ziel].dataset.seite;
       if (seite && seite !== aktuelleSeite) seiteZeigen(seite);
+      bogenOeffnen(false);
     };
     leiste.addEventListener("pointerup", loslassen);
     leiste.addEventListener("pointercancel", loslassen);
+
+    /* Wer die Reihe offen stehen laesst und woanders hintippt, meint
+       nicht die Reihe. */
+    document.addEventListener("pointerdown", ev => {
+      if (!bogenOffen) return;
+      if (leiste.contains(ev.target)) return;
+      bogenOeffnen(false);
+    }, true);
 
     /* Am Rechner kann man auch mit dem Rad blaettern */
     leiste.addEventListener("wheel", ev => {
       if (!bogenAn()) return;
       ev.preventDefault();
+      bogenOeffnen(true);
       const ziel = Math.max(0, Math.min(bogenSeiten.length - 1,
         bogenPos + (ev.deltaY > 0 ? 1 : -1)));
       if (ziel === bogenPos) return;

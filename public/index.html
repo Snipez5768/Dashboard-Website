@@ -1031,7 +1031,20 @@
      Seitenleiste zusammen — so bleiben beide gleich, ohne dass
      man die Liste zweimal pflegt. -->
 <div class="bogen-leiste" id="bogenLeiste" aria-label="Seiten">
+  <!-- In Ruhe steht hier nur eine Linie mit dem Namen der Seite.
+       Beruehren oeffnet die Reihe. -->
+  <div class="bg-ruhe" id="bogenRuhe">
+    <span class="bg-strich"></span>
+    <span class="bg-hier" id="bogenHier">Dashboard</span>
+    <span class="bg-strich"></span>
+  </div>
   <div class="bg-bahn"></div>
+  <!-- Der Weg ins Kontopanel. Auf dem Tablet gibt es die
+       Seitenleiste nicht mehr, die ihn sonst traegt — ohne diesen
+       Knopf kaeme man dort an keine Einstellung mehr. -->
+  <button class="bg-profil" id="bogenProfil" type="button" title="Konto und Einstellungen">
+    <span class="avatar" id="bogenAvatar">LU</span>
+  </button>
 </div>
 
 <div class="chart-tooltip" id="chartTooltip" role="tooltip"></div>
