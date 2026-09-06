@@ -110,7 +110,7 @@ h1 { margin:0 0 4px; font-size:25px; font-weight:700; letter-spacing:-.03em; }
   <div class="reihe">
     <button class="btn haupt" id="neu">+ Block</button>
     <button class="btn" id="kopieren">Bauplan kopieren</button>
-    <button class="btn" id="zuruecksetzen">Zurücksetzen</button>
+    <button class="btn" id="zuruecksetzen">Auf den Ist-Zustand</button>
     <span class="fertig" id="fertig"></span>
   </div>
 
@@ -123,12 +123,16 @@ h1 { margin:0 0 4px; font-size:25px; font-weight:700; letter-spacing:-.03em; }
     <div class="z-feld">
       <label for="zSorte">Sorte</label>
       <select id="zSorte">
-        <option value="termine">Nächste Termine</option>
-        <option value="habits">Habits</option>
-        <option value="streaks">Streaks</option>
+        <option value="wetter">Wetter · jetzt</option>
+        <option value="vorhersage">Wetter · Vorhersage</option>
+        <option value="stzahl">Bildschirmzeit · Zahl</option>
+        <option value="stkurve">Bildschirmzeit · Kurve</option>
         <option value="kalorien">Kalorien</option>
-        <option value="wetter">Wetter</option>
-        <option value="bildschirmzeit">Bildschirmzeit</option>
+        <option value="klausur">Nächste Klausur</option>
+        <option value="habits">Habits</option>
+        <option value="schule">Schule</option>
+        <option value="termine">Nächste Termine</option>
+        <option value="streaks">Streaks (steht derzeit aus)</option>
         <option value="neu">Etwas Neues — im Text beschreiben</option>
       </select>
     </div>
@@ -146,19 +150,34 @@ h1 { margin:0 0 4px; font-size:25px; font-weight:700; letter-spacing:-.03em; }
   const SPALTEN = 12, REIHEN = 6, SPEICHER = "lifeos_bauplan";
 
   const SORTEN = {
-    termine:"Nächste Termine", habits:"Habits", streaks:"Streaks",
-    kalorien:"Kalorien", wetter:"Wetter", bildschirmzeit:"Bildschirmzeit", neu:"Neu"
+    wetter:"Wetter · jetzt", vorhersage:"Wetter · Vorhersage",
+    stzahl:"Bildschirmzeit · Zahl", stkurve:"Bildschirmzeit · Kurve",
+    kalorien:"Kalorien", klausur:"Nächste Klausur", habits:"Habits",
+    schule:"Schule", termine:"Nächste Termine", streaks:"Streaks", neu:"Neu"
+  };
+
+  /* Welche Karte in der App zu welcher Sorte gehoert. Steht in der
+     Ausgabe mit dabei, damit beim Umsetzen nichts zu raten ist —
+     "Wetter" gibt es inzwischen zweimal. */
+  const KARTEN = {
+    wetter:"card-wetter", vorhersage:"card-wetter2",
+    stzahl:"card-screentime2", stkurve:"card-screentime",
+    kalorien:"card-kalorien", klausur:"card-klausur", habits:"card-habits",
+    schule:"card-schule", termine:"card-naechste", streaks:"card-streaks", neu:"—"
   };
 
   /* Startzustand: das, was gerade in der App steht — du korrigierst,
      statt bei null anzufangen. */
   const START = [
-    { id:1, name:"Nächste Termine", sorte:"termine",        text:"", x:1, y:1, w:4, h:3 },
-    { id:2, name:"Habits",          sorte:"habits",         text:"", x:5, y:1, w:4, h:3 },
-    { id:3, name:"Streaks",         sorte:"streaks",        text:"", x:9, y:1, w:4, h:3 },
-    { id:4, name:"Kalorien",        sorte:"kalorien",       text:"", x:1, y:4, w:3, h:3 },
-    { id:5, name:"Wetter",          sorte:"wetter",         text:"", x:4, y:4, w:3, h:3 },
-    { id:6, name:"Bildschirmzeit",  sorte:"bildschirmzeit", text:"", x:7, y:4, w:6, h:3 }
+    { id:1, name:"Wetter · jetzt",          sorte:"wetter",     text:"", x:1,  y:1, w:3, h:2 },
+    { id:2, name:"Bildschirmzeit · Zahl",   sorte:"stzahl",     text:"", x:4,  y:1, w:3, h:2 },
+    { id:3, name:"Bildschirmzeit · Kurve",  sorte:"stkurve",    text:"", x:7,  y:1, w:6, h:3 },
+    { id:4, name:"Wetter · Vorhersage",     sorte:"vorhersage", text:"", x:1,  y:3, w:3, h:2 },
+    { id:5, name:"Kalorien",                sorte:"kalorien",   text:"", x:4,  y:3, w:3, h:2 },
+    { id:6, name:"Nächste Klausur",         sorte:"klausur",    text:"", x:1,  y:5, w:3, h:2 },
+    { id:7, name:"Habits",                  sorte:"habits",     text:"", x:4,  y:5, w:3, h:2 },
+    { id:8, name:"Schule",                  sorte:"schule",     text:"", x:7,  y:4, w:3, h:3 },
+    { id:9, name:"Nächste Termine",         sorte:"termine",    text:"", x:10, y:4, w:3, h:3 }
   ];
 
   const feld = document.getElementById("feld");
@@ -313,7 +332,7 @@ h1 { margin:0 0 4px; font-size:25px; font-weight:700; letter-spacing:-.03em; }
     const zeilen = bloecke.map((b, i) => {
       const name = b.name || SORTEN[b.sorte];
       return "BLOCK " + (i + 1) + " — " + name + "\n"
-        + "  Sorte:  " + SORTEN[b.sorte] + "\n"
+        + "  Sorte:  " + SORTEN[b.sorte] + "   (" + (KARTEN[b.sorte] || "—") + ")\n"
         + "  Platz:  Spalte " + b.x + "-" + (b.x + b.w - 1)
         + ", Reihe " + b.y + "-" + (b.y + b.h - 1) + "   (" + b.w + " × " + b.h + ")\n"
         + "  Raster: grid-area: " + b.y + " / " + b.x + " / " + (b.y + b.h) + " / " + (b.x + b.w) + ";\n"

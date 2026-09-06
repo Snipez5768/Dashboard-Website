@@ -18,7 +18,7 @@
 /* Bei jeder Aenderung hochzaehlen: der Browser tauscht den Worker
    nur aus, wenn sich seine Datei unterscheidet, und ein neuer Name
    raeumt zugleich die alte Kopie weg. */
-const LAGER = "lifeos-v7";
+const LAGER = "lifeos-v8";
 
 /* So lange wird auf den Server gewartet, bevor die Kopie einspringt */
 const NETZ_FRIST = 2000;
@@ -105,7 +105,12 @@ self.addEventListener("fetch", e => {
      Der Server wird trotzdem gefragt, nur eben nebenher: die
      Auffrischung landet im Lager und liegt beim nächsten Start
      bereit. Ein Neuladen in der App holt sie sofort. */
-  if (anfrage.mode === "navigate") {
+  /* Nur die App selbst nimmt den Weg ueber die Kopie. Fuer jede
+     andere Seite im Ordner waere der Rueckfall auf index.html
+     schlicht die falsche Seite. */
+  const istApp = url.pathname === "/" || url.pathname === "/index.html";
+
+  if (anfrage.mode === "navigate" && istApp) {
     /* Beides synchron anmelden: waitUntil nimmt später nichts mehr
        an, und ohne es darf der Worker mitten im Auffrischen enden. */
     const auffrischen = fetch(anfrage)
