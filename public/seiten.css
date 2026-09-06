@@ -218,7 +218,7 @@
   background: color-mix(in srgb, var(--text-muted) 16%, transparent);
 }
 #seite-habits .hk-feld.done {
-  background: var(--status-green);
+  background: var(--accent-active);
 }
 #seite-habits .hk-gitter { gap: 4px; }
 

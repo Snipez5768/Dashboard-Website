@@ -2651,7 +2651,7 @@
      kraeftiger der Punkt. */
   function punktFarbe(alterAnteil) {
     const deckung = 0.32 + (1 - alterAnteil * 0.6) * 0.68;
-    return `color-mix(in srgb, var(--gruen-voll) ${Math.round(deckung * 100)}%, transparent)`;
+    return `color-mix(in srgb, var(--accent-active) ${Math.round(deckung * 100)}%, transparent)`;
   }
 
   /* Das Widget kann statt der letzten Tage das ganze Jahr zeigen:

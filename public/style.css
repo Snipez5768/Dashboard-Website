@@ -10256,9 +10256,9 @@ input:focus, textarea:focus, select:focus {
 .perlen { display: flex; gap: 3px; align-items: center; }
 .perle  { width: 8px; height: 8px; border-radius: 50%;
   background: var(--senke-1); flex-shrink: 0; }
-.perle.voll  { background: var(--status-green); }
+.perle.voll  { background: var(--accent-active); }
 .perle.heute { box-shadow: 0 0 0 2px var(--kontur-2); }
-.perle.voll.heute { box-shadow: 0 0 0 2px color-mix(in srgb, var(--status-green) 45%, transparent); }
+.perle.voll.heute { box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-active) 45%, transparent); }
 
 /* Der Abhak-Knopf */
 .hb-knopf {
