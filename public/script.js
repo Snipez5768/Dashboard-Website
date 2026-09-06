@@ -14496,12 +14496,19 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
 
   /* ---------- Der Schalter ---------- */
   function bogenWahl() {
-    return localStorage.getItem("lifeos_leiste") === "bogen" ? "bogen" : "seite";
+    /* Ohne Eintrag gilt der Bogen — er ersetzt die Seitenleiste,
+       er ergaenzt sie nicht. Der alte Schluessel "lifeos_leiste"
+       bleibt liegen, aber ungelesen: den hat der Start selbst
+       geschrieben, er traegt also keine Entscheidung. */
+    return localStorage.getItem("lifeos_seitenwechsel") === "seite" ? "seite" : "bogen";
   }
-  function bogenSetzen(wert) {
+  function bogenSetzen(wert, merken) {
     if (wert === "bogen") document.documentElement.setAttribute("data-leiste", "bogen");
     else                  document.documentElement.removeAttribute("data-leiste");
-    try { localStorage.setItem("lifeos_leiste", wert); } catch (f) {}
+    /* Gemerkt wird nur eine echte Wahl. Schriebe schon der Start
+       mit, stuende dort spaeter eine Vorgabe als Entscheidung —
+       und eine geaenderte Vorgabe erreichte niemanden mehr. */
+    if (merken) { try { localStorage.setItem("lifeos_seitenwechsel", wert); } catch (f) {} }
     const w = $("leisteWahl");
     if (w) w.querySelectorAll("button[data-leiste]").forEach(k =>
       k.classList.toggle("active", k.dataset.leiste === wert));
@@ -14513,7 +14520,7 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
     if (!w) return;
     w.addEventListener("click", e => {
       const k = e.target.closest("button[data-leiste]");
-      if (k) bogenSetzen(k.dataset.leiste);
+      if (k) bogenSetzen(k.dataset.leiste, true);
     });
     bogenSetzen(bogenWahl());
   })();

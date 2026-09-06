@@ -58,6 +58,14 @@
       if (localStorage.getItem("lifeos_glas") !== "aus") {
         document.documentElement.setAttribute("data-glas", "an");
       }
+      /* Der Bogen unten ersetzt auf dem Tablet die Seitenleiste —
+         das ist der Normalfall, nicht die Ausnahme. Nur wer sie
+         ausdruecklich zurueckholt, bekommt sie wieder. Was hier
+         gesetzt wird, greift ohnehin nur auf Tabletbreite: am
+         Rechner steht keine einzige Regel dazu. */
+      if (localStorage.getItem("lifeos_seitenwechsel") !== "seite") {
+        document.documentElement.setAttribute("data-leiste", "bogen");
+      }
     } catch (f) { /* Kein Speicher: dann eben nach Geraeteeinstellung */ }
   })();
 </script>
@@ -1408,15 +1416,17 @@
             verwischen, was hinter ihnen liegt. Gefällt es nicht, steht hier wieder Aus —
             sonst ändert sich nichts.</p>
 
-          <!-- Auch ein Versuch auf Widerruf, und nur auf dem Tablet -->
+          <!-- Auf dem Tablet gilt der Bogen. Der Weg zurueck steht
+               hier, falls er sich doch nicht bewaehrt. -->
           <h3 class="kop-unter" style="margin-top:18px">Seitenwechsel</h3>
           <div class="seg-toggle thema-wahl" id="leisteWahl" role="group" aria-label="Seitenwechsel">
-            <button type="button" data-leiste="seite">Leiste links</button>
             <button type="button" data-leiste="bogen">Bogen unten</button>
+            <button type="button" data-leiste="seite">Leiste links</button>
           </div>
-          <p class="kop-hinweis">Auf dem Tablet: statt der Leiste links eine Reihe am
-            unteren Rand, auf einem flachen Bogen. Ziehen wechselt die Seite, in der
-            Mitte steht die, auf der du bist. Am Rechner ändert sich nichts.</p>
+          <p class="kop-hinweis">Auf dem Tablet steht statt der Leiste links eine Reihe am
+            unteren Rand, auf einem flachen Bogen: ziehen wechselt die Seite, in der Mitte
+            steht die, auf der du bist. Wer die Leiste zurückwill, holt sie sich hier.
+            Am Rechner und am Telefon ändert sich nichts.</p>
         </div>
 
         <div class="kop-abschnitt">
