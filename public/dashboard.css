@@ -834,3 +834,11 @@
   }
   #seite-dashboard .widget-grid > .card { grid-area: auto; height: auto; }
 }
+
+/* Der letzte Eintrag einer rollenden Liste klebte am Kartenrand —
+   beim Rollen sieht das aus, als waere er abgeschnitten. Ein paar
+   Pixel Auslauf unten machen sichtbar, dass die Liste zu Ende ist. */
+#seite-dashboard .habit-list,
+#seite-dashboard .hb-liste,
+#seite-dashboard .streak-list,
+#seite-dashboard .entry-list { padding-bottom: 4px; }
