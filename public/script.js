@@ -58,6 +58,9 @@
     lat: 52.52,
     lon: 13.405,
     calGoal: 0,
+    /* Tagesziel fuer die Bildschirmzeit in Minuten. Es faerbt den
+       Balken im Dashboard-Widget. */
+    screenLimit: 240,
     /* Profilbild als eingebettete Datenadresse, auf 256 Kanten
        gestutzt — so reist es mit den Einstellungen zum iPad. */
     bild: ""
@@ -402,6 +405,10 @@
      der letzten 21 Tage sorgt dafür, dass die Tages-Kästchen und die
      Streak nicht leer starten. */
   const HABIT_LIMIT = 6;
+  /* Auf dem Dashboard ist die Karte zwei Rasterreihen hoch. Mehr als
+     drei Zeilen passen dort nicht, ohne dass die letzte abgeschnitten
+     wird. Die Habits-Seite zeigt weiterhin alle. */
+  const DASH_HABITS = 3;
   const DEFAULT_HABITS = [
     { id: "sport",  name: "Sport"   },
     { id: "lesen",  name: "Lesen"   },
@@ -1387,8 +1394,234 @@
     renderNaechste();
   }
 
+
+  /* ==========================================================
+     DIE VIER NEUEN DASHBOARD-WIDGETS
+
+     Sie stammen aus Lucas Bauplan. Keins von ihnen legt eigene
+     Daten an — sie lesen, was ohnehin schon da ist, und stellen es
+     anders dar. Einzige Ausnahme ist das Bildschirmzeit-Limit; das
+     ist eine neue Einstellung und war abgestimmt.
+     ========================================================== */
+
+  /* Wie viele Minuten an einem Tag zusammenkamen */
+  /* Ruft eine Funktion auf, die vielleicht weiter unten in der Datei
+     steht. Bei einem const wirft schon der Zugriff, wenn die Zeile noch
+     nicht gelaufen ist — typeof hilft dagegen nicht. */
+  function spaet(fn, ersatz) {
+    try { return fn(); } catch (f) { return ersatz; }
+  }
+
+  function stTagesSumme(key) {
+    const e = screentime && screentime.history && screentime.history[key];
+    if (!e) return null;
+    return (Number(e.phone) || 0) + (Number(e.pc) || 0);
+  }
+
+  /* ----------------------------------------------------------
+     BLOCK 4 — WETTER · VORHERSAGE
+     Das erste Wetter-Widget zeigt jetzt, dieses die kommenden Tage.
+     Heute selbst faellt weg: es steht schon nebenan.
+     ---------------------------------------------------------- */
+  function renderVorhersage() {
+    const body = $("vorhersageBody");
+    if (!body) return;
+    const d = wetterDaten && wetterDaten.daily;
+    if (!d || !d.time || !d.time.length) {
+      body.innerHTML = '<div class="muted-line">Noch keine Vorhersage</div>';
+      return;
+    }
+    const heute = todayStr();
+    let zeilen = "";
+    for (let i = 0; i < d.time.length && zeilen.split("vh-tag").length <= 5; i++) {
+      if (d.time[i] === heute) continue;          /* heute steht nebenan */
+      const datum = new Date(d.time[i] + "T00:00:00");
+      const info = weatherCodeInfo(d.weather_code[i]);
+      const regen = d.precipitation_probability_max?.[i] ?? 0;
+      zeilen += `
+        <div class="vh-tag" title="${fmtDate(d.time[i])} · ${escapeHTML(info.text)}">
+          <span class="vh-name">${WOCHENTAGE_KURZ[datum.getDay()]}</span>
+          <span class="vh-icon">${WEATHER_ICONS[info.icon]}</span>
+          <span class="vh-regen${regen >= 30 ? " hoch" : ""}">${regen}%</span>
+          <span class="vh-min">${Math.round(d.temperature_2m_min[i])}°</span>
+          <span class="vh-max">${Math.round(d.temperature_2m_max[i])}°</span>
+        </div>`;
+    }
+    body.innerHTML = zeilen || '<div class="muted-line">Noch keine Vorhersage</div>';
+  }
+
+  /* ----------------------------------------------------------
+     BLOCK 5 — BILDSCHIRMZEIT · ZAHL
+     Heute gross, gestern klein darunter, Balken zum Limit. Die
+     Kurve traegt das andere Widget.
+     ---------------------------------------------------------- */
+  function renderStZahl() {
+    const body = $("stZahlBody");
+    if (!body) return;
+
+    const heute = stTagesSumme(todayStr());
+    const gestern = stTagesSumme(dateKey(new Date(Date.now() - 86400000)));
+    if (heute === null) {
+      body.innerHTML = '<div class="muted-line">Noch nichts erfasst</div>';
+      return;
+    }
+
+    const limit = Number(settings.screenLimit) || 240;
+    const anteil = Math.min(100, Math.round((heute / limit) * 100));
+    /* Die Farbe sagt, wo man steht: unter der Haelfte gruen, gegen
+       das Limit gelb, darueber rot. */
+    const ton = anteil >= 100 ? "var(--status-red)"
+              : anteil >= 70  ? "var(--status-orange)"
+              : "var(--status-green)";
+
+    const vergleich = gestern === null ? ""
+      : `<div class="stz-gestern">gestern ${dauerText(gestern)}</div>`;
+
+    body.innerHTML = `
+      <div class="stz-zahl">${dauerText(heute)}</div>
+      ${vergleich}
+      <div class="stz-balken"><i style="width:${anteil}%;background:${ton}"></i></div>
+      <div class="stz-limit">${anteil}% von ${dauerText(limit)}</div>`;
+  }
+
+  /* ----------------------------------------------------------
+     BLOCK 6 — NAECHSTE KLAUSUR
+     Faellt keine an, tritt der naechste Termin an ihre Stelle. Ein
+     leeres Widget sagt nichts; eines mit dem naechsten Termin sagt
+     immerhin, was als Naechstes ansteht.
+     ---------------------------------------------------------- */
+  /* badgeFor schreibt ganze Saetze. In den schmalen Dashboard-Karten
+     ist dafuer kein Platz, also hier die knappe Fassung. */
+  function fristKurz(tage, datum) {
+    if (tage === 0) return 'heute';
+    if (tage === 1) return 'morgen';
+    if (tage <= 6) return tage + ' Tage';
+    const d = new Date(datum + 'T00:00:00');
+    return d.getDate() + '.' + (d.getMonth() + 1) + '.';
+  }
+
+  function fristTon(tage) {
+    if (tage === null || tage === undefined) return "";
+    if (tage <= 2)  return "rot";
+    if (tage <= 7)  return "gelb";
+    return "gruen";
+  }
+
+  function renderKlausurWidget() {
+    const body = $("klausurBody");
+    const marke = $("klausurFrist");
+    if (!body) return;
+
+    const naechste = spaet(() => geplanteKlausuren(), klausuren || [])
+      .filter(k => k && k.date && daysUntil(k.date) >= 0)
+      .sort((a, b) => a.date.localeCompare(b.date))[0];
+
+    if (naechste) {
+      const tage = daysUntil(naechste.date);
+      const ton = fristTon(tage);
+      if (marke) { marke.textContent = badgeFor(tage, naechste.date); marke.className = "card-badge " + ton; }
+
+      /* Vorbereitungsstand: wie viele Karten dieser Klausur schon in
+         einem hoeheren Fach liegen. Ohne Karten bleibt der Balken leer. */
+      const karten = spaet(() => alleKartenVon(naechste.id) || [], []);
+      const sitzt = karten.filter(c => spaet(() => karteStufe(c), 0) >= 3).length;
+      const anteil = karten.length ? Math.round((sitzt / karten.length) * 100) : 0;
+      const balkenTon = anteil >= 70 ? "var(--status-green)"
+                      : anteil >= 30 ? "var(--status-orange)"
+                      : "var(--status-red)";
+
+      const fach = naechste.fach ? fachInfo(naechste.fach).kurz : "";
+      body.innerHTML = `
+        <div class="kw-fach">${escapeHTML(fach || naechste.title || "Klausur")}</div>
+        <div class="kw-thema">${escapeHTML(naechste.title || klausurZusatz(naechste) || "")}</div>
+        <div class="kw-stand">${karten.length
+          ? sitzt + " von " + karten.length + " Karten sitzen"
+          : "Noch keine Karteikarten"}</div>
+        <div class="kw-balken"><i style="width:${anteil}%;background:${balkenTon}"></i></div>`;
+      return;
+    }
+
+    /* Keine Klausur: der naechste Termin im Detail */
+    const termin = spaet(() => naechsteEintraege(), [])
+      .filter(e => e && e.date && daysUntil(e.date) >= 0)
+      .sort((a, b) => a.date.localeCompare(b.date))[0];
+
+    if (!termin) {
+      if (marke) { marke.textContent = "—"; marke.className = "card-badge"; }
+      body.innerHTML = '<div class="muted-line">Keine Klausur, kein Termin</div>';
+      return;
+    }
+
+    const tage = daysUntil(termin.date);
+    if (marke) { marke.textContent = badgeFor(tage, termin.date); marke.className = "card-badge " + fristTon(tage); }
+    body.innerHTML = `
+      <div class="kw-fach">${escapeHTML(termin.title || "Termin")}</div>
+      <div class="kw-thema">${fmtDate(termin.date)}${termin.time ? " · " + termin.time : ""}</div>
+      <div class="kw-stand">${termin.ort ? escapeHTML(termin.ort) : "Keine Klausur geplant"}</div>`;
+  }
+
+  /* ----------------------------------------------------------
+     BLOCK 9 — SCHULE
+     Nur Schulisches: Hausaufgaben, Klausuren, Tests. Ist nichts da,
+     tritt der naechste Termin ein, damit die Karte nicht leer steht.
+     ---------------------------------------------------------- */
+  function renderSchuleWidget() {
+    const liste = $("schuleDashList");
+    const zahl = $("schuleZahl");
+    if (!liste) return;
+
+    const alle = spaet(() => naechsteEintraege(), [])
+      .filter(e => e && e.date && daysUntil(e.date) >= 0
+                && (e.art === "klausur" || e.art === "hausaufgabe" || e.art === "thema"))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    if (zahl) zahl.textContent = String(alle.length);
+
+    const zeigen = alle.slice(0, 4);
+    if (!zeigen.length) {
+      liste.innerHTML = '<div class="muted-line">Nichts Anstehendes</div>';
+      return;
+    }
+
+    liste.innerHTML = zeigen.map(e => {
+      const tage = daysUntil(e.date);
+      const ton = fristTon(tage);
+      const was = e.art === "klausur" ? pruefungWort(e)
+                : e.art === "hausaufgabe" ? "Hausaufgabe" : "Thema";
+      const fach = e.fach ? " · " + fachInfo(e.fach).kurz : "";
+      return `<li class="insel entry-item ${e.art}" data-id="${e.id}" data-art="${e.art}">
+          <span class="i-mal ${ton}">${e.art === "hausaufgabe" ? SYM_LERNEN : SYM_LERNEN}</span>
+          <div class="i-text">
+            <div class="i-sache">${escapeHTML(was + fach)} · ${fmtDate(e.date)}</div>
+            <div class="i-wert">${escapeHTML(e.title || "")}</div>
+          </div>
+          <span class="i-rechts"><span class="marke ${ton}">${fristKurz(tage, e.date)}</span></span>
+        </li>`;
+    }).join("");
+
+    /* Auch hier fuehrt die Zeile zur passenden Seite. */
+    liste.querySelectorAll(".entry-item").forEach(li => {
+      li.addEventListener("click", () => {
+        const art = li.dataset.art, id = li.dataset.id;
+        if (art === "klausur") lernenZeigen(id);
+        else if (art === "hausaufgabe") hausaufgabenZeigen(id);
+        else if (art === "thema") themaZeigen(id);
+      });
+    });
+  }
+
+  /* Alle vier haengen an denselben Daten wie der Rest des
+     Dashboards — sie werden mitgezeichnet, wenn sich etwas aendert. */
+  function renderNeueWidgets() {
+    try { renderVorhersage(); }      catch (f) { console.error("[Vorhersage]", f); }
+    try { renderStZahl(); }          catch (f) { console.error("[Bildschirmzeit-Zahl]", f); }
+    try { renderKlausurWidget(); }   catch (f) { console.error("[Klausur-Widget]", f); }
+    try { renderSchuleWidget(); }    catch (f) { console.error("[Schule-Widget]", f); }
+  }
+
   function renderNaechste() {
-    const alle = naechsteEintraege();
+    renderNeueWidgets();   /* die vier aus dem Bauplan haengen an denselben Daten */
+    const alle = naechsteEintraege().filter(e => e.art === "termin");
     const list = $("naechsteList");
     const widget = $("naechsteWidget");
     list.innerHTML = "";
@@ -1412,7 +1645,7 @@
          Zustandsklassen — heute, bald, sonst. */
       li.className = "insel entry-item " + e.art + " " + frist
                    + (diff === 0 ? " today" : diff <= 3 ? " soon" : "");
-      const ton = diff === 0 ? " rot" : diff <= 3 ? " gelb" : " blau";
+      const ton = diff <= 1 ? " rot" : diff <= 6 ? " gelb" : " gruen";
       li.innerHTML = `
         <span class="i-mal${ton}">${e.art === "termin" ? SYM_KALENDER : SYM_LERNEN}</span>
         <div class="i-text">
@@ -1425,11 +1658,21 @@
           <div class="i-wert">${escapeHTML(e.title)}</div>
         </div>
         <span class="i-rechts">
-          <span class="marke${ton}">${badgeFor(diff, e.art === "termin" ? null : e.date)}</span>
+          <span class="marke${ton}">${fristKurz(diff, e.date)}</span>
           <button class="entry-go" data-id="${e.id}" data-art="${e.art}"
             title="${e.art === "termin" ? "Zum Kalender" : "Zur Lernseite"}"
             aria-label="${e.art === "termin" ? "Zum Kalender" : "Zur Lernseite"}">${SYM_PFEIL_RECHTS}</button>
         </span>`;
+      /* Der Pfeil hat in der schmalen Karte keinen Platz mehr. Damit
+         der Weg zur passenden Seite nicht verloren geht, traegt ihn
+         jetzt die ganze Zeile. */
+      li.addEventListener("click", ev => {
+        if (ev.target.closest(".entry-go")) return;   /* der Knopf macht es selbst */
+        if (e.art === "klausur") lernenZeigen(e.id);
+        else if (e.art === "hausaufgabe") hausaufgabenZeigen(e.id);
+        else if (e.art === "thema") themaZeigen(e.id);
+        else kalenderZeigen(e.date);
+      });
       list.appendChild(li);
     });
 
@@ -2249,7 +2492,7 @@
       return;
     }
 
-    const zeilen = sichtbar.map(h => {
+    const zeileVon = (h) => {
       const fertig = habitErledigt(h.id, heute);
       const serie = habitSerie(h.id);
 
@@ -2297,14 +2540,25 @@
             <span class="hb-knopf">${HAKEN_SVG}</span>
           </span>
         </button>`;
-    }).join("");
+    };
+
+    /* Auf dem Dashboard treten abgehakte Habits zurueck, solange noch
+       etwas offen ist — nach Bauplan Block 7. Ist alles erledigt,
+       stehen wieder die ersten da, damit die Karte nicht leer bleibt. */
+    const offen = sichtbar.filter(h => !habitErledigt(h.id, heute));
+    const dashAuswahl = (offen.length ? offen : sichtbar).slice(0, DASH_HABITS);
+
+    const zeilen     = sichtbar.map(zeileVon).join("");
+    const zeilenDash = dashAuswahl.map(zeileVon).join("");
 
     document.querySelectorAll(".habit-list").forEach(wrap => {
-      wrap.style.setProperty("--reihen", String(sichtbar.length));
+      const imDash = !!wrap.closest("#seite-dashboard");
+      const menge  = imDash ? dashAuswahl : sichtbar;
+      wrap.style.setProperty("--reihen", String(menge.length));
       /* Die Zeilen sitzen in einem eigenen Kasten: Maße in cqh gehen
          immer auf den nächsten Container darüber — ein Element kann
          seine eigene Höhe nicht abfragen. */
-      wrap.innerHTML = '<div class="hb-liste">' + zeilen + '</div>';
+      wrap.innerHTML = '<div class="hb-liste">' + (imDash ? zeilenDash : zeilen) + '</div>';
       wrap.querySelectorAll(".hb-zeile").forEach(z => {
         z.addEventListener("click", e => toggleHabit(z.dataset.habit, e));
       });
@@ -2652,6 +2906,11 @@
     $("settingName").value = settings.name || "";
     $("settingCity").value = settings.city || "";
     $("settingCalGoal").value = settings.calGoal || "";
+    /* dauerText schreibt "4 h" — das liest parseDurationToMinutes
+       nicht zurueck. Also im selben Format wie der Platzhalter. */
+    const stl = Number(settings.screenLimit) || 240;
+    $("settingStLimit").value =
+      Math.floor(stl / 60) + ":" + String(stl % 60).padStart(2, "0");
     $("settingCalConsumed").value = kalorien.consumed || "";
     const t = getDayEntry(todayStr());
     $("settingStPhone").value = t.phone ? formatMinutes(t.phone) : "";
@@ -2825,6 +3084,20 @@
     setDayEntry(todayStr(), { pc: min });
     renderScreenTime();
     showToast("PC-Bildschirmzeit gespeichert.", "success");
+  });
+
+  /* Das Tagesziel fuer die Bildschirmzeit. Es faerbt den Balken im
+     Dashboard-Widget: bis siebzig Prozent gruen, darueber gelb, ab
+     dem Ziel rot. */
+  $("settingStLimitSave").addEventListener("click", () => {
+    const input = $("settingStLimit");
+    const min = parseDurationToMinutes(input.value);
+    if (min === null || min <= 0) { input.placeholder = "Format z.B. 4:00 oder 4h30"; return; }
+    settings.screenLimit = min;
+    store.set("lifeos_settings", settings);
+    renderScreenTime();
+    renderNeueWidgets();
+    showToast("Tagesziel gespeichert: " + dauerText(min) + ".", "success");
   });
 
   $("settingCitySave").addEventListener("click", async () => {

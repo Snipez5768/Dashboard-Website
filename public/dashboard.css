@@ -921,3 +921,159 @@
   #seite-dashboard .widget-grid > .card { grid-area: auto; height: auto; }
   #seite-dashboard #card-screentime { min-height: 190px; }
 }
+
+/* ==========================================================
+   DIE VIER NEUEN WIDGETS
+   ========================================================== */
+
+/* ---- Wetter · Vorhersage ---- */
+#seite-dashboard #card-wetter2 > .card-body {
+  display: flex; flex-direction: column; gap: 2px;
+  flex: 1; min-height: 0; overflow-y: auto;
+  scrollbar-width: none;
+}
+#seite-dashboard #card-wetter2 > .card-body::-webkit-scrollbar { display: none; }
+#seite-dashboard .vh-tag {
+  display: grid;
+  grid-template-columns: 30px 24px 1fr auto auto;
+  align-items: center; gap: 8px;
+  padding: 5px 4px;
+  border-radius: 12px;
+  font-size: 12.5px;
+  transition: background var(--t-base) var(--ease-soft);
+}
+#seite-dashboard .vh-tag:hover { background: var(--surface-sunken); }
+#seite-dashboard .vh-name { color: var(--text-muted); font-weight: 500; }
+#seite-dashboard .vh-icon svg { width: 20px; height: 20px; }
+#seite-dashboard .vh-icon { color: var(--status-orange); display: grid; place-items: center; }
+#seite-dashboard .vh-regen { font-size: 11px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+#seite-dashboard .vh-regen.hoch { color: var(--blue-ink); font-weight: 600; }
+#seite-dashboard .vh-min { color: var(--text-muted); font-variant-numeric: tabular-nums; min-width: 30px; text-align: right; }
+#seite-dashboard .vh-max { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 32px; text-align: right; }
+
+/* ---- Bildschirmzeit · Zahl ---- */
+#seite-dashboard #card-screentime2 > .card-body {
+  display: flex; flex-direction: column; justify-content: center; gap: 3px;
+  flex: 1; min-height: 0;
+}
+#seite-dashboard .stz-zahl {
+  font-size: clamp(22px, 3vw, 32px); font-weight: 700;
+  letter-spacing: -.035em; line-height: 1; font-variant-numeric: tabular-nums;
+}
+#seite-dashboard .stz-gestern { font-size: 12px; color: var(--text-muted); }
+#seite-dashboard .stz-balken {
+  margin-top: 8px; height: 7px; border-radius: 999px;
+  background: var(--surface-sunken); box-shadow: var(--sunken); overflow: hidden;
+}
+#seite-dashboard .stz-balken i { display: block; height: 100%; border-radius: 999px;
+  transition: width .6s cubic-bezier(.32,.72,0,1); }
+#seite-dashboard .stz-limit { font-size: 11px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+
+/* ---- Nächste Klausur ---- */
+#seite-dashboard #card-klausur > .card-body {
+  display: flex; flex-direction: column; justify-content: center; gap: 3px;
+  flex: 1; min-height: 0;
+}
+#seite-dashboard .kw-fach {
+  font-size: clamp(17px, 2vw, 22px); font-weight: 700; letter-spacing: -.025em;
+  line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#seite-dashboard .kw-thema {
+  font-size: 12.5px; color: var(--text-muted); line-height: 1.35;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+}
+#seite-dashboard .kw-stand { margin-top: 4px; font-size: 11.5px; color: var(--text-muted); }
+#seite-dashboard .kw-balken {
+  margin-top: 7px; height: 7px; border-radius: 999px;
+  background: var(--surface-sunken); box-shadow: var(--sunken); overflow: hidden;
+}
+#seite-dashboard .kw-balken i { display: block; height: 100%; border-radius: 999px;
+  transition: width .6s cubic-bezier(.32,.72,0,1); }
+
+/* Das Abzeichen oben rechts traegt die Ampelfarbe der Frist */
+#seite-dashboard .card-badge.rot   { background: var(--tint-red);    color: var(--red-ink); }
+#seite-dashboard .card-badge.gelb  { background: var(--tint-orange); color: var(--orange-ink); }
+#seite-dashboard .card-badge.gruen { background: var(--tint-green);  color: var(--green-ink); }
+
+/* ---- Schule ---- */
+#seite-dashboard #card-schule > .card-body { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+#seite-dashboard #card-schule .entry-list {
+  flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none;
+  display: flex; flex-direction: column; gap: 6px; list-style: none; margin: 0; padding: 0 0 4px;
+}
+#seite-dashboard #card-schule .entry-list::-webkit-scrollbar { display: none; }
+#seite-dashboard #card-schule .entry-item::before { content: none; }
+
+/* ----------------------------------------------------------
+   SCHMALE KARTEN
+   Schule und Naechste Termine sind drei von zwoelf Rasterspalten
+   breit. Icon, Titel, Abzeichen und Pfeil passen dort nicht alle
+   nebeneinander — der Titel wurde auf null gedrueckt. Also faellt
+   der Pfeil weg und das Abzeichen wird knapp.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-schule .entry-go,
+#seite-dashboard #card-naechste .entry-go { display: none; }
+
+#seite-dashboard #card-schule .entry-item,
+#seite-dashboard #card-naechste .entry-item {
+  gap: 9px;
+  padding: 8px 10px 8px 8px;
+  min-height: 48px;
+}
+#seite-dashboard #card-schule .i-mal,
+#seite-dashboard #card-naechste .i-mal { width: 30px; height: 30px; border-radius: 10px; }
+#seite-dashboard #card-schule .i-mal svg,
+#seite-dashboard #card-naechste .i-mal svg { width: 16px; height: 16px; }
+
+/* Der Titel bekommt den Platz, das Abzeichen nur so viel wie noetig */
+#seite-dashboard #card-schule .i-text,
+#seite-dashboard #card-naechste .i-text { flex: 1 1 auto; min-width: 0; }
+#seite-dashboard #card-schule .i-rechts,
+#seite-dashboard #card-naechste .i-rechts { flex: 0 1 auto; min-width: 0; gap: 5px; }
+#seite-dashboard #card-schule .marke,
+#seite-dashboard #card-naechste .marke {
+  font-size: 10px; padding: 2.5px 7px; line-height: 1.35;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 84px;
+}
+#seite-dashboard #card-schule .i-sache,
+#seite-dashboard #card-naechste .i-sache { font-size: 10.5px; }
+#seite-dashboard #card-schule .i-wert,
+#seite-dashboard #card-naechste .i-wert { font-size: 13.5px; }
+
+/* Die Zeile traegt jetzt den Weg zur Seite, also zeigt sie das auch */
+#seite-dashboard #card-schule .entry-item,
+#seite-dashboard #card-naechste .entry-item { cursor: pointer; }
+
+/* ----------------------------------------------------------
+   HABITS AUF DEM DASHBOARD
+   Die Karte ist zwei Rasterreihen hoch. Drei Zeilen passen dort nur
+   in kompakter Form; auf kleinen Fenstern rollt die Liste, statt die
+   letzte Zeile abzuschneiden.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-habits > .card-body {
+  flex: 1; min-height: 0; overflow: hidden;
+  display: flex; flex-direction: column;
+}
+#seite-dashboard #card-habits .habit-list {
+  flex: 1; min-height: 0; height: auto; max-height: none;
+  overflow-y: auto; overflow-x: hidden; scrollbar-width: none;
+  display: block;
+}
+#seite-dashboard #card-habits .habit-list::-webkit-scrollbar { display: none; }
+#seite-dashboard #card-habits .hb-liste {
+  display: flex; flex-direction: column; gap: 6px;
+  height: auto; min-height: 0; max-height: none; overflow: visible;
+}
+#seite-dashboard #card-habits .hb-zeile {
+  flex: 0 0 auto;
+  height: auto; min-height: 46px; max-height: none;
+  padding: 7px 10px 7px 7px;
+  gap: 9px;
+}
+#seite-dashboard #card-habits .i-mal    { width: 30px; height: 30px; border-radius: 10px; font-size: 13px; }
+#seite-dashboard #card-habits .i-sache  { font-size: 10.5px; }
+#seite-dashboard #card-habits .i-wert   { font-size: 13.5px; }
+#seite-dashboard #card-habits .i-rechts { gap: 7px; }
+#seite-dashboard #card-habits .perlen   { gap: 3px; }
+#seite-dashboard #card-habits .perle    { width: 6px; height: 6px; }
+#seite-dashboard #card-habits .hb-knopf { width: 24px; height: 24px; }
