@@ -2145,6 +2145,22 @@
      fielen dann in sich zusammen und die Serie riss die Zeile
      auseinander. Eine gemessene Zahl kann das nicht passieren. */
   function habitMasse() {
+    /* STILLGELEGT.
+
+       Diese Funktion rechnete die Hoehe jeder Habit-Zeile aus der
+       Hoehe ihres Widgets und schrieb sie als Inline-Stil. Das war
+       richtig, solange die Zeilen sich eine feste Kartenhoehe aus
+       dem alten 24-Spalten-Raster teilen mussten.
+
+       Jetzt traegt jede Zeile ihre eigene Hoehe aus der CSS, und die
+       Karte waechst mit ihrem Inhalt. Eine gerechnete Hoehe als
+       Inline-Stil laesst sich davon nicht mehr ueberstimmen — sie
+       gewinnt gegen jede Regel und hat das Dashboard daran
+       gehindert, die Proportionen der Musterseite anzunehmen.
+
+       Die Funktion bleibt als leere Huelle stehen, damit die fuenf
+       Aufrufstellen und der ResizeObserver nichts wissen muessen. */
+    return;
     document.querySelectorAll(".habit-list").forEach(wrap => {
       const innen = wrap.querySelector(".hb-liste");
       if (!innen) return;
