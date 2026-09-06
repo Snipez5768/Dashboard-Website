@@ -592,7 +592,7 @@
   let wetterDaten = null;
 
   const TROPFEN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">' +
-    '<path d="M12 3.5c3.2 3.8 5.5 6.6 5.5 9.4a5.5 5.5 0 0 1-11 0c0-2.8 2.3-5.6 5.5-9.4Z"/></svg>';
+    '<path d="M12 3.4c3.3 4 5.6 6.8 5.6 9.6a5.6 5.6 0 1 1-11.2 0c0-2.8 2.3-5.6 5.6-9.6Z"/></svg>';
 
   async function loadWeather(force) {
     $("weatherCityLabel").textContent = settings.city || "—";
@@ -1359,10 +1359,10 @@
 
   /* Der Pfeil sagt "hier geht es weiter" — er ersetzt das doppelte
      Seitensymbol, das vorher im Malzeichen und im Knopf stand. */
-  const SYM_PFEIL_RECHTS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
-  const SYM_KALENDER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3.2v3.6M16 3.2v3.6"/></svg>';
-  const SYM_WECKER   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="7.4"/><path d="M12 9.6V13l2.4 1.5M5.2 4.2 3 6.4M18.8 4.2 21 6.4"/></svg>';
-  const SYM_LERNEN   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7.3C10.4 5.9 8.4 5.2 5.6 5.2c-.9 0-1.6.7-1.6 1.6v9.7c0 .9.7 1.6 1.6 1.6 2.8 0 4.8.7 6.4 2.1 1.6-1.4 3.6-2.1 6.4-2.1.9 0 1.6-.7 1.6-1.6V6.8c0-.9-.7-1.6-1.6-1.6-2.8 0-4.8.7-6.4 2.1Z"/><path d="M12 7.3v13"/></svg>';
+  const SYM_PFEIL_RECHTS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.4 6l6 6-6 6"/></svg>';
+  const SYM_KALENDER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.4" y="5.2" width="17.2" height="15.4" rx="3"/><path d="M3.4 10h17.2"/><path d="M8.2 3.4v3.4M15.8 3.4v3.4"/></svg>';
+  const SYM_WECKER   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13.4" r="7.6"/><path d="M12 9.4v4l2.8 1.7"/><path d="M5.4 4.2 3.2 6.4M18.6 4.2l2.2 2.2"/></svg>';
+  const SYM_LERNEN   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7.6C10.3 6.1 8.2 5.4 5.4 5.4c-.9 0-1.6.7-1.6 1.6v9.4c0 .9.7 1.6 1.6 1.6 2.8 0 4.9.7 6.6 2.2"/><path d="M12 7.6c1.7-1.5 3.8-2.2 6.6-2.2.9 0 1.6.7 1.6 1.6v9.4c0 .9-.7 1.6-1.6 1.6-2.8 0-4.9.7-6.6 2.2"/><path d="M12 7.6v12.6"/></svg>';
 
   /* Farbe nach Restzeit — ab acht Tagen gruen, vier bis sieben gelb,
      drei oder weniger rot. Eine Stelle, damit alle Listen gleich
@@ -2721,7 +2721,7 @@
 
   const HAKEN_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ` +
     `stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">` +
-    `<path d="m5 12.5 4.6 4.6L19 7.2"/></svg>`;
+    `<path d="m5.4 12.6 4.4 4.4 9-9.4"/></svg>`;
 
   /* ==========================================================
      HABITS im Widget
@@ -10910,16 +10910,17 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
   const SYM_PAPIERKORB =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
     + 'stroke-linecap="round" stroke-linejoin="round">'
-    + '<path d="M4 6.5h16"/><path d="M9.5 6.5V4.8A1.3 1.3 0 0 1 10.8 3.5h2.4a1.3 1.3 0 0 1 1.3 1.3v1.7"/>'
-    + '<path d="M6.2 6.5 7 19.2a1.6 1.6 0 0 0 1.6 1.5h6.8a1.6 1.6 0 0 0 1.6-1.5l.8-12.7"/>'
-    + '<path d="M10.3 10.2v6.6M13.7 10.2v6.6"/></svg>';
+    + '<path d="M3.8 6.4h16.4"/>'
+    + '<path d="M9.4 6.4V4.8c0-.8.6-1.4 1.4-1.4h2.4c.8 0 1.4.6 1.4 1.4v1.6"/>'
+    + '<path d="M6.4 6.4l.8 12.8c.1.9.8 1.6 1.7 1.6h6.2c.9 0 1.6-.7 1.7-1.6l.8-12.8"/>'
+    + '<path d="M10.2 10.4v6.4M13.8 10.4v6.4"/></svg>';
 
   const SYM_RUECKBLICK =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
     + 'stroke-linecap="round" stroke-linejoin="round">'
-    + '<path d="M3.6 8.6V4.4"/><path d="M3.6 8.6h4.2"/>'
-    + '<path d="M4.2 8.4A8.4 8.4 0 1 1 3.7 14"/>'
-    + '<path d="M12 7.6V12l3 1.9"/></svg>';
+    + '<path d="M3.4 4.4v4.4h4.4"/>'
+    + '<path d="M3.9 8.8A8.4 8.4 0 1 1 3.6 13.6"/>'
+    + '<path d="M12 7.4V12l3.2 2"/></svg>';
 
   /* Eine Stelle für beide Quellen — sonst muss man an sechs Orten
      daran denken. */
