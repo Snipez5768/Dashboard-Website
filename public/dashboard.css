@@ -2603,3 +2603,303 @@
   width: clamp(8px, .68vw, 10px);
   height: clamp(8px, .68vw, 10px);
 }
+
+/* ==========================================================
+   ==========================================================
+   HANDY UND TABLET
+
+   Dieser Block steht bewusst ganz am Ende: die Aufteilung des
+   zweiten Bauplans weiter oben nennt das Raster mit derselben
+   Staerke, und wer spaeter kommt, gewinnt. Genau daran scheiterten
+   die frueheren Regeln — auf dem iPad lagen weiter zwoelf Spalten,
+   von denen drei auf null Breite standen, und die Kacheln
+   ueberlappten.
+
+   Am Rechner aendert sich nichts: alles hier haengt an einer
+   Hoechstbreite von 1180 Pixeln.
+   ========================================================== */
+
+/* ----------------------------------------------------------
+   TABLET — 700 bis 1180 Pixel
+
+   Zwei Spalten, und die Seite darf rollen. Acht Kacheln auf eine
+   iPad-Hoehe zu zwingen hiesse, jede auf gut hundert Pixel zu
+   quetschen; dann steht ueberall eine Zahl und nirgends etwas,
+   das man lesen kann.
+   ---------------------------------------------------------- */
+@media (min-width: 700px) and (max-width: 1180px) {
+
+  /* Die Seitenleiste nimmt 236 der 820 Pixel — fast ein Drittel.
+     Eingeklappt bleiben die Symbole, der Platz geht an den Inhalt. */
+  .sidebar {
+    width: var(--sidebar-w-collapsed);
+    min-width: var(--sidebar-w-collapsed);
+    max-width: var(--sidebar-w-collapsed);
+  }
+  .sidebar .brand-name,
+  .sidebar .profile-text,
+  .sidebar .nav-link span,
+  .sidebar .nav-group-label { display: none; }
+  .sidebar .sidebar-head { flex-direction: column; gap: 14px; padding: 20px 12px 16px; }
+  .sidebar .sidebar-profile { justify-content: center; padding: 11px 0; }
+  .sidebar .nav-link { justify-content: center; padding: 11px 0; }
+
+  /* Das Dashboard rollt und steht in zwei Spalten */
+  #seite-dashboard.aktiv { overflow-y: auto; overflow-x: hidden; }
+  #seite-dashboard .widget-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: none;
+    grid-auto-rows: minmax(0, auto);
+    gap: 12px;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    padding: 4px 4px 20px;
+  }
+
+  /* Das Wetter faellt auf dem iPad weg — beide Kacheln. */
+  #seite-dashboard #card-wetter,
+  #seite-dashboard #card-wetter2 { display: none; }
+
+  /* Jede Kachel bestimmt ihren Platz selbst; die Reihenfolge
+     kommt aus order, nicht aus der Reihenfolge im Aufbau. */
+  /* Jede Kachel einzeln: die Aufteilung des Bauplans nennt sie
+     mit zwei Kennungen, dagegen kaeme eine Sammelregel nicht an. */
+  #seite-dashboard #card-wetter,
+  #seite-dashboard #card-wetter2,
+  #seite-dashboard #card-screentime2,
+  #seite-dashboard #card-kalorien,
+  #seite-dashboard #card-timer,
+  #seite-dashboard #card-klausur,
+  #seite-dashboard #card-habits,
+  #seite-dashboard #card-schule,
+  #seite-dashboard #card-naechste,
+  #seite-dashboard #card-tagesplan,
+  #seite-dashboard #card-screentime,
+  #seite-dashboard #card-streaks,
+  #seite-dashboard #card-vorschlag,
+  #seite-dashboard #card-quick {
+    grid-area: auto;
+    grid-column: auto / span 1;
+    grid-row: auto;
+    height: auto;
+  }
+
+  #seite-dashboard #card-klausur {
+    order: 1; grid-column: span 2; min-height: 148px;
+  }
+  #seite-dashboard #card-screentime2 { order: 2; min-height: 132px; }
+  #seite-dashboard #card-kalorien    { order: 3; min-height: 132px; }
+  #seite-dashboard #card-timer       { order: 4; min-height: 132px; }
+  #seite-dashboard #card-habits      { order: 5; min-height: 132px; }
+  #seite-dashboard #card-naechste {
+    order: 6; grid-column: span 2; min-height: 300px;
+  }
+  #seite-dashboard #card-tagesplan   { order: 7; min-height: 280px; }
+  #seite-dashboard #card-schule      { order: 8; min-height: 280px; }
+
+  /* Habits stehen hier breiter als am Rechner — der Name bekommt
+     Platz, die Tagesreihe darf daneben statt darunter. */
+  #seite-dashboard #card-habits .hb-zeile {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-rows: auto;
+  }
+  #seite-dashboard #card-habits .i-text   { grid-column: 1; grid-row: 1; }
+  #seite-dashboard #card-habits .perlen   { grid-column: 2; grid-row: 1; }
+  #seite-dashboard #card-habits .hb-knopf { grid-column: 3; grid-row: 1; }
+}
+
+/* ----------------------------------------------------------
+   HANDY — bis 699 Pixel
+   Eine Spalte, alles untereinander, die Seite rollt.
+   ---------------------------------------------------------- */
+@media (max-width: 699px) {
+  #seite-dashboard.aktiv { overflow-y: auto; overflow-x: hidden; }
+  #seite-dashboard .widget-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    grid-auto-rows: minmax(0, auto);
+    gap: 10px;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    /* Unten Platz fuer die Leiste, die dort schwebt */
+    padding: 2px 2px 92px;
+  }
+  /* Auch hier jede Kachel einzeln, aus demselben Grund. */
+  #seite-dashboard #card-wetter,
+  #seite-dashboard #card-wetter2,
+  #seite-dashboard #card-screentime2,
+  #seite-dashboard #card-kalorien,
+  #seite-dashboard #card-timer,
+  #seite-dashboard #card-klausur,
+  #seite-dashboard #card-habits,
+  #seite-dashboard #card-schule,
+  #seite-dashboard #card-naechste,
+  #seite-dashboard #card-tagesplan,
+  #seite-dashboard #card-screentime,
+  #seite-dashboard #card-streaks,
+  #seite-dashboard #card-vorschlag,
+  #seite-dashboard #card-quick {
+    grid-area: auto;
+    grid-column: 1;
+    grid-row: auto;
+    height: auto;
+  }
+
+  /* Auf dem Handy bleibt das Wetter — dort ist es der Blick aus
+     dem Fenster vor dem Aufstehen. */
+  #seite-dashboard #card-wetter      { order: 1; min-height: 104px; }
+  #seite-dashboard #card-klausur     { order: 2; min-height: 138px; }
+  #seite-dashboard #card-screentime2 { order: 3; min-height: 112px; }
+  #seite-dashboard #card-kalorien    { order: 4; min-height: 112px; }
+  #seite-dashboard #card-habits      { order: 5; min-height: 300px; }
+  #seite-dashboard #card-tagesplan   { order: 6; min-height: 240px; }
+  #seite-dashboard #card-naechste    { order: 7; min-height: 280px; }
+  #seite-dashboard #card-schule      { order: 8; min-height: 200px; }
+  #seite-dashboard #card-wetter2     { order: 9; min-height: 200px; }
+  #seite-dashboard #card-timer       { order: 10; min-height: 118px; }
+
+  /* Die Kacheln haben hier die volle Breite — was am Rechner eng
+     war, darf jetzt atmen. */
+  #seite-dashboard #card-habits .hb-zeile {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-rows: auto;
+    padding: 10px 13px;
+  }
+  #seite-dashboard #card-habits .i-text   { grid-column: 1; grid-row: 1; }
+  #seite-dashboard #card-habits .perlen   { grid-column: 2; grid-row: 1; }
+  #seite-dashboard #card-habits .hb-knopf { grid-column: 3; grid-row: 1; }
+  #seite-dashboard #card-habits .i-wert   { font-size: 16px; }
+
+  /* Die Termine tragen ihren Strahl auch hier */
+  #seite-dashboard #card-naechste .entry-list { padding-left: 22px; }
+
+  /* Kein Zwang zur Kuerze mehr: die Zeilen duerfen umbrechen */
+  #seite-dashboard #card-schule .marke,
+  #seite-dashboard #card-naechste .marke { max-width: none; }
+}
+
+/* ----------------------------------------------------------
+   AUF DEM TABLET TRAEGT JEDE KACHEL IHRE EIGENE HOEHE
+
+   Sonst richtet sich die Reihe nach der hoechsten: der Timer stand
+   neben den Habits und war 229 Pixel hoch fuer eine Zeitangabe von
+   dreissig. Mit align-items: start nimmt jede nur, was sie braucht.
+
+   Und die Listen bekommen genug Hoehe, dass nichts rollen muss —
+   auf dem iPad ist Platz genug dafuer.
+   ---------------------------------------------------------- */
+@media (min-width: 700px) and (max-width: 1180px) {
+  #seite-dashboard .widget-grid { align-items: start; }
+
+  #seite-dashboard #card-habits   { min-height: 318px; }
+  #seite-dashboard #card-naechste { min-height: 392px; }
+  #seite-dashboard #card-timer    { min-height: 128px; }
+
+  /* Die Kachelkoerper duerfen mitwachsen, statt zu rollen */
+  #seite-dashboard #card-habits .habit-list,
+  #seite-dashboard #card-naechste .entry-list,
+  #seite-dashboard #card-schule .entry-list,
+  #seite-dashboard #card-tagesplan > .card-body {
+    overflow-y: visible;
+    max-height: none;
+  }
+}
+
+/* Auf dem Tablet traegt jede Kachel ihre eigene Hoehe — dafuer muss
+   das align-self: stretch aus der Rechner-Aufteilung weichen. Es
+   steht dort mit zwei Kennungen, also hier auch. */
+@media (min-width: 700px) and (max-width: 1180px) {
+  #seite-dashboard #card-wetter,
+  #seite-dashboard #card-wetter2,
+  #seite-dashboard #card-screentime2,
+  #seite-dashboard #card-kalorien,
+  #seite-dashboard #card-timer,
+  #seite-dashboard #card-klausur,
+  #seite-dashboard #card-habits,
+  #seite-dashboard #card-schule,
+  #seite-dashboard #card-naechste,
+  #seite-dashboard #card-tagesplan { align-self: start; }
+}
+
+/* align-items: start war der falsche Weg: das Raster rechnet die
+   Zeilenhoehe dann aus dem Inhalt und laesst die Mindesthoehe der
+   Kachel aussen vor. Die Zeilen wurden zu niedrig, und "Nächste
+   Termine" lag ueber den Habits, "Tagesplan" ueber den Terminen.
+
+   Die Zeilen tragen also wieder die Hoehe ihrer hoechsten Kachel.
+   Nur der Timer richtet sich nach oben aus — er soll neben den
+   Habits nicht auf 318 Pixel gestreckt werden, nur weil dort fuenf
+   Zeilen stehen. */
+@media (min-width: 700px) and (max-width: 1180px) {
+  #seite-dashboard .widget-grid { align-items: stretch; }
+
+  #seite-dashboard #card-wetter,
+  #seite-dashboard #card-wetter2,
+  #seite-dashboard #card-screentime2,
+  #seite-dashboard #card-kalorien,
+  #seite-dashboard #card-klausur,
+  #seite-dashboard #card-habits,
+  #seite-dashboard #card-schule,
+  #seite-dashboard #card-naechste,
+  #seite-dashboard #card-tagesplan { align-self: stretch; }
+
+  #seite-dashboard #card-timer { align-self: start; }
+}
+
+/* ----------------------------------------------------------
+   TABLET: SPALTEN STATT RASTER
+
+   Im Raster traegt die Mindesthoehe einer Kachel nichts zur
+   Zeilenhoehe bei — die Zeile richtet sich nach dem Inhalt. Bei
+   "Nächste Termine" war der Inhalt 240 Pixel hoch, die Kachel per
+   min-height 392: sie ragte 150 Pixel in die naechste Zeile und
+   lag ueber dem Tagesplan.
+
+   Als Flexkasten zaehlt die Mindesthoehe mit. Jede Kachel bekommt
+   ihre Breite selbst, die Reihe ist so hoch wie ihre hoechste —
+   und nichts ueberlappt mehr.
+   ---------------------------------------------------------- */
+@media (min-width: 700px) and (max-width: 1180px) {
+  #seite-dashboard .widget-grid {
+    display: flex;
+    /* Ohne diese Zeile bleibt die Richtung aus einer frueheren Regel
+       auf column stehen — dann ist die Hauptachse senkrecht, und
+       calc(50%) meint die Hoehe statt der Breite. Die Kacheln waren
+       dadurch 121 bis 281 Pixel breit statt gleichmaessig 351. */
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: stretch;
+    align-content: flex-start;
+    gap: 12px;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    padding: 4px 4px 24px;
+  }
+
+  /* Halbe Breite, abzueglich der halben Luecke */
+  #seite-dashboard #card-screentime2,
+  #seite-dashboard #card-kalorien,
+  #seite-dashboard #card-timer,
+  #seite-dashboard #card-habits,
+  #seite-dashboard #card-tagesplan,
+  #seite-dashboard #card-schule {
+    flex: 0 0 calc(50% - 6px);
+    max-width: calc(50% - 6px);
+  }
+
+  /* Ueber die volle Breite: was viel Text oder viele Zeilen traegt */
+  #seite-dashboard #card-klausur,
+  #seite-dashboard #card-naechste {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  /* Der Timer steht neben den Habits und soll nicht auf deren
+     Hoehe wachsen. */
+  #seite-dashboard #card-timer { align-self: flex-start; }
+}
