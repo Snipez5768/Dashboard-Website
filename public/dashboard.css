@@ -2535,3 +2535,34 @@
 #seite-dashboard #card-habits .perle.voll.heute {
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-active) 50%, transparent);
 }
+
+/* ----------------------------------------------------------
+   DER HAKEN STEHT MITTIG
+
+   Mit flex-wrap sass er in der oberen Reihe, also auf Hoehe des
+   Namens und nicht der Zeile. Als Raster geht er ueber beide
+   Reihen und sitzt darin mittig — Name und Tagesreihe teilen
+   sich die linke Spalte.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-habits .hb-zeile {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 10px;
+  row-gap: 3px;
+}
+#seite-dashboard #card-habits .i-text {
+  grid-column: 1;
+  grid-row: 1;
+}
+#seite-dashboard #card-habits .perlen {
+  grid-column: 1;
+  grid-row: 2;
+  width: auto;
+}
+#seite-dashboard #card-habits .hb-knopf {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  align-self: center;
+}
