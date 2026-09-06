@@ -2380,3 +2380,123 @@
   background: var(--status-red);
   color: #fff;
 }
+
+/* ----------------------------------------------------------
+   DIE HABIT-ZEILE WIRD LESBAR
+
+   Die Kachel ist zwei Rasterspalten breit, innen rund 174 Pixel.
+   Davon nahmen Perlen und Haken 74, das Malzeichen 28 — fuer den
+   Namen blieben 52. "Meditation" wurde zu "Medit…", und groesser
+   setzen liess sich davon nichts.
+
+   Jetzt teilt sich die Zeile auf zwei Reihen: oben das Zeichen,
+   der Name und der Haken, darunter Wochenstand und Perlen. Der
+   Name bekommt damit gut das Doppelte an Breite und kann in
+   sechzehn Pixeln stehen.
+
+   Moeglich wird das durch display:contents auf .i-rechts — der
+   Kasten verschwindet aus dem Aufbau, und Perlen wie Haken werden
+   eigene Kinder der Zeile, die sich getrennt anordnen lassen.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-habits .hb-zeile {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: 3px;
+  column-gap: clamp(7px, .7vw, 10px);
+  padding: clamp(7px, .7vw, 10px) clamp(8px, .8vw, 11px);
+  min-height: 0;
+}
+
+/* Der Kasten um Perlen und Haken faellt weg; beide ordnen sich
+   jetzt selbst ein. */
+#seite-dashboard #card-habits .i-rechts { display: contents; }
+
+#seite-dashboard #card-habits .i-mal {
+  order: 1;
+  width: clamp(28px, 2.3vw, 34px);
+  height: clamp(28px, 2.3vw, 34px);
+  border-radius: 11px;
+  font-size: clamp(13px, 1vw, 15px);
+}
+
+#seite-dashboard #card-habits .i-text {
+  order: 2;
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column-reverse;   /* Name oben, Stand darunter */
+  gap: 0;
+}
+#seite-dashboard #card-habits .i-wert {
+  font-size: clamp(13.5px, 1.1vw, 16.5px);
+  font-weight: 650;
+  letter-spacing: -.02em;
+  line-height: 1.2;
+}
+#seite-dashboard #card-habits .i-sache {
+  font-size: clamp(10px, .78vw, 12px);
+  line-height: 1.25;
+}
+
+#seite-dashboard #card-habits .hb-knopf {
+  order: 3;
+  flex: 0 0 auto;
+  width: clamp(24px, 2vw, 28px);
+  height: clamp(24px, 2vw, 28px);
+}
+
+/* Die Perlen ruecken in die zweite Reihe und nehmen sie ganz ein */
+#seite-dashboard #card-habits .perlen {
+  order: 4;
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  gap: clamp(4px, .45vw, 6px);
+  padding-left: calc(clamp(28px, 2.3vw, 34px) + clamp(7px, .7vw, 10px));
+}
+#seite-dashboard #card-habits .perle {
+  width: clamp(7px, .62vw, 9px);
+  height: clamp(7px, .62vw, 9px);
+}
+
+/* Fuenf Zeilen mit dem groesseren Namen brauchten 397 Pixel, die
+   Liste hat 287 — es rollte. Der Wochenstand faellt weg: "5 von 7"
+   sagt dasselbe wie die sieben Perlen direkt darunter, nur in
+   Worten. Damit passen die fuenf, und der Name darf stehen bleiben,
+   wie er ist. Auf der Habits-Seite bleibt der Stand. */
+#seite-dashboard #card-habits .i-sache { display: none; }
+#seite-dashboard #card-habits .hb-zeile {
+  padding: 6px 9px;
+  row-gap: 2px;
+}
+#seite-dashboard #card-habits .i-mal {
+  width: clamp(26px, 2.1vw, 31px);
+  height: clamp(26px, 2.1vw, 31px);
+}
+#seite-dashboard #card-habits .hb-knopf {
+  width: clamp(23px, 1.9vw, 27px);
+  height: clamp(23px, 1.9vw, 27px);
+}
+#seite-dashboard #card-habits .perlen {
+  gap: clamp(3.5px, .4vw, 5px);
+  padding-left: calc(clamp(26px, 2.1vw, 31px) + 8px);
+}
+#seite-dashboard #card-habits .perle {
+  width: clamp(6px, .55vw, 8px);
+  height: clamp(6px, .55vw, 8px);
+}
+#seite-dashboard #card-habits .hb-liste { gap: 4px; }
+
+/* Dreiundzwanzig Pixel fehlten noch. Sie kommen aus dem Polster
+   der Zeile und dem Malzeichen — nicht aus der Schrift, denn um
+   die ging es. */
+#seite-dashboard #card-habits .hb-zeile { padding: 5px 9px; }
+#seite-dashboard #card-habits .i-mal {
+  width: clamp(25px, 2vw, 28px);
+  height: clamp(25px, 2vw, 28px);
+}
+#seite-dashboard #card-habits .perlen {
+  padding-left: calc(clamp(25px, 2vw, 28px) + 8px);
+}
+#seite-dashboard #card-habits .hb-liste { gap: 3px; }
