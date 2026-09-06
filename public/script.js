@@ -673,6 +673,12 @@
         </div>
         `;
     }
+
+    /* Die Vorhersage-Kachel haengt an denselben Daten. Sie wurde
+       bisher nur beim allgemeinen Neuzeichnen gefuellt — kamen die
+       Wetterdaten spaeter, blieb dort "Noch keine Vorhersage"
+       stehen, waehrend nebenan schon Zahlen standen. */
+    spaet(() => renderVorhersage(), null);
   }
 
   /* Umschalter: aktuelles Wetter oder 7-Tage-Vorhersage */
