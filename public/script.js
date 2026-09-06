@@ -3224,15 +3224,55 @@
      Ordnen-Modus wiederholen. */
   const ORD_ANFANGS_WEG = ["card-wetter", "card-wetter2"];
 
+  /* Vier Breiten und vier Hoehen. Die Breiten rechnen die Luecke
+     mit: bei drei Kacheln nebeneinander liegen zwei Luecken von je
+     zwoelf Pixeln dazwischen, also acht je Kachel. */
+  const ORD_BREITEN = [
+    { wort: "1/3", wert: "calc(33.333% - 8px)" },
+    { wort: "1/2", wert: "calc(50% - 6px)" },
+    { wort: "2/3", wert: "calc(66.667% - 4px)" },
+    { wort: "1/1", wert: "100%" }
+  ];
+  /* Die Hoehen in Pixeln, nicht in Anteilen: eine Kachel mit einer
+     Zahl darin braucht dieselbe Hoehe, ob sie ein Drittel oder die
+     ganze Breite hat. */
+  const ORD_HOEHEN = [
+    { wort: "S", wert: 108 },
+    { wort: "M", wert: 168 },
+    { wort: "L", wert: 258 },
+    { wort: "XL", wert: 348 }
+  ];
+
+  /* Womit eine Kachel anfaengt, wenn nichts eingestellt wurde */
+  const ORD_VORGABE = {
+    "card-klausur":     { b: 3, h: 1 },
+    "card-screentime2": { b: 1, h: 0 },
+    "card-kalorien":    { b: 1, h: 0 },
+    "card-timer":       { b: 1, h: 0 },
+    "card-habits":      { b: 1, h: 3 },
+    "card-naechste":    { b: 3, h: 3 },
+    "card-tagesplan":   { b: 1, h: 2 },
+    "card-schule":      { b: 1, h: 2 },
+    "card-wetter":      { b: 1, h: 0 },
+    "card-wetter2":     { b: 1, h: 2 }
+  };
+  function ordStufe(id, feld) {
+    const eigen = feld === "b" ? ordPlan.breit[id] : ordPlan.hoehe[id];
+    if (Number.isInteger(eigen)) return eigen;
+    const v = ORD_VORGABE[id];
+    return v ? v[feld] : (feld === "b" ? 1 : 1);
+  }
+
   let ordPlan = store.get("lifeos_ipad_plan", null);
   /* Beim allerersten Mal gilt die Vorgabe: Wetter aus. Danach
      zaehlt nur noch, was hier eingestellt wurde. */
   if (!ordPlan || typeof ordPlan !== "object") {
-    ordPlan = { reihe: [], breit: {}, weg: ORD_ANFANGS_WEG.slice() };
+    ordPlan = { reihe: [], breit: {}, hoehe: {}, weg: ORD_ANFANGS_WEG.slice() };
   }
   if (!Array.isArray(ordPlan.reihe)) ordPlan.reihe = [];
   if (!Array.isArray(ordPlan.weg))   ordPlan.weg = [];
   if (!ordPlan.breit || typeof ordPlan.breit !== "object") ordPlan.breit = {};
+  if (!ordPlan.hoehe || typeof ordPlan.hoehe !== "object") ordPlan.hoehe = {};
 
   let ordModus = false;
 
@@ -3263,6 +3303,8 @@
         k.style.removeProperty("order");
         k.style.removeProperty("flex");
         k.style.removeProperty("max-width");
+        k.style.removeProperty("min-height");
+        k.style.removeProperty("height");
         k.style.removeProperty("display");
         return;
       }
@@ -3275,11 +3317,12 @@
       }
       k.style.removeProperty("display");
 
-      /* Zwei Breiten: halb oder ganz. Mehr Abstufungen braeuchten
-         auf 820 Pixeln niemand — ein Drittel waere 268 breit. */
-      const ganz = ordPlan.breit[id] === 2;
-      k.style.flex = ganz ? "0 0 100%" : "0 0 calc(50% - 6px)";
-      k.style.maxWidth = ganz ? "100%" : "calc(50% - 6px)";
+      const b = ORD_BREITEN[ordStufe(id, "b")] || ORD_BREITEN[1];
+      const h = ORD_HOEHEN[ordStufe(id, "h")]  || ORD_HOEHEN[1];
+      k.style.flex = "0 0 " + b.wert;
+      k.style.maxWidth = b.wert;
+      k.style.minHeight = h.wert + "px";
+      k.style.height = "auto";
     });
 
     /* Der Knopf steht nur da, wo er etwas bewirkt */
@@ -3302,7 +3345,8 @@
 
       griff = document.createElement("div");
       griff.className = "ord-griffe";
-      const ganz = ordPlan.breit[id] === 2;
+      const bw = (ORD_BREITEN[ordStufe(id, "b")] || ORD_BREITEN[1]).wort;
+      const hw = (ORD_HOEHEN[ordStufe(id, "h")]  || ORD_HOEHEN[1]).wort;
       const weg = ordPlan.weg.includes(id);
       griff.innerHTML = `
         <button type="button" data-ord="hoch" title="Nach vorn" aria-label="Nach vorn">
@@ -3311,10 +3355,10 @@
         <button type="button" data-ord="runter" title="Nach hinten" aria-label="Nach hinten">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10l6 6 6-6"/></svg>
         </button>
-        <button type="button" data-ord="breite" title="${ganz ? "Halbe Breite" : "Volle Breite"}"
-          aria-label="Breite ändern">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.6 12h16.8"/><path d="M7.4 8.2 3.6 12l3.8 3.8"/><path d="M16.6 8.2 20.4 12l-3.8 3.8"/></svg>
-        </button>
+        <button type="button" data-ord="breite" class="ord-stufe" title="Breite: ${bw}"
+          aria-label="Breite ändern">${bw}</button>
+        <button type="button" data-ord="hoehe" class="ord-stufe" title="Höhe: ${hw}"
+          aria-label="Höhe ändern">${hw}</button>
         <button type="button" data-ord="weg" class="ord-weg" title="${weg ? "Wieder zeigen" : "Ausblenden"}"
           aria-label="Ausblenden">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 6.6 17.4 17.4M17.4 6.6 6.6 17.4"/></svg>
@@ -3341,7 +3385,9 @@
       folge.splice(i + 1, 0, folge.splice(i, 1)[0]);
       ordPlan.reihe = folge;
     } else if (was === "breite") {
-      ordPlan.breit[id] = ordPlan.breit[id] === 2 ? 1 : 2;
+      ordPlan.breit[id] = (ordStufe(id, "b") + 1) % ORD_BREITEN.length;
+    } else if (was === "hoehe") {
+      ordPlan.hoehe[id] = (ordStufe(id, "h") + 1) % ORD_HOEHEN.length;
     } else if (was === "weg") {
       const w = ordPlan.weg.indexOf(id);
       if (w >= 0) ordPlan.weg.splice(w, 1); else ordPlan.weg.push(id);
@@ -3394,7 +3440,7 @@
     start.addEventListener("click", ordStarten);
     $("ordFertig").addEventListener("click", ordBeenden);
     $("ordZurueck").addEventListener("click", () => {
-      ordPlan = { reihe: [], breit: {}, weg: ORD_ANFANGS_WEG.slice() };
+      ordPlan = { reihe: [], breit: {}, hoehe: {}, weg: ORD_ANFANGS_WEG.slice() };
       ordSichern();
       ordAnwenden();
       ordAusgeblendeteZeigen();
