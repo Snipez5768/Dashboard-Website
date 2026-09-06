@@ -1159,3 +1159,380 @@
   flex: 0 0 auto; align-self: flex-end; margin-left: auto;
   padding: 3px 9px; font-size: 11px; border-radius: 999px;
 }
+
+/* ==========================================================
+   ==========================================================
+   DIE SPRACHE DER MUSTERSEITE
+
+   Die Werte stehen so in muster.html — Karte 20 Pixel Polster und
+   26 Radius, Name 13 Pixel in Grau, Abzeichen als Pille mit Punkt,
+   grosse Zahl 38 Pixel mit kleinen Einheiten, Unterzeile 13, Balken
+   8 hoch. Weil die Karten hier verschieden gross sind, wandern die
+   festen Groessen in clamp(): bei 1600 Pixel Fensterbreite kommt
+   genau der Demo-Wert heraus, darunter schrumpft es mit.
+   ========================================================== */
+
+/* ----------------------------------------------------------
+   1  DIE KARTE
+   ---------------------------------------------------------- */
+#seite-dashboard .card {
+  padding: clamp(14px, 1.25vw, 20px);
+  border-radius: 26px;
+  border: none;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-3);
+  display: flex;
+  flex-direction: column;
+  min-width: 0; min-height: 0; height: 100%;
+  overflow: hidden;
+}
+
+/* ----------------------------------------------------------
+   2  DIE KOPFZEILE
+   Auf der Musterseite steht dort nur der Name in Grau und rechts
+   das Abzeichen. Das farbige Symbolquadrat gab es dort nicht — es
+   nahm den Platz weg, den die Zahl darunter braucht.
+   ---------------------------------------------------------- */
+#seite-dashboard .card-head > .i-mal { display: none; }
+
+#seite-dashboard .card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+  margin-bottom: clamp(9px, .9vw, 14px);
+  padding: 0;
+  border: none;
+  background: none;
+  min-height: 0;
+}
+
+#seite-dashboard .card-title {
+  font-size: clamp(11.5px, .82vw, 13px);
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-muted);
+  margin-right: auto;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+#seite-dashboard .card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: 0 0 auto;
+  padding: 4px 11px;
+  border: none;
+  border-radius: 999px;
+  font-size: clamp(10px, .73vw, 11.5px);
+  font-weight: 600;
+  line-height: 1.35;
+  white-space: nowrap;
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+}
+#seite-dashboard .card-badge::before {
+  content: "";
+  width: 6px; height: 6px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: currentColor;
+}
+#seite-dashboard .card-badge[hidden] { display: none; }
+
+/* Die vier Signaltoene der Musterseite */
+#seite-dashboard .card-badge.rot   { background: var(--tint-red);    color: var(--red-ink); }
+#seite-dashboard .card-badge.gruen { background: var(--tint-green);  color: var(--green-ink); }
+#seite-dashboard .card-badge.gelb  { background: var(--tint-orange); color: var(--orange-ink); }
+#seite-dashboard .card-badge.blau  { background: var(--tint-blue);   color: var(--blue-ink); }
+
+/* ----------------------------------------------------------
+   3  DIE GROSSE ZAHL
+   38 Pixel, Tabellenziffern, Einheiten klein daneben.
+   ---------------------------------------------------------- */
+#seite-dashboard .cal-value,
+#seite-dashboard .weather-temp,
+#seite-dashboard .stz-zahl {
+  font-family: var(--sans);
+  font-size: clamp(26px, 2.9vw, 46px);
+  font-weight: 700;
+  letter-spacing: -.035em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  animation: none;
+}
+#seite-dashboard .cal-value small,
+#seite-dashboard .weather-temp small,
+#seite-dashboard .stz-zahl small {
+  font-size: clamp(12px, 1.15vw, 19px);
+  font-weight: 500;
+  letter-spacing: -.01em;
+  color: var(--text-muted);
+}
+
+/* Die Unterzeile */
+#seite-dashboard .cal-sub,
+#seite-dashboard .weather-desc,
+#seite-dashboard .stz-gestern,
+#seite-dashboard .stz-limit,
+#seite-dashboard .kw-thema,
+#seite-dashboard .kw-stand {
+  margin-top: 6px;
+  font-family: var(--sans);
+  font-size: clamp(11.5px, .95vw, 15px);
+  font-weight: 400;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+/* Der Balken */
+#seite-dashboard .stz-balken,
+#seite-dashboard .kw-balken {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  box-shadow: var(--sunken);
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+#seite-dashboard .stz-balken i,
+#seite-dashboard .kw-balken i {
+  display: block; height: 100%; border-radius: 999px;
+  transition: width .6s cubic-bezier(.32,.72,0,1);
+}
+
+/* ----------------------------------------------------------
+   4  WETTER JETZT
+   Symbol links, Temperatur rechts, darunter eine Zeile.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-wetter > .card-body {
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: column; justify-content: center;
+  gap: 0;
+}
+#seite-dashboard .weather-main {
+  display: flex; flex-direction: row; align-items: center;
+  gap: clamp(10px, 1vw, 14px);
+  flex-wrap: nowrap;
+}
+#seite-dashboard .weather-icon {
+  flex: 0 0 auto;
+  width: clamp(40px, 4vw, 66px);
+  height: clamp(40px, 4vw, 66px);
+  display: grid; place-items: center;
+  background: none; border: none; padding: 0; border-radius: 0;
+  color: var(--status-orange);
+}
+#seite-dashboard .weather-icon svg {
+  width: 100%; height: 100%;
+  stroke: var(--status-orange); stroke-width: 1.8; fill: none;
+}
+#seite-dashboard .weather-werte { min-width: 0; }
+#seite-dashboard .weather-desc {
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* Die alten Pillenreihen sind aus dem Aufbau raus; falls doch eine
+   uebrig bleibt, nimmt sie keinen Platz mehr weg. */
+#seite-dashboard #card-wetter .weather-minmax,
+#seite-dashboard #card-wetter .weather-regen { display: none; }
+
+/* ----------------------------------------------------------
+   5  BILDSCHIRMZEIT · ZAHL
+   ---------------------------------------------------------- */
+#seite-dashboard #card-screentime2 > .card-body {
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: column; justify-content: center;
+  gap: 0;
+}
+#seite-dashboard .stz-balken { margin-top: clamp(10px, 1.1vw, 14px); }
+#seite-dashboard .stz-limit  { margin-top: 6px; }
+
+/* ----------------------------------------------------------
+   6  KALORIEN
+   Ring links, Zahlen rechts — die Aufteilung der Musterseite.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-kalorien > .card-body {
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: row; align-items: center;
+  flex-wrap: nowrap;
+  gap: clamp(11px, 1.1vw, 16px);
+}
+#seite-dashboard #card-kalorien .cal-ring-area {
+  position: relative;
+  flex: 0 0 auto;
+  width:  clamp(58px, 5.6vw, 90px);
+  height: clamp(58px, 5.6vw, 90px);
+  min-width: 0; min-height: 0;
+  display: block;
+}
+#seite-dashboard .cal-ring { width: 100%; height: 100%; display: block; }
+#seite-dashboard .cal-ring circle { fill: none; stroke-linecap: round; }
+#seite-dashboard .cal-ring-spur   { stroke: var(--surface-sunken); }
+#seite-dashboard .cal-ring-wert   { transition: stroke-dashoffset .7s cubic-bezier(.32,.72,0,1); }
+
+/* Der alte Strichring bleibt im Aufbau, damit seine Zeichenfunktion
+   weiterlaeuft — zu sehen ist er nicht mehr. */
+#seite-dashboard #card-kalorien .cal-gauge-wrap { display: none; }
+
+#seite-dashboard .cal-neben {
+  flex: 1 1 auto; min-width: 0;
+  display: flex; flex-direction: column; align-items: flex-start;
+  gap: 0;
+}
+#seite-dashboard .cal-sub.drueber,
+#seite-dashboard .cal-neben .drueber { color: var(--red-ink); }
+#seite-dashboard #card-kalorien .cal-empty {
+  display: none;
+  border: none; background: none; padding: 0;
+  margin-top: 6px;
+  font-size: clamp(11px, .82vw, 13px); color: var(--text-muted); text-align: left;
+}
+#seite-dashboard #card-kalorien .cal-body.empty .cal-empty { display: block; }
+#seite-dashboard #card-kalorien .cal-body.empty .cal-sub   { display: none; }
+
+#seite-dashboard .cal-flamme {
+  margin-top: 8px;
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 9px 3px 6px;
+  border-radius: 999px;
+  background: var(--tint-orange); color: var(--orange-ink);
+  font-size: clamp(10px, .73vw, 11.5px); font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+#seite-dashboard .cal-flamme svg { width: 13px; height: 13px; display: block; }
+#seite-dashboard .cal-flamme[hidden] { display: none; }
+
+/* Der Weg zur Kalorien-Seite: klein und unaufdringlich unten rechts */
+#seite-dashboard #card-kalorien .ghost-btn {
+  position: absolute; right: clamp(14px, 1.25vw, 20px); bottom: clamp(12px, 1.1vw, 16px);
+  padding: 3px 10px; font-size: 11px; border-radius: 999px;
+}
+#seite-dashboard #card-kalorien { position: relative; }
+
+/* ----------------------------------------------------------
+   7  NAECHSTE KLAUSUR
+   Fach gross, Thema darunter, Balken unten — wie die Klausurkarte
+   der Musterseite, nur auf die Kachelhoehe gezogen.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-klausur > .card-body {
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: column; justify-content: center;
+  gap: 0;
+}
+#seite-dashboard .kw-fach {
+  font-family: var(--sans);
+  font-size: clamp(18px, 1.9vw, 31px);
+  font-weight: 650;
+  letter-spacing: -.02em;
+  line-height: 1.15;
+  color: var(--text-primary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#seite-dashboard .kw-thema {
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+#seite-dashboard .kw-balken { margin-top: clamp(10px, 1.1vw, 14px); }
+
+/* ----------------------------------------------------------
+   8  WETTER · VORHERSAGE
+   Kein Gegenstueck auf der Musterseite — also dieselben Bausteine:
+   Zeilenhoehe aus dem Zeitstrahl, Schrift aus der Unterzeile.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-wetter2 > .card-body {
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: column; justify-content: center;
+  gap: 1px;
+  overflow-y: auto; scrollbar-width: none;
+}
+#seite-dashboard .vh-tag {
+  display: grid;
+  grid-template-columns: 26px 22px 1fr auto auto;
+  align-items: center; gap: clamp(5px, .55vw, 9px);
+  padding: clamp(3px, .45vh, 6px) 4px;
+  border-radius: 12px;
+  font-size: clamp(10.5px, .8vw, 13px);
+  transition: background var(--t-base) var(--ease-soft);
+}
+#seite-dashboard .vh-tag:hover { background: var(--surface-sunken); }
+#seite-dashboard .vh-name  { color: var(--text-muted); font-weight: 500; }
+#seite-dashboard .vh-icon  { color: var(--status-orange); display: grid; place-items: center; }
+#seite-dashboard .vh-icon svg { width: clamp(15px, 1.25vw, 20px); height: clamp(15px, 1.25vw, 20px); }
+#seite-dashboard .vh-regen { font-size: clamp(9.5px, .7vw, 11.5px); color: var(--text-muted); font-variant-numeric: tabular-nums; }
+#seite-dashboard .vh-regen.hoch { color: var(--blue-ink); font-weight: 600; }
+#seite-dashboard .vh-min { color: var(--text-muted); font-variant-numeric: tabular-nums; text-align: right; }
+#seite-dashboard .vh-max { font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
+
+/* ----------------------------------------------------------
+   9  DIE ZEILEN-KARTEN
+   Habits, Schule und Termine tragen den Zeitstrahl der
+   Musterseite: graue Kapseln, das Laufende in Blau.
+   ---------------------------------------------------------- */
+#seite-dashboard .entry-item,
+#seite-dashboard .hb-zeile {
+  border-radius: 18px;
+  background: var(--surface-sunken);
+  border: none;
+}
+#seite-dashboard .i-sache {
+  font-size: clamp(9.5px, .7vw, 11.5px);
+  font-weight: 500; color: var(--text-muted); line-height: 1.3;
+}
+#seite-dashboard .i-wert {
+  font-size: clamp(12.5px, 1.02vw, 16px);
+  font-weight: 650; letter-spacing: -.02em; line-height: 1.25;
+}
+#seite-dashboard .marke {
+  display: inline-flex; align-items: center;
+  padding: 3px 9px; border-radius: 999px;
+  font-size: clamp(9.5px, .7vw, 11px); font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ----------------------------------------------------------
+   10  DIE KURVE
+   Die grosse Karte bekommt denselben Kopf; die Legende und der
+   Umschalter bleiben, wo sie sind.
+   ---------------------------------------------------------- */
+#seite-dashboard #card-screentime > .card-body,
+#seite-dashboard #card-screentime .st-chart {
+  flex: 1 1 auto; min-height: 0; height: auto;
+}
+#seite-dashboard #card-screentime .legend {
+  display: flex; align-items: center; gap: 10px;
+  margin-right: 10px;
+}
+#seite-dashboard #card-screentime .legend-item {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 11px; border-radius: 999px; border: none;
+  background: var(--surface-sunken); color: var(--text-muted);
+  font-size: clamp(10px, .73vw, 11.5px); font-weight: 600;
+}
+
+/* ----------------------------------------------------------
+   NICHTS WIRD ABGESCHNITTEN
+   "Teilweise bewölkt · 13° bis 20°" ist laenger als "Bedeckt ·
+   15° bis 20°" aus der Demo und stiess rechts an. Statt es zu
+   kuerzen, darf es umbrechen — Platz ist in der Kachel genug.
+   ---------------------------------------------------------- */
+#seite-dashboard .weather-desc {
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: clip;
+}
+#seite-dashboard .kw-fach {
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: clip;
+}
+/* Bricht der Titel um, ruecken Thema und Balken nach — dafuer
+   darf das Thema dann nur noch eine Zeile belegen. */
+#seite-dashboard .kw-thema { -webkit-line-clamp: 2; }

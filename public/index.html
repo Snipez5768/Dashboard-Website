@@ -344,6 +344,12 @@
           </div>
           <div class="card-body cal-body" id="calWidget">
             <div class="cal-ring-area">
+              <!-- Der glatte Ring der Musterseite -->
+              <svg class="cal-ring" viewBox="0 0 100 100" aria-hidden="true">
+                <circle class="cal-ring-spur" cx="50" cy="50" r="40" stroke-width="11"></circle>
+                <circle class="cal-ring-wert" id="calRingWert" cx="50" cy="50" r="40" stroke-width="11"
+                        stroke-dasharray="251.33" stroke-dashoffset="251.33" transform="rotate(-90 50 50)"></circle>
+              </svg>
               <div class="cal-gauge-wrap">
                 <svg class="cal-gauge" viewBox="0 0 200 200" aria-hidden="true">
                   <defs>
@@ -355,18 +361,12 @@
                   </defs>
                   <g id="calGaugeTicks"></g>
                 </svg>
-                <div class="cal-center">
-                  <div class="cal-value"><span id="calConsumed">0</span></div>
-                  <div class="cal-sub"><span class="cal-slash">/</span><span id="calGoalDisplay">0</span> kcal</div>
-                </div>
               </div>
-              <div class="cal-empty">Noch nichts getrackt</div>
             </div>
-            <!-- Bauplan Block 1: neben dem Ring der Rest des Tages und
-                 die Flamme fuer die Tage am Stueck. -->
             <div class="cal-neben" id="calNeben">
-              <div class="cal-rest"><span id="calRest">—</span></div>
-              <div class="cal-rest-wort" id="calRestWort">übrig</div>
+              <div class="cal-value"><span id="calConsumed">0</span><small> kcal</small></div>
+              <div class="cal-sub">von <span id="calGoalDisplay">0</span> · <span id="calRest">—</span> <span id="calRestWort">übrig</span></div>
+              <div class="cal-empty">Noch nichts getrackt</div>
               <div class="cal-flamme" id="calFlamme" hidden>
                 <span class="cal-flamme-mal" id="calFlammeMal"></span><span id="calFlammeTage">0</span>
               </div>
@@ -457,6 +457,7 @@
           <div class="card-head">
             <span class="i-mal gelb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M11 18.5h2"/></svg></span>
             <span class="card-title">Bildschirmzeit</span>
+            <span class="card-badge" id="stZahlTrend" hidden>—</span>
           </div>
           <div class="card-body stzahl" id="stZahlBody">
             <div class="muted-line">—</div>

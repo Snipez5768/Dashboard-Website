@@ -655,29 +655,18 @@
       const max = data.daily?.temperature_2m_max?.[0];
       const regen = data.daily?.precipitation_probability_max?.[0];
       const tempText = `${Math.round(cur.temperature_2m)}°`;
+      /* Eine Zeile fuer alles Weitere, wie auf der Musterseite */
+      const spanne = (min !== undefined && max !== undefined)
+        ? " · " + Math.round(min) + "° bis " + Math.round(max) + "°" : "";
       body.innerHTML = `
         <div class="weather-main">
           <div class="weather-icon">${WEATHER_ICONS[info.icon]}</div>
           <div class="weather-werte">
-            <div class="weather-temp" style="--zeichen:${tempText.length}">${tempText}</div>
-            <div class="weather-desc">${info.text}</div>
+            <div class="weather-temp">${Math.round(cur.temperature_2m)}<small>°</small></div>
+            <div class="weather-desc">${escapeHTML(info.text)}${spanne}</div>
           </div>
         </div>
-        ${max !== undefined ? `
-        <div class="weather-minmax">
-          <span class="wmm min" title="Tiefstwert heute">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6.5 12.5 12 19l5.5-6.5"/></svg>
-            ${Math.round(min)}°
-          </span>
-          <span class="wmm max" title="Höchstwert heute">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6.5 11.5 12 5l5.5 6.5"/></svg>
-            ${Math.round(max)}°
-          </span>
-        </div>` : ""}
-        ${regen !== undefined ? `
-        <div class="weather-regen${regen >= 30 ? " hoch" : ""}" title="Regenwahrscheinlichkeit heute">
-          ${TROPFEN_SVG}<span>${regen}%</span>
-        </div>` : ""}`;
+        `;
     }
   }
 
@@ -775,12 +764,20 @@
         restWort.textContent = "kein Ziel gesetzt";
       } else if (over) {
         rest.textContent = (consumed - goal).toLocaleString("de-DE");
-        restWort.textContent = "über dem Ziel";
+        restWort.textContent = "darüber";
       } else {
         rest.textContent = (goal - consumed).toLocaleString("de-DE");
         restWort.textContent = "übrig";
       }
       rest.parentElement.classList.toggle("drueber", over);
+    }
+
+    /* Der glatte Ring der Musterseite. Sein Umfang ist 2·π·40 =
+       251,33 — davon bleibt der ungefuellte Teil als Versatz. */
+    const ring = $("calRingWert");
+    if (ring) {
+      ring.style.strokeDashoffset = (251.33 * (1 - pct)).toFixed(1);
+      ring.style.stroke = over ? "var(--status-red)" : "var(--status-green)";
     }
 
     /* Die Flamme zaehlt die Tage am Stueck, an denen ueberhaupt
@@ -1513,8 +1510,24 @@
     const vergleich = gestern === null ? ""
       : `<div class="stz-gestern">gestern ${dauerText(gestern)}</div>`;
 
+    /* Stunden und Minuten gross, die Einheiten klein daneben —
+       so steht es auf der Musterseite. */
+    const std = Math.floor(heute / 60), rest = heute % 60;
+    const gross = (std ? std + '<small> h</small> ' : '') + rest + '<small> min</small>';
+
+    /* Der Vergleich zu gestern als Abzeichen in der Kopfzeile */
+    const marke = $("stZahlTrend");
+    if (marke) {
+      if (gestern) {
+        const p = Math.round(((heute - gestern) / gestern) * 100);
+        marke.textContent = (p > 0 ? "+" : "") + p + " %";
+        marke.className = "card-badge " + (p > 15 ? "rot" : p > 0 ? "gelb" : "gruen");
+        marke.hidden = false;
+      } else { marke.hidden = true; }
+    }
+
     body.innerHTML = `
-      <div class="stz-zahl">${dauerText(heute)}</div>
+      <div class="stz-zahl">${gross}</div>
       ${vergleich}
       <div class="stz-balken"><i style="width:${anteil}%;background:${ton}"></i></div>
       <div class="stz-limit">${anteil}% von ${dauerText(limit)}</div>`;
@@ -1567,9 +1580,15 @@
                       : "var(--status-red)";
 
       const fach = naechste.fach ? fachInfo(naechste.fach).kurz : "";
+      /* Ohne Fach traegt der Titel die Ueberschrift — dann darf er
+         nicht noch einmal als Thema darunter stehen. */
+      const kopf = fach || naechste.title || "Klausur";
+      const thema = fach
+        ? (naechste.title || spaet(() => klausurZusatz(naechste), "") || fmtDate(naechste.date))
+        : fmtDate(naechste.date);
       body.innerHTML = `
-        <div class="kw-fach">${escapeHTML(fach || naechste.title || "Klausur")}</div>
-        <div class="kw-thema">${escapeHTML(naechste.title || klausurZusatz(naechste) || "")}</div>
+        <div class="kw-fach">${escapeHTML(kopf)}</div>
+        <div class="kw-thema">${escapeHTML(thema)}</div>
         <div class="kw-stand">${karten.length
           ? sitzt + " von " + karten.length + " Karten sitzen"
           : "Noch keine Karteikarten"}</div>
