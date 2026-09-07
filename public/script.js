@@ -3670,16 +3670,63 @@
   /* ==========================================================
      TOASTS
      ========================================================== */
+  /* Die Zeichen in der Kapsel — dieselbe Handschrift wie die
+     uebrigen Symbole: rund abgeschlossene Striche, keine Flaechen. */
+  const TOAST_ZEICHEN = {
+    info:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8h.01M11 12h1v4h1"/></svg>',
+    success: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+    error:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v6M12 17h.01"/></svg>'
+  };
+
+  /* Eine Meldung waechst aus einem kleinen Fleck heraus, wie die
+     Insel oben am iPhone: erst die Kapsel, dann der Inhalt.
+
+     Wachsen laesst sich nur mit Zahlen — "auto" bewegt sich nicht.
+     Also einmal in voller Groesse messen, dann zusammenziehen und
+     auf das gemessene Mass laufen lassen. Zwischen Messen und
+     Zusammenziehen muss ein Umbruch liegen, sonst fasst der Browser
+     beides zusammen und es gibt gar keine Bewegung. */
+  const TOAST_FLECK = 46;   /* Breite des Flecks, aus dem sie waechst */
+
   function showToast(msg, type) {
     const stack = $("toastStack");
+    if (!stack) return;
+
     const el = document.createElement("div");
     el.className = "toast" + (type ? " " + type : "");
-    el.textContent = msg;
+    el.innerHTML = '<span class="toast-mal">' +
+      (TOAST_ZEICHEN[type] || TOAST_ZEICHEN.info) + '</span>' +
+      '<span class="toast-text"></span>';
+    el.querySelector(".toast-text").textContent = msg;
     stack.appendChild(el);
-    setTimeout(() => {
-      el.classList.add("fade-out");
-      el.addEventListener("animationend", () => el.remove(), { once: true });
-    }, 3400);
+
+    /* In voller Groesse messen ... */
+    const mass = el.getBoundingClientRect();
+    const breit = Math.ceil(mass.width);
+    const hoch = Math.ceil(mass.height);
+
+    /* ... dann auf den Fleck zusammenziehen ... */
+    el.classList.add("klein");
+    el.style.width = TOAST_FLECK + "px";
+    el.style.height = "34px";
+    void el.offsetWidth;                 /* Umbruch erzwingen */
+
+    /* ... und wachsen lassen. */
+    el.classList.remove("klein");
+    el.style.width = breit + "px";
+    el.style.height = hoch + "px";
+
+    let weg = null;
+    const schliessen = () => {
+      if (!el.isConnected) return;
+      clearTimeout(weg);
+      el.classList.add("geht");
+      el.style.width = TOAST_FLECK + "px";
+      el.style.height = "34px";
+      setTimeout(() => el.remove(), 480);
+    };
+    weg = setTimeout(schliessen, 3400);
+    el.addEventListener("click", schliessen);
   }
 
   /* ==========================================================
@@ -14697,5 +14744,87 @@ Gegenbeispiel: |x| ist stetig, aber bei 0 nicht differenzierbar.`;
   /* Dreht jemand das iPad, wechselt die Breite und damit die Frage,
      ob die Anordnung ueberhaupt gilt. */
   matchMedia(PLAN_BEDINGUNG).addEventListener("change", planAnwenden);
+
+
+  /* ==========================================================
+     DAS BLATT WEGZIEHEN — nur auf dem Telefon
+
+     Fenster fahren dort von unten herein wie die Karte, die am
+     iPhone beim Oeffnen der AirPods hochkommt. Dann sollen sie sich
+     auch so schliessen lassen: nach unten wegziehen.
+
+     Gezogen wird nur, wenn das Blatt oben steht. Sonst waere jeder
+     Versuch, im Fenster nach oben zu rollen, ein Schliessen.
+
+     Die ersten Pixel gehoeren noch niemandem: erst ab einem kurzen
+     Weg uebernimmt der Zug, damit ein Tipp auf einen Knopf im
+     Fenster ein Tipp bleibt.
+     ========================================================== */
+  const BLATT_BEDINGUNG =
+    "(max-width: 699px),(max-width: 900px) and (max-height: 500px)";
+  const BLATT_SCHWELLE = 8;    /* ab hier ist es ein Zug */
+  const BLATT_WEG = 110;       /* so weit gezogen heisst: zu */
+
+  let blattZug = null;
+
+  function blattAn() { return matchMedia(BLATT_BEDINGUNG).matches; }
+
+  document.addEventListener("pointerdown", ev => {
+    if (!blattAn() || blattZug) return;
+    const blatt = ev.target.closest && ev.target.closest(".modal");
+    if (!blatt) return;
+    const schicht = blatt.closest(".modal-overlay");
+    if (!schicht || !schicht.classList.contains("open")) return;
+    /* Nur von ganz oben aus — sonst rollt man im Fenster */
+    if (blatt.scrollTop > 0) return;
+
+    blattZug = { y: ev.clientY, blatt: blatt, schicht: schicht, zieht: false };
+  });
+
+  document.addEventListener("pointermove", ev => {
+    if (!blattZug) return;
+    const weg = ev.clientY - blattZug.y;
+
+    if (!blattZug.zieht) {
+      if (weg < BLATT_SCHWELLE) return;      /* nach oben oder zu kurz */
+      blattZug.zieht = true;
+      blattZug.blatt.classList.add("zieht");
+    }
+    /* Nach oben laesst es sich kaum ziehen: ein Blatt, das sich
+       aus dem oberen Rand schieben laesst, kennt man nicht. */
+    const hin = weg < 0 ? weg / 6 : weg;
+    blattZug.blatt.style.transform = "translateY(" + hin.toFixed(1) + "px)";
+  });
+
+  function blattLoslassen(ev) {
+    if (!blattZug) return;
+    const { blatt, schicht, zieht } = blattZug;
+    const weg = ev ? ev.clientY - blattZug.y : 0;
+    blattZug = null;
+
+    blatt.classList.remove("zieht");
+    if (!zieht) return;
+
+    if (weg > BLATT_WEG) {
+      /* Weit genug: abfahren und danach schliessen. Geschlossen wird
+         wie ueberall sonst — durch das Wegnehmen von "open". So
+         braucht kein Fenster eine eigene Behandlung. */
+      blatt.style.transform = "";
+      blatt.classList.add("faehrt-ab");
+      setTimeout(() => {
+        schicht.classList.remove("open");
+        blatt.classList.remove("faehrt-ab");
+      }, 240);
+      return;
+    }
+
+    /* Nicht weit genug: zurueck an den Platz */
+    blatt.style.transform = "";
+    blatt.classList.add("federt");
+    setTimeout(() => blatt.classList.remove("federt"), 360);
+  }
+
+  document.addEventListener("pointerup", blattLoslassen);
+  document.addEventListener("pointercancel", blattLoslassen);
 
 })();

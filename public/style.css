@@ -1414,45 +1414,109 @@ html.tablet #card-kalorien { display: none; }
 .quick-tile.add-tile:hover { color: var(--blue); border-color: color-mix(in srgb, var(--blau) 50%, transparent); }
 
 /* ==========================================================
-   TOASTS
+   MELDUNGEN — DIE INSEL
+
+   Nach dem Vorbild der Dynamic Island: eine schwarze Kapsel oben in
+   der Mitte, die aus einem kleinen Fleck herauswaechst und den
+   Inhalt erst zeigt, wenn sie ihre Groesse hat.
+
+   Schwarz in beiden Modi, absichtlich. Am iPhone ist die Insel der
+   Ausschnitt selbst und deshalb immer schwarz; ein helles Kaestchen
+   waere etwas anderes. Auf hellem Grund traegt sie sich ueber den
+   Schatten.
+
+   Das Wachsen braucht Zahlen: "auto" laesst sich nicht bewegen.
+   Deshalb misst das Skript die fertige Kapsel einmal und setzt
+   Breite und Hoehe in Pixeln — siehe showToast.
    ========================================================== */
 .toast-stack {
   position: fixed;
-  top: 20px;
-  right: 20px;
+  top: calc(env(safe-area-inset-top, 0px) + 14px);
+  left: 0;
+  right: 0;
   /* Ueber dem Kontopanel (1400): eine Meldung, die hinter dem
      Panel liegt, meldet nichts. */
   z-index: 1600;
   /* Meldungen liegen ueber allem, duerfen aber nichts abfangen —
-     sonst geht ein Klick auf einen Knopf darunter ins Leere. */
+     sonst geht ein Klick auf einen Knopf darunter ins Leere. Die
+     Kapsel selbst nimmt sie wieder an, damit man sie wegtippen
+     kann. */
   pointer-events: none;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  max-width: min(430px, calc(100vw - 40px));
+  align-items: center;
+  gap: 8px;
 }
 .toast {
-  padding: 17px 21px;
-  border-radius: 20px;
-  background: color-mix(in srgb, var(--flaeche) 38%, transparent);
-  backdrop-filter: blur(42px) saturate(180%);
-  -webkit-backdrop-filter: blur(42px) saturate(180%);
-  /* Erst der umlaufende Rand, dann der farbige Streifen — sonst
-     ueberschreibt die Kurzschreibweise ihn wieder. */
-  border: 1px solid var(--auflage-3);
-  border-left: 4px solid var(--blue);
-  box-shadow:
-    0 14px 38px rgba(0, 0, 0, 0.46),
-    0 2px 10px rgba(0, 0, 0, 0.26);
-  font-size: 14.5px;
-  line-height: 1.45;
-  animation: toast-in 0.22s ease;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+  padding: 0 16px;
+  border: none;
+  border-radius: 999px;
+  background: #000;
+  color: #fff;
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.35;
+  letter-spacing: -.01em;
+  text-align: left;
+  pointer-events: auto;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .34),
+              0 2px 8px rgba(0, 0, 0, .22);
+  max-width: min(440px, calc(100vw - 28px));
+  /* Der Sprung am Ende ist das, was die Insel ausmacht: sie faellt
+     ein kleines Stueck ueber ihr Ziel hinaus und kommt zurueck. */
+  transition: width .46s cubic-bezier(.34, 1.36, .5, 1),
+              height .46s cubic-bezier(.34, 1.36, .5, 1),
+              opacity .2s ease,
+              transform .32s cubic-bezier(.34, 1.36, .5, 1);
 }
-.toast.success { border-left-color: var(--green); }
-.toast.error { border-left-color: var(--red); }
-.toast.fade-out { animation: toast-out 0.25s ease forwards; }
-@keyframes toast-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
-@keyframes toast-out { to { opacity: 0; transform: translateX(14px); } }
+/* Der Fleck, aus dem sie herauswaechst */
+.toast.klein {
+  opacity: 0;
+  transform: translateY(-6px) scale(.9);
+}
+.toast.geht { opacity: 0; transform: translateY(-8px) scale(.92); }
+
+/* Der Inhalt kommt erst, wenn die Kapsel steht — sonst schoebe sich
+   der Text waehrend des Wachsens hin und her. */
+.toast > * {
+  opacity: 1;
+  transition: opacity .18s ease .12s;
+}
+.toast.klein > * { opacity: 0; transition-delay: 0s; }
+
+.toast-mal {
+  flex: none;
+  width: 21px; height: 21px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: var(--blue);
+  color: #000;
+}
+.toast-mal svg { width: 13px; height: 13px; display: block; }
+.toast.success .toast-mal { background: var(--green); }
+.toast.error   .toast-mal { background: var(--red); color: #fff; }
+
+.toast-text {
+  min-width: 0;
+  padding: 11px 0;
+  /* Zwei Zeilen reichen; alles darueber wird abgeschnitten, statt
+     die Insel zu einem Zettel wachsen zu lassen. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+/* Wer Bewegung sparsam mag, bekommt die Kapsel ohne Wachsen */
+@media (prefers-reduced-motion: reduce) {
+  .toast { transition: opacity .2s ease; }
+}
 
 /* ==========================================================
    MODAL
@@ -6831,41 +6895,16 @@ html.eng .vorschlag-foot { grid-area: 3 / 1 / 4 / 3; margin-top: 7px; }
 .einricht-schritte a:hover { color: var(--text); }
 
 
-/* ---------- Meldungen auf dem Telefon ----------
-   Sie kommen von oben, wie man es vom Telefon kennt — und über die
-   volle Breite, weil daneben ohnehin kein Platz ist.
-
-   Der obere Rand richtet sich nach der Safe Area: als App vom
-   Home-Bildschirm reicht die Seite unter die Dynamic Island, und
-   eine Meldung darunter wäre halb verdeckt. Im Browser ist der
-   Wert null, dann bleiben die 10px Abstand.
-
-   column-reverse, damit die neueste immer an derselben Stelle
-   erscheint und die älteren nach unten schiebt — auf einem
-   schmalen Bildschirm sucht man sie sonst jedes Mal woanders. */
+/* ---------- Die Insel auf dem Telefon ----------
+   Naeher an den oberen Rand, damit sie dort sitzt, wo am iPhone der
+   Ausschnitt ist. Als App vom Home-Bildschirm reicht die Seite
+   darunter, deshalb die Safe Area; im Browser ist der Wert null. */
 @media (max-width: 699px), (max-width: 900px) and (max-height: 500px) {
   .toast-stack {
-    top: calc(env(safe-area-inset-top, 0px) + 10px);
+    top: calc(env(safe-area-inset-top, 0px) + 8px);
     bottom: auto;
-    left: 12px;
-    right: 12px;
-    max-width: none;
-    flex-direction: column-reverse;
   }
-  .toast-stack > * { width: 100%; }
-
-  /* Hereinschieben und wieder hinaus — beides nach oben, sonst
-     wandert die Meldung zur Seite aus dem Bild. */
-  .toast { animation: toast-in-oben 0.24s ease; }
-  .toast.fade-out { animation: toast-out-oben 0.25s ease forwards; }
-}
-
-@keyframes toast-in-oben {
-  from { opacity: 0; transform: translateY(-14px); }
-  to   { opacity: 1; transform: none; }
-}
-@keyframes toast-out-oben {
-  to { opacity: 0; transform: translateY(-12px); }
+  .toast { font-size: 13.5px; max-width: calc(100vw - 20px); }
 }
 
 
@@ -10696,3 +10735,122 @@ input:focus, textarea:focus, select:focus {
 #seite-dashboard #card-streaks::after,
 #seite-dashboard #card-habits::before,
 #seite-dashboard #card-streaks::before { content: none; }
+
+
+/* ==========================================================
+   FENSTER AUF DEM TELEFON — DAS BLATT
+
+   Nach dem Vorbild der Karte, die am iPhone hochkommt, wenn man die
+   AirPods oeffnet: ein Blatt, das von unten hereinfaehrt, mit
+   grossen Rundungen und Luft zu den Raendern, statt eines Kastens
+   mitten auf dem Bildschirm.
+
+   Das gilt fuer alles, was sich als Fenster oeffnet: die Modale,
+   die kleinen Auswahlfenster und das Kontopanel. Auf dem Rechner und
+   dem Tablet aendert sich nichts — die Regeln stehen alle in dieser
+   Medienabfrage.
+
+   Gezogen wird oben am Griff: nach unten ueber ein Drittel der Hoehe
+   hinaus schliesst das Blatt. Das steht im Skript unter "BLATT".
+   ========================================================== */
+@media (max-width: 699px), (max-width: 900px) and (max-height: 500px) {
+
+  /* ---- Die Modale ---- */
+  .modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+    /* Der Grund kommt langsamer als das Blatt, sonst wirkt er wie
+       eine eigene Schicht, die vorauseilt. */
+    animation: blatt-grund .34s ease both;
+  }
+  .modal {
+    width: auto;
+    max-width: none;
+    max-height: 86vh;
+    /* Am oberen Ende soll das Ziehen nicht in ein Ueberrollen der
+       Seite dahinter umschlagen. */
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+    margin: 0 8px calc(8px + env(safe-area-inset-bottom, 0px));
+    padding: 10px 20px 24px;
+    border-radius: 34px;
+    animation: blatt-hoch .44s cubic-bezier(.32, .72, 0, 1) both;
+  }
+
+  /* Der Griff oben. Er ist nur ein Zeichen — gezogen werden darf am
+     ganzen oberen Rand, sonst muesste man fuenf Pixel treffen. */
+  .modal::before {
+    content: "";
+    display: block;
+    width: 38px; height: 5px;
+    flex: none;
+    margin: 0 auto 14px;
+    border-radius: 3px;
+    background: var(--auflage-3);
+  }
+
+  /* Waehrend der Finger zieht, laeuft nichts nach */
+  .modal.zieht,
+  .kop.zieht { animation: none; transition: none; }
+  /* Losgelassen, ohne weit genug zu sein: zurueck an den Platz */
+  .modal.federt,
+  .kop.federt {
+    animation: none;
+    transition: transform .34s cubic-bezier(.32, .72, 0, 1);
+    transform: none;
+  }
+  /* Weggezogen oder weggetippt */
+  .modal.faehrt-ab,
+  .kop.faehrt-ab {
+    animation: none;
+    transition: transform .26s cubic-bezier(.4, 0, 1, 1);
+    transform: translateY(100%);
+  }
+
+  /* ---- Die kleinen Auswahlfenster ----
+     Am Element haengen sie auf dem Telefon nicht mehr: dort ist kein
+     Platz daneben, und ein Fenster, das halb ueber dem Finger klebt,
+     verdeckt genau das, was man aussucht. Also auch von unten. */
+  .pop.offen {
+    left: 8px !important;
+    right: 8px !important;
+    top: auto !important;
+    bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+    width: auto;
+    max-width: none;
+    border-radius: 30px;
+    padding: 14px;
+    animation: blatt-hoch .4s cubic-bezier(.32, .72, 0, 1) both;
+  }
+  .pop-datum, .pop-zeit { width: auto; }
+
+  /* ---- Das Kontopanel ----
+     Es fuellt den Bildschirm, faehrt aber genauso von unten herein,
+     statt aufzublenden. */
+  /* Kein Griff und keine neue Aufteilung: das Panel fuellt den
+     Bildschirm und traegt seine eigene Spalteneinteilung. Es faehrt
+     nur herein, statt aufzublenden. */
+  .kop {
+    border-radius: 20px 20px 0 0;
+    animation: blatt-hoch .44s cubic-bezier(.32, .72, 0, 1) both;
+  }
+  .kop.schliesst { animation: blatt-runter .26s ease both; }
+}
+
+@keyframes blatt-hoch {
+  from { transform: translateY(100%); }
+  to   { transform: none; }
+}
+@keyframes blatt-runter {
+  from { transform: none; }
+  to   { transform: translateY(100%); }
+}
+@keyframes blatt-grund {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Wer Bewegung sparsam mag, bekommt das Blatt ohne Fahrt */
+@media (prefers-reduced-motion: reduce) {
+  .modal, .kop, .pop.offen { animation: none !important; }
+}
