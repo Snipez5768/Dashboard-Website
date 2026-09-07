@@ -3147,21 +3147,32 @@
   }
 
   /* ---- In Ruhe: eine Linie mit dem Namen der Seite ----
-     Unscheinbar am unteren Rand, mehr nicht. Sie faengt keine
-     Beruehrung ab — der Griff ist die Leiste selbst, sonst muesste
-     man genau die Linie treffen. */
+     Sie liegt ganz unten am Bildrand und faellt kaum auf. Erst beim
+     Anfassen hebt sie sich und macht der Reihe Platz — deshalb sitzt
+     sie ueber "bottom" und nicht ueber "top": von unten gemessen
+     bleibt sie am Rand, egal wie hoch die Leiste ist.
+
+     Sie faengt keine Beruehrung ab — der Griff ist die Leiste selbst,
+     sonst muesste man genau die Linie treffen. */
   :root[data-leiste="bogen"] .bg-ruhe {
     position: absolute;
     left: 0; right: 0;
-    top: 92px;
+    bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 12px;
     pointer-events: none;
-    transition: opacity .2s var(--ease-soft);
+    transition: opacity .2s var(--ease-soft),
+                transform .28s cubic-bezier(.32,.72,0,1);
   }
-  :root[data-leiste="bogen"] .bogen-leiste.offen .bg-ruhe { opacity: 0; }
+  /* Beim Oeffnen hebt sie sich, waehrend sie verschwindet: die Reihe
+     kommt hoch, nicht irgendetwas Neues an anderer Stelle. */
+  :root[data-leiste="bogen"] .bogen-leiste.offen .bg-ruhe {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
 
   /* Die Striche laufen nach aussen aus, statt hart abzubrechen */
   :root[data-leiste="bogen"] .bg-strich {
@@ -3184,22 +3195,48 @@
   }
 
   /* ---- Der Weg ins Kontopanel ----
-     Rechts aussen, auf der Hoehe der Reihe, in derselben Kapselform
-     wie die Eintraege. Er steht immer da, offen wie in Ruhe: die
-     Einstellungen sollen nicht hinter einer Geste liegen. */
+     Rechts aussen. Er steht immer da, offen wie in Ruhe: die
+     Einstellungen sollen nicht hinter einer Geste liegen.
+
+     Ein einziger Kreis, kein Bild in einem Rahmen: vorher sass ein
+     abgerundetes Viereck in einer Kapsel, deren Grund auf der dunklen
+     Seite unsichtbar blieb — zu sehen war nur ein blauer Klecks in
+     der Ecke. Der Ring ersetzt den Rahmen und traegt auf jedem Grund.
+
+     In Ruhe liegt er auf der Hoehe der Linie, offen auf der Hoehe der
+     Reihe. So steht nie etwas allein in der Ecke. */
   :root[data-leiste="bogen"] .bg-profil {
     position: absolute;
-    right: 22px; top: 78px;
-    display: grid; place-items: center;
-    padding: 6px;
+    right: 22px;
+    bottom: calc(9px + env(safe-area-inset-bottom, 0px));
+    width: 38px; height: 38px;
+    padding: 0;
     border: none;
-    border-radius: 999px;
-    background: var(--surface-card);
-    box-shadow: var(--shadow-2);
+    border-radius: 50%;
+    overflow: hidden;
+    background: none;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .28),
+                0 0 0 1px var(--border);
     cursor: pointer;
-    transition: transform var(--t-fast) var(--ease);
+    transition: bottom .28s cubic-bezier(.32,.72,0,1),
+                transform var(--t-fast) var(--ease);
+  }
+  :root[data-leiste="bogen"] .bogen-leiste.offen .bg-profil {
+    bottom: calc(31px + env(safe-area-inset-bottom, 0px));
   }
   :root[data-leiste="bogen"] .bg-profil:active { transform: scale(.94); }
+
+  /* Das Bild fuellt den Kreis ganz aus */
+  :root[data-leiste="bogen"] .bg-profil .avatar {
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    font-size: 13px;
+  }
+  :root[data-leiste="bogen"] .bg-profil .avatar img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
 
   /* Die Seitenleiste tritt ab, der Inhalt rueckt nach */
   :root[data-leiste="bogen"] .sidebar { display: none; }
